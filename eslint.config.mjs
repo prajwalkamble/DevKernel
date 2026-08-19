@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Build output of pinned dependencies, copied in by the scripts/copy-*.mjs
+    // pair. Minified bundles, not source this project edits.
+    "public/pyodide/**",
+    "public/monaco/**",
   ]),
 ]);
 

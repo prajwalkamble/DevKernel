@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pyodide runtime, copied out of node_modules by scripts/copy-pyodide.mjs
+/public/pyodide
+
+# monaco editor, copied out of node_modules by scripts/copy-monaco.mjs
+/public/monaco

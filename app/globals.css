@@ -1,26 +1,270 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  --surface: #f8fafc;
+  --surface-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --muted: #5b6678;
+  --accent: #4338ca;
+  --accent-foreground: #ffffff;
+  --accent-soft: #eef2ff;
+  /* Track colours double as badge text on their own -soft background, so each
+     one has to clear 4.5:1 against it. That rules out the bright yellows and
+     cyans the brands themselves use. */
+  --js-color: #8a6100;
+  --js-soft: #fdf7e3;
+  --ts-color: #1d4ed8;
+  --ts-soft: #eff6ff;
+  --cpp-color: #0b6ea8;
+  --cpp-soft: #eef8ff;
+  --asm-color: #9a4a05;
+  --asm-soft: #fdf5e6;
+  --rust-color: #b03a08;
+  --rust-soft: #fff3ea;
+  --go-color: #007d9c;
+  --go-soft: #e7f6fa;
+  --java-color: #b01236;
+  --java-soft: #fff0f2;
+  --spring-color: #33691e;
+  --spring-soft: #f0faec;
+  --dsa-color: #ab1a95;
+  --dsa-soft: #fdf2fa;
+  /* System design. Teal rather than another blue: it sits beside DSA in the
+     same list, and the two must never be mistaken for one another. */
+  --system-color: #0f766e;
+  --system-soft: #effcf9;
+  --python-color: #2b5f8f;
+  --python-soft: #eef5fc;
+  --react-color: #0e7490;
+  --react-soft: #ecfeff;
+  --next-color: #334155;
+  --next-soft: #f1f5f9;
+  --angular-color: #7e22ce;
+  --angular-soft: #faf5ff;
+  --success: #15803d;
+  --success-soft: #eafaf0;
+  --danger: #c81e1e;
+  --danger-soft: #fef2f2;
+  /* Problem difficulty. Same 4.5:1 rule as the track colours: each one is a
+     badge label on its own -soft background, and also sits directly on
+     --surface in the problem table. */
+  --easy-color: #15803d;
+  --easy-soft: #eafaf0;
+  --medium-color: #8a5a00;
+  --medium-soft: #fdf6e3;
+  --hard-color: #c2261e;
+  --hard-soft: #fdf0ef;
+  /* Code surfaces track the light/dark Shiki theme rather than being fixed
+     dark: `github-light` paints near-black tokens, which are invisible on a
+     dark block. */
+  --code-bg: #f7f9fb;
+  --code-header: #eaeef3;
+  --console-bg: #f7f9fb;
+  --console-fg: #1f2a3a;
+  --console-dim: #64748b;
+  --console-info: #0369a1;
+  --console-warn: #92600a;
+  --console-error: #b91c1c;
+  --console-rule: rgb(15 23 42 / 0.07);
+  --skeleton-sheen: rgb(255 255 255 / 0.75);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0a0d14;
+  --foreground: #e5e9f2;
+  --surface: #11151f;
+  --surface-hover: #171c29;
+  --border: #232a3a;
+  --muted: #8b93a7;
+  --accent: #818cf8;
+  --accent-foreground: #0a0d14;
+  --accent-soft: #1a1c33;
+  --js-color: #facc15;
+  --js-soft: #1c1a0f;
+  --ts-color: #60a5fa;
+  --ts-soft: #0f1a2c;
+  --cpp-color: #38bdf8;
+  --cpp-soft: #0b1b28;
+  --asm-color: #fbbf24;
+  --asm-soft: #241a08;
+  --rust-color: #fb923c;
+  --rust-soft: #24150c;
+  --go-color: #4dc4e6;
+  --go-soft: #08222b;
+  --java-color: #fb7185;
+  --java-soft: #260f16;
+  --spring-color: #7bd44f;
+  --spring-soft: #0e1b0f;
+  --dsa-color: #f2a8e2;
+  --dsa-soft: #291024;
+  --system-color: #2dd4bf;
+  --system-soft: #06231f;
+  --python-color: #7cc0ec;
+  --python-soft: #0c1a26;
+  --react-color: #22d3ee;
+  --react-soft: #082f36;
+  --next-color: #cbd5e1;
+  --next-soft: #1c2333;
+  --angular-color: #c084fc;
+  --angular-soft: #241033;
+  --success: #4ade80;
+  --success-soft: #0c1f14;
+  --danger: #f87171;
+  --danger-soft: #2a1414;
+  --easy-color: #4ade80;
+  --easy-soft: #0c1f14;
+  --medium-color: #fbbf24;
+  --medium-soft: #241a08;
+  --hard-color: #f87171;
+  --hard-soft: #2a1414;
+  --code-bg: #0a0d14;
+  --code-header: rgb(255 255 255 / 0.04);
+  --console-bg: #0a0d14;
+  --console-fg: #dbe2ee;
+  --console-dim: #6b7488;
+  --console-info: #7dd3fc;
+  --console-warn: #fcd34d;
+  --console-error: #fca5a5;
+  --console-rule: rgb(255 255 255 / 0.06);
+  --skeleton-sheen: rgb(255 255 255 / 0.05);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-js: var(--js-color);
+  --color-js-soft: var(--js-soft);
+  --color-ts: var(--ts-color);
+  --color-ts-soft: var(--ts-soft);
+  --color-cpp: var(--cpp-color);
+  --color-cpp-soft: var(--cpp-soft);
+  --color-asm: var(--asm-color);
+  --color-asm-soft: var(--asm-soft);
+  --color-rust: var(--rust-color);
+  --color-rust-soft: var(--rust-soft);
+  --color-go: var(--go-color);
+  --color-go-soft: var(--go-soft);
+  --color-java: var(--java-color);
+  --color-java-soft: var(--java-soft);
+  --color-spring: var(--spring-color);
+  --color-spring-soft: var(--spring-soft);
+  --color-dsa: var(--dsa-color);
+  --color-dsa-soft: var(--dsa-soft);
+  --color-system: var(--system-color);
+  --color-system-soft: var(--system-soft);
+  --color-python: var(--python-color);
+  --color-python-soft: var(--python-soft);
+  --color-react: var(--react-color);
+  --color-react-soft: var(--react-soft);
+  --color-next: var(--next-color);
+  --color-next-soft: var(--next-soft);
+  --color-angular: var(--angular-color);
+  --color-angular-soft: var(--angular-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-easy: var(--easy-color);
+  --color-easy-soft: var(--easy-soft);
+  --color-medium: var(--medium-color);
+  --color-medium-soft: var(--medium-soft);
+  --color-hard: var(--hard-color);
+  --color-hard-soft: var(--hard-soft);
+  --color-code: var(--code-bg);
+  --color-code-header: var(--code-header);
+  --color-console: var(--console-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+* {
+  border-color: var(--border);
+}
+
+html {
+  /* Small screens are the constraint everywhere else in this file; this stops a
+     single long token in a heading or a stray wide child from side-scrolling
+     the whole page instead of just its own container. */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/*
+ * Skeleton placeholders. The sweep is a background-position animation over a
+ * gradient rather than a moving child element, so a skeleton is one empty div
+ * with no layout cost and nothing to clean up.
+ */
+.skeleton {
+  background-color: var(--surface-hover);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--skeleton-sheen) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background-image: none;
+  }
+}
+
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: transparent !important;
+}
+
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark);
 }
