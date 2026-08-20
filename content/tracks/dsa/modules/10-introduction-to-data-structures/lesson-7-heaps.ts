@@ -118,6 +118,11 @@ holds: True`,
             "The whole check is one line: every element is at least its parent. Note it says nothing about siblings — 3 and 2 sit next to each other in the wrong order and the heap is still valid — and nothing about cousins. That is exactly the freedom that makes the operations O(log n) rather than O(n).",
         },
       ],
+      visual: {
+        id: "heap-visual",
+        kind: "heap",
+        title: "A min-heap, as a tree and as the array it really is",
+      },
     },
     {
       id: "max-heaps",
