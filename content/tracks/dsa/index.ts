@@ -21,6 +21,7 @@ import { prefixSumsModule } from "./modules/18-prefix-sums";
 import { recursionModule } from "./modules/19-recursion";
 import { hashingModule } from "./modules/20-hashing";
 import { sortingModule } from "./modules/21-sorting";
+import { linkedListsModule } from "./modules/22-linked-lists";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -117,25 +118,7 @@ export const dsaTrack: TrackDefinition = {
     sortingModule,
     binarySearchModule,
     hashingModule,
-    createComingSoonModule({
-      id: "dsa-linked-lists",
-      slug: "linked-lists",
-      title: "Linked Lists",
-      order: 22,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "Rarely the right structure in production, permanently popular in interviews — because pointer manipulation is where sloppy reasoning shows up immediately.",
-      topics: [
-        "Singly, doubly and circular lists, and the cost of each operation",
-        "Why a linked list loses to an array in practice, despite O(1) insertion",
-        "The dummy head, and why it removes half your edge cases",
-        "Reversal, iteratively and recursively",
-        "Fast and slow pointers: cycle detection, the middle, the nth from the end",
-        "Finding the start of a cycle, and why Floyd's argument works",
-        "Merging, partitioning and sorting a list",
-        "Building an LRU cache from a list and a map",
-      ],
-    }),
+    linkedListsModule,
     createComingSoonModule({
       id: "dsa-stacks-queues",
       slug: "stacks-and-queues",
