@@ -42,6 +42,12 @@ export function Header() {
             Problems
           </Link>
           <Link
+            href="/visualize"
+            className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
+          >
+            Visualise
+          </Link>
+          <Link
             href="/playground"
             className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
           >

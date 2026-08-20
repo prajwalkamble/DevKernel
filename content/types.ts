@@ -68,12 +68,65 @@ export interface InterviewQuestion {
   answer: string;
 }
 
+/**
+ * An interactive visualisation embedded in a lesson.
+ *
+ * The spec says *what* to show, never *how it animates*. Frames are generated
+ * in the browser by running the real algorithm from `lib/visuals`, so a
+ * visualisation cannot drift out of step with the code it claims to depict —
+ * the same rule that makes lesson output trustworthy, applied to pictures.
+ */
+export type VisualKind =
+  /* Algorithm families, each with a picker over several algorithms. */
+  | "sorting"
+  | "searching"
+  | "graph"
+  | "dp"
+  | "string-matching"
+  | "pattern"
+  | "tree-algorithm"
+  /* Individual data structures. */
+  | "stack"
+  | "queue"
+  | "deque"
+  | "linked-list"
+  | "doubly-linked-list"
+  | "circular-buffer"
+  | "dynamic-array"
+  | "bst"
+  | "trie"
+  | "heap"
+  | "hash-table"
+  | "segment-tree"
+  | "fenwick-tree"
+  | "lru-cache";
+
+export interface VisualSpec {
+  id: string;
+  kind: VisualKind;
+  title?: string;
+  /** Which algorithm to start on, for the kinds that offer a choice. */
+  algorithm?: string;
+  /** Hide the algorithm picker, when a lesson is about one algorithm only. */
+  lockAlgorithm?: boolean;
+  /** Starting values. Numbers for arrays and trees. */
+  data?: number[];
+  /** Starting words, for tries and hash tables. */
+  words?: string[];
+  /** The value to search for. */
+  target?: number;
+  /** The word to look up, for a trie. */
+  lookup?: string;
+}
+
 export interface Section {
   id: string;
   heading: string;
   /** Paragraphs of markdown-lite prose */
   body?: string[];
   examples?: CodeExample[];
+  /** An interactive visualisation, rendered after the prose and examples. */
+  visual?: VisualSpec;
   pitfalls?: Pitfall[];
 }
 
