@@ -20,6 +20,7 @@ import { slidingWindowsModule } from "./modules/17-sliding-windows";
 import { prefixSumsModule } from "./modules/18-prefix-sums";
 import { recursionModule } from "./modules/19-recursion";
 import { hashingModule } from "./modules/20-hashing";
+import { sortingModule } from "./modules/21-sorting";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -113,25 +114,7 @@ export const dsaTrack: TrackDefinition = {
     twoPointersModule,
     slidingWindowsModule,
     prefixSumsModule,
-    createComingSoonModule({
-      id: "dsa-sorting",
-      slug: "sorting",
-      title: "Sorting",
-      order: 21,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "A tool rather than a topic. You will rarely implement one and constantly rely on one — so this is mostly about what your language's sort really is and when order is the whole solution.",
-      topics: [
-        "Insertion, merge, quick and heap sort, and what each is good at",
-        "The O(n log n) lower bound, and the counting sorts that beat it",
-        "Stability, and the moments it silently matters",
-        "What Arrays.sort and list.sort actually are, including the quadratic worst case",
-        "Custom comparators, sorting by several keys, and comparator contracts",
-        "Bucket sort and counting sort, when the key range is small",
-        "Sorting as preprocessing: intervals, duplicates, and greedy setups",
-        "The sheet: the problems where sorting is the entire idea",
-      ],
-    }),
+    sortingModule,
     binarySearchModule,
     hashingModule,
     createComingSoonModule({
