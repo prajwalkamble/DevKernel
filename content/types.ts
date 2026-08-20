@@ -26,6 +26,25 @@ export type CodeLanguage =
   | "json"
   | "http";
 
+/**
+ * The same program written in another language.
+ *
+ * Every variant is a complete, runnable program that prints the same thing as
+ * the primary one — `scripts/verify-lesson-code.mjs` compiles and runs each of
+ * them, so a translation that drifted from the original is a failed build
+ * rather than a thing a learner discovers. `output` is only set when a
+ * language legitimately prints differently; otherwise the example's own
+ * `output` is checked against every variant.
+ */
+export interface CodeVariant {
+  lang: CodeLanguage;
+  code: string;
+  /** Overrides the example's `output` when this language genuinely differs. */
+  output?: string;
+  /** As on CodeExample: names a toolchain the verifier does not have. */
+  requires?: string;
+}
+
 export interface CodeExample {
   id: string;
   title?: string;
@@ -44,6 +63,14 @@ export interface CodeExample {
   output?: string;
   /** Markdown-lite prose (supports **bold** and `code`) explaining the example */
   explanation?: string;
+  /**
+   * The same program in other languages, offered behind a dropdown.
+   *
+   * The primary `code`/`lang` pair is the one the prose talks about and is
+   * always the default; these are alternatives for a reader who thinks in a
+   * different language. Only the languages actually present are offered.
+   */
+  alternates?: CodeVariant[];
   /**
    * Names a toolchain this example needs that the local verifier does not
    * provide — a Spring application context, say, which `java Main.java` cannot

@@ -48,6 +48,180 @@ print(largest_rectangle([3, 3, 3]))`,
 4
 5
 9`,
+      alternates: [
+        {
+          lang: "javascript",
+          code: `function largestRectangle(heights) {
+  const stack = [];
+  let best = 0;
+  const bars = [...heights, 0];              // sentinel flushes the stack
+  for (let i = 0; i < bars.length; i++) {
+    while (stack.length && heights[stack[stack.length - 1]] >= bars[i]) {
+      const height = heights[stack.pop()];
+      const left = stack.length ? stack[stack.length - 1] + 1 : 0;
+      best = Math.max(best, height * (i - left));
+    }
+    stack.push(i);
+  }
+  return best;
+}
+
+console.log(largestRectangle([2, 1, 5, 6, 2, 3]));
+console.log(largestRectangle([2, 4]));
+console.log(largestRectangle([5]));
+console.log(largestRectangle([3, 3, 3]));`,
+        },
+        {
+          lang: "typescript",
+          code: `function largestRectangle(heights: number[]): number {
+  const stack: number[] = [];
+  let best = 0;
+  const bars = [...heights, 0];              // sentinel flushes the stack
+  for (let i = 0; i < bars.length; i++) {
+    while (stack.length && heights[stack[stack.length - 1]] >= bars[i]) {
+      const height = heights[stack.pop()!];
+      const left = stack.length ? stack[stack.length - 1] + 1 : 0;
+      best = Math.max(best, height * (i - left));
+    }
+    stack.push(i);
+  }
+  return best;
+}
+
+console.log(largestRectangle([2, 1, 5, 6, 2, 3]));
+console.log(largestRectangle([2, 4]));
+console.log(largestRectangle([5]));
+console.log(largestRectangle([3, 3, 3]));`,
+        },
+        {
+          lang: "java",
+          code: `import java.util.*;
+
+public class Main {
+    static int largestRectangle(int[] heights) {
+        Deque<Integer> stack = new ArrayDeque<>();
+        int best = 0;
+        for (int i = 0; i <= heights.length; i++) {
+            int h = (i == heights.length) ? 0 : heights[i];   // sentinel
+            while (!stack.isEmpty() && heights[stack.peek()] >= h) {
+                int height = heights[stack.pop()];
+                int left = stack.isEmpty() ? 0 : stack.peek() + 1;
+                best = Math.max(best, height * (i - left));
+            }
+            stack.push(i);
+        }
+        return best;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(largestRectangle(new int[]{2, 1, 5, 6, 2, 3}));
+        System.out.println(largestRectangle(new int[]{2, 4}));
+        System.out.println(largestRectangle(new int[]{5}));
+        System.out.println(largestRectangle(new int[]{3, 3, 3}));
+    }
+}`,
+        },
+        {
+          lang: "cpp",
+          code: `#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int largestRectangle(const vector<int>& heights) {
+    vector<int> stack;
+    int best = 0;
+    int n = (int)heights.size();
+    for (int i = 0; i <= n; i++) {
+        int h = (i == n) ? 0 : heights[i];               // sentinel
+        while (!stack.empty() && heights[stack.back()] >= h) {
+            int height = heights[stack.back()];
+            stack.pop_back();
+            int left = stack.empty() ? 0 : stack.back() + 1;
+            best = max(best, height * (i - left));
+        }
+        stack.push_back(i);
+    }
+    return best;
+}
+
+int main() {
+    cout << largestRectangle({2, 1, 5, 6, 2, 3}) << "\\n";
+    cout << largestRectangle({2, 4}) << "\\n";
+    cout << largestRectangle({5}) << "\\n";
+    cout << largestRectangle({3, 3, 3}) << "\\n";
+}`,
+        },
+        {
+          lang: "rust",
+          code: `fn largest_rectangle(heights: &[i32]) -> i32 {
+    let mut stack: Vec<usize> = Vec::new();
+    let mut best = 0;
+    let n = heights.len();
+    for i in 0..=n {
+        let h = if i == n { 0 } else { heights[i] };      // sentinel
+        while let Some(&top) = stack.last() {
+            if heights[top] < h {
+                break;
+            }
+            stack.pop();
+            let left = match stack.last() {
+                Some(&below) => below + 1,
+                None => 0,
+            };
+            best = best.max(heights[top] * (i - left) as i32);
+        }
+        stack.push(i);
+    }
+    best
+}
+
+fn main() {
+    println!("{}", largest_rectangle(&[2, 1, 5, 6, 2, 3]));
+    println!("{}", largest_rectangle(&[2, 4]));
+    println!("{}", largest_rectangle(&[5]));
+    println!("{}", largest_rectangle(&[3, 3, 3]));
+}`,
+        },
+        {
+          lang: "go",
+          code: `package main
+
+import "fmt"
+
+func largestRectangle(heights []int) int {
+	stack := []int{}
+	best := 0
+	n := len(heights)
+	for i := 0; i <= n; i++ {
+		h := 0 // sentinel at i == n
+		if i < n {
+			h = heights[i]
+		}
+		for len(stack) > 0 && heights[stack[len(stack)-1]] >= h {
+			height := heights[stack[len(stack)-1]]
+			stack = stack[:len(stack)-1]
+			left := 0
+			if len(stack) > 0 {
+				left = stack[len(stack)-1] + 1
+			}
+			if area := height * (i - left); area > best {
+				best = area
+			}
+		}
+		stack = append(stack, i)
+	}
+	return best
+}
+
+func main() {
+	fmt.Println(largestRectangle([]int{2, 1, 5, 6, 2, 3}))
+	fmt.Println(largestRectangle([]int{2, 4}))
+	fmt.Println(largestRectangle([]int{5}))
+	fmt.Println(largestRectangle([]int{3, 3, 3}))
+}`,
+        },
+      ],
           explanation:
             "For `[2,1,5,6,2,3]` the answer is 10 — bars 5 and 6 giving height 5 across width 2. The width line is the one to understand: after popping, **the new top of the stack is the previous shorter bar**, so the rectangle starts at `stack[-1] + 1`, and when the stack is empty the bar extends all the way to index 0. The `i` at that moment is the first shorter bar on the right, so `i - left` is the full span. Appending a zero sentinel guarantees every remaining bar gets popped and measured; without it, an increasing histogram like `[2,4]` never flushes and returns 0.",
         },

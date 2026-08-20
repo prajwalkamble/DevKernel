@@ -43,6 +43,165 @@ print(two_sum([3, 2, 4], 6))`,
           output: `[0, 1]
 [0, 1]
 [1, 2]`,
+      alternates: [
+        {
+          lang: "javascript",
+          code: `function twoSum(nums, target) {
+  const seen = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    if (seen.has(target - nums[i])) return [seen.get(target - nums[i]), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}
+
+const show = (pair) => console.log(\`[\${pair.join(", ")}]\`);
+show(twoSum([2, 7, 11, 15], 9));
+show(twoSum([3, 3], 6));
+show(twoSum([3, 2, 4], 6));`,
+        },
+        {
+          lang: "typescript",
+          code: `function twoSum(nums: number[], target: number): number[] {
+  const seen = new Map<number, number>();
+  for (let i = 0; i < nums.length; i++) {
+    const need = target - nums[i];
+    if (seen.has(need)) return [seen.get(need)!, i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}
+
+const show = (pair: number[]) => console.log(\`[\${pair.join(", ")}]\`);
+show(twoSum([2, 7, 11, 15], 9));
+show(twoSum([3, 3], 6));
+show(twoSum([3, 2, 4], 6));`,
+        },
+        {
+          lang: "java",
+          code: `import java.util.*;
+
+public class Main {
+    static int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            Integer j = seen.get(target - nums[i]);
+            if (j != null) return new int[]{j, i};
+            seen.put(nums[i], i);
+        }
+        return new int[]{};
+    }
+
+    static void show(int[] pair) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < pair.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(pair[i]);
+        }
+        System.out.println(sb.append("]"));
+    }
+
+    public static void main(String[] args) {
+        show(twoSum(new int[]{2, 7, 11, 15}, 9));
+        show(twoSum(new int[]{3, 3}, 6));
+        show(twoSum(new int[]{3, 2, 4}, 6));
+    }
+}`,
+        },
+        {
+          lang: "cpp",
+          code: `#include <iostream>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+vector<int> twoSum(const vector<int>& nums, int target) {
+    unordered_map<int, int> seen;
+    for (int i = 0; i < (int)nums.size(); i++) {
+        auto it = seen.find(target - nums[i]);
+        if (it != seen.end()) return {it->second, i};
+        seen[nums[i]] = i;
+    }
+    return {};
+}
+
+void show(const vector<int>& pair) {
+    cout << "[";
+    for (size_t i = 0; i < pair.size(); i++) {
+        if (i) cout << ", ";
+        cout << pair[i];
+    }
+    cout << "]\\n";
+}
+
+int main() {
+    show(twoSum({2, 7, 11, 15}, 9));
+    show(twoSum({3, 3}, 6));
+    show(twoSum({3, 2, 4}, 6));
+}`,
+        },
+        {
+          lang: "rust",
+          code: `use std::collections::HashMap;
+
+fn two_sum(nums: &[i32], target: i32) -> Vec<i32> {
+    let mut seen: HashMap<i32, i32> = HashMap::new();
+    for (i, &x) in nums.iter().enumerate() {
+        if let Some(&j) = seen.get(&(target - x)) {
+            return vec![j, i as i32];
+        }
+        seen.insert(x, i as i32);
+    }
+    vec![]
+}
+
+fn show(pair: &[i32]) {
+    let parts: Vec<String> = pair.iter().map(|x| x.to_string()).collect();
+    println!("[{}]", parts.join(", "));
+}
+
+fn main() {
+    show(&two_sum(&[2, 7, 11, 15], 9));
+    show(&two_sum(&[3, 3], 6));
+    show(&two_sum(&[3, 2, 4], 6));
+}`,
+        },
+        {
+          lang: "go",
+          code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func twoSum(nums []int, target int) []int {
+	seen := make(map[int]int)
+	for i, x := range nums {
+		if j, ok := seen[target-x]; ok {
+			return []int{j, i}
+		}
+		seen[x] = i
+	}
+	return []int{}
+}
+
+func show(pair []int) {
+	parts := make([]string, len(pair))
+	for i, v := range pair {
+		parts[i] = strconv.Itoa(v)
+	}
+	fmt.Println("[" + strings.Join(parts, ", ") + "]")
+}
+
+func main() {
+	show(twoSum([]int{2, 7, 11, 15}, 9))
+	show(twoSum([]int{3, 3}, 6))
+	show(twoSum([]int{3, 2, 4}, 6))
+}`,
+        },
+      ],
           explanation:
             "The map stores **value → index**, not value → seen. A boolean would answer \"is there a pair?\" but the question asks for positions, and recovering them afterwards would cost another scan. Note the third case: `[3, 2, 4]` with target 6 must not pair 3 with itself — and it does not, because 3 is only inserted after its own check.",
         },

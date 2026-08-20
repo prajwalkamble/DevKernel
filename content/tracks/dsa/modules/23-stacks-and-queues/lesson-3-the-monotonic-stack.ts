@@ -59,6 +59,272 @@ print(daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]))`,
 [-1, -1, -1, -1]
 [2, 3, -1]
 [1, 1, 4, 2, 1, 1, 0, 0]`,
+      alternates: [
+        {
+          lang: "javascript",
+          code: `function nextGreater(nums) {
+  const out = new Array(nums.length).fill(-1);
+  const stack = [];                       // indices, values strictly decreasing
+  for (let i = 0; i < nums.length; i++) {
+    while (stack.length && nums[stack[stack.length - 1]] < nums[i]) {
+      out[stack.pop()] = nums[i];
+    }
+    stack.push(i);
+  }
+  return out;
+}
+
+function dailyTemperatures(temps) {
+  const out = new Array(temps.length).fill(0);
+  const stack = [];
+  for (let i = 0; i < temps.length; i++) {
+    while (stack.length && temps[stack[stack.length - 1]] < temps[i]) {
+      const j = stack.pop();
+      out[j] = i - j;
+    }
+    stack.push(i);
+  }
+  return out;
+}
+
+const show = (a) => console.log(\`[\${a.join(", ")}]\`);
+show(nextGreater([2, 1, 2, 4, 3]));
+show(nextGreater([5, 4, 3, 2]));
+show(nextGreater([1, 2, 3]));
+show(dailyTemperatures([73, 74, 75, 71, 69, 72, 76, 73]));`,
+        },
+        {
+          lang: "typescript",
+          code: `function nextGreater(nums: number[]): number[] {
+  const out: number[] = new Array(nums.length).fill(-1);
+  const stack: number[] = [];                       // indices, values strictly decreasing
+  for (let i = 0; i < nums.length; i++) {
+    while (stack.length && nums[stack[stack.length - 1]] < nums[i]) {
+      out[stack.pop()!] = nums[i];
+    }
+    stack.push(i);
+  }
+  return out;
+}
+
+function dailyTemperatures(temps: number[]): number[] {
+  const out: number[] = new Array(temps.length).fill(0);
+  const stack: number[] = [];
+  for (let i = 0; i < temps.length; i++) {
+    while (stack.length && temps[stack[stack.length - 1]] < temps[i]) {
+      const j = stack.pop()!;
+      out[j] = i - j;
+    }
+    stack.push(i);
+  }
+  return out;
+}
+
+const show = (a: number[]) => console.log(\`[\${a.join(", ")}]\`);
+show(nextGreater([2, 1, 2, 4, 3]));
+show(nextGreater([5, 4, 3, 2]));
+show(nextGreater([1, 2, 3]));
+show(dailyTemperatures([73, 74, 75, 71, 69, 72, 76, 73]));`,
+        },
+        {
+          lang: "java",
+          code: `import java.util.*;
+
+public class Main {
+    static int[] nextGreater(int[] nums) {
+        int[] out = new int[nums.length];
+        Arrays.fill(out, -1);
+        Deque<Integer> stack = new ArrayDeque<>();   // indices, values decreasing
+        for (int i = 0; i < nums.length; i++) {
+            while (!stack.isEmpty() && nums[stack.peek()] < nums[i]) {
+                out[stack.pop()] = nums[i];
+            }
+            stack.push(i);
+        }
+        return out;
+    }
+
+    static int[] dailyTemperatures(int[] temps) {
+        int[] out = new int[temps.length];
+        Deque<Integer> stack = new ArrayDeque<>();
+        for (int i = 0; i < temps.length; i++) {
+            while (!stack.isEmpty() && temps[stack.peek()] < temps[i]) {
+                int j = stack.pop();
+                out[j] = i - j;
+            }
+            stack.push(i);
+        }
+        return out;
+    }
+
+    static void show(int[] a) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < a.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(a[i]);
+        }
+        System.out.println(sb.append("]"));
+    }
+
+    public static void main(String[] args) {
+        show(nextGreater(new int[]{2, 1, 2, 4, 3}));
+        show(nextGreater(new int[]{5, 4, 3, 2}));
+        show(nextGreater(new int[]{1, 2, 3}));
+        show(dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73}));
+    }
+}`,
+        },
+        {
+          lang: "cpp",
+          code: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> nextGreater(const vector<int>& nums) {
+    vector<int> out(nums.size(), -1);
+    vector<int> stack;                       // indices, values strictly decreasing
+    for (int i = 0; i < (int)nums.size(); i++) {
+        while (!stack.empty() && nums[stack.back()] < nums[i]) {
+            out[stack.back()] = nums[i];
+            stack.pop_back();
+        }
+        stack.push_back(i);
+    }
+    return out;
+}
+
+vector<int> dailyTemperatures(const vector<int>& temps) {
+    vector<int> out(temps.size(), 0);
+    vector<int> stack;
+    for (int i = 0; i < (int)temps.size(); i++) {
+        while (!stack.empty() && temps[stack.back()] < temps[i]) {
+            int j = stack.back();
+            stack.pop_back();
+            out[j] = i - j;
+        }
+        stack.push_back(i);
+    }
+    return out;
+}
+
+void show(const vector<int>& a) {
+    cout << "[";
+    for (size_t i = 0; i < a.size(); i++) {
+        if (i) cout << ", ";
+        cout << a[i];
+    }
+    cout << "]\\n";
+}
+
+int main() {
+    show(nextGreater({2, 1, 2, 4, 3}));
+    show(nextGreater({5, 4, 3, 2}));
+    show(nextGreater({1, 2, 3}));
+    show(dailyTemperatures({73, 74, 75, 71, 69, 72, 76, 73}));
+}`,
+        },
+        {
+          lang: "rust",
+          code: `fn next_greater(nums: &[i32]) -> Vec<i32> {
+    let mut out = vec![-1; nums.len()];
+    let mut stack: Vec<usize> = Vec::new();   // indices, values strictly decreasing
+    for i in 0..nums.len() {
+        while let Some(&top) = stack.last() {
+            if nums[top] >= nums[i] {
+                break;
+            }
+            stack.pop();
+            out[top] = nums[i];
+        }
+        stack.push(i);
+    }
+    out
+}
+
+fn daily_temperatures(temps: &[i32]) -> Vec<i32> {
+    let mut out = vec![0; temps.len()];
+    let mut stack: Vec<usize> = Vec::new();
+    for i in 0..temps.len() {
+        while let Some(&top) = stack.last() {
+            if temps[top] >= temps[i] {
+                break;
+            }
+            stack.pop();
+            out[top] = (i - top) as i32;
+        }
+        stack.push(i);
+    }
+    out
+}
+
+fn show(a: &[i32]) {
+    let parts: Vec<String> = a.iter().map(|x| x.to_string()).collect();
+    println!("[{}]", parts.join(", "));
+}
+
+fn main() {
+    show(&next_greater(&[2, 1, 2, 4, 3]));
+    show(&next_greater(&[5, 4, 3, 2]));
+    show(&next_greater(&[1, 2, 3]));
+    show(&daily_temperatures(&[73, 74, 75, 71, 69, 72, 76, 73]));
+}`,
+        },
+        {
+          lang: "go",
+          code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func nextGreater(nums []int) []int {
+	out := make([]int, len(nums))
+	for i := range out {
+		out[i] = -1
+	}
+	stack := []int{} // indices, values strictly decreasing
+	for i, x := range nums {
+		for len(stack) > 0 && nums[stack[len(stack)-1]] < x {
+			out[stack[len(stack)-1]] = x
+			stack = stack[:len(stack)-1]
+		}
+		stack = append(stack, i)
+	}
+	return out
+}
+
+func dailyTemperatures(temps []int) []int {
+	out := make([]int, len(temps))
+	stack := []int{}
+	for i, t := range temps {
+		for len(stack) > 0 && temps[stack[len(stack)-1]] < t {
+			j := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			out[j] = i - j
+		}
+		stack = append(stack, i)
+	}
+	return out
+}
+
+func show(a []int) {
+	parts := make([]string, len(a))
+	for i, v := range a {
+		parts[i] = strconv.Itoa(v)
+	}
+	fmt.Println("[" + strings.Join(parts, ", ") + "]")
+}
+
+func main() {
+	show(nextGreater([]int{2, 1, 2, 4, 3}))
+	show(nextGreater([]int{5, 4, 3, 2}))
+	show(nextGreater([]int{1, 2, 3}))
+	show(dailyTemperatures([]int{73, 74, 75, 71, 69, 72, 76, 73}))
+}`,
+        },
+      ],
           explanation:
             "The two functions are the **same loop**. The only difference is what gets recorded: the value that resolved the wait, or the distance to it — which is why the stack holds *indices* rather than values, since a value alone cannot tell you how far away it was. In the strictly decreasing input everything is still waiting at the end, so every answer is the default. Note that `[2,1,2,4,3]` gives index 0 the answer 4, not 2: with `<` in the condition, an equal value does not resolve the wait.",
         },
