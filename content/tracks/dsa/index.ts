@@ -23,6 +23,7 @@ import { hashingModule } from "./modules/20-hashing";
 import { sortingModule } from "./modules/21-sorting";
 import { linkedListsModule } from "./modules/22-linked-lists";
 import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
+import { treesModule } from "./modules/24-trees";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -122,25 +123,7 @@ export const dsaTrack: TrackDefinition = {
     linkedListsModule,
     stacksAndQueuesModule,
     recursionModule,
-    createComingSoonModule({
-      id: "dsa-trees",
-      slug: "trees",
-      title: "Trees & Binary Search Trees",
-      order: 24,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "Where recursion stops being a party trick. Traversals, the ordering invariant that makes a BST searchable, and the balancing that stops it degenerating into a linked list.",
-      topics: [
-        "Terminology, height, depth, and the shapes that matter",
-        "Traversals: preorder, inorder, postorder — recursive and iterative",
-        "Level-order traversal, and the level-width snapshot",
-        "The BST invariant, and search, insert and delete",
-        "Why validating a BST is not a local comparison",
-        "Balanced trees: AVL and red-black, and what your language's TreeMap is",
-        "Lowest common ancestor, diameter, and path problems",
-        "Serialising and reconstructing a tree",
-      ],
-    }),
+    treesModule,
     createComingSoonModule({
       id: "dsa-heaps",
       slug: "heaps-and-priority-queues",
