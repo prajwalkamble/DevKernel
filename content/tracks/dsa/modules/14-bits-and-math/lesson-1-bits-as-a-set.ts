@@ -87,6 +87,140 @@ m & -m          00010000  <- isolates the lowest set bit
 m & (m-1)       10100000  <- clears the lowest set bit
 popcount        3
 kernighan count 3`,
+      alternates: [
+        {
+          lang: "asm",
+          code: `; The same operations, at the level where they stop being metaphors.
+;
+; Every line the Python version writes as an operator is one instruction here:
+; \`mask |= 1 << i\` is \`bts\`, \`mask &= ~(1 << i)\` is \`btr\`, \`mask ^= 1 << i\` is
+; \`btc\`, and the two famous tricks — m & -m and m & (m-1) — are \`blsi\` and
+; \`blsr\`, single instructions that exist precisely because they are common.
+;
+; \`m\` lives in r14 rather than r11 on purpose: the \`syscall\` instruction
+; clobbers rcx and r11, so a value parked in r11 does not survive the first
+; write. That is the kind of detail this level makes you deal with.
+;
+; nasm -f elf64 main.asm && ld -o main main.o
+
+section .data
+    lbl_mask  db "mask     ", 0
+    lbl_isol  db "m & -m   ", 0
+    lbl_clr   db "m & (m-1)", 0
+    lbl_pop   db "popcount ", 0
+    space     db " "
+    newline   db 10
+
+section .bss
+    buf resb 16
+
+section .text
+    global _start
+
+; write rsi, length rdx, to stdout
+write:
+    mov rax, 1
+    mov rdi, 1
+    syscall
+    ret
+
+; print the NUL-terminated string at rsi
+puts:
+    mov rdx, 0
+.count:
+    cmp byte [rsi + rdx], 0
+    je .out
+    inc rdx
+    jmp .count
+.out:
+    call write
+    ret
+
+; print r8b as eight binary digits, then a newline
+putbin:
+    mov r12, 8
+    mov r13, buf
+.next:
+    dec r12
+    mov al, r8b
+    mov rcx, r12          ; cl is the bit index, 7 down to 0
+    shr al, cl
+    and al, 1
+    add al, '0'
+    mov [r13], al
+    inc r13
+    test r12, r12
+    jnz .next
+    mov byte [r13], 10
+    mov rsi, buf
+    mov rdx, 9
+    call write
+    ret
+
+; print rax as a single decimal digit, then a newline
+putdigit:
+    add al, '0'
+    mov [buf], al
+    mov byte [buf + 1], 10
+    mov rsi, buf
+    mov rdx, 2
+    call write
+    ret
+
+_start:
+    xor r9, r9                  ; the mask
+
+    bts r9, 0                   ; set bit 0
+    bts r9, 2                   ; set bit 2
+    bts r9, 5                   ; set bit 5
+    btr r9, 2                   ; clear bit 2
+    btc r9, 0                   ; toggle bit 0
+
+    mov rsi, lbl_mask
+    call puts
+    mov rsi, space
+    mov rdx, 1
+    call write
+    mov r8, r9
+    call putbin
+
+    mov r14, 10110000b          ; m
+
+    mov rsi, lbl_isol
+    call puts
+    mov rsi, space
+    mov rdx, 1
+    call write
+    blsi r10, r14               ; m & -m
+    mov r8, r10
+    call putbin
+
+    mov rsi, lbl_clr
+    call puts
+    mov rsi, space
+    mov rdx, 1
+    call write
+    blsr r10, r14               ; m & (m - 1)
+    mov r8, r10
+    call putbin
+
+    mov rsi, lbl_pop
+    call puts
+    mov rsi, space
+    mov rdx, 1
+    call write
+    popcnt rax, r14             ; also one instruction
+    call putdigit
+
+    mov rax, 60                 ; exit(0)
+    xor rdi, rdi
+    syscall`,
+          output: `mask      00100000
+m & -m    00010000
+m & (m-1) 10100000
+popcount  3`,
+        },
+      ],
           explanation:
             "The two lines worth committing to memory are the last pair. **`n & -n`** isolates the lowest set bit and nothing else — it works because `-n` is `~n + 1` in two's complement, which flips every bit above the lowest set one and leaves that one standing. **`n & (n - 1)`** clears the lowest set bit, because subtracting one borrows through the trailing zeros and turns the lowest one into a zero. Loop on the second and you count set bits in one iteration *per set bit* rather than one per bit width — Kernighan's trick, and the reason a sparse mask is cheap to walk.",
         },

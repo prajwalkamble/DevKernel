@@ -50,6 +50,202 @@ print(sliding_window_max([9, 8, 7, 6], 2))`,
           output: `[3, 3, 5, 5, 6, 7]
 [1]
 [9, 8, 7]`,
+      alternates: [
+        {
+          lang: "javascript",
+          code: `function slidingWindowMax(nums, k) {
+  const dq = [];                       // indices, values decreasing
+  const out = [];
+  for (let i = 0; i < nums.length; i++) {
+    while (dq.length && nums[dq[dq.length - 1]] <= nums[i]) {
+      dq.pop();                        // smaller values can never win again
+    }
+    dq.push(i);
+    if (dq[0] === i - k) dq.shift();   // the front has left the window
+    if (i >= k - 1) out.push(nums[dq[0]]);
+  }
+  return out;
+}
+
+const show = (a) => console.log(\`[\${a.join(", ")}]\`);
+show(slidingWindowMax([1, 3, -1, -3, 5, 3, 6, 7], 3));
+show(slidingWindowMax([1], 1));
+show(slidingWindowMax([9, 8, 7, 6], 2));`,
+        },
+        {
+          lang: "typescript",
+          code: `function slidingWindowMax(nums: number[], k: number): number[] {
+  const dq: number[] = [];                       // indices, values decreasing
+  const out: number[] = [];
+  for (let i = 0; i < nums.length; i++) {
+    while (dq.length && nums[dq[dq.length - 1]] <= nums[i]) {
+      dq.pop();                        // smaller values can never win again
+    }
+    dq.push(i);
+    if (dq[0] === i - k) dq.shift();   // the front has left the window
+    if (i >= k - 1) out.push(nums[dq[0]]);
+  }
+  return out;
+}
+
+const show = (a: number[]) => console.log(\`[\${a.join(", ")}]\`);
+show(slidingWindowMax([1, 3, -1, -3, 5, 3, 6, 7], 3));
+show(slidingWindowMax([1], 1));
+show(slidingWindowMax([9, 8, 7, 6], 2));`,
+        },
+        {
+          lang: "java",
+          code: `import java.util.*;
+
+public class Main {
+    static int[] slidingWindowMax(int[] nums, int k) {
+        Deque<Integer> dq = new ArrayDeque<>();      // indices, values decreasing
+        int[] out = new int[nums.length - k + 1];
+        int at = 0;
+        for (int i = 0; i < nums.length; i++) {
+            while (!dq.isEmpty() && nums[dq.peekLast()] <= nums[i]) {
+                dq.pollLast();                       // can never win again
+            }
+            dq.addLast(i);
+            if (dq.peekFirst() == i - k) dq.pollFirst();
+            if (i >= k - 1) out[at++] = nums[dq.peekFirst()];
+        }
+        return out;
+    }
+
+    static void show(int[] a) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < a.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(a[i]);
+        }
+        System.out.println(sb.append("]"));
+    }
+
+    public static void main(String[] args) {
+        show(slidingWindowMax(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
+        show(slidingWindowMax(new int[]{1}, 1));
+        show(slidingWindowMax(new int[]{9, 8, 7, 6}, 2));
+    }
+}`,
+        },
+        {
+          lang: "cpp",
+          code: `#include <deque>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> slidingWindowMax(const vector<int>& nums, int k) {
+    deque<int> dq;                       // indices, values decreasing
+    vector<int> out;
+    for (int i = 0; i < (int)nums.size(); i++) {
+        while (!dq.empty() && nums[dq.back()] <= nums[i]) {
+            dq.pop_back();               // smaller values can never win again
+        }
+        dq.push_back(i);
+        if (dq.front() == i - k) dq.pop_front();
+        if (i >= k - 1) out.push_back(nums[dq.front()]);
+    }
+    return out;
+}
+
+void show(const vector<int>& a) {
+    cout << "[";
+    for (size_t i = 0; i < a.size(); i++) {
+        if (i) cout << ", ";
+        cout << a[i];
+    }
+    cout << "]\\n";
+}
+
+int main() {
+    show(slidingWindowMax({1, 3, -1, -3, 5, 3, 6, 7}, 3));
+    show(slidingWindowMax({1}, 1));
+    show(slidingWindowMax({9, 8, 7, 6}, 2));
+}`,
+        },
+        {
+          lang: "rust",
+          code: `use std::collections::VecDeque;
+
+fn sliding_window_max(nums: &[i32], k: usize) -> Vec<i32> {
+    let mut dq: VecDeque<usize> = VecDeque::new();   // indices, values decreasing
+    let mut out = Vec::new();
+    for i in 0..nums.len() {
+        while let Some(&back) = dq.back() {
+            if nums[back] > nums[i] {
+                break;
+            }
+            dq.pop_back();                           // can never win again
+        }
+        dq.push_back(i);
+        if let Some(&front) = dq.front() {
+            if i >= k && front == i - k {
+                dq.pop_front();                      // has left the window
+            }
+        }
+        if i + 1 >= k {
+            out.push(nums[*dq.front().unwrap()]);
+        }
+    }
+    out
+}
+
+fn show(a: &[i32]) {
+    let parts: Vec<String> = a.iter().map(|x| x.to_string()).collect();
+    println!("[{}]", parts.join(", "));
+}
+
+fn main() {
+    show(&sliding_window_max(&[1, 3, -1, -3, 5, 3, 6, 7], 3));
+    show(&sliding_window_max(&[1], 1));
+    show(&sliding_window_max(&[9, 8, 7, 6], 2));
+}`,
+        },
+        {
+          lang: "go",
+          code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func slidingWindowMax(nums []int, k int) []int {
+	dq := []int{} // indices, values decreasing
+	out := []int{}
+	for i, x := range nums {
+		for len(dq) > 0 && nums[dq[len(dq)-1]] <= x {
+			dq = dq[:len(dq)-1] // smaller values can never win again
+		}
+		dq = append(dq, i)
+		if dq[0] == i-k {
+			dq = dq[1:] // the front has left the window
+		}
+		if i >= k-1 {
+			out = append(out, nums[dq[0]])
+		}
+	}
+	return out
+}
+
+func show(a []int) {
+	parts := make([]string, len(a))
+	for i, v := range a {
+		parts[i] = strconv.Itoa(v)
+	}
+	fmt.Println("[" + strings.Join(parts, ", ") + "]")
+}
+
+func main() {
+	show(slidingWindowMax([]int{1, 3, -1, -3, 5, 3, 6, 7}, 3))
+	show(slidingWindowMax([]int{1}, 1))
+	show(slidingWindowMax([]int{9, 8, 7, 6}, 2))
+}`,
+        },
+      ],
           explanation:
             "Two discards at **opposite ends**, which is exactly why a deque is required rather than a stack. From the **back**, values the newcomer dominates — they can never win again. From the **front**, the index that has just fallen out of the window. Only one element can expire per step, so the front check is an `if` and not a `while`. The strictly decreasing input `[9,8,7,6]` never triggers a back-discard, and every answer comes from an expiry instead.",
         },

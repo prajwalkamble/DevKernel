@@ -48,6 +48,206 @@ for case in ["()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("]:
 '((('      False
 ''         True
 '())('     False`,
+      alternates: [
+        {
+          lang: "javascript",
+          code: `function isBalanced(s) {
+  const pairs = { ")": "(", "]": "[", "}": "{" };
+  const stack = [];
+  for (const ch of s) {
+    if ("([{".includes(ch)) {
+      stack.push(ch);
+    } else if (ch in pairs) {
+      if (!stack.length || stack.pop() !== pairs[ch]) return false;
+    }
+  }
+  return stack.length === 0;          // leftovers are the second failure mode
+}
+
+for (const c of ["()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("]) {
+  console.log(\`'\${c}'\`.padEnd(10) + " " + isBalanced(c));
+}`,
+          output: `'()[]{}'   true
+'([{}])'   true
+'(]'       false
+'([)]'     false
+'((('      false
+''         true
+'())('     false`,
+        },
+        {
+          lang: "typescript",
+          code: `function isBalanced(s: string): boolean {
+  const pairs: Record<string, string> = { ")": "(", "]": "[", "}": "{" };
+  const stack: string[] = [];
+  for (const ch of s) {
+    if ("([{".includes(ch)) {
+      stack.push(ch);
+    } else if (ch in pairs) {
+      if (!stack.length || stack.pop() !== pairs[ch]) return false;
+    }
+  }
+  return stack.length === 0;          // leftovers are the second failure mode
+}
+
+for (const c of ["()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("]) {
+  console.log(\`'\${c}'\`.padEnd(10) + " " + isBalanced(c));
+}`,
+          output: `'()[]{}'   true
+'([{}])'   true
+'(]'       false
+'([)]'     false
+'((('      false
+''         true
+'())('     false`,
+        },
+        {
+          lang: "java",
+          code: `import java.util.*;
+
+public class Main {
+    static boolean isBalanced(String s) {
+        Map<Character, Character> pairs = Map.of(')', '(', ']', '[', '}', '{');
+        Deque<Character> stack = new ArrayDeque<>();
+        for (char ch : s.toCharArray()) {
+            if (ch == '(' || ch == '[' || ch == '{') {
+                stack.push(ch);
+            } else if (pairs.containsKey(ch)) {
+                if (stack.isEmpty() || stack.pop() != pairs.get(ch)) return false;
+            }
+        }
+        return stack.isEmpty();      // leftovers are the second failure mode
+    }
+
+    public static void main(String[] args) {
+        for (String c : new String[]{"()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("}) {
+            String quoted = "'" + c + "'";
+            System.out.printf("%-10s %b%n", quoted, isBalanced(c));
+        }
+    }
+}`,
+          output: `'()[]{}'   true
+'([{}])'   true
+'(]'       false
+'([)]'     false
+'((('      false
+''         true
+'())('     false`,
+        },
+        {
+          lang: "cpp",
+          code: `#include <iomanip>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+using namespace std;
+
+bool isBalanced(const string& s) {
+    map<char, char> pairs{{')', '('}, {']', '['}, {'}', '{'}};
+    vector<char> stack;
+    for (char ch : s) {
+        if (ch == '(' || ch == '[' || ch == '{') {
+            stack.push_back(ch);
+        } else if (pairs.count(ch)) {
+            if (stack.empty() || stack.back() != pairs[ch]) return false;
+            stack.pop_back();
+        }
+    }
+    return stack.empty();            // leftovers are the second failure mode
+}
+
+int main() {
+    cout << boolalpha;
+    for (const string& c : {"()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("}) {
+        string quoted = "'" + c + "'";
+        cout << left << setw(10) << quoted << " " << isBalanced(c) << "\\n";
+    }
+}`,
+          output: `'()[]{}'   true
+'([{}])'   true
+'(]'       false
+'([)]'     false
+'((('      false
+''         true
+'())('     false`,
+        },
+        {
+          lang: "rust",
+          code: `fn is_balanced(s: &str) -> bool {
+    let mut stack: Vec<char> = Vec::new();
+    for ch in s.chars() {
+        match ch {
+            '(' | '[' | '{' => stack.push(ch),
+            ')' | ']' | '}' => {
+                let want = match ch {
+                    ')' => '(',
+                    ']' => '[',
+                    _ => '{',
+                };
+                if stack.pop() != Some(want) {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+    }
+    stack.is_empty() // leftovers are the second failure mode
+}
+
+fn main() {
+    for c in ["()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("] {
+        let quoted = format!("'{}'", c);
+        println!("{:<10} {}", quoted, is_balanced(c));
+    }
+}`,
+          output: `'()[]{}'   true
+'([{}])'   true
+'(]'       false
+'([)]'     false
+'((('      false
+''         true
+'())('     false`,
+        },
+        {
+          lang: "go",
+          code: `package main
+
+import "fmt"
+
+func isBalanced(s string) bool {
+	pairs := map[rune]rune{')': '(', ']': '[', '}': '{'}
+	stack := []rune{}
+	for _, ch := range s {
+		switch ch {
+		case '(', '[', '{':
+			stack = append(stack, ch)
+		default:
+			if want, ok := pairs[ch]; ok {
+				if len(stack) == 0 || stack[len(stack)-1] != want {
+					return false
+				}
+				stack = stack[:len(stack)-1]
+			}
+		}
+	}
+	return len(stack) == 0 // leftovers are the second failure mode
+}
+
+func main() {
+	for _, c := range []string{"()[]{}", "([{}])", "(]", "([)]", "(((", "", "())("} {
+		fmt.Printf("%-10s %t\\n", "'"+c+"'", isBalanced(c))
+	}
+}`,
+          output: `'()[]{}'   true
+'([{}])'   true
+'(]'       false
+'([)]'     false
+'((('      false
+''         true
+'())('     false`,
+        },
+      ],
           explanation:
             "There are **two** ways to be unbalanced and both need handling. A closer with nothing open, or the wrong opener on top — caught inside the loop. And openers left over at the end — caught by `return not stack`, which is the check people forget, and `'((('` is the case that catches them. `'([)]'` is the one that proves a counter cannot replace the stack: the counts are all correct and the nesting is not.",
         },

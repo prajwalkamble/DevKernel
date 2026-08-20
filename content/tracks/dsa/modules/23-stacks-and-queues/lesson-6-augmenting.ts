@@ -64,6 +64,244 @@ pop  3 -> min now 3
 pop  7 -> min now 3
 pop  3 -> min now 5
 pop  5 -> min now None`,
+      alternates: [
+        {
+          lang: "javascript",
+          code: `class MinStack {
+  // Every entry remembers the minimum of the stack at and below it.
+  constructor() {
+    this.stack = [];                 // [value, minSoFar]
+  }
+  push(x) {
+    const current = this.stack.length ? Math.min(x, this.getMin()) : x;
+    this.stack.push([x, current]);
+  }
+  pop() {
+    return this.stack.pop()[0];
+  }
+  top() {
+    return this.stack[this.stack.length - 1][0];
+  }
+  getMin() {
+    return this.stack[this.stack.length - 1][1];
+  }
+  get size() {
+    return this.stack.length;
+  }
+}
+
+const s = new MinStack();
+for (const v of [5, 3, 7, 3, 8]) {
+  s.push(v);
+  console.log(\`push \${v} -> top=\${s.top()} min=\${s.getMin()}\`);
+}
+while (s.size) {
+  const v = s.pop();
+  console.log(\`pop  \${v} -> min now \${s.size ? s.getMin() : "None"}\`);
+}`,
+        },
+        {
+          lang: "typescript",
+          code: `class MinStack {
+  stack: [number, number][];
+  // Every entry remembers the minimum of the stack at and below it.
+  constructor() {
+    this.stack = [];                 // [value, minSoFar]
+  }
+  push(x: number): void {
+    const current = this.stack.length ? Math.min(x, this.getMin()) : x;
+    this.stack.push([x, current]);
+  }
+  pop(): number {
+    return this.stack.pop()[0];
+  }
+  top(): number {
+    return this.stack[this.stack.length - 1][0];
+  }
+  getMin(): number {
+    return this.stack[this.stack.length - 1][1];
+  }
+  get size(): number {
+    return this.stack.length;
+  }
+}
+
+const s = new MinStack();
+for (const v of [5, 3, 7, 3, 8]) {
+  s.push(v);
+  console.log(\`push \${v} -> top=\${s.top()} min=\${s.getMin()}\`);
+}
+while (s.size) {
+  const v = s.pop();
+  console.log(\`pop  \${v} -> min now \${s.size ? s.getMin() : "None"}\`);
+}`,
+        },
+        {
+          lang: "java",
+          code: `import java.util.*;
+
+public class Main {
+    /** Every entry remembers the minimum of the stack at and below it. */
+    static class MinStack {
+        private final Deque<int[]> stack = new ArrayDeque<>();   // {value, minSoFar}
+
+        void push(int x) {
+            int current = stack.isEmpty() ? x : Math.min(x, getMin());
+            stack.push(new int[]{x, current});
+        }
+
+        int pop() { return stack.pop()[0]; }
+        int top() { return stack.peek()[0]; }
+        int getMin() { return stack.peek()[1]; }
+        int size() { return stack.size(); }
+    }
+
+    public static void main(String[] args) {
+        MinStack s = new MinStack();
+        for (int v : new int[]{5, 3, 7, 3, 8}) {
+            s.push(v);
+            System.out.println("push " + v + " -> top=" + s.top() + " min=" + s.getMin());
+        }
+        while (s.size() > 0) {
+            int v = s.pop();
+            System.out.println("pop  " + v + " -> min now " + (s.size() > 0 ? s.getMin() : "None"));
+        }
+    }
+}`,
+        },
+        {
+          lang: "cpp",
+          code: `#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+/** Every entry remembers the minimum of the stack at and below it. */
+class MinStack {
+    vector<pair<int, int>> stack;      // {value, minSoFar}
+public:
+    void push(int x) {
+        int current = stack.empty() ? x : min(x, getMin());
+        stack.push_back({x, current});
+    }
+    int pop() {
+        int v = stack.back().first;
+        stack.pop_back();
+        return v;
+    }
+    int top() const { return stack.back().first; }
+    int getMin() const { return stack.back().second; }
+    size_t size() const { return stack.size(); }
+};
+
+int main() {
+    MinStack s;
+    for (int v : {5, 3, 7, 3, 8}) {
+        s.push(v);
+        cout << "push " << v << " -> top=" << s.top() << " min=" << s.getMin() << "\\n";
+    }
+    while (s.size() > 0) {
+        int v = s.pop();
+        cout << "pop  " << v << " -> min now ";
+        if (s.size() > 0) cout << s.getMin() << "\\n";
+        else cout << "None\\n";
+    }
+}`,
+        },
+        {
+          lang: "rust",
+          code: `/// Every entry remembers the minimum of the stack at and below it.
+struct MinStack {
+    stack: Vec<(i32, i32)>, // (value, min_so_far)
+}
+
+impl MinStack {
+    fn new() -> Self {
+        MinStack { stack: Vec::new() }
+    }
+    fn push(&mut self, x: i32) {
+        let current = match self.stack.last() {
+            Some(&(_, m)) => x.min(m),
+            None => x,
+        };
+        self.stack.push((x, current));
+    }
+    fn pop(&mut self) -> i32 {
+        self.stack.pop().unwrap().0
+    }
+    fn top(&self) -> i32 {
+        self.stack.last().unwrap().0
+    }
+    fn get_min(&self) -> i32 {
+        self.stack.last().unwrap().1
+    }
+    fn len(&self) -> usize {
+        self.stack.len()
+    }
+}
+
+fn main() {
+    let mut s = MinStack::new();
+    for v in [5, 3, 7, 3, 8] {
+        s.push(v);
+        println!("push {} -> top={} min={}", v, s.top(), s.get_min());
+    }
+    while s.len() > 0 {
+        let v = s.pop();
+        if s.len() > 0 {
+            println!("pop  {} -> min now {}", v, s.get_min());
+        } else {
+            println!("pop  {} -> min now None", v);
+        }
+    }
+}`,
+        },
+        {
+          lang: "go",
+          code: `package main
+
+import "fmt"
+
+type entry struct{ value, minSoFar int }
+
+// MinStack: every entry remembers the minimum of the stack at and below it.
+type MinStack struct{ stack []entry }
+
+func (s *MinStack) Push(x int) {
+	current := x
+	if len(s.stack) > 0 && s.GetMin() < x {
+		current = s.GetMin()
+	}
+	s.stack = append(s.stack, entry{x, current})
+}
+
+func (s *MinStack) Pop() int {
+	v := s.stack[len(s.stack)-1].value
+	s.stack = s.stack[:len(s.stack)-1]
+	return v
+}
+
+func (s *MinStack) Top() int    { return s.stack[len(s.stack)-1].value }
+func (s *MinStack) GetMin() int { return s.stack[len(s.stack)-1].minSoFar }
+func (s *MinStack) Len() int    { return len(s.stack) }
+
+func main() {
+	s := &MinStack{}
+	for _, v := range []int{5, 3, 7, 3, 8} {
+		s.Push(v)
+		fmt.Printf("push %d -> top=%d min=%d\\n", v, s.Top(), s.GetMin())
+	}
+	for s.Len() > 0 {
+		v := s.Pop()
+		if s.Len() > 0 {
+			fmt.Printf("pop  %d -> min now %d\\n", v, s.GetMin())
+		} else {
+			fmt.Printf("pop  %d -> min now None\\n", v)
+		}
+	}
+}`,
+        },
+      ],
           explanation:
             "Follow the duplicate 3s. After popping the second 3 the minimum is still 3, because the first one is still below — no special handling needed, since each entry carries its own answer. The alternative implementation keeps a separate stack of minima and pushes only when `x <= current_min`; the `<=` there is essential, and using `<` breaks on exactly this duplicate case. Storing the pair avoids that trap entirely at the cost of one extra value per element.",
         },
