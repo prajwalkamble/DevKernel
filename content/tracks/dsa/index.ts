@@ -22,6 +22,7 @@ import { recursionModule } from "./modules/19-recursion";
 import { hashingModule } from "./modules/20-hashing";
 import { sortingModule } from "./modules/21-sorting";
 import { linkedListsModule } from "./modules/22-linked-lists";
+import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -119,25 +120,7 @@ export const dsaTrack: TrackDefinition = {
     binarySearchModule,
     hashingModule,
     linkedListsModule,
-    createComingSoonModule({
-      id: "dsa-stacks-queues",
-      slug: "stacks-and-queues",
-      title: "Stacks, Queues & Monotonic Structures",
-      order: 23,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "Two structures with one rule each — and the monotonic variants that answer \"the next element greater than this one\" for every index in linear time.",
-      topics: [
-        "Stacks: LIFO, and the problems that are secretly about nesting",
-        "Queues, deques and circular buffers",
-        "Expression parsing, bracket matching, and infix to postfix",
-        "The monotonic stack, and next-greater-element in O(n)",
-        "The amortised argument: why a nested while loop is still linear",
-        "Largest rectangle in a histogram, and the family around it",
-        "The monotonic deque, and sliding-window maximum",
-        "Min-stack, and augmenting a structure to answer a new question",
-      ],
-    }),
+    stacksAndQueuesModule,
     recursionModule,
     createComingSoonModule({
       id: "dsa-trees",
