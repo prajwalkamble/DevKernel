@@ -68,6 +68,295 @@ height of a single node: 0
 height of an empty tree: -1`,
           explanation:
             "Three functions, one shape: base case for empty, then combine the two recursive results. `height` returns **−1** for empty precisely so that a leaf works out to 0 without a second base case — `1 + max(-1, -1)` is 0. Choosing −1 there is what removes the special case, and it is the kind of base-case choice worth being deliberate about. `leaves` needs its own second base case because a leaf is not the same as an empty child.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `class Node {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+//        4
+//      /   \\
+//     2     7
+//    / \\   /
+//   1   3 6
+const root = new Node(4, new Node(2, new Node(1), new Node(3)), new Node(7, new Node(6)));
+
+// Edges on the longest downward path. An empty tree is -1.
+function height(node) {
+  if (node === null) return -1;
+  return 1 + Math.max(height(node.left), height(node.right));
+}
+
+function size(node) {
+  return node === null ? 0 : 1 + size(node.left) + size(node.right);
+}
+
+function leaves(node) {
+  if (node === null) return 0;
+  if (node.left === null && node.right === null) return 1;
+  return leaves(node.left) + leaves(node.right);
+}
+
+console.log("height:", height(root));
+console.log("size:  ", size(root));
+console.log("leaves:", leaves(root));
+console.log("height of a single node:", height(new Node(1)));
+console.log("height of an empty tree:", height(null));`,
+            },
+            {
+              lang: "typescript",
+              code: `class Node {
+  val: number;
+  left: Node | null;
+  right: Node | null;
+
+  constructor(val: number, left: Node | null = null, right: Node | null = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+//        4
+//      /   \\
+//     2     7
+//    / \\   /
+//   1   3 6
+const root = new Node(4, new Node(2, new Node(1), new Node(3)), new Node(7, new Node(6)));
+
+// Edges on the longest downward path. An empty tree is -1.
+function height(node: Node | null): number {
+  if (node === null) return -1;
+  return 1 + Math.max(height(node.left), height(node.right));
+}
+
+function size(node: Node | null): number {
+  return node === null ? 0 : 1 + size(node.left) + size(node.right);
+}
+
+function leaves(node: Node | null): number {
+  if (node === null) return 0;
+  if (node.left === null && node.right === null) return 1;
+  return leaves(node.left) + leaves(node.right);
+}
+
+console.log("height:", height(root));
+console.log("size:  ", size(root));
+console.log("leaves:", leaves(root));
+console.log("height of a single node:", height(new Node(1)));
+console.log("height of an empty tree:", height(null));`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static class Node {
+        int val;
+        Node left, right;
+
+        Node(int val) { this.val = val; }
+
+        Node(int val, Node left, Node right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    //        4
+    //      /   \\
+    //     2     7
+    //    / \\   /
+    //   1   3 6
+    static final Node ROOT = new Node(4,
+            new Node(2, new Node(1), new Node(3)),
+            new Node(7, new Node(6), null));
+
+    /** Edges on the longest downward path. An empty tree is -1. */
+    static int height(Node node) {
+        if (node == null) return -1;
+        return 1 + Math.max(height(node.left), height(node.right));
+    }
+
+    static int size(Node node) {
+        return node == null ? 0 : 1 + size(node.left) + size(node.right);
+    }
+
+    static int leaves(Node node) {
+        if (node == null) return 0;
+        if (node.left == null && node.right == null) return 1;
+        return leaves(node.left) + leaves(node.right);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("height: " + height(ROOT));
+        System.out.println("size:   " + size(ROOT));
+        System.out.println("leaves: " + leaves(ROOT));
+        System.out.println("height of a single node: " + height(new Node(1)));
+        System.out.println("height of an empty tree: " + height(null));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int val, Node* left = nullptr, Node* right = nullptr)
+        : val(val), left(left), right(right) {}
+};
+
+// Edges on the longest downward path. An empty tree is -1.
+int height(Node* node) {
+    if (!node) return -1;
+    return 1 + max(height(node->left), height(node->right));
+}
+
+int size(Node* node) {
+    return node ? 1 + size(node->left) + size(node->right) : 0;
+}
+
+int leaves(Node* node) {
+    if (!node) return 0;
+    if (!node->left && !node->right) return 1;
+    return leaves(node->left) + leaves(node->right);
+}
+
+int main() {
+    //        4
+    //      /   \\
+    //     2     7
+    //    / \\   /
+    //   1   3 6
+    Node* root = new Node(4, new Node(2, new Node(1), new Node(3)),
+                             new Node(7, new Node(6)));
+
+    cout << "height: " << height(root) << "\\n";
+    cout << "size:   " << size(root) << "\\n";
+    cout << "leaves: " << leaves(root) << "\\n";
+    cout << "height of a single node: " << height(new Node(1)) << "\\n";
+    cout << "height of an empty tree: " << height(nullptr) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// \`Option<Box<Node>>\`: a tree node owns its children, and nothing here is
+// shared or cyclic, so ownership lines up with the shape exactly.
+struct Node {
+    val: i32,
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+}
+
+fn node(val: i32, left: Option<Box<Node>>, right: Option<Box<Node>>) -> Option<Box<Node>> {
+    Some(Box::new(Node { val, left, right }))
+}
+
+fn leaf(val: i32) -> Option<Box<Node>> {
+    node(val, None, None)
+}
+
+/// Edges on the longest downward path. An empty tree is -1.
+fn height(n: &Option<Box<Node>>) -> i32 {
+    match n {
+        None => -1,
+        Some(node) => 1 + height(&node.left).max(height(&node.right)),
+    }
+}
+
+fn size(n: &Option<Box<Node>>) -> i32 {
+    match n {
+        None => 0,
+        Some(node) => 1 + size(&node.left) + size(&node.right),
+    }
+}
+
+fn leaves(n: &Option<Box<Node>>) -> i32 {
+    match n {
+        None => 0,
+        Some(node) if node.left.is_none() && node.right.is_none() => 1,
+        Some(node) => leaves(&node.left) + leaves(&node.right),
+    }
+}
+
+fn main() {
+    //        4
+    //      /   \\
+    //     2     7
+    //    / \\   /
+    //   1   3 6
+    let root = node(4, node(2, leaf(1), leaf(3)), node(7, leaf(6), None));
+
+    println!("height: {}", height(&root));
+    println!("size:   {}", size(&root));
+    println!("leaves: {}", leaves(&root));
+    println!("height of a single node: {}", height(&leaf(1)));
+    println!("height of an empty tree: {}", height(&None));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+type Node struct {
+	val         int
+	left, right *Node
+}
+
+// Edges on the longest downward path. An empty tree is -1.
+func height(node *Node) int {
+	if node == nil {
+		return -1
+	}
+	return 1 + max(height(node.left), height(node.right))
+}
+
+func size(node *Node) int {
+	if node == nil {
+		return 0
+	}
+	return 1 + size(node.left) + size(node.right)
+}
+
+func leaves(node *Node) int {
+	if node == nil {
+		return 0
+	}
+	if node.left == nil && node.right == nil {
+		return 1
+	}
+	return leaves(node.left) + leaves(node.right)
+}
+
+func main() {
+	//        4
+	//      /   \\
+	//     2     7
+	//    / \\   /
+	//   1   3 6
+	root := &Node{4,
+		&Node{2, &Node{val: 1}, &Node{val: 3}},
+		&Node{7, &Node{val: 6}, nil}}
+
+	fmt.Println("height:", height(root))
+	fmt.Println("size:  ", size(root))
+	fmt.Println("leaves:", leaves(root))
+	fmt.Println("height of a single node:", height(&Node{val: 1}))
+	fmt.Println("height of an empty tree:", height(nil))
+}`,
+            },
+          ],
         },
       ],
       visual: {

@@ -78,6 +78,448 @@ balanced-ish height: 3
 degenerate height:   4`,
           explanation:
             "In-order comes out sorted, which is the invariant made visible. The last two lines are the point of the lesson: **eight scattered values give height 3; five sorted values give height 4**. The degenerate tree has fewer nodes and is taller, because each insert went right every time — it is a linked list. Nothing in the insert code is wrong; the input chose the shape. `insert` returns the (possibly new) subtree root and the caller reassigns, which is the idiom that avoids needing a parent pointer.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+class Node {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function insert(node, val) {
+  if (node === null) return new Node(val);
+  if (val < node.val) node.left = insert(node.left, val);
+  else if (val > node.val) node.right = insert(node.right, val);
+  return node;                     // equal values are ignored here
+}
+
+function search(node, val) {
+  while (node) {
+    if (val === node.val) return true;
+    node = val < node.val ? node.left : node.right;
+  }
+  return false;
+}
+
+function inorder(n, out) {
+  if (n) {
+    inorder(n.left, out);
+    out.push(n.val);
+    inorder(n.right, out);
+  }
+  return out;
+}
+
+let root = null;
+for (const v of [8, 3, 10, 1, 6, 14, 4, 7]) root = insert(root, v);
+
+console.log("inorder:", list(inorder(root, [])));
+console.log("search 6: ", search(root, 6));
+console.log("search 5: ", search(root, 5));
+
+// A sorted insertion order gives a tree that is a linked list.
+let degenerate = null;
+for (const v of [1, 2, 3, 4, 5]) degenerate = insert(degenerate, v);
+
+function height(n) {
+  return n === null ? -1 : 1 + Math.max(height(n.left), height(n.right));
+}
+
+console.log("balanced-ish height:", height(root));
+console.log("degenerate height:  ", height(degenerate));`,
+              output: `inorder: [1, 3, 4, 6, 7, 8, 10, 14]
+search 6:  true
+search 5:  false
+balanced-ish height: 3
+degenerate height:   4`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+class Node {
+  val: number;
+  left: Node | null;
+  right: Node | null;
+
+  constructor(val: number, left: Node | null = null, right: Node | null = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function insert(node: Node | null, val: number): Node {
+  if (node === null) return new Node(val);
+  if (val < node.val) node.left = insert(node.left, val);
+  else if (val > node.val) node.right = insert(node.right, val);
+  return node;                     // equal values are ignored here
+}
+
+function search(node: Node | null, val: number): boolean {
+  while (node) {
+    if (val === node.val) return true;
+    node = val < node.val ? node.left : node.right;
+  }
+  return false;
+}
+
+function inorder(n: Node | null, out: number[]): number[] {
+  if (n) {
+    inorder(n.left, out);
+    out.push(n.val);
+    inorder(n.right, out);
+  }
+  return out;
+}
+
+let root: Node | null = null;
+for (const v of [8, 3, 10, 1, 6, 14, 4, 7]) root = insert(root, v);
+
+console.log("inorder:", list(inorder(root, [])));
+console.log("search 6: ", search(root, 6));
+console.log("search 5: ", search(root, 5));
+
+// A sorted insertion order gives a tree that is a linked list.
+let degenerate: Node | null = null;
+for (const v of [1, 2, 3, 4, 5]) degenerate = insert(degenerate, v);
+
+function height(n: Node | null): number {
+  return n === null ? -1 : 1 + Math.max(height(n.left), height(n.right));
+}
+
+console.log("balanced-ish height:", height(root));
+console.log("degenerate height:  ", height(degenerate));`,
+              output: `inorder: [1, 3, 4, 6, 7, 8, 10, 14]
+search 6:  true
+search 5:  false
+balanced-ish height: 3
+degenerate height:   4`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static class Node {
+        int val;
+        Node left, right;
+
+        Node(int val) { this.val = val; }
+    }
+
+    static String list(List<Integer> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs.get(i));
+        }
+        return sb.append("]").toString();
+    }
+
+    static Node insert(Node node, int val) {
+        if (node == null) return new Node(val);
+        if (val < node.val) node.left = insert(node.left, val);
+        else if (val > node.val) node.right = insert(node.right, val);
+        return node;                 // equal values are ignored here
+    }
+
+    static boolean search(Node node, int val) {
+        while (node != null) {
+            if (val == node.val) return true;
+            node = val < node.val ? node.left : node.right;
+        }
+        return false;
+    }
+
+    static List<Integer> inorder(Node n, List<Integer> out) {
+        if (n != null) {
+            inorder(n.left, out);
+            out.add(n.val);
+            inorder(n.right, out);
+        }
+        return out;
+    }
+
+    static int height(Node n) {
+        return n == null ? -1 : 1 + Math.max(height(n.left), height(n.right));
+    }
+
+    public static void main(String[] args) {
+        Node root = null;
+        for (int v : new int[]{8, 3, 10, 1, 6, 14, 4, 7}) root = insert(root, v);
+
+        System.out.println("inorder: " + list(inorder(root, new ArrayList<>())));
+        System.out.println("search 6:  " + search(root, 6));
+        System.out.println("search 5:  " + search(root, 5));
+
+        // A sorted insertion order gives a tree that is a linked list.
+        Node degenerate = null;
+        for (int v : new int[]{1, 2, 3, 4, 5}) degenerate = insert(degenerate, v);
+
+        System.out.println("balanced-ish height: " + height(root));
+        System.out.println("degenerate height:   " + height(degenerate));
+    }
+}`,
+              output: `inorder: [1, 3, 4, 6, 7, 8, 10, 14]
+search 6:  true
+search 5:  false
+balanced-ish height: 3
+degenerate height:   4`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left = nullptr;
+    Node* right = nullptr;
+    explicit Node(int val) : val(val) {}
+};
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+Node* insert(Node* node, int val) {
+    if (!node) return new Node(val);
+    if (val < node->val) node->left = insert(node->left, val);
+    else if (val > node->val) node->right = insert(node->right, val);
+    return node;                     // equal values are ignored here
+}
+
+bool search(Node* node, int val) {
+    while (node) {
+        if (val == node->val) return true;
+        node = val < node->val ? node->left : node->right;
+    }
+    return false;
+}
+
+vector<int>& inorder(Node* n, vector<int>& out) {
+    if (n) {
+        inorder(n->left, out);
+        out.push_back(n->val);
+        inorder(n->right, out);
+    }
+    return out;
+}
+
+int height(Node* n) {
+    return n ? 1 + max(height(n->left), height(n->right)) : -1;
+}
+
+int main() {
+    Node* root = nullptr;
+    for (int v : {8, 3, 10, 1, 6, 14, 4, 7}) root = insert(root, v);
+
+    vector<int> walk;
+    cout << "inorder: " << list(inorder(root, walk)) << "\\n";
+    cout << "search 6:  " << boolalpha << search(root, 6) << "\\n";
+    cout << "search 5:  " << boolalpha << search(root, 5) << "\\n";
+
+    // A sorted insertion order gives a tree that is a linked list.
+    Node* degenerate = nullptr;
+    for (int v : {1, 2, 3, 4, 5}) degenerate = insert(degenerate, v);
+
+    cout << "balanced-ish height: " << height(root) << "\\n";
+    cout << "degenerate height:   " << height(degenerate) << "\\n";
+}`,
+              output: `inorder: [1, 3, 4, 6, 7, 8, 10, 14]
+search 6:  true
+search 5:  false
+balanced-ish height: 3
+degenerate height:   4`,
+            },
+            {
+              lang: "rust",
+              code: `struct Node {
+    val: i32,
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+}
+
+fn leaf(val: i32) -> Option<Box<Node>> {
+    Some(Box::new(Node { val, left: None, right: None }))
+}
+
+fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn insert(node: Option<Box<Node>>, val: i32) -> Option<Box<Node>> {
+    match node {
+        None => leaf(val),
+        Some(mut n) => {
+            if val < n.val {
+                n.left = insert(n.left.take(), val);
+            } else if val > n.val {
+                n.right = insert(n.right.take(), val);
+            }
+            Some(n) // equal values are ignored here
+        }
+    }
+}
+
+fn search(root: &Option<Box<Node>>, val: i32) -> bool {
+    let mut cur = root.as_deref();
+    while let Some(n) = cur {
+        if val == n.val {
+            return true;
+        }
+        cur = if val < n.val { n.left.as_deref() } else { n.right.as_deref() };
+    }
+    false
+}
+
+fn inorder(n: &Option<Box<Node>>, out: &mut Vec<i32>) {
+    if let Some(node) = n {
+        inorder(&node.left, out);
+        out.push(node.val);
+        inorder(&node.right, out);
+    }
+}
+
+fn height(n: &Option<Box<Node>>) -> i32 {
+    match n {
+        None => -1,
+        Some(node) => 1 + height(&node.left).max(height(&node.right)),
+    }
+}
+
+fn main() {
+    let mut root = None;
+    for v in [8, 3, 10, 1, 6, 14, 4, 7] {
+        root = insert(root, v);
+    }
+
+    let mut walk = Vec::new();
+    inorder(&root, &mut walk);
+    println!("inorder: {}", list(&walk));
+    println!("search 6:  {}", search(&root, 6));
+    println!("search 5:  {}", search(&root, 5));
+
+    // A sorted insertion order gives a tree that is a linked list.
+    let mut degenerate = None;
+    for v in [1, 2, 3, 4, 5] {
+        degenerate = insert(degenerate, v);
+    }
+
+    println!("balanced-ish height: {}", height(&root));
+    println!("degenerate height:   {}", height(&degenerate));
+}`,
+              output: `inorder: [1, 3, 4, 6, 7, 8, 10, 14]
+search 6:  true
+search 5:  false
+balanced-ish height: 3
+degenerate height:   4`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Node struct {
+	val         int
+	left, right *Node
+}
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func insert(node *Node, val int) *Node {
+	if node == nil {
+		return &Node{val: val}
+	}
+	if val < node.val {
+		node.left = insert(node.left, val)
+	} else if val > node.val {
+		node.right = insert(node.right, val)
+	}
+	return node // equal values are ignored here
+}
+
+func search(node *Node, val int) bool {
+	for node != nil {
+		if val == node.val {
+			return true
+		}
+		if val < node.val {
+			node = node.left
+		} else {
+			node = node.right
+		}
+	}
+	return false
+}
+
+func inorder(n *Node, out []int) []int {
+	if n != nil {
+		out = inorder(n.left, out)
+		out = append(out, n.val)
+		out = inorder(n.right, out)
+	}
+	return out
+}
+
+func height(n *Node) int {
+	if n == nil {
+		return -1
+	}
+	return 1 + max(height(n.left), height(n.right))
+}
+
+func main() {
+	var root *Node
+	for _, v := range []int{8, 3, 10, 1, 6, 14, 4, 7} {
+		root = insert(root, v)
+	}
+
+	fmt.Println("inorder:", list(inorder(root, nil)))
+	fmt.Println("search 6: ", search(root, 6))
+	fmt.Println("search 5: ", search(root, 5))
+
+	// A sorted insertion order gives a tree that is a linked list.
+	var degenerate *Node
+	for _, v := range []int{1, 2, 3, 4, 5} {
+		degenerate = insert(degenerate, v)
+	}
+
+	fmt.Println("balanced-ish height:", height(root))
+	fmt.Println("degenerate height:  ", height(degenerate))
+}`,
+              output: `inorder: [1, 3, 4, 6, 7, 8, 10, 14]
+search 6:  true
+search 5:  false
+balanced-ish height: 3
+degenerate height:   4`,
+            },
+          ],
         },
       ],
       visual: {

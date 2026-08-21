@@ -79,6 +79,497 @@ round trip matches:  True
 empty tree: #`,
           explanation:
             "The two assignments in `build` must stay in that order — left then right — because they consume from a shared iterator and the order of consumption *is* the structure. Writing them as a single constructor call would leave evaluation order to the language and is a genuine portability bug. Using an iterator rather than an index is what keeps the position shared across recursive calls without passing it explicitly; an index passed by value would reset on each return.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+class Node {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+const root = new Node(1, new Node(2), new Node(3, new Node(4), new Node(5)));
+
+// Preorder, with an explicit marker for absent children.
+function serialise(node) {
+  const out = [];
+  function walk(n) {
+    if (n === null) {
+      out.push("#");
+      return;
+    }
+    out.push(String(n.val));
+    walk(n.left);
+    walk(n.right);
+  }
+  walk(node);
+  return out.join(",");
+}
+
+function deserialise(text) {
+  const tokens = text.split(",");
+  let i = 0;
+  function build() {
+    const token = tokens[i++];
+    if (token === "#") return null;
+    const node = new Node(Number(token));
+    node.left = build();
+    node.right = build();
+    return node;
+  }
+  return build();
+}
+
+function inorder(n, out) {
+  if (n) {
+    inorder(n.left, out);
+    out.push(n.val);
+    inorder(n.right, out);
+  }
+  return out;
+}
+
+const text = serialise(root);
+console.log("serialised:", text);
+const rebuilt = deserialise(text);
+console.log("inorder of original:", list(inorder(root, [])));
+console.log("inorder of rebuilt: ", list(inorder(rebuilt, [])));
+console.log("round trip matches: ", serialise(rebuilt) === text);
+console.log("empty tree:", serialise(null));`,
+              output: `serialised: 1,2,#,#,3,4,#,#,5,#,#
+inorder of original: [2, 1, 4, 3, 5]
+inorder of rebuilt:  [2, 1, 4, 3, 5]
+round trip matches:  true
+empty tree: #`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+class Node {
+  val: number;
+  left: Node | null;
+  right: Node | null;
+
+  constructor(val: number, left: Node | null = null, right: Node | null = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+const root = new Node(1, new Node(2), new Node(3, new Node(4), new Node(5)));
+
+// Preorder, with an explicit marker for absent children.
+function serialise(node: Node | null): string {
+  const out: string[] = [];
+  function walk(n: Node | null): void {
+    if (n === null) {
+      out.push("#");
+      return;
+    }
+    out.push(String(n.val));
+    walk(n.left);
+    walk(n.right);
+  }
+  walk(node);
+  return out.join(",");
+}
+
+function deserialise(text: string): Node | null {
+  const tokens = text.split(",");
+  let i = 0;
+  function build(): Node | null {
+    const token = tokens[i++];
+    if (token === "#") return null;
+    const node = new Node(Number(token));
+    node.left = build();
+    node.right = build();
+    return node;
+  }
+  return build();
+}
+
+function inorder(n: Node | null, out: number[]): number[] {
+  if (n) {
+    inorder(n.left, out);
+    out.push(n.val);
+    inorder(n.right, out);
+  }
+  return out;
+}
+
+const text = serialise(root);
+console.log("serialised:", text);
+const rebuilt = deserialise(text);
+console.log("inorder of original:", list(inorder(root, [])));
+console.log("inorder of rebuilt: ", list(inorder(rebuilt, [])));
+console.log("round trip matches: ", serialise(rebuilt) === text);
+console.log("empty tree:", serialise(null));`,
+              output: `serialised: 1,2,#,#,3,4,#,#,5,#,#
+inorder of original: [2, 1, 4, 3, 5]
+inorder of rebuilt:  [2, 1, 4, 3, 5]
+round trip matches:  true
+empty tree: #`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static class Node {
+        int val;
+        Node left, right;
+
+        Node(int val) { this.val = val; }
+
+        Node(int val, Node left, Node right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    static String list(List<Integer> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs.get(i));
+        }
+        return sb.append("]").toString();
+    }
+
+    /** Preorder, with an explicit marker for absent children. */
+    static String serialise(Node node) {
+        List<String> out = new ArrayList<>();
+        walk(node, out);
+        return String.join(",", out);
+    }
+
+    static void walk(Node n, List<String> out) {
+        if (n == null) {
+            out.add("#");
+            return;
+        }
+        out.add(String.valueOf(n.val));
+        walk(n.left, out);
+        walk(n.right, out);
+    }
+
+    static int cursor;
+
+    static Node deserialise(String text) {
+        String[] tokens = text.split(",");
+        cursor = 0;
+        return build(tokens);
+    }
+
+    static Node build(String[] tokens) {
+        String token = tokens[cursor++];
+        if (token.equals("#")) return null;
+        Node node = new Node(Integer.parseInt(token));
+        node.left = build(tokens);
+        node.right = build(tokens);
+        return node;
+    }
+
+    static List<Integer> inorder(Node n, List<Integer> out) {
+        if (n != null) {
+            inorder(n.left, out);
+            out.add(n.val);
+            inorder(n.right, out);
+        }
+        return out;
+    }
+
+    public static void main(String[] args) {
+        Node root = new Node(1, new Node(2), new Node(3, new Node(4), new Node(5)));
+
+        String text = serialise(root);
+        System.out.println("serialised: " + text);
+        Node rebuilt = deserialise(text);
+        System.out.println("inorder of original: " + list(inorder(root, new ArrayList<>())));
+        System.out.println("inorder of rebuilt:  " + list(inorder(rebuilt, new ArrayList<>())));
+        System.out.println("round trip matches:  " + serialise(rebuilt).equals(text));
+        System.out.println("empty tree: " + serialise(null));
+    }
+}`,
+              output: `serialised: 1,2,#,#,3,4,#,#,5,#,#
+inorder of original: [2, 1, 4, 3, 5]
+inorder of rebuilt:  [2, 1, 4, 3, 5]
+round trip matches:  true
+empty tree: #`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int val, Node* left = nullptr, Node* right = nullptr)
+        : val(val), left(left), right(right) {}
+};
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// Preorder, with an explicit marker for absent children.
+void walk(Node* n, vector<string>& out) {
+    if (!n) {
+        out.push_back("#");
+        return;
+    }
+    out.push_back(to_string(n->val));
+    walk(n->left, out);
+    walk(n->right, out);
+}
+
+string serialise(Node* node) {
+    vector<string> out;
+    walk(node, out);
+    string joined;
+    for (size_t i = 0; i < out.size(); i++) {
+        if (i) joined += ",";
+        joined += out[i];
+    }
+    return joined;
+}
+
+Node* build(const vector<string>& tokens, size_t& cursor) {
+    string token = tokens[cursor++];
+    if (token == "#") return nullptr;
+    Node* node = new Node(stoi(token));
+    node->left = build(tokens, cursor);
+    node->right = build(tokens, cursor);
+    return node;
+}
+
+Node* deserialise(const string& text) {
+    vector<string> tokens;
+    stringstream ss(text);
+    string part;
+    while (getline(ss, part, ',')) tokens.push_back(part);
+    size_t cursor = 0;
+    return build(tokens, cursor);
+}
+
+vector<int>& inorder(Node* n, vector<int>& out) {
+    if (n) {
+        inorder(n->left, out);
+        out.push_back(n->val);
+        inorder(n->right, out);
+    }
+    return out;
+}
+
+int main() {
+    Node* root = new Node(1, new Node(2), new Node(3, new Node(4), new Node(5)));
+
+    string text = serialise(root);
+    cout << "serialised: " << text << "\\n";
+    Node* rebuilt = deserialise(text);
+    vector<int> a, b;
+    cout << "inorder of original: " << list(inorder(root, a)) << "\\n";
+    cout << "inorder of rebuilt:  " << list(inorder(rebuilt, b)) << "\\n";
+    cout << "round trip matches:  " << boolalpha << (serialise(rebuilt) == text) << "\\n";
+    cout << "empty tree: " << serialise(nullptr) << "\\n";
+}`,
+              output: `serialised: 1,2,#,#,3,4,#,#,5,#,#
+inorder of original: [2, 1, 4, 3, 5]
+inorder of rebuilt:  [2, 1, 4, 3, 5]
+round trip matches:  true
+empty tree: #`,
+            },
+            {
+              lang: "rust",
+              code: `struct Node {
+    val: i32,
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+}
+
+fn node(val: i32, left: Option<Box<Node>>, right: Option<Box<Node>>) -> Option<Box<Node>> {
+    Some(Box::new(Node { val, left, right }))
+}
+
+fn leaf(val: i32) -> Option<Box<Node>> {
+    node(val, None, None)
+}
+
+fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Preorder, with an explicit marker for absent children.
+fn walk(n: &Option<Box<Node>>, out: &mut Vec<String>) {
+    match n {
+        None => out.push("#".to_string()),
+        Some(node) => {
+            out.push(node.val.to_string());
+            walk(&node.left, out);
+            walk(&node.right, out);
+        }
+    }
+}
+
+fn serialise(n: &Option<Box<Node>>) -> String {
+    let mut out = Vec::new();
+    walk(n, &mut out);
+    out.join(",")
+}
+
+fn build(tokens: &[&str], cursor: &mut usize) -> Option<Box<Node>> {
+    let token = tokens[*cursor];
+    *cursor += 1;
+    if token == "#" {
+        return None;
+    }
+    let mut n = Box::new(Node {
+        val: token.parse().unwrap(),
+        left: None,
+        right: None,
+    });
+    // Left before right, and both before the node is handed back: the cursor
+    // is shared, so the order of these two lines is the tree's shape.
+    n.left = build(tokens, cursor);
+    n.right = build(tokens, cursor);
+    Some(n)
+}
+
+fn deserialise(text: &str) -> Option<Box<Node>> {
+    let tokens: Vec<&str> = text.split(',').collect();
+    let mut cursor = 0;
+    build(&tokens, &mut cursor)
+}
+
+fn inorder(n: &Option<Box<Node>>, out: &mut Vec<i32>) {
+    if let Some(node) = n {
+        inorder(&node.left, out);
+        out.push(node.val);
+        inorder(&node.right, out);
+    }
+}
+
+fn main() {
+    let root = node(1, leaf(2), node(3, leaf(4), leaf(5)));
+
+    let text = serialise(&root);
+    println!("serialised: {}", text);
+    let rebuilt = deserialise(&text);
+    let (mut a, mut b) = (Vec::new(), Vec::new());
+    inorder(&root, &mut a);
+    inorder(&rebuilt, &mut b);
+    println!("inorder of original: {}", list(&a));
+    println!("inorder of rebuilt:  {}", list(&b));
+    println!("round trip matches:  {}", serialise(&rebuilt) == text);
+    println!("empty tree: {}", serialise(&None));
+}`,
+              output: `serialised: 1,2,#,#,3,4,#,#,5,#,#
+inorder of original: [2, 1, 4, 3, 5]
+inorder of rebuilt:  [2, 1, 4, 3, 5]
+round trip matches:  true
+empty tree: #`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+type Node struct {
+	val         int
+	left, right *Node
+}
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// Preorder, with an explicit marker for absent children.
+func walk(n *Node, out []string) []string {
+	if n == nil {
+		return append(out, "#")
+	}
+	out = append(out, strconv.Itoa(n.val))
+	out = walk(n.left, out)
+	return walk(n.right, out)
+}
+
+func serialise(node *Node) string {
+	return strings.Join(walk(node, nil), ",")
+}
+
+func deserialise(text string) *Node {
+	tokens := strings.Split(text, ",")
+	cursor := 0
+	var build func() *Node
+	build = func() *Node {
+		token := tokens[cursor]
+		cursor++
+		if token == "#" {
+			return nil
+		}
+		v, _ := strconv.Atoi(token)
+		node := &Node{val: v}
+		node.left = build()
+		node.right = build()
+		return node
+	}
+	return build()
+}
+
+func inorder(n *Node, out []int) []int {
+	if n != nil {
+		out = inorder(n.left, out)
+		out = append(out, n.val)
+		out = inorder(n.right, out)
+	}
+	return out
+}
+
+func main() {
+	root := &Node{1, &Node{val: 2}, &Node{3, &Node{val: 4}, &Node{val: 5}}}
+
+	text := serialise(root)
+	fmt.Println("serialised:", text)
+	rebuilt := deserialise(text)
+	fmt.Println("inorder of original:", list(inorder(root, nil)))
+	fmt.Println("inorder of rebuilt: ", list(inorder(rebuilt, nil)))
+	fmt.Println("round trip matches: ", serialise(rebuilt) == text)
+	fmt.Println("empty tree:", serialise(nil))
+}`,
+              output: `serialised: 1,2,#,#,3,4,#,#,5,#,#
+inorder of original: [2, 1, 4, 3, 5]
+inorder of rebuilt:  [2, 1, 4, 3, 5]
+round trip matches:  true
+empty tree: #`,
+            },
+          ],
         },
       ],
       visual: {

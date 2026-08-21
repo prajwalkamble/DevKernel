@@ -103,6 +103,279 @@ poll: 3
 poll: 4`,
           explanation:
             "Reversing a stack into another stack restores arrival order. The `if (outBox.isEmpty())` guard is the entire algorithm: transferring on **every** poll would be O(n) each time, but transferring only when the out box runs dry means each element moves between the stacks exactly once in its lifetime. Note that offering 4 after polling twice does not disturb the elements already waiting in the out box — which is why arrival order survives the interleaving.",
+          alternates: [
+            {
+              lang: "python",
+              code: `class QueueFromStacks:
+    """A queue built from two stacks: amortised O(1) per operation."""
+
+    def __init__(self):
+        self.in_box = []
+        self.out_box = []
+
+    def offer(self, x):
+        self.in_box.append(x)
+
+    def poll(self):
+        self._shift()
+        return self.out_box.pop()
+
+    def peek(self):
+        self._shift()
+        return self.out_box[-1]
+
+    def _shift(self):
+        """Only refills when out is empty, which is what makes it amortised O(1)."""
+        if not self.out_box:
+            while self.in_box:
+                self.out_box.append(self.in_box.pop())
+
+
+q = QueueFromStacks()
+q.offer(1); q.offer(2); q.offer(3)
+print("poll:", q.poll())
+print("peek:", q.peek())
+q.offer(4)
+print("poll:", q.poll())
+print("poll:", q.poll())
+print("poll:", q.poll())`,
+            },
+            {
+              lang: "javascript",
+              code: `// A queue built from two stacks: amortised O(1) per operation.
+class QueueFromStacks {
+  constructor() {
+    this.inBox = [];
+    this.outBox = [];
+  }
+
+  offer(x) {
+    this.inBox.push(x);
+  }
+
+  poll() {
+    this.shift();
+    return this.outBox.pop();
+  }
+
+  peek() {
+    this.shift();
+    return this.outBox[this.outBox.length - 1];
+  }
+
+  // Only refills when out is empty, which is what makes it amortised O(1).
+  shift() {
+    if (this.outBox.length === 0) {
+      while (this.inBox.length) this.outBox.push(this.inBox.pop());
+    }
+  }
+}
+
+const q = new QueueFromStacks();
+q.offer(1);
+q.offer(2);
+q.offer(3);
+console.log("poll:", q.poll());
+console.log("peek:", q.peek());
+q.offer(4);
+console.log("poll:", q.poll());
+console.log("poll:", q.poll());
+console.log("poll:", q.poll());`,
+            },
+            {
+              lang: "typescript",
+              code: `// A queue built from two stacks: amortised O(1) per operation.
+class QueueFromStacks {
+  inBox: number[];
+  outBox: number[];
+
+  constructor() {
+    this.inBox = [];
+    this.outBox = [];
+  }
+
+  offer(x: number): void {
+    this.inBox.push(x);
+  }
+
+  poll(): number {
+    this.shift();
+    return this.outBox.pop()!;
+  }
+
+  peek(): number {
+    this.shift();
+    return this.outBox[this.outBox.length - 1];
+  }
+
+  // Only refills when out is empty, which is what makes it amortised O(1).
+  shift(): void {
+    if (this.outBox.length === 0) {
+      while (this.inBox.length) this.outBox.push(this.inBox.pop());
+    }
+  }
+}
+
+const q = new QueueFromStacks();
+q.offer(1);
+q.offer(2);
+q.offer(3);
+console.log("poll:", q.poll());
+console.log("peek:", q.peek());
+q.offer(4);
+console.log("poll:", q.poll());
+console.log("poll:", q.poll());
+console.log("poll:", q.poll());`,
+            },
+            {
+              lang: "cpp",
+              code: `// A queue built from two stacks: amortised O(1) per operation.
+#include <iostream>
+#include <stack>
+using namespace std;
+
+class QueueFromStacks {
+    stack<int> inBox, outBox;
+
+    // Only refills when out is empty, which is what makes it amortised O(1).
+    void shift() {
+        if (outBox.empty()) {
+            while (!inBox.empty()) {
+                outBox.push(inBox.top());
+                inBox.pop();
+            }
+        }
+    }
+
+public:
+    void offer(int x) { inBox.push(x); }
+
+    int poll() {
+        shift();
+        int v = outBox.top();
+        outBox.pop();
+        return v;
+    }
+
+    int peek() {
+        shift();
+        return outBox.top();
+    }
+};
+
+int main() {
+    QueueFromStacks q;
+    q.offer(1);
+    q.offer(2);
+    q.offer(3);
+    cout << "poll: " << q.poll() << "\\n";
+    cout << "peek: " << q.peek() << "\\n";
+    q.offer(4);
+    cout << "poll: " << q.poll() << "\\n";
+    cout << "poll: " << q.poll() << "\\n";
+    cout << "poll: " << q.poll() << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `/// A queue built from two stacks: amortised O(1) per operation.
+struct QueueFromStacks {
+    in_box: Vec<i32>,
+    out_box: Vec<i32>,
+}
+
+impl QueueFromStacks {
+    fn new() -> Self {
+        QueueFromStacks { in_box: Vec::new(), out_box: Vec::new() }
+    }
+
+    fn offer(&mut self, x: i32) {
+        self.in_box.push(x);
+    }
+
+    fn poll(&mut self) -> i32 {
+        self.shift();
+        self.out_box.pop().unwrap()
+    }
+
+    fn peek(&mut self) -> i32 {
+        self.shift();
+        *self.out_box.last().unwrap()
+    }
+
+    /// Only refills when out is empty, which is what makes it amortised O(1).
+    fn shift(&mut self) {
+        if self.out_box.is_empty() {
+            while let Some(x) = self.in_box.pop() {
+                self.out_box.push(x);
+            }
+        }
+    }
+}
+
+fn main() {
+    let mut q = QueueFromStacks::new();
+    q.offer(1);
+    q.offer(2);
+    q.offer(3);
+    println!("poll: {}", q.poll());
+    println!("peek: {}", q.peek());
+    q.offer(4);
+    println!("poll: {}", q.poll());
+    println!("poll: {}", q.poll());
+    println!("poll: {}", q.poll());
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+// A queue built from two stacks: amortised O(1) per operation.
+type QueueFromStacks struct {
+	inBox, outBox []int
+}
+
+func (q *QueueFromStacks) Offer(x int) { q.inBox = append(q.inBox, x) }
+
+func (q *QueueFromStacks) Poll() int {
+	q.shift()
+	v := q.outBox[len(q.outBox)-1]
+	q.outBox = q.outBox[:len(q.outBox)-1]
+	return v
+}
+
+func (q *QueueFromStacks) Peek() int {
+	q.shift()
+	return q.outBox[len(q.outBox)-1]
+}
+
+// Only refills when out is empty, which is what makes it amortised O(1).
+func (q *QueueFromStacks) shift() {
+	if len(q.outBox) == 0 {
+		for len(q.inBox) > 0 {
+			v := q.inBox[len(q.inBox)-1]
+			q.inBox = q.inBox[:len(q.inBox)-1]
+			q.outBox = append(q.outBox, v)
+		}
+	}
+}
+
+func main() {
+	q := &QueueFromStacks{}
+	q.Offer(1)
+	q.Offer(2)
+	q.Offer(3)
+	fmt.Println("poll:", q.Poll())
+	fmt.Println("peek:", q.Peek())
+	q.Offer(4)
+	fmt.Println("poll:", q.Poll())
+	fmt.Println("poll:", q.Poll())
+	fmt.Println("poll:", q.Poll())
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

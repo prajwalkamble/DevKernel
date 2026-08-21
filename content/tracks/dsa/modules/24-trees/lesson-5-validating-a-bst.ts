@@ -69,6 +69,311 @@ range check says bad tree is valid: False
 range check says good tree is valid: True`,
           explanation:
             "The local check returns **True** for a tree that is not a BST — a wrong answer, not a slow one, which is why this is worth writing out once. The range version passes each subtree the window it is permitted to occupy: descending left tightens the upper bound to the current value, descending right tightens the lower bound. By the time the recursion reaches 6, its window is `(10, 15)` and 6 falls outside it.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `class Node {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+//        10
+//       /  \\
+//      5    15
+//          /  \\
+//         6    20      <- 6 is less than 10, so this is NOT a BST
+const bad = new Node(10, new Node(5), new Node(15, new Node(6), new Node(20)));
+const good = new Node(10, new Node(5), new Node(15, new Node(12), new Node(20)));
+
+// Only compares each node with its own children. Wrong.
+function validLocal(node) {
+  if (node === null) return true;
+  if (node.left && node.left.val >= node.val) return false;
+  if (node.right && node.right.val <= node.val) return false;
+  return validLocal(node.left) && validLocal(node.right);
+}
+
+// Carries the range each subtree is allowed to occupy. Right.
+function valid(node, low = null, high = null) {
+  if (node === null) return true;
+  if (low !== null && node.val <= low) return false;
+  if (high !== null && node.val >= high) return false;
+  return valid(node.left, low, node.val) && valid(node.right, node.val, high);
+}
+
+console.log("local check says bad tree is valid:", validLocal(bad));
+console.log("range check says bad tree is valid:", valid(bad));
+console.log("range check says good tree is valid:", valid(good));`,
+              output: `local check says bad tree is valid: true
+range check says bad tree is valid: false
+range check says good tree is valid: true`,
+            },
+            {
+              lang: "typescript",
+              code: `class Node {
+  val: number;
+  left: Node | null;
+  right: Node | null;
+
+  constructor(val: number, left: Node | null = null, right: Node | null = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+//        10
+//       /  \\
+//      5    15
+//          /  \\
+//         6    20      <- 6 is less than 10, so this is NOT a BST
+const bad = new Node(10, new Node(5), new Node(15, new Node(6), new Node(20)));
+const good = new Node(10, new Node(5), new Node(15, new Node(12), new Node(20)));
+
+// Only compares each node with its own children. Wrong.
+function validLocal(node: Node | null): boolean {
+  if (node === null) return true;
+  if (node.left && node.left.val >= node.val) return false;
+  if (node.right && node.right.val <= node.val) return false;
+  return validLocal(node.left) && validLocal(node.right);
+}
+
+// Carries the range each subtree is allowed to occupy. Right.
+function valid(node: Node | null, low: number | null = null, high: number | null = null): boolean {
+  if (node === null) return true;
+  if (low !== null && node.val <= low) return false;
+  if (high !== null && node.val >= high) return false;
+  return valid(node.left, low, node.val) && valid(node.right, node.val, high);
+}
+
+console.log("local check says bad tree is valid:", validLocal(bad));
+console.log("range check says bad tree is valid:", valid(bad));
+console.log("range check says good tree is valid:", valid(good));`,
+              output: `local check says bad tree is valid: true
+range check says bad tree is valid: false
+range check says good tree is valid: true`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static class Node {
+        int val;
+        Node left, right;
+
+        Node(int val) { this.val = val; }
+
+        Node(int val, Node left, Node right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    /** Only compares each node with its own children. Wrong. */
+    static boolean validLocal(Node node) {
+        if (node == null) return true;
+        if (node.left != null && node.left.val >= node.val) return false;
+        if (node.right != null && node.right.val <= node.val) return false;
+        return validLocal(node.left) && validLocal(node.right);
+    }
+
+    /** Carries the range each subtree is allowed to occupy. Right. */
+    static boolean valid(Node node, Integer low, Integer high) {
+        if (node == null) return true;
+        if (low != null && node.val <= low) return false;
+        if (high != null && node.val >= high) return false;
+        return valid(node.left, low, node.val) && valid(node.right, node.val, high);
+    }
+
+    public static void main(String[] args) {
+        //        10
+        //       /  \\
+        //      5    15
+        //          /  \\
+        //         6    20      <- 6 is less than 10, so this is NOT a BST
+        Node bad = new Node(10, new Node(5), new Node(15, new Node(6), new Node(20)));
+        Node good = new Node(10, new Node(5), new Node(15, new Node(12), new Node(20)));
+
+        System.out.println("local check says bad tree is valid: " + validLocal(bad));
+        System.out.println("range check says bad tree is valid: " + valid(bad, null, null));
+        System.out.println("range check says good tree is valid: " + valid(good, null, null));
+    }
+}`,
+              output: `local check says bad tree is valid: true
+range check says bad tree is valid: false
+range check says good tree is valid: true`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <optional>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int val, Node* left = nullptr, Node* right = nullptr)
+        : val(val), left(left), right(right) {}
+};
+
+// Only compares each node with its own children. Wrong.
+bool validLocal(Node* node) {
+    if (!node) return true;
+    if (node->left && node->left->val >= node->val) return false;
+    if (node->right && node->right->val <= node->val) return false;
+    return validLocal(node->left) && validLocal(node->right);
+}
+
+// Carries the range each subtree is allowed to occupy. Right.
+bool valid(Node* node, optional<int> low = nullopt, optional<int> high = nullopt) {
+    if (!node) return true;
+    if (low && node->val <= *low) return false;
+    if (high && node->val >= *high) return false;
+    return valid(node->left, low, node->val) && valid(node->right, node->val, high);
+}
+
+int main() {
+    //        10
+    //       /  \\
+    //      5    15
+    //          /  \\
+    //         6    20      <- 6 is less than 10, so this is NOT a BST
+    Node* bad = new Node(10, new Node(5), new Node(15, new Node(6), new Node(20)));
+    Node* good = new Node(10, new Node(5), new Node(15, new Node(12), new Node(20)));
+
+    cout << boolalpha;
+    cout << "local check says bad tree is valid: " << validLocal(bad) << "\\n";
+    cout << "range check says bad tree is valid: " << valid(bad) << "\\n";
+    cout << "range check says good tree is valid: " << valid(good) << "\\n";
+}`,
+              output: `local check says bad tree is valid: true
+range check says bad tree is valid: false
+range check says good tree is valid: true`,
+            },
+            {
+              lang: "rust",
+              code: `struct Node {
+    val: i32,
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+}
+
+fn node(val: i32, left: Option<Box<Node>>, right: Option<Box<Node>>) -> Option<Box<Node>> {
+    Some(Box::new(Node { val, left, right }))
+}
+
+fn leaf(val: i32) -> Option<Box<Node>> {
+    node(val, None, None)
+}
+
+/// Only compares each node with its own children. Wrong.
+fn valid_local(n: &Option<Box<Node>>) -> bool {
+    let node = match n {
+        None => return true,
+        Some(node) => node,
+    };
+    if node.left.as_ref().is_some_and(|c| c.val >= node.val) {
+        return false;
+    }
+    if node.right.as_ref().is_some_and(|c| c.val <= node.val) {
+        return false;
+    }
+    valid_local(&node.left) && valid_local(&node.right)
+}
+
+/// Carries the range each subtree is allowed to occupy. Right.
+fn valid(n: &Option<Box<Node>>, low: Option<i32>, high: Option<i32>) -> bool {
+    let node = match n {
+        None => return true,
+        Some(node) => node,
+    };
+    if low.is_some_and(|l| node.val <= l) {
+        return false;
+    }
+    if high.is_some_and(|h| node.val >= h) {
+        return false;
+    }
+    valid(&node.left, low, Some(node.val)) && valid(&node.right, Some(node.val), high)
+}
+
+fn main() {
+    //        10
+    //       /  \\
+    //      5    15
+    //          /  \\
+    //         6    20      <- 6 is less than 10, so this is NOT a BST
+    let bad = node(10, leaf(5), node(15, leaf(6), leaf(20)));
+    let good = node(10, leaf(5), node(15, leaf(12), leaf(20)));
+
+    println!("local check says bad tree is valid: {}", valid_local(&bad));
+    println!("range check says bad tree is valid: {}", valid(&bad, None, None));
+    println!("range check says good tree is valid: {}", valid(&good, None, None));
+}`,
+              output: `local check says bad tree is valid: true
+range check says bad tree is valid: false
+range check says good tree is valid: true`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+type Node struct {
+	val         int
+	left, right *Node
+}
+
+// Only compares each node with its own children. Wrong.
+func validLocal(node *Node) bool {
+	if node == nil {
+		return true
+	}
+	if node.left != nil && node.left.val >= node.val {
+		return false
+	}
+	if node.right != nil && node.right.val <= node.val {
+		return false
+	}
+	return validLocal(node.left) && validLocal(node.right)
+}
+
+// Carries the range each subtree is allowed to occupy. Right.
+func valid(node *Node, low, high *int) bool {
+	if node == nil {
+		return true
+	}
+	if low != nil && node.val <= *low {
+		return false
+	}
+	if high != nil && node.val >= *high {
+		return false
+	}
+	return valid(node.left, low, &node.val) && valid(node.right, &node.val, high)
+}
+
+func main() {
+	//        10
+	//       /  \\
+	//      5    15
+	//          /  \\
+	//         6    20      <- 6 is less than 10, so this is NOT a BST
+	bad := &Node{10, &Node{val: 5}, &Node{15, &Node{val: 6}, &Node{val: 20}}}
+	good := &Node{10, &Node{val: 5}, &Node{15, &Node{val: 12}, &Node{val: 20}}}
+
+	fmt.Println("local check says bad tree is valid:", validLocal(bad))
+	fmt.Println("range check says bad tree is valid:", valid(bad, nil, nil))
+	fmt.Println("range check says good tree is valid:", valid(good, nil, nil))
+}`,
+              output: `local check says bad tree is valid: true
+range check says bad tree is valid: false
+range check says good tree is valid: true`,
+            },
+          ],
         },
       ],
       visual: {

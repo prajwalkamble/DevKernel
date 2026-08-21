@@ -64,6 +64,349 @@ right side view: [4, 7, 6]
 max width:       3`,
           explanation:
             "`width = len(q)` is the whole trick. Taking it **before** the inner loop is essential — the loop appends children to the same queue, so reading the length inside would keep growing and never terminate the level. Once levels are separate, right-side-view is the last element of each and maximum width is the longest, so two more problems cost one line each.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+class Node {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+const root = new Node(4, new Node(2, new Node(1), new Node(3)), new Node(7, new Node(6)));
+
+function levelOrder(root) {
+  if (root === null) return [];
+  const out = [];
+  let q = [root];
+  while (q.length) {
+    const width = q.length;        // snapshot: how many nodes are on this level
+    const level = [];
+    const next = [];
+    for (let i = 0; i < width; i++) {
+      const node = q[i];
+      level.push(node.val);
+      if (node.left) next.push(node.left);
+      if (node.right) next.push(node.right);
+    }
+    out.push(level);
+    q = next;
+  }
+  return out;
+}
+
+levelOrder(root).forEach((level, i) => console.log(\`level \${i}: \${list(level)}\`));
+
+console.log("right side view:", list(levelOrder(root).map((lvl) => lvl[lvl.length - 1])));
+console.log("max width:      ", Math.max(...levelOrder(root).map((lvl) => lvl.length)));`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+class Node {
+  val: number;
+  left: Node | null;
+  right: Node | null;
+
+  constructor(val: number, left: Node | null = null, right: Node | null = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+const root = new Node(4, new Node(2, new Node(1), new Node(3)), new Node(7, new Node(6)));
+
+function levelOrder(root: Node | null): number[][] {
+  if (root === null) return [];
+  const out: number[][] = [];
+  let q = [root];
+  while (q.length) {
+    const width = q.length;        // snapshot: how many nodes are on this level
+    const level: number[] = [];
+    const next: Node[] = [];
+    for (let i = 0; i < width; i++) {
+      const node = q[i];
+      level.push(node.val);
+      if (node.left) next.push(node.left);
+      if (node.right) next.push(node.right);
+    }
+    out.push(level);
+    q = next;
+  }
+  return out;
+}
+
+levelOrder(root).forEach((level, i) => console.log(\`level \${i}: \${list(level)}\`));
+
+console.log("right side view:", list(levelOrder(root).map((lvl) => lvl[lvl.length - 1])));
+console.log("max width:      ", Math.max(...levelOrder(root).map((lvl) => lvl.length)));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static class Node {
+        int val;
+        Node left, right;
+
+        Node(int val) { this.val = val; }
+
+        Node(int val, Node left, Node right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    static String list(List<Integer> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs.get(i));
+        }
+        return sb.append("]").toString();
+    }
+
+    static List<List<Integer>> levelOrder(Node root) {
+        List<List<Integer>> out = new ArrayList<>();
+        if (root == null) return out;
+        Deque<Node> q = new ArrayDeque<>();
+        q.add(root);
+        while (!q.isEmpty()) {
+            int width = q.size();      // snapshot: how many nodes are on this level
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < width; i++) {
+                Node node = q.poll();
+                level.add(node.val);
+                if (node.left != null) q.add(node.left);
+                if (node.right != null) q.add(node.right);
+            }
+            out.add(level);
+        }
+        return out;
+    }
+
+    public static void main(String[] args) {
+        Node root = new Node(4, new Node(2, new Node(1), new Node(3)),
+                                new Node(7, new Node(6), null));
+
+        List<List<Integer>> levels = levelOrder(root);
+        for (int i = 0; i < levels.size(); i++) {
+            System.out.println("level " + i + ": " + list(levels.get(i)));
+        }
+
+        List<Integer> rightSide = new ArrayList<>();
+        int maxWidth = 0;
+        for (List<Integer> lvl : levels) {
+            rightSide.add(lvl.get(lvl.size() - 1));
+            maxWidth = Math.max(maxWidth, lvl.size());
+        }
+        System.out.println("right side view: " + list(rightSide));
+        System.out.println("max width:       " + maxWidth);
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <deque>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int val, Node* left = nullptr, Node* right = nullptr)
+        : val(val), left(left), right(right) {}
+};
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+vector<vector<int>> levelOrder(Node* root) {
+    vector<vector<int>> out;
+    if (!root) return out;
+    deque<Node*> q{root};
+    while (!q.empty()) {
+        size_t width = q.size();     // snapshot: how many nodes are on this level
+        vector<int> level;
+        for (size_t i = 0; i < width; i++) {
+            Node* node = q.front();
+            q.pop_front();
+            level.push_back(node->val);
+            if (node->left) q.push_back(node->left);
+            if (node->right) q.push_back(node->right);
+        }
+        out.push_back(level);
+    }
+    return out;
+}
+
+int main() {
+    Node* root = new Node(4, new Node(2, new Node(1), new Node(3)),
+                             new Node(7, new Node(6)));
+
+    auto levels = levelOrder(root);
+    for (size_t i = 0; i < levels.size(); i++) {
+        cout << "level " << i << ": " << list(levels[i]) << "\\n";
+    }
+
+    vector<int> rightSide;
+    size_t maxWidth = 0;
+    for (const auto& lvl : levels) {
+        rightSide.push_back(lvl.back());
+        maxWidth = max(maxWidth, lvl.size());
+    }
+    cout << "right side view: " << list(rightSide) << "\\n";
+    cout << "max width:       " << maxWidth << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `use std::collections::VecDeque;
+
+struct Node {
+    val: i32,
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+}
+
+fn node(val: i32, left: Option<Box<Node>>, right: Option<Box<Node>>) -> Option<Box<Node>> {
+    Some(Box::new(Node { val, left, right }))
+}
+
+fn leaf(val: i32) -> Option<Box<Node>> {
+    node(val, None, None)
+}
+
+fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn level_order(root: &Option<Box<Node>>) -> Vec<Vec<i32>> {
+    let mut out = Vec::new();
+    let start = match root.as_deref() {
+        None => return out,
+        Some(n) => n,
+    };
+    let mut q: VecDeque<&Node> = VecDeque::from([start]);
+    while !q.is_empty() {
+        let width = q.len(); // snapshot: how many nodes are on this level
+        let mut level = Vec::new();
+        for _ in 0..width {
+            let n = q.pop_front().unwrap();
+            level.push(n.val);
+            if let Some(l) = n.left.as_deref() {
+                q.push_back(l);
+            }
+            if let Some(r) = n.right.as_deref() {
+                q.push_back(r);
+            }
+        }
+        out.push(level);
+    }
+    out
+}
+
+fn main() {
+    let root = node(4, node(2, leaf(1), leaf(3)), node(7, leaf(6), None));
+
+    let levels = level_order(&root);
+    for (i, level) in levels.iter().enumerate() {
+        println!("level {}: {}", i, list(level));
+    }
+
+    let right_side: Vec<i32> = levels.iter().map(|lvl| *lvl.last().unwrap()).collect();
+    let max_width = levels.iter().map(|lvl| lvl.len()).max().unwrap();
+    println!("right side view: {}", list(&right_side));
+    println!("max width:       {}", max_width);
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Node struct {
+	val         int
+	left, right *Node
+}
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func levelOrder(root *Node) [][]int {
+	var out [][]int
+	if root == nil {
+		return out
+	}
+	q := []*Node{root}
+	for len(q) > 0 {
+		width := len(q) // snapshot: how many nodes are on this level
+		var level []int
+		for i := 0; i < width; i++ {
+			node := q[0]
+			q = q[1:]
+			level = append(level, node.val)
+			if node.left != nil {
+				q = append(q, node.left)
+			}
+			if node.right != nil {
+				q = append(q, node.right)
+			}
+		}
+		out = append(out, level)
+	}
+	return out
+}
+
+func main() {
+	root := &Node{4,
+		&Node{2, &Node{val: 1}, &Node{val: 3}},
+		&Node{7, &Node{val: 6}, nil}}
+
+	levels := levelOrder(root)
+	for i, level := range levels {
+		fmt.Printf("level %d: %s\\n", i, list(level))
+	}
+
+	var rightSide []int
+	maxWidth := 0
+	for _, lvl := range levels {
+		rightSide = append(rightSide, lvl[len(lvl)-1])
+		maxWidth = max(maxWidth, len(lvl))
+	}
+	fmt.Println("right side view:", list(rightSide))
+	fmt.Println("max width:      ", maxWidth)
+}`,
+            },
+          ],
         },
       ],
       visual: {

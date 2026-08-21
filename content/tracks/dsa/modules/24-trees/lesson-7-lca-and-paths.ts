@@ -77,6 +77,342 @@ lca(7, 4): 2
 diameter (edges): 5`,
           explanation:
             "`lca(5, 1)` is the root, because the targets are in different halves. `lca(6, 4)` is 5 — both are below it and they split there. The diameter function is the pattern in miniature: it is a **height** traversal, and the diameter is computed as a side effect at each node. The longest path either passes through this node, costing `left + right`, or lies entirely within one subtree, which the recursion has already considered. Returning `1 + max(l, r)` is the height; the `max` into `diameter` is the answer. The result 5 is the path 6→5→2→7 extended — precisely, 7→2→5→3→1→0, which is five edges.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `class Node {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+//        3
+//      /   \\
+//     5     1
+//    / \\   / \\
+//   6   2 0   8
+//      / \\
+//     7   4
+const root = new Node(
+  3,
+  new Node(5, new Node(6), new Node(2, new Node(7), new Node(4))),
+  new Node(1, new Node(0), new Node(8))
+);
+
+// The first node where a and b are on different sides — or is one of them.
+function lca(node, a, b) {
+  if (node === null || node.val === a || node.val === b) return node;
+  const left = lca(node.left, a, b);
+  const right = lca(node.right, a, b);
+  if (left && right) return node;   // they split here, so this is the meeting point
+  return left ?? right;
+}
+
+let diameter = 0;
+
+// Height, while recording the longest path that bends at each node.
+function depth(node) {
+  if (node === null) return 0;
+  const l = depth(node.left);
+  const r = depth(node.right);
+  diameter = Math.max(diameter, l + r);
+  return 1 + Math.max(l, r);
+}
+
+console.log("lca(5, 1):", lca(root, 5, 1).val);
+console.log("lca(6, 4):", lca(root, 6, 4).val);
+console.log("lca(7, 4):", lca(root, 7, 4).val);
+depth(root);
+console.log("diameter (edges):", diameter);`,
+            },
+            {
+              lang: "typescript",
+              code: `class Node {
+  val: number;
+  left: Node | null;
+  right: Node | null;
+
+  constructor(val: number, left: Node | null = null, right: Node | null = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+//        3
+//      /   \\
+//     5     1
+//    / \\   / \\
+//   6   2 0   8
+//      / \\
+//     7   4
+const root = new Node(
+  3,
+  new Node(5, new Node(6), new Node(2, new Node(7), new Node(4))),
+  new Node(1, new Node(0), new Node(8))
+);
+
+// The first node where a and b are on different sides — or is one of them.
+function lca(node: Node | null, a: number, b: number): Node | null {
+  if (node === null || node.val === a || node.val === b) return node;
+  const left = lca(node.left, a, b);
+  const right = lca(node.right, a, b);
+  if (left && right) return node;   // they split here, so this is the meeting point
+  return left ?? right;
+}
+
+let diameter = 0;
+
+// Height, while recording the longest path that bends at each node.
+function depth(node: Node | null): number {
+  if (node === null) return 0;
+  const l = depth(node.left);
+  const r = depth(node.right);
+  diameter = Math.max(diameter, l + r);
+  return 1 + Math.max(l, r);
+}
+
+console.log("lca(5, 1):", lca(root, 5, 1)!.val);
+console.log("lca(6, 4):", lca(root, 6, 4)!.val);
+console.log("lca(7, 4):", lca(root, 7, 4)!.val);
+depth(root);
+console.log("diameter (edges):", diameter);`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static class Node {
+        int val;
+        Node left, right;
+
+        Node(int val) { this.val = val; }
+
+        Node(int val, Node left, Node right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    /** The first node where a and b are on different sides — or is one of them. */
+    static Node lca(Node node, int a, int b) {
+        if (node == null || node.val == a || node.val == b) return node;
+        Node left = lca(node.left, a, b);
+        Node right = lca(node.right, a, b);
+        if (left != null && right != null) return node;  // they split here
+        return left != null ? left : right;
+    }
+
+    static int diameter = 0;
+
+    /** Height, while recording the longest path that bends at each node. */
+    static int depth(Node node) {
+        if (node == null) return 0;
+        int l = depth(node.left), r = depth(node.right);
+        diameter = Math.max(diameter, l + r);
+        return 1 + Math.max(l, r);
+    }
+
+    public static void main(String[] args) {
+        //        3
+        //      /   \\
+        //     5     1
+        //    / \\   / \\
+        //   6   2 0   8
+        //      / \\
+        //     7   4
+        Node root = new Node(3,
+                new Node(5, new Node(6), new Node(2, new Node(7), new Node(4))),
+                new Node(1, new Node(0), new Node(8)));
+
+        System.out.println("lca(5, 1): " + lca(root, 5, 1).val);
+        System.out.println("lca(6, 4): " + lca(root, 6, 4).val);
+        System.out.println("lca(7, 4): " + lca(root, 7, 4).val);
+        depth(root);
+        System.out.println("diameter (edges): " + diameter);
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int val, Node* left = nullptr, Node* right = nullptr)
+        : val(val), left(left), right(right) {}
+};
+
+// The first node where a and b are on different sides — or is one of them.
+Node* lca(Node* node, int a, int b) {
+    if (!node || node->val == a || node->val == b) return node;
+    Node* left = lca(node->left, a, b);
+    Node* right = lca(node->right, a, b);
+    if (left && right) return node;   // they split here, so this is the meeting point
+    return left ? left : right;
+}
+
+int diameter = 0;
+
+// Height, while recording the longest path that bends at each node.
+int depth(Node* node) {
+    if (!node) return 0;
+    int l = depth(node->left), r = depth(node->right);
+    diameter = max(diameter, l + r);
+    return 1 + max(l, r);
+}
+
+int main() {
+    //        3
+    //      /   \\
+    //     5     1
+    //    / \\   / \\
+    //   6   2 0   8
+    //      / \\
+    //     7   4
+    Node* root = new Node(3,
+            new Node(5, new Node(6), new Node(2, new Node(7), new Node(4))),
+            new Node(1, new Node(0), new Node(8)));
+
+    cout << "lca(5, 1): " << lca(root, 5, 1)->val << "\\n";
+    cout << "lca(6, 4): " << lca(root, 6, 4)->val << "\\n";
+    cout << "lca(7, 4): " << lca(root, 7, 4)->val << "\\n";
+    depth(root);
+    cout << "diameter (edges): " << diameter << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `struct Node {
+    val: i32,
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+}
+
+fn node(val: i32, left: Option<Box<Node>>, right: Option<Box<Node>>) -> Option<Box<Node>> {
+    Some(Box::new(Node { val, left, right }))
+}
+
+fn leaf(val: i32) -> Option<Box<Node>> {
+    node(val, None, None)
+}
+
+/// The first node where a and b are on different sides — or is one of them.
+fn lca<'a>(n: Option<&'a Node>, a: i32, b: i32) -> Option<&'a Node> {
+    let node = n?;
+    if node.val == a || node.val == b {
+        return Some(node);
+    }
+    let left = lca(node.left.as_deref(), a, b);
+    let right = lca(node.right.as_deref(), a, b);
+    if left.is_some() && right.is_some() {
+        return Some(node); // they split here, so this is the meeting point
+    }
+    left.or(right)
+}
+
+/// Height, while recording the longest path that bends at each node.
+/// The running maximum is threaded through as a parameter rather than kept in
+/// a global, which Rust has no safe way to mutate.
+fn depth(n: Option<&Node>, diameter: &mut i32) -> i32 {
+    let node = match n {
+        None => return 0,
+        Some(node) => node,
+    };
+    let l = depth(node.left.as_deref(), diameter);
+    let r = depth(node.right.as_deref(), diameter);
+    *diameter = (*diameter).max(l + r);
+    1 + l.max(r)
+}
+
+fn main() {
+    //        3
+    //      /   \\
+    //     5     1
+    //    / \\   / \\
+    //   6   2 0   8
+    //      / \\
+    //     7   4
+    let root = node(
+        3,
+        node(5, leaf(6), node(2, leaf(7), leaf(4))),
+        node(1, leaf(0), leaf(8)),
+    );
+    let r = root.as_deref();
+
+    println!("lca(5, 1): {}", lca(r, 5, 1).unwrap().val);
+    println!("lca(6, 4): {}", lca(r, 6, 4).unwrap().val);
+    println!("lca(7, 4): {}", lca(r, 7, 4).unwrap().val);
+    let mut diameter = 0;
+    depth(r, &mut diameter);
+    println!("diameter (edges): {}", diameter);
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+type Node struct {
+	val         int
+	left, right *Node
+}
+
+// The first node where a and b are on different sides — or is one of them.
+func lca(node *Node, a, b int) *Node {
+	if node == nil || node.val == a || node.val == b {
+		return node
+	}
+	left := lca(node.left, a, b)
+	right := lca(node.right, a, b)
+	if left != nil && right != nil {
+		return node // they split here, so this is the meeting point
+	}
+	if left != nil {
+		return left
+	}
+	return right
+}
+
+var diameter = 0
+
+// Height, while recording the longest path that bends at each node.
+func depth(node *Node) int {
+	if node == nil {
+		return 0
+	}
+	l, r := depth(node.left), depth(node.right)
+	diameter = max(diameter, l+r)
+	return 1 + max(l, r)
+}
+
+func main() {
+	//        3
+	//      /   \\
+	//     5     1
+	//    / \\   / \\
+	//   6   2 0   8
+	//      / \\
+	//     7   4
+	root := &Node{3,
+		&Node{5, &Node{val: 6}, &Node{2, &Node{val: 7}, &Node{val: 4}}},
+		&Node{1, &Node{val: 0}, &Node{val: 8}}}
+
+	fmt.Println("lca(5, 1):", lca(root, 5, 1).val)
+	fmt.Println("lca(6, 4):", lca(root, 6, 4).val)
+	fmt.Println("lca(7, 4):", lca(root, 7, 4).val)
+	depth(root)
+	fmt.Println("diameter (edges):", diameter)
+}`,
+            },
+          ],
         },
       ],
     },
