@@ -63,6 +63,264 @@ print(show(head))`,
 1 -> 9 -> 3 -> 4 -> None`,
           explanation:
             "Both operations are two reference assignments — genuinely O(1). Note what the deletion needed: the node *before* the one being removed. In a singly linked list you can never delete a node you are standing on without help, and that asymmetry is behind a whole family of interview questions. `build` walks the values in reverse because prepending is the only O(1) way to construct a list front-to-back.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `class Node {
+  constructor(val, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(values) {
+  let head = null;
+  for (let i = values.length - 1; i >= 0; i--) head = new Node(values[i], head);
+  return head;
+}
+
+function show(head) {
+  const out = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out.join(" -> ") + " -> None";
+}
+
+const head = build([1, 2, 3, 4]);
+console.log(show(head));
+
+// Insert 9 after the node holding 2 — O(1) once you are standing there.
+const node = head.next;
+node.next = new Node(9, node.next);
+console.log(show(head));
+
+// Delete the node after 1 — also O(1), and also needs the *previous* node.
+head.next = head.next.next;
+console.log(show(head));`,
+            },
+            {
+              lang: "typescript",
+              code: `class Node {
+  val: number;
+  next: Node | null;
+
+  constructor(val: number, next: Node | null = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(values: number[]): Node | null {
+  let head: Node | null = null;
+  for (let i = values.length - 1; i >= 0; i--) head = new Node(values[i], head);
+  return head;
+}
+
+function show(head: Node | null): string {
+  const out: number[] = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out.join(" -> ") + " -> None";
+}
+
+const head = build([1, 2, 3, 4])!;
+console.log(show(head));
+
+// Insert 9 after the node holding 2 — O(1) once you are standing there.
+const node = head.next!;
+node.next = new Node(9, node.next);
+console.log(show(head));
+
+// Delete the node after 1 — also O(1), and also needs the *previous* node.
+head.next = head.next!.next;
+console.log(show(head));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static class Node {
+        int val;
+        Node next;
+
+        Node(int val, Node next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    static Node build(int[] values) {
+        Node head = null;
+        for (int i = values.length - 1; i >= 0; i--) head = new Node(values[i], head);
+        return head;
+    }
+
+    static String show(Node head) {
+        StringBuilder sb = new StringBuilder();
+        while (head != null) {
+            sb.append(head.val).append(" -> ");
+            head = head.next;
+        }
+        return sb.append("None").toString();
+    }
+
+    public static void main(String[] args) {
+        Node head = build(new int[]{1, 2, 3, 4});
+        System.out.println(show(head));
+
+        // Insert 9 after the node holding 2 — O(1) once you are standing there.
+        Node node = head.next;
+        node.next = new Node(9, node.next);
+        System.out.println(show(head));
+
+        // Delete the node after 1 — also O(1), and also needs the *previous* node.
+        head.next = head.next.next;
+        System.out.println(show(head));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int val, Node* next = nullptr) : val(val), next(next) {}
+};
+
+Node* build(const vector<int>& values) {
+    Node* head = nullptr;
+    for (int i = (int)values.size() - 1; i >= 0; i--) head = new Node(values[i], head);
+    return head;
+}
+
+string show(Node* head) {
+    string out;
+    while (head) {
+        out += to_string(head->val) + " -> ";
+        head = head->next;
+    }
+    return out + "None";
+}
+
+int main() {
+    Node* head = build({1, 2, 3, 4});
+    cout << show(head) << "\\n";
+
+    // Insert 9 after the node holding 2 — O(1) once you are standing there.
+    Node* node = head->next;
+    node->next = new Node(9, node->next);
+    cout << show(head) << "\\n";
+
+    // Delete the node after 1 — also O(1), and also needs the *previous* node.
+    head->next = head->next->next;
+    cout << show(head) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// \`Option<Box<Node>>\` is Rust's singly linked list: each node owns the rest of
+// the list, and \`None\` is the end. Rewiring means moving those boxes around
+// with \`take()\` rather than copying a pointer.
+struct Node {
+    val: i32,
+    next: Option<Box<Node>>,
+}
+
+fn build(values: &[i32]) -> Option<Box<Node>> {
+    let mut head = None;
+    for &v in values.iter().rev() {
+        head = Some(Box::new(Node { val: v, next: head }));
+    }
+    head
+}
+
+fn show(head: &Option<Box<Node>>) -> String {
+    let mut out = String::new();
+    let mut cur = head;
+    while let Some(node) = cur {
+        out += &format!("{} -> ", node.val);
+        cur = &node.next;
+    }
+    out + "None"
+}
+
+fn main() {
+    let mut head = build(&[1, 2, 3, 4]);
+    println!("{}", show(&head));
+
+    // Insert 9 after the node holding 2 — O(1) once you are standing there.
+    {
+        let node = head.as_mut().unwrap().next.as_mut().unwrap();
+        let rest = node.next.take();
+        node.next = Some(Box::new(Node { val: 9, next: rest }));
+    }
+    println!("{}", show(&head));
+
+    // Delete the node after 1 — also O(1), and also needs the *previous* node.
+    {
+        let first = head.as_mut().unwrap();
+        let second = first.next.take().unwrap();
+        first.next = second.next;
+    }
+    println!("{}", show(&head));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Node struct {
+	val  int
+	next *Node
+}
+
+func build(values []int) *Node {
+	var head *Node
+	for i := len(values) - 1; i >= 0; i-- {
+		head = &Node{values[i], head}
+	}
+	return head
+}
+
+func show(head *Node) string {
+	var b strings.Builder
+	for head != nil {
+		fmt.Fprintf(&b, "%d -> ", head.val)
+		head = head.next
+	}
+	return b.String() + "None"
+}
+
+func main() {
+	head := build([]int{1, 2, 3, 4})
+	fmt.Println(show(head))
+
+	// Insert 9 after the node holding 2 — O(1) once you are standing there.
+	node := head.next
+	node.next = &Node{9, node.next}
+	fmt.Println(show(head))
+
+	// Delete the node after 1 — also O(1), and also needs the *previous* node.
+	head.next = head.next.next
+	fmt.Println(show(head))
+}`,
+            },
+          ],
         },
       ],
       visual: {

@@ -81,6 +81,393 @@ remove_all_dummy
    [1, 2, 3]`,
           explanation:
             "Identical results — that is the point. The dummy version is not more capable, it is **one loop instead of two**. The naive version's leading `while` exists solely to strip target values off the front, and it has to be a `while` rather than an `if` because `[7,7,7]` would otherwise leave a 7 behind. That subtlety is exactly the class of bug the dummy head deletes along with the branch.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+class Node {
+  constructor(val, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals) {
+  let head = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function toList(head) {
+  const out = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out;
+}
+
+function removeAllNaive(head, target) {
+  while (head && head.val === target) head = head.next;
+  let cur = head;
+  while (cur && cur.next) {
+    if (cur.next.val === target) cur.next = cur.next.next;
+    else cur = cur.next;
+  }
+  return head;
+}
+
+function removeAllDummy(head, target) {
+  const dummy = new Node(0, head);
+  let cur = dummy;
+  while (cur.next) {
+    if (cur.next.val === target) cur.next = cur.next.next;
+    else cur = cur.next;
+  }
+  return dummy.next;
+}
+
+for (const [name, fn] of [["remove_all_naive", removeAllNaive], ["remove_all_dummy", removeAllDummy]]) {
+  console.log(name);
+  console.log("  ", list(toList(fn(build([7, 1, 7, 2, 7]), 7))));
+  console.log("  ", list(toList(fn(build([7, 7, 7]), 7))));
+  console.log("  ", list(toList(fn(build([1, 2, 3]), 7))));
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+class Node {
+  val: number;
+  next: Node | null;
+
+  constructor(val: number, next: Node | null = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals: number[]): Node | null {
+  let head: Node | null = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function toList(head: Node | null): number[] {
+  const out: number[] = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out;
+}
+
+function removeAllNaive(head: Node | null, target: number): Node | null {
+  while (head && head.val === target) head = head.next;
+  let cur: Node | null = head;
+  while (cur && cur.next) {
+    if (cur.next.val === target) cur.next = cur.next.next;
+    else cur = cur.next;
+  }
+  return head;
+}
+
+function removeAllDummy(head: Node | null, target: number): Node | null {
+  const dummy = new Node(0, head);
+  let cur = dummy;
+  while (cur.next) {
+    if (cur.next.val === target) cur.next = cur.next.next;
+    else cur = cur.next;
+  }
+  return dummy.next;
+}
+
+const impls: [string, (h: Node | null, t: number) => Node | null][] = [
+  ["remove_all_naive", removeAllNaive],
+  ["remove_all_dummy", removeAllDummy],
+];
+for (const [name, fn] of impls) {
+  console.log(name);
+  console.log("  ", list(toList(fn(build([7, 1, 7, 2, 7]), 7))));
+  console.log("  ", list(toList(fn(build([7, 7, 7]), 7))));
+  console.log("  ", list(toList(fn(build([1, 2, 3]), 7))));
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+import java.util.function.BiFunction;
+
+public class Main {
+    static class Node {
+        int val;
+        Node next;
+
+        Node(int val, Node next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    static Node build(int[] vals) {
+        Node head = null;
+        for (int i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+        return head;
+    }
+
+    static String toList(Node head) {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
+        while (head != null) {
+            if (!first) sb.append(", ");
+            sb.append(head.val);
+            first = false;
+            head = head.next;
+        }
+        return sb.append("]").toString();
+    }
+
+    static Node removeAllNaive(Node head, int target) {
+        while (head != null && head.val == target) head = head.next;
+        Node cur = head;
+        while (cur != null && cur.next != null) {
+            if (cur.next.val == target) cur.next = cur.next.next;
+            else cur = cur.next;
+        }
+        return head;
+    }
+
+    static Node removeAllDummy(Node head, int target) {
+        Node dummy = new Node(0, head);
+        Node cur = dummy;
+        while (cur.next != null) {
+            if (cur.next.val == target) cur.next = cur.next.next;
+            else cur = cur.next;
+        }
+        return dummy.next;
+    }
+
+    public static void main(String[] args) {
+        String[] names = {"remove_all_naive", "remove_all_dummy"};
+        List<BiFunction<Node, Integer, Node>> impls = List.of(Main::removeAllNaive, Main::removeAllDummy);
+        for (int k = 0; k < names.length; k++) {
+            BiFunction<Node, Integer, Node> fn = impls.get(k);
+            System.out.println(names[k]);
+            System.out.println("   " + toList(fn.apply(build(new int[]{7, 1, 7, 2, 7}), 7)));
+            System.out.println("   " + toList(fn.apply(build(new int[]{7, 7, 7}), 7)));
+            System.out.println("   " + toList(fn.apply(build(new int[]{1, 2, 3}), 7)));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int val, Node* next = nullptr) : val(val), next(next) {}
+};
+
+Node* build(const vector<int>& vals) {
+    Node* head = nullptr;
+    for (int i = (int)vals.size() - 1; i >= 0; i--) head = new Node(vals[i], head);
+    return head;
+}
+
+string toList(Node* head) {
+    string out = "[";
+    bool first = true;
+    while (head) {
+        if (!first) out += ", ";
+        out += to_string(head->val);
+        first = false;
+        head = head->next;
+    }
+    return out + "]";
+}
+
+Node* removeAllNaive(Node* head, int target) {
+    while (head && head->val == target) head = head->next;
+    Node* cur = head;
+    while (cur && cur->next) {
+        if (cur->next->val == target) cur->next = cur->next->next;
+        else cur = cur->next;
+    }
+    return head;
+}
+
+Node* removeAllDummy(Node* head, int target) {
+    Node dummy(0, head);
+    Node* cur = &dummy;
+    while (cur->next) {
+        if (cur->next->val == target) cur->next = cur->next->next;
+        else cur = cur->next;
+    }
+    return dummy.next;
+}
+
+int main() {
+    vector<pair<string, function<Node*(Node*, int)>>> impls = {
+        {"remove_all_naive", removeAllNaive}, {"remove_all_dummy", removeAllDummy}};
+    for (const auto& [name, fn] : impls) {
+        cout << name << "\\n";
+        cout << "   " << toList(fn(build({7, 1, 7, 2, 7}), 7)) << "\\n";
+        cout << "   " << toList(fn(build({7, 7, 7}), 7)) << "\\n";
+        cout << "   " << toList(fn(build({1, 2, 3}), 7)) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// \`Option<Box<Node>>\`: each node owns the rest of the list.
+struct Node {
+    val: i32,
+    next: Option<Box<Node>>,
+}
+
+fn build(vals: &[i32]) -> Option<Box<Node>> {
+    let mut head = None;
+    for &v in vals.iter().rev() {
+        head = Some(Box::new(Node { val: v, next: head }));
+    }
+    head
+}
+
+fn to_list(head: &Option<Box<Node>>) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    let mut cur = head;
+    while let Some(node) = cur {
+        parts.push(node.val.to_string());
+        cur = &node.next;
+    }
+    format!("[{}]", parts.join(", "))
+}
+
+fn remove_all_naive(mut head: Option<Box<Node>>, target: i32) -> Option<Box<Node>> {
+    while head.as_ref().is_some_and(|n| n.val == target) {
+        head = head.unwrap().next;
+    }
+    let mut cur = head.as_mut();
+    while let Some(node) = cur {
+        if node.next.as_ref().is_some_and(|n| n.val == target) {
+            let dead = node.next.take().unwrap();
+            node.next = dead.next;
+            cur = Some(node);
+        } else {
+            cur = node.next.as_mut();
+        }
+    }
+    head
+}
+
+fn remove_all_dummy(head: Option<Box<Node>>, target: i32) -> Option<Box<Node>> {
+    let mut dummy = Box::new(Node { val: 0, next: head });
+    let mut cur = &mut dummy;
+    while cur.next.is_some() {
+        if cur.next.as_ref().unwrap().val == target {
+            let dead = cur.next.take().unwrap();
+            cur.next = dead.next;
+        } else {
+            cur = cur.next.as_mut().unwrap();
+        }
+    }
+    dummy.next
+}
+
+fn main() {
+    let impls: [(&str, fn(Option<Box<Node>>, i32) -> Option<Box<Node>>); 2] = [
+        ("remove_all_naive", remove_all_naive),
+        ("remove_all_dummy", remove_all_dummy),
+    ];
+    for (name, f) in impls {
+        println!("{}", name);
+        println!("   {}", to_list(&f(build(&[7, 1, 7, 2, 7]), 7)));
+        println!("   {}", to_list(&f(build(&[7, 7, 7]), 7)));
+        println!("   {}", to_list(&f(build(&[1, 2, 3]), 7)));
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Node struct {
+	val  int
+	next *Node
+}
+
+func build(vals []int) *Node {
+	var head *Node
+	for i := len(vals) - 1; i >= 0; i-- {
+		head = &Node{vals[i], head}
+	}
+	return head
+}
+
+func toList(head *Node) string {
+	var parts []string
+	for head != nil {
+		parts = append(parts, fmt.Sprint(head.val))
+		head = head.next
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func removeAllNaive(head *Node, target int) *Node {
+	for head != nil && head.val == target {
+		head = head.next
+	}
+	cur := head
+	for cur != nil && cur.next != nil {
+		if cur.next.val == target {
+			cur.next = cur.next.next
+		} else {
+			cur = cur.next
+		}
+	}
+	return head
+}
+
+func removeAllDummy(head *Node, target int) *Node {
+	dummy := &Node{0, head}
+	cur := dummy
+	for cur.next != nil {
+		if cur.next.val == target {
+			cur.next = cur.next.next
+		} else {
+			cur = cur.next
+		}
+	}
+	return dummy.next
+}
+
+func main() {
+	type impl struct {
+		name string
+		fn   func(*Node, int) *Node
+	}
+	for _, im := range []impl{{"remove_all_naive", removeAllNaive}, {"remove_all_dummy", removeAllDummy}} {
+		fmt.Println(im.name)
+		fmt.Println("  ", toList(im.fn(build([]int{7, 1, 7, 2, 7}), 7)))
+		fmt.Println("  ", toList(im.fn(build([]int{7, 7, 7}), 7)))
+		fmt.Println("  ", toList(im.fn(build([]int{1, 2, 3}), 7)))
+	}
+}`,
+            },
+          ],
         },
       ],
     },

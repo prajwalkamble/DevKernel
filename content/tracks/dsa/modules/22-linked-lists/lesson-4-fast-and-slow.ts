@@ -66,14 +66,418 @@ tail = head
 while tail.next:
     tail = tail.next
 tail.next = head.next.next
-print("cycle starts at:", has_cycle_and_start(head))
-print("no cycle:       ", has_cycle_and_start(build([1, 2, 3])))`,
+def show(v):
+    return "-" if v is None else str(v)
+
+print("cycle starts at:", show(has_cycle_and_start(head)))
+print("no cycle:       ", show(has_cycle_and_start(build([1, 2, 3]))))`,
           output: `middle of 1..5: 3
 middle of 1..6: 4
 cycle starts at: 3
-no cycle:        None`,
+no cycle:        -`,
           explanation:
             "For an even-length list this returns the **second** of the two middles — 4 out of 1..6, not 3. Which one you want depends on the problem: to split a list into halves for merge sort you usually want the *first* middle, and you get it by starting `fast = head.next` instead of `head`. Getting this backwards is why a merge sort on a two-element list can recurse forever. The `while fast and fast.next` condition covers both parities and the empty list at once.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `class Node {
+  constructor(val, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals) {
+  let head = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function middle(head) {
+  let slow = head;
+  let fast = head;
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+  return slow.val;
+}
+
+function hasCycleAndStart(head) {
+  let slow = head;
+  let fast = head;
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      let finder = head;
+      while (finder !== slow) {
+        finder = finder.next;
+        slow = slow.next;
+      }
+      return finder.val;
+    }
+  }
+  return null;
+}
+
+const show = (v) => (v === null ? "-" : String(v));
+
+console.log("middle of 1..5:", middle(build([1, 2, 3, 4, 5])));
+console.log("middle of 1..6:", middle(build([1, 2, 3, 4, 5, 6])));
+
+// Build 1 -> 2 -> 3 -> 4 -> 5 -> back to 3
+const head = build([1, 2, 3, 4, 5]);
+let tail = head;
+while (tail.next) tail = tail.next;
+tail.next = head.next.next;
+console.log("cycle starts at:", show(hasCycleAndStart(head)));
+console.log("no cycle:       ", show(hasCycleAndStart(build([1, 2, 3]))));`,
+            },
+            {
+              lang: "typescript",
+              code: `class Node {
+  val: number;
+  next: Node | null;
+
+  constructor(val: number, next: Node | null = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals: number[]): Node | null {
+  let head: Node | null = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function middle(head: Node): number {
+  let slow: Node = head;
+  let fast: Node | null = head;
+  while (fast && fast.next) {
+    slow = slow.next!;
+    fast = fast.next.next;
+  }
+  return slow.val;
+}
+
+function hasCycleAndStart(head: Node): number | null {
+  let slow: Node = head;
+  let fast: Node | null = head;
+  while (fast && fast.next) {
+    slow = slow.next!;
+    fast = fast.next.next;
+    if (slow === fast) {
+      let finder: Node = head;
+      while (finder !== slow) {
+        finder = finder.next!;
+        slow = slow.next!;
+      }
+      return finder.val;
+    }
+  }
+  return null;
+}
+
+const show = (v: number | null): string => (v === null ? "-" : String(v));
+
+console.log("middle of 1..5:", middle(build([1, 2, 3, 4, 5])!));
+console.log("middle of 1..6:", middle(build([1, 2, 3, 4, 5, 6])!));
+
+// Build 1 -> 2 -> 3 -> 4 -> 5 -> back to 3
+const head = build([1, 2, 3, 4, 5])!;
+let tail = head;
+while (tail.next) tail = tail.next;
+tail.next = head.next!.next;
+console.log("cycle starts at:", show(hasCycleAndStart(head)));
+console.log("no cycle:       ", show(hasCycleAndStart(build([1, 2, 3])!)));`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static class Node {
+        int val;
+        Node next;
+
+        Node(int val, Node next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    static Node build(int[] vals) {
+        Node head = null;
+        for (int i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+        return head;
+    }
+
+    static int middle(Node head) {
+        Node slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow.val;
+    }
+
+    static Integer hasCycleAndStart(Node head) {
+        Node slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                Node finder = head;
+                while (finder != slow) {
+                    finder = finder.next;
+                    slow = slow.next;
+                }
+                return finder.val;
+            }
+        }
+        return null;
+    }
+
+    static String show(Integer v) {
+        return v == null ? "-" : String.valueOf(v);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("middle of 1..5: " + middle(build(new int[]{1, 2, 3, 4, 5})));
+        System.out.println("middle of 1..6: " + middle(build(new int[]{1, 2, 3, 4, 5, 6})));
+
+        // Build 1 -> 2 -> 3 -> 4 -> 5 -> back to 3
+        Node head = build(new int[]{1, 2, 3, 4, 5});
+        Node tail = head;
+        while (tail.next != null) tail = tail.next;
+        tail.next = head.next.next;
+        System.out.println("cycle starts at: " + show(hasCycleAndStart(head)));
+        System.out.println("no cycle:        " + show(hasCycleAndStart(build(new int[]{1, 2, 3}))));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <optional>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int val, Node* next = nullptr) : val(val), next(next) {}
+};
+
+Node* build(const vector<int>& vals) {
+    Node* head = nullptr;
+    for (int i = (int)vals.size() - 1; i >= 0; i--) head = new Node(vals[i], head);
+    return head;
+}
+
+int middle(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    return slow->val;
+}
+
+optional<int> hasCycleAndStart(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {
+            Node* finder = head;
+            while (finder != slow) {
+                finder = finder->next;
+                slow = slow->next;
+            }
+            return finder->val;
+        }
+    }
+    return nullopt;
+}
+
+string show(const optional<int>& v) { return v ? to_string(*v) : "-"; }
+
+int main() {
+    cout << "middle of 1..5: " << middle(build({1, 2, 3, 4, 5})) << "\\n";
+    cout << "middle of 1..6: " << middle(build({1, 2, 3, 4, 5, 6})) << "\\n";
+
+    // Build 1 -> 2 -> 3 -> 4 -> 5 -> back to 3
+    Node* head = build({1, 2, 3, 4, 5});
+    Node* tail = head;
+    while (tail->next) tail = tail->next;
+    tail->next = head->next->next;
+    cout << "cycle starts at: " << show(hasCycleAndStart(head)) << "\\n";
+    cout << "no cycle:        " << show(hasCycleAndStart(build({1, 2, 3}))) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// \`Rc<RefCell<Node>>\`, not \`Option<Box<Node>>\`: this example needs two cursors
+// walking the same list, and it deliberately builds a cycle. A \`Box\` owns its
+// successor, so it can express neither. The cycle it builds is a reference
+// cycle, which \`Rc\` will never free — the leak is the price of the demo.
+use std::cell::RefCell;
+use std::rc::Rc;
+
+type Link = Option<Rc<RefCell<Node>>>;
+
+struct Node {
+    val: i32,
+    next: Link,
+}
+
+fn build(vals: &[i32]) -> Link {
+    let mut head: Link = None;
+    for &v in vals.iter().rev() {
+        head = Some(Rc::new(RefCell::new(Node { val: v, next: head })));
+    }
+    head
+}
+
+fn next_of(link: &Link) -> Link {
+    link.as_ref().and_then(|n| n.borrow().next.clone())
+}
+
+fn middle(head: &Link) -> i32 {
+    let mut slow = head.clone();
+    let mut fast = head.clone();
+    while fast.is_some() && next_of(&fast).is_some() {
+        slow = next_of(&slow);
+        fast = next_of(&next_of(&fast));
+    }
+    let node = slow.unwrap();
+    let val = node.borrow().val;
+    val
+}
+
+fn has_cycle_and_start(head: &Link) -> Option<i32> {
+    let mut slow = head.clone();
+    let mut fast = head.clone();
+    while fast.is_some() && next_of(&fast).is_some() {
+        slow = next_of(&slow);
+        fast = next_of(&next_of(&fast));
+        let met = match (&slow, &fast) {
+            (Some(s), Some(f)) => Rc::ptr_eq(s, f),
+            _ => false,
+        };
+        if met {
+            let mut finder = head.clone();
+            loop {
+                let same = match (&finder, &slow) {
+                    (Some(a), Some(b)) => Rc::ptr_eq(a, b),
+                    _ => false,
+                };
+                if same {
+                    return Some(finder.unwrap().borrow().val);
+                }
+                finder = next_of(&finder);
+                slow = next_of(&slow);
+            }
+        }
+    }
+    None
+}
+
+fn show(v: Option<i32>) -> String {
+    match v {
+        None => "-".to_string(),
+        Some(x) => x.to_string(),
+    }
+}
+
+fn main() {
+    println!("middle of 1..5: {}", middle(&build(&[1, 2, 3, 4, 5])));
+    println!("middle of 1..6: {}", middle(&build(&[1, 2, 3, 4, 5, 6])));
+
+    // Build 1 -> 2 -> 3 -> 4 -> 5 -> back to 3
+    let head = build(&[1, 2, 3, 4, 5]);
+    let mut tail = head.clone();
+    while next_of(&tail).is_some() {
+        tail = next_of(&tail);
+    }
+    let third = next_of(&next_of(&head));
+    tail.as_ref().unwrap().borrow_mut().next = third;
+    println!("cycle starts at: {}", show(has_cycle_and_start(&head)));
+    println!("no cycle:        {}", show(has_cycle_and_start(&build(&[1, 2, 3]))));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+type Node struct {
+	val  int
+	next *Node
+}
+
+func build(vals []int) *Node {
+	var head *Node
+	for i := len(vals) - 1; i >= 0; i-- {
+		head = &Node{vals[i], head}
+	}
+	return head
+}
+
+func middle(head *Node) int {
+	slow, fast := head, head
+	for fast != nil && fast.next != nil {
+		slow = slow.next
+		fast = fast.next.next
+	}
+	return slow.val
+}
+
+func hasCycleAndStart(head *Node) *int {
+	slow, fast := head, head
+	for fast != nil && fast.next != nil {
+		slow = slow.next
+		fast = fast.next.next
+		if slow == fast {
+			finder := head
+			for finder != slow {
+				finder = finder.next
+				slow = slow.next
+			}
+			return &finder.val
+		}
+	}
+	return nil
+}
+
+func show(v *int) string {
+	if v == nil {
+		return "-"
+	}
+	return fmt.Sprint(*v)
+}
+
+func main() {
+	fmt.Println("middle of 1..5:", middle(build([]int{1, 2, 3, 4, 5})))
+	fmt.Println("middle of 1..6:", middle(build([]int{1, 2, 3, 4, 5, 6})))
+
+	// Build 1 -> 2 -> 3 -> 4 -> 5 -> back to 3
+	head := build([]int{1, 2, 3, 4, 5})
+	tail := head
+	for tail.next != nil {
+		tail = tail.next
+	}
+	tail.next = head.next.next
+	fmt.Println("cycle starts at:", show(hasCycleAndStart(head)))
+	fmt.Println("no cycle:       ", show(hasCycleAndStart(build([]int{1, 2, 3}))))
+}`,
+            },
+          ],
         },
       ],
       visual: {

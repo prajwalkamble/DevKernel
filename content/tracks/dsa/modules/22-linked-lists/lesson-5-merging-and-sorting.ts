@@ -76,6 +76,427 @@ print(to_list(sort_list(build([-1, 5, 3, 4, 0]))))`,
 [-1, 0, 3, 4, 5]`,
           explanation:
             "Two lines carry the weight. `fast = head.next` offsets the fast cursor so `slow` stops at the **first** of two middles — with `fast = head` a two-element list would put `slow` on the second node, `right` would be empty, and the recursion would split `[4, 2]` into `[4, 2]` and nothing forever. And `slow.next = None` performs the actual cut; without it both halves still run to the end of the original list and the recursion never shrinks.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+class Node {
+  constructor(val, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals) {
+  let head = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function toList(head) {
+  const out = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out;
+}
+
+function merge(a, b) {
+  const dummy = new Node(0);
+  let tail = dummy;
+  while (a && b) {
+    if (a.val <= b.val) {          // <= keeps equal elements in a's order: stable
+      tail.next = a;
+      a = a.next;
+    } else {
+      tail.next = b;
+      b = b.next;
+    }
+    tail = tail.next;
+  }
+  tail.next = a ?? b;              // one of them is already null
+  return dummy.next;
+}
+
+function sortList(head) {
+  if (head === null || head.next === null) return head;
+  let slow = head;
+  let fast = head.next;            // note the offset
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+  const right = slow.next;
+  slow.next = null;                // cut, or the recursion never ends
+  return merge(sortList(head), sortList(right));
+}
+
+console.log(list(toList(merge(build([1, 3, 5]), build([2, 4, 6])))));
+console.log(list(toList(merge(build([1, 2]), build([])))));
+console.log(list(toList(sortList(build([4, 2, 1, 3])))));
+console.log(list(toList(sortList(build([-1, 5, 3, 4, 0])))));`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+class Node {
+  val: number;
+  next: Node | null;
+
+  constructor(val: number, next: Node | null = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals: number[]): Node | null {
+  let head: Node | null = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function toList(head: Node | null): number[] {
+  const out: number[] = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out;
+}
+
+function merge(a: Node | null, b: Node | null): Node | null {
+  const dummy = new Node(0);
+  let tail = dummy;
+  while (a && b) {
+    if (a.val <= b.val) {          // <= keeps equal elements in a's order: stable
+      tail.next = a;
+      a = a.next;
+    } else {
+      tail.next = b;
+      b = b.next;
+    }
+    tail = tail.next;
+  }
+  tail.next = a ?? b;              // one of them is already null
+  return dummy.next;
+}
+
+function sortList(head: Node | null): Node | null {
+  if (head === null || head.next === null) return head;
+  let slow: Node = head;
+  let fast: Node | null = head.next;            // note the offset
+  while (fast && fast.next) {
+    slow = slow.next!;
+    fast = fast.next.next;
+  }
+  const right = slow.next;
+  slow.next = null;                // cut, or the recursion never ends
+  return merge(sortList(head), sortList(right));
+}
+
+console.log(list(toList(merge(build([1, 3, 5]), build([2, 4, 6])))));
+console.log(list(toList(merge(build([1, 2]), build([])))));
+console.log(list(toList(sortList(build([4, 2, 1, 3])))));
+console.log(list(toList(sortList(build([-1, 5, 3, 4, 0])))));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static class Node {
+        int val;
+        Node next;
+
+        Node(int val, Node next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    static Node build(int[] vals) {
+        Node head = null;
+        for (int i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+        return head;
+    }
+
+    static String toList(Node head) {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
+        while (head != null) {
+            if (!first) sb.append(", ");
+            sb.append(head.val);
+            first = false;
+            head = head.next;
+        }
+        return sb.append("]").toString();
+    }
+
+    static Node merge(Node a, Node b) {
+        Node dummy = new Node(0, null);
+        Node tail = dummy;
+        while (a != null && b != null) {
+            if (a.val <= b.val) {      // <= keeps equal elements in a's order: stable
+                tail.next = a;
+                a = a.next;
+            } else {
+                tail.next = b;
+                b = b.next;
+            }
+            tail = tail.next;
+        }
+        tail.next = a != null ? a : b; // one of them is already null
+        return dummy.next;
+    }
+
+    static Node sortList(Node head) {
+        if (head == null || head.next == null) return head;
+        Node slow = head, fast = head.next;   // note the offset
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        Node right = slow.next;
+        slow.next = null;                     // cut, or the recursion never ends
+        return merge(sortList(head), sortList(right));
+    }
+
+    public static void main(String[] args) {
+        System.out.println(toList(merge(build(new int[]{1, 3, 5}), build(new int[]{2, 4, 6}))));
+        System.out.println(toList(merge(build(new int[]{1, 2}), build(new int[]{}))));
+        System.out.println(toList(sortList(build(new int[]{4, 2, 1, 3}))));
+        System.out.println(toList(sortList(build(new int[]{-1, 5, 3, 4, 0}))));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int val, Node* next = nullptr) : val(val), next(next) {}
+};
+
+Node* build(const vector<int>& vals) {
+    Node* head = nullptr;
+    for (int i = (int)vals.size() - 1; i >= 0; i--) head = new Node(vals[i], head);
+    return head;
+}
+
+string toList(Node* head) {
+    string out = "[";
+    bool first = true;
+    while (head) {
+        if (!first) out += ", ";
+        out += to_string(head->val);
+        first = false;
+        head = head->next;
+    }
+    return out + "]";
+}
+
+Node* merge(Node* a, Node* b) {
+    Node dummy(0);
+    Node* tail = &dummy;
+    while (a && b) {
+        if (a->val <= b->val) {      // <= keeps equal elements in a's order: stable
+            tail->next = a;
+            a = a->next;
+        } else {
+            tail->next = b;
+            b = b->next;
+        }
+        tail = tail->next;
+    }
+    tail->next = a ? a : b;          // one of them is already null
+    return dummy.next;
+}
+
+Node* sortList(Node* head) {
+    if (!head || !head->next) return head;
+    Node* slow = head;
+    Node* fast = head->next;         // note the offset
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    Node* right = slow->next;
+    slow->next = nullptr;            // cut, or the recursion never ends
+    return merge(sortList(head), sortList(right));
+}
+
+int main() {
+    cout << toList(merge(build({1, 3, 5}), build({2, 4, 6}))) << "\\n";
+    cout << toList(merge(build({1, 2}), build({}))) << "\\n";
+    cout << toList(sortList(build({4, 2, 1, 3}))) << "\\n";
+    cout << toList(sortList(build({-1, 5, 3, 4, 0}))) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// \`Option<Box<Node>>\`: each node owns the rest of the list.
+struct Node {
+    val: i32,
+    next: Option<Box<Node>>,
+}
+
+fn build(vals: &[i32]) -> Option<Box<Node>> {
+    let mut head = None;
+    for &v in vals.iter().rev() {
+        head = Some(Box::new(Node { val: v, next: head }));
+    }
+    head
+}
+
+fn to_list(head: &Option<Box<Node>>) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    let mut cur = head;
+    while let Some(node) = cur {
+        parts.push(node.val.to_string());
+        cur = &node.next;
+    }
+    format!("[{}]", parts.join(", "))
+}
+
+fn merge(mut a: Option<Box<Node>>, mut b: Option<Box<Node>>) -> Option<Box<Node>> {
+    let mut dummy = Box::new(Node { val: 0, next: None });
+    let mut tail = &mut dummy;
+    while a.is_some() && b.is_some() {
+        // <= keeps equal elements in a's order: stable
+        let take_a = a.as_ref().unwrap().val <= b.as_ref().unwrap().val;
+        let mut node = if take_a {
+            let mut n = a.take().unwrap();
+            a = n.next.take();
+            n
+        } else {
+            let mut n = b.take().unwrap();
+            b = n.next.take();
+            n
+        };
+        node.next = None;
+        tail.next = Some(node);
+        tail = tail.next.as_mut().unwrap();
+    }
+    tail.next = if a.is_some() { a } else { b }; // one of them is already None
+    dummy.next
+}
+
+/// The two-cursor scan for the midpoint needs two live references into the
+/// same list, which \`Box\` ownership rules out. Counting first and splitting at
+/// the same index is the version that compiles, and it cuts in the same place.
+fn sort_list(head: Option<Box<Node>>) -> Option<Box<Node>> {
+    let len = {
+        let mut n = 0;
+        let mut cur = &head;
+        while let Some(node) = cur {
+            n += 1;
+            cur = &node.next;
+        }
+        n
+    };
+    if len < 2 {
+        return head;
+    }
+    let mut left = head;
+    let right = {
+        let mut cur = left.as_mut().unwrap();
+        for _ in 1..(len + 1) / 2 {
+            cur = cur.next.as_mut().unwrap();
+        }
+        cur.next.take() // cut, or the recursion never ends
+    };
+    merge(sort_list(left), sort_list(right))
+}
+
+fn main() {
+    println!("{}", to_list(&merge(build(&[1, 3, 5]), build(&[2, 4, 6]))));
+    println!("{}", to_list(&merge(build(&[1, 2]), build(&[]))));
+    println!("{}", to_list(&sort_list(build(&[4, 2, 1, 3]))));
+    println!("{}", to_list(&sort_list(build(&[-1, 5, 3, 4, 0]))));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Node struct {
+	val  int
+	next *Node
+}
+
+func build(vals []int) *Node {
+	var head *Node
+	for i := len(vals) - 1; i >= 0; i-- {
+		head = &Node{vals[i], head}
+	}
+	return head
+}
+
+func toList(head *Node) string {
+	var parts []string
+	for head != nil {
+		parts = append(parts, fmt.Sprint(head.val))
+		head = head.next
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func merge(a, b *Node) *Node {
+	dummy := &Node{}
+	tail := dummy
+	for a != nil && b != nil {
+		if a.val <= b.val { // <= keeps equal elements in a's order: stable
+			tail.next = a
+			a = a.next
+		} else {
+			tail.next = b
+			b = b.next
+		}
+		tail = tail.next
+	}
+	if a != nil { // one of them is already nil
+		tail.next = a
+	} else {
+		tail.next = b
+	}
+	return dummy.next
+}
+
+func sortList(head *Node) *Node {
+	if head == nil || head.next == nil {
+		return head
+	}
+	slow, fast := head, head.next // note the offset
+	for fast != nil && fast.next != nil {
+		slow = slow.next
+		fast = fast.next.next
+	}
+	right := slow.next
+	slow.next = nil // cut, or the recursion never ends
+	return merge(sortList(head), sortList(right))
+}
+
+func main() {
+	fmt.Println(toList(merge(build([]int{1, 3, 5}), build([]int{2, 4, 6}))))
+	fmt.Println(toList(merge(build([]int{1, 2}), build([]int{}))))
+	fmt.Println(toList(sortList(build([]int{4, 2, 1, 3}))))
+	fmt.Println(toList(sortList(build([]int{-1, 5, 3, 4, 0}))))
+}`,
+            },
+          ],
         },
       ],
     },

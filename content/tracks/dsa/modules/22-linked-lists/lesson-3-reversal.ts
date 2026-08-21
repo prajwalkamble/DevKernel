@@ -71,6 +71,352 @@ print(to_list(reverse_iterative(build([]))))`,
 []`,
           explanation:
             "The iterative version handles the empty list without a special case: `prev` starts as None and the loop never runs, so None comes back. The recursive version's base case covers both empty and single-node. The line worth staring at is `head.next.next = head` — at that point `head.next` is the node that *used to* follow, and after the recursive call it is the **tail** of the reversed remainder, so pointing its `next` at `head` appends `head` to the end. Setting `head.next = None` immediately after is what stops the list from containing a two-node cycle.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+class Node {
+  constructor(val, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals) {
+  let head = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function toList(head) {
+  const out = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out;
+}
+
+function reverseIterative(head) {
+  let prev = null;
+  while (head) {
+    const next = head.next;   // save it before you destroy it
+    head.next = prev;
+    prev = head;
+    head = next;
+  }
+  return prev;
+}
+
+function reverseRecursive(head) {
+  if (head === null || head.next === null) return head;
+  const newHead = reverseRecursive(head.next);
+  head.next.next = head;      // the node after me should point back at me
+  head.next = null;
+  return newHead;
+}
+
+console.log(list(toList(reverseIterative(build([1, 2, 3, 4, 5])))));
+console.log(list(toList(reverseRecursive(build([1, 2, 3, 4, 5])))));
+console.log(list(toList(reverseIterative(build([1])))));
+console.log(list(toList(reverseIterative(build([])))));`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+class Node {
+  val: number;
+  next: Node | null;
+
+  constructor(val: number, next: Node | null = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+function build(vals: number[]): Node | null {
+  let head: Node | null = null;
+  for (let i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+  return head;
+}
+
+function toList(head: Node | null): number[] {
+  const out: number[] = [];
+  while (head) {
+    out.push(head.val);
+    head = head.next;
+  }
+  return out;
+}
+
+function reverseIterative(head: Node | null): Node | null {
+  let prev: Node | null = null;
+  while (head) {
+    const next = head.next;   // save it before you destroy it
+    head.next = prev;
+    prev = head;
+    head = next;
+  }
+  return prev;
+}
+
+function reverseRecursive(head: Node | null): Node | null {
+  if (head === null || head.next === null) return head;
+  const newHead = reverseRecursive(head.next);
+  head.next.next = head;      // the node after me should point back at me
+  head.next = null;
+  return newHead;
+}
+
+console.log(list(toList(reverseIterative(build([1, 2, 3, 4, 5])))));
+console.log(list(toList(reverseRecursive(build([1, 2, 3, 4, 5])))));
+console.log(list(toList(reverseIterative(build([1])))));
+console.log(list(toList(reverseIterative(build([])))));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static class Node {
+        int val;
+        Node next;
+
+        Node(int val, Node next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    static Node build(int[] vals) {
+        Node head = null;
+        for (int i = vals.length - 1; i >= 0; i--) head = new Node(vals[i], head);
+        return head;
+    }
+
+    static String toList(Node head) {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
+        while (head != null) {
+            if (!first) sb.append(", ");
+            sb.append(head.val);
+            first = false;
+            head = head.next;
+        }
+        return sb.append("]").toString();
+    }
+
+    static Node reverseIterative(Node head) {
+        Node prev = null;
+        while (head != null) {
+            Node next = head.next;   // save it before you destroy it
+            head.next = prev;
+            prev = head;
+            head = next;
+        }
+        return prev;
+    }
+
+    static Node reverseRecursive(Node head) {
+        if (head == null || head.next == null) return head;
+        Node newHead = reverseRecursive(head.next);
+        head.next.next = head;       // the node after me should point back at me
+        head.next = null;
+        return newHead;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(toList(reverseIterative(build(new int[]{1, 2, 3, 4, 5}))));
+        System.out.println(toList(reverseRecursive(build(new int[]{1, 2, 3, 4, 5}))));
+        System.out.println(toList(reverseIterative(build(new int[]{1}))));
+        System.out.println(toList(reverseIterative(build(new int[]{}))));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int val, Node* next = nullptr) : val(val), next(next) {}
+};
+
+Node* build(const vector<int>& vals) {
+    Node* head = nullptr;
+    for (int i = (int)vals.size() - 1; i >= 0; i--) head = new Node(vals[i], head);
+    return head;
+}
+
+string toList(Node* head) {
+    string out = "[";
+    bool first = true;
+    while (head) {
+        if (!first) out += ", ";
+        out += to_string(head->val);
+        first = false;
+        head = head->next;
+    }
+    return out + "]";
+}
+
+Node* reverseIterative(Node* head) {
+    Node* prev = nullptr;
+    while (head) {
+        Node* next = head->next;   // save it before you destroy it
+        head->next = prev;
+        prev = head;
+        head = next;
+    }
+    return prev;
+}
+
+Node* reverseRecursive(Node* head) {
+    if (!head || !head->next) return head;
+    Node* newHead = reverseRecursive(head->next);
+    head->next->next = head;       // the node after me should point back at me
+    head->next = nullptr;
+    return newHead;
+}
+
+int main() {
+    cout << toList(reverseIterative(build({1, 2, 3, 4, 5}))) << "\\n";
+    cout << toList(reverseRecursive(build({1, 2, 3, 4, 5}))) << "\\n";
+    cout << toList(reverseIterative(build({1}))) << "\\n";
+    cout << toList(reverseIterative(build({}))) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// \`Option<Box<Node>>\`: each node owns the rest of the list, and \`None\` is the
+// end. That ownership is what makes the two reversals read differently here
+// than everywhere else.
+struct Node {
+    val: i32,
+    next: Option<Box<Node>>,
+}
+
+fn build(vals: &[i32]) -> Option<Box<Node>> {
+    let mut head = None;
+    for &v in vals.iter().rev() {
+        head = Some(Box::new(Node { val: v, next: head }));
+    }
+    head
+}
+
+fn to_list(head: &Option<Box<Node>>) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    let mut cur = head;
+    while let Some(node) = cur {
+        parts.push(node.val.to_string());
+        cur = &node.next;
+    }
+    format!("[{}]", parts.join(", "))
+}
+
+fn reverse_iterative(mut head: Option<Box<Node>>) -> Option<Box<Node>> {
+    let mut prev = None;
+    while let Some(mut node) = head {
+        head = node.next.take(); // save it before you destroy it
+        node.next = prev;
+        prev = Some(node);
+    }
+    prev
+}
+
+/// The form the other languages write — reverse the rest, then set
+/// \`head.next.next = head\` — cannot be written with \`Box\`. It needs \`head.next\`
+/// and the tail of the reversed list to be the same node, and a \`Box\` owns its
+/// successor outright, so the recursive call takes it away. Carrying the
+/// already-reversed prefix down as an argument is the version that compiles,
+/// and it reverses in a single pass rather than walking back up.
+fn reverse_recursive(head: Option<Box<Node>>) -> Option<Box<Node>> {
+    fn go(head: Option<Box<Node>>, acc: Option<Box<Node>>) -> Option<Box<Node>> {
+        match head {
+            None => acc,
+            Some(mut node) => {
+                let next = node.next.take();
+                node.next = acc;
+                go(next, Some(node))
+            }
+        }
+    }
+    go(head, None)
+}
+
+fn main() {
+    println!("{}", to_list(&reverse_iterative(build(&[1, 2, 3, 4, 5]))));
+    println!("{}", to_list(&reverse_recursive(build(&[1, 2, 3, 4, 5]))));
+    println!("{}", to_list(&reverse_iterative(build(&[1]))));
+    println!("{}", to_list(&reverse_iterative(build(&[]))));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Node struct {
+	val  int
+	next *Node
+}
+
+func build(vals []int) *Node {
+	var head *Node
+	for i := len(vals) - 1; i >= 0; i-- {
+		head = &Node{vals[i], head}
+	}
+	return head
+}
+
+func toList(head *Node) string {
+	var parts []string
+	for head != nil {
+		parts = append(parts, fmt.Sprint(head.val))
+		head = head.next
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func reverseIterative(head *Node) *Node {
+	var prev *Node
+	for head != nil {
+		next := head.next // save it before you destroy it
+		head.next = prev
+		prev = head
+		head = next
+	}
+	return prev
+}
+
+func reverseRecursive(head *Node) *Node {
+	if head == nil || head.next == nil {
+		return head
+	}
+	newHead := reverseRecursive(head.next)
+	head.next.next = head // the node after me should point back at me
+	head.next = nil
+	return newHead
+}
+
+func main() {
+	fmt.Println(toList(reverseIterative(build([]int{1, 2, 3, 4, 5}))))
+	fmt.Println(toList(reverseRecursive(build([]int{1, 2, 3, 4, 5}))))
+	fmt.Println(toList(reverseIterative(build([]int{1}))))
+	fmt.Println(toList(reverseIterative(build([]int{}))))
+}`,
+            },
+          ],
         },
       ],
       visual: {
