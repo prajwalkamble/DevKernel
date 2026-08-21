@@ -49,6 +49,158 @@ for i, b in enumerate(buckets):
 6 ['eve']`,
           explanation:
             "The `h * 31 + ord(ch)` loop is close to what `String.hashCode` really does in Java. Seven keys into seven buckets does **not** give one key per bucket — two buckets hold two keys and two hold none. That is normal and expected, not a sign of a bad hash: spreading n keys randomly over n buckets leaves about 37% of them empty.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const strList = (xs) => "[" + xs.map((s) => \`'\${s}'\`).join(", ") + "]";
+
+const words = ["ana", "bob", "cy", "dee", "eve", "fay", "gus"];
+const buckets = Array.from({ length: 7 }, () => []);
+
+for (const w of words) {
+  let h = 0;
+  for (const ch of w) h = h * 31 + ch.charCodeAt(0);
+  buckets[h % 7].push(w);
+}
+
+buckets.forEach((b, i) => console.log(i, strList(b)));`,
+            },
+            {
+              lang: "typescript",
+              code: `const strList = (xs: string[]): string => "[" + xs.map((s) => \`'\${s}'\`).join(", ") + "]";
+
+const words: string[] = ["ana", "bob", "cy", "dee", "eve", "fay", "gus"];
+const buckets: string[][] = Array.from({ length: 7 }, () => []);
+
+for (const w of words) {
+  let h = 0;
+  for (const ch of w) h = h * 31 + ch.charCodeAt(0);
+  buckets[h % 7].push(w);
+}
+
+buckets.forEach((b, i) => console.log(i, strList(b)));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String strList(List<String> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append("'").append(xs.get(i)).append("'");
+        }
+        return sb.append("]").toString();
+    }
+
+    public static void main(String[] args) {
+        String[] words = {"ana", "bob", "cy", "dee", "eve", "fay", "gus"};
+        List<List<String>> buckets = new ArrayList<>();
+        for (int i = 0; i < 7; i++) buckets.add(new ArrayList<>());
+
+        for (String w : words) {
+            int h = 0;
+            for (char ch : w.toCharArray()) h = h * 31 + ch;
+            buckets.get(h % 7).add(w);
+        }
+
+        for (int i = 0; i < buckets.size(); i++) {
+            System.out.println(i + " " + strList(buckets.get(i)));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string strList(const vector<string>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += "'" + xs[i] + "'";
+    }
+    return out + "]";
+}
+
+int main() {
+    vector<string> words = {"ana", "bob", "cy", "dee", "eve", "fay", "gus"};
+    vector<vector<string>> buckets(7);
+
+    for (const string& w : words) {
+        int h = 0;
+        for (char ch : w) h = h * 31 + ch;
+        buckets[h % 7].push_back(w);
+    }
+
+    for (size_t i = 0; i < buckets.size(); i++) {
+        cout << i << " " << strList(buckets[i]) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn str_list(xs: &[String]) -> String {
+    let parts: Vec<String> = xs.iter().map(|s| format!("'{}'", s)).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn main() {
+    let words = ["ana", "bob", "cy", "dee", "eve", "fay", "gus"];
+    let mut buckets: Vec<Vec<String>> = vec![Vec::new(); 7];
+
+    for w in words {
+        let mut h: i32 = 0;
+        for ch in w.chars() {
+            h = h * 31 + ch as i32;
+        }
+        buckets[(h % 7) as usize].push(w.to_string());
+    }
+
+    for (i, b) in buckets.iter().enumerate() {
+        println!("{} {}", i, str_list(b));
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func strList(xs []string) string {
+	parts := make([]string, len(xs))
+	for i, s := range xs {
+		parts[i] = "'" + s + "'"
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func main() {
+	words := []string{"ana", "bob", "cy", "dee", "eve", "fay", "gus"}
+	buckets := make([][]string, 7)
+
+	for _, w := range words {
+		h := 0
+		for _, ch := range w {
+			h = h*31 + int(ch)
+		}
+		buckets[h%7] = append(buckets[h%7], w)
+	}
+
+	for i, b := range buckets {
+		fmt.Println(i, strList(b))
+	}
+}`,
+            },
+          ],
         },
       ],
       visual: {

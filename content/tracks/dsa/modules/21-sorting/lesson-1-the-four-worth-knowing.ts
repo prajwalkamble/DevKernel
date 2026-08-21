@@ -90,6 +90,422 @@ reversed  insertion cmp= 66 move= 66   selection cmp= 66 move= 12
 shuffled  insertion cmp= 39 move= 30   selection cmp= 66 move= 12`,
           explanation:
             "Insertion sort on sorted input: 11 comparisons, **zero moves** — one comparison per element to confirm it is already in place. On reversed input it degrades to the full 66. Selection sort does **66 comparisons whatever you give it**, because it scans the whole remaining array regardless; it is not adaptive at all. Its one virtue is the move count: exactly n, which matters if a swap is expensive — writing to flash memory, say.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `// Runs a sort on a copy and reports comparisons and moves.
+const padL = (v, w) => String(v).padStart(w);
+const padR = (v, w) => String(v).padEnd(w);
+
+function counted(sortFn, data) {
+  const stats = { cmp: 0, move: 0 };
+  const out = sortFn([...data], stats);
+  const want = [...data].sort((a, b) => a - b);
+  if (out.join() !== want.join()) throw new Error("did not sort");
+  return stats;
+}
+
+function insertion(a, st) {
+  for (let i = 1; i < a.length; i++) {
+    const key = a[i];
+    let j = i - 1;
+    while (j >= 0) {
+      st.cmp++;
+      if (a[j] <= key) break;
+      a[j + 1] = a[j];
+      st.move++;
+      j--;
+    }
+    a[j + 1] = key;
+  }
+  return a;
+}
+
+function selection(a, st) {
+  for (let i = 0; i < a.length; i++) {
+    let lo = i;
+    for (let j = i + 1; j < a.length; j++) {
+      st.cmp++;
+      if (a[j] < a[lo]) lo = j;
+    }
+    [a[i], a[lo]] = [a[lo], a[i]];
+    st.move++;
+  }
+  return a;
+}
+
+const sortedIn = Array.from({ length: 12 }, (_, i) => i);
+const reversedIn = [...sortedIn].reverse();
+const shuffled = [7, 2, 9, 0, 11, 4, 1, 8, 3, 10, 5, 6];
+
+for (const [name, data] of [["sorted", sortedIn], ["reversed", reversedIn], ["shuffled", shuffled]]) {
+  const i = counted(insertion, data);
+  const s = counted(selection, data);
+  console.log(
+    \`\${padR(name, 9)} insertion cmp=\${padL(i.cmp, 3)} move=\${padL(i.move, 3)}\` +
+      \`   selection cmp=\${padL(s.cmp, 3)} move=\${padL(s.move, 3)}\`
+  );
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `// Runs a sort on a copy and reports comparisons and moves.
+interface Stats {
+  cmp: number;
+  move: number;
+}
+
+const padL = (v: number, w: number): string => String(v).padStart(w);
+const padR = (v: string, w: number): string => String(v).padEnd(w);
+
+function counted(sortFn: (a: number[], st: Stats) => number[], data: number[]): Stats {
+  const stats = { cmp: 0, move: 0 };
+  const out = sortFn([...data], stats);
+  const want = [...data].sort((a, b) => a - b);
+  if (out.join() !== want.join()) throw new Error("did not sort");
+  return stats;
+}
+
+function insertion(a: number[], st: Stats): number[] {
+  for (let i = 1; i < a.length; i++) {
+    const key = a[i];
+    let j = i - 1;
+    while (j >= 0) {
+      st.cmp++;
+      if (a[j] <= key) break;
+      a[j + 1] = a[j];
+      st.move++;
+      j--;
+    }
+    a[j + 1] = key;
+  }
+  return a;
+}
+
+function selection(a: number[], st: Stats): number[] {
+  for (let i = 0; i < a.length; i++) {
+    let lo = i;
+    for (let j = i + 1; j < a.length; j++) {
+      st.cmp++;
+      if (a[j] < a[lo]) lo = j;
+    }
+    [a[i], a[lo]] = [a[lo], a[i]];
+    st.move++;
+  }
+  return a;
+}
+
+const sortedIn = Array.from({ length: 12 }, (_, i) => i);
+const reversedIn = [...sortedIn].reverse();
+const shuffled: number[] = [7, 2, 9, 0, 11, 4, 1, 8, 3, 10, 5, 6];
+
+const cases: [string, number[]][] = [["sorted", sortedIn], ["reversed", reversedIn], ["shuffled", shuffled]];
+for (const [name, data] of cases) {
+  const i = counted(insertion, data);
+  const s = counted(selection, data);
+  console.log(
+    \`\${padR(name, 9)} insertion cmp=\${padL(i.cmp, 3)} move=\${padL(i.move, 3)}\` +
+      \`   selection cmp=\${padL(s.cmp, 3)} move=\${padL(s.move, 3)}\`
+  );
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    /** Runs a sort on a copy and reports comparisons and moves. */
+    static class Stats {
+        int cmp, move;
+    }
+
+    interface Sorter {
+        int[] apply(int[] a, Stats st);
+    }
+
+    static Stats counted(Sorter sortFn, int[] data) {
+        Stats stats = new Stats();
+        int[] out = sortFn.apply(data.clone(), stats);
+        int[] want = data.clone();
+        Arrays.sort(want);
+        if (!Arrays.equals(out, want)) throw new AssertionError("did not sort");
+        return stats;
+    }
+
+    static int[] insertion(int[] a, Stats st) {
+        for (int i = 1; i < a.length; i++) {
+            int key = a[i];
+            int j = i - 1;
+            while (j >= 0) {
+                st.cmp++;
+                if (a[j] <= key) break;
+                a[j + 1] = a[j];
+                st.move++;
+                j--;
+            }
+            a[j + 1] = key;
+        }
+        return a;
+    }
+
+    static int[] selection(int[] a, Stats st) {
+        for (int i = 0; i < a.length; i++) {
+            int lo = i;
+            for (int j = i + 1; j < a.length; j++) {
+                st.cmp++;
+                if (a[j] < a[lo]) lo = j;
+            }
+            int t = a[i];
+            a[i] = a[lo];
+            a[lo] = t;
+            st.move++;
+        }
+        return a;
+    }
+
+    public static void main(String[] args) {
+        int[] sortedIn = new int[12];
+        int[] reversedIn = new int[12];
+        for (int i = 0; i < 12; i++) {
+            sortedIn[i] = i;
+            reversedIn[i] = 11 - i;
+        }
+        int[] shuffled = {7, 2, 9, 0, 11, 4, 1, 8, 3, 10, 5, 6};
+
+        String[] labels = {"sorted", "reversed", "shuffled"};
+        int[][] datasets = {sortedIn, reversedIn, shuffled};
+        for (int k = 0; k < labels.length; k++) {
+            Stats i = counted(Main::insertion, datasets[k]);
+            Stats s = counted(Main::selection, datasets[k]);
+            System.out.printf("%-9s insertion cmp=%3d move=%3d   selection cmp=%3d move=%3d%n",
+                    labels[k], i.cmp, i.move, s.cmp, s.move);
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `// Runs a sort on a copy and reports comparisons and moves.
+#include <algorithm>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Stats {
+    int cmp = 0, move = 0;
+};
+
+Stats counted(const function<vector<int>(vector<int>, Stats&)>& sortFn, const vector<int>& data) {
+    Stats stats;
+    vector<int> out = sortFn(data, stats);
+    vector<int> want = data;
+    sort(want.begin(), want.end());
+    if (out != want) throw runtime_error("did not sort");
+    return stats;
+}
+
+vector<int> insertion(vector<int> a, Stats& st) {
+    for (int i = 1; i < (int)a.size(); i++) {
+        int key = a[i];
+        int j = i - 1;
+        while (j >= 0) {
+            st.cmp++;
+            if (a[j] <= key) break;
+            a[j + 1] = a[j];
+            st.move++;
+            j--;
+        }
+        a[j + 1] = key;
+    }
+    return a;
+}
+
+vector<int> selection(vector<int> a, Stats& st) {
+    for (size_t i = 0; i < a.size(); i++) {
+        size_t lo = i;
+        for (size_t j = i + 1; j < a.size(); j++) {
+            st.cmp++;
+            if (a[j] < a[lo]) lo = j;
+        }
+        swap(a[i], a[lo]);
+        st.move++;
+    }
+    return a;
+}
+
+int main() {
+    vector<int> sortedIn(12), reversedIn(12);
+    for (int i = 0; i < 12; i++) {
+        sortedIn[i] = i;
+        reversedIn[i] = 11 - i;
+    }
+    vector<int> shuffled = {7, 2, 9, 0, 11, 4, 1, 8, 3, 10, 5, 6};
+
+    vector<pair<string, vector<int>>> cases = {
+        {"sorted", sortedIn}, {"reversed", reversedIn}, {"shuffled", shuffled}};
+    for (const auto& [name, data] : cases) {
+        Stats i = counted(insertion, data);
+        Stats s = counted(selection, data);
+        cout << left << setw(9) << name << right
+             << " insertion cmp=" << setw(3) << i.cmp << " move=" << setw(3) << i.move
+             << "   selection cmp=" << setw(3) << s.cmp << " move=" << setw(3) << s.move << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `/// Runs a sort on a copy and reports comparisons and moves.
+#[derive(Default)]
+struct Stats {
+    cmp: i32,
+    moves: i32,
+}
+
+fn counted(sort_fn: fn(Vec<i32>, &mut Stats) -> Vec<i32>, data: &[i32]) -> Stats {
+    let mut stats = Stats::default();
+    let out = sort_fn(data.to_vec(), &mut stats);
+    let mut want = data.to_vec();
+    want.sort();
+    assert_eq!(out, want, "did not sort");
+    stats
+}
+
+fn insertion(mut a: Vec<i32>, st: &mut Stats) -> Vec<i32> {
+    for i in 1..a.len() {
+        let key = a[i];
+        let mut j = i as i32 - 1;
+        while j >= 0 {
+            st.cmp += 1;
+            if a[j as usize] <= key {
+                break;
+            }
+            a[(j + 1) as usize] = a[j as usize];
+            st.moves += 1;
+            j -= 1;
+        }
+        a[(j + 1) as usize] = key;
+    }
+    a
+}
+
+fn selection(mut a: Vec<i32>, st: &mut Stats) -> Vec<i32> {
+    for i in 0..a.len() {
+        let mut lo = i;
+        for j in i + 1..a.len() {
+            st.cmp += 1;
+            if a[j] < a[lo] {
+                lo = j;
+            }
+        }
+        a.swap(i, lo);
+        st.moves += 1;
+    }
+    a
+}
+
+fn main() {
+    let sorted_in: Vec<i32> = (0..12).collect();
+    let reversed_in: Vec<i32> = (0..12).rev().collect();
+    let shuffled = vec![7, 2, 9, 0, 11, 4, 1, 8, 3, 10, 5, 6];
+
+    for (name, data) in [
+        ("sorted", &sorted_in),
+        ("reversed", &reversed_in),
+        ("shuffled", &shuffled),
+    ] {
+        let i = counted(insertion, data);
+        let s = counted(selection, data);
+        println!(
+            "{:<9} insertion cmp={:3} move={:3}   selection cmp={:3} move={:3}",
+            name, i.cmp, i.moves, s.cmp, s.moves
+        );
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `// Runs a sort on a copy and reports comparisons and moves.
+package main
+
+import (
+	"fmt"
+	"slices"
+)
+
+type stats struct {
+	cmp, move int
+}
+
+func counted(sortFn func([]int, *stats) []int, data []int) stats {
+	st := stats{}
+	out := sortFn(slices.Clone(data), &st)
+	want := slices.Clone(data)
+	slices.Sort(want)
+	if !slices.Equal(out, want) {
+		panic("did not sort")
+	}
+	return st
+}
+
+func insertion(a []int, st *stats) []int {
+	for i := 1; i < len(a); i++ {
+		key := a[i]
+		j := i - 1
+		for j >= 0 {
+			st.cmp++
+			if a[j] <= key {
+				break
+			}
+			a[j+1] = a[j]
+			st.move++
+			j--
+		}
+		a[j+1] = key
+	}
+	return a
+}
+
+func selection(a []int, st *stats) []int {
+	for i := range a {
+		lo := i
+		for j := i + 1; j < len(a); j++ {
+			st.cmp++
+			if a[j] < a[lo] {
+				lo = j
+			}
+		}
+		a[i], a[lo] = a[lo], a[i]
+		st.move++
+	}
+	return a
+}
+
+func main() {
+	sortedIn := make([]int, 12)
+	reversedIn := make([]int, 12)
+	for i := 0; i < 12; i++ {
+		sortedIn[i] = i
+		reversedIn[i] = 11 - i
+	}
+	shuffled := []int{7, 2, 9, 0, 11, 4, 1, 8, 3, 10, 5, 6}
+
+	type testCase struct {
+		name string
+		data []int
+	}
+	for _, c := range []testCase{{"sorted", sortedIn}, {"reversed", reversedIn}, {"shuffled", shuffled}} {
+		i := counted(insertion, c.data)
+		s := counted(selection, c.data)
+		fmt.Printf("%-9s insertion cmp=%3d move=%3d   selection cmp=%3d move=%3d\\n",
+			c.name, i.cmp, i.move, s.cmp, s.move)
+	}
+}`,
+            },
+          ],
         },
       ],
     },

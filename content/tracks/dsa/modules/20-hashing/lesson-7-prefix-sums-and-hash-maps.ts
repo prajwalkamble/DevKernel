@@ -49,6 +49,144 @@ print(subarrays_summing_to([1, -1, 0], 0))`,
 3`,
           explanation:
             "The fourth case is the one to sit with: `[1, -1, 0]` with k=0 has three answers — `[1,-1]`, `[0]` and `[1,-1,0]`. A sliding window finds at most one of them. The third case has four: `[3,4]`, `[7]`, `[7,2,-3,1]` and `[1,4,2]` — note that two of them overlap, which is another thing a window cannot express.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `function subarraysSummingTo(nums, k) {
+  const seen = new Map([[0, 1]]);
+  let running = 0;
+  let total = 0;
+  for (const x of nums) {
+    running += x;
+    total += seen.get(running - k) ?? 0;
+    seen.set(running, (seen.get(running) ?? 0) + 1);
+  }
+  return total;
+}
+
+console.log(subarraysSummingTo([1, 1, 1], 2));
+console.log(subarraysSummingTo([1, 2, 3], 3));
+console.log(subarraysSummingTo([3, 4, 7, 2, -3, 1, 4, 2], 7));
+console.log(subarraysSummingTo([1, -1, 0], 0));`,
+            },
+            {
+              lang: "typescript",
+              code: `function subarraysSummingTo(nums: number[], k: number): number {
+  const seen = new Map<number, number>([[0, 1]]);
+  let running = 0;
+  let total = 0;
+  for (const x of nums) {
+    running += x;
+    total += seen.get(running - k) ?? 0;
+    seen.set(running, (seen.get(running) ?? 0) + 1);
+  }
+  return total;
+}
+
+console.log(subarraysSummingTo([1, 1, 1], 2));
+console.log(subarraysSummingTo([1, 2, 3], 3));
+console.log(subarraysSummingTo([3, 4, 7, 2, -3, 1, 4, 2], 7));
+console.log(subarraysSummingTo([1, -1, 0], 0));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static int subarraysSummingTo(int[] nums, int k) {
+        Map<Integer, Integer> seen = new HashMap<>();
+        seen.put(0, 1);
+        int running = 0, total = 0;
+        for (int x : nums) {
+            running += x;
+            total += seen.getOrDefault(running - k, 0);
+            seen.merge(running, 1, Integer::sum);
+        }
+        return total;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(subarraysSummingTo(new int[]{1, 1, 1}, 2));
+        System.out.println(subarraysSummingTo(new int[]{1, 2, 3}, 3));
+        System.out.println(subarraysSummingTo(new int[]{3, 4, 7, 2, -3, 1, 4, 2}, 7));
+        System.out.println(subarraysSummingTo(new int[]{1, -1, 0}, 0));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+int subarraysSummingTo(const vector<int>& nums, int k) {
+    unordered_map<int, int> seen{{0, 1}};
+    int running = 0, total = 0;
+    for (int x : nums) {
+        running += x;
+        auto it = seen.find(running - k);
+        if (it != seen.end()) total += it->second;
+        seen[running]++;
+    }
+    return total;
+}
+
+int main() {
+    cout << subarraysSummingTo({1, 1, 1}, 2) << "\\n";
+    cout << subarraysSummingTo({1, 2, 3}, 3) << "\\n";
+    cout << subarraysSummingTo({3, 4, 7, 2, -3, 1, 4, 2}, 7) << "\\n";
+    cout << subarraysSummingTo({1, -1, 0}, 0) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `use std::collections::HashMap;
+
+fn subarrays_summing_to(nums: &[i32], k: i32) -> i32 {
+    let mut seen: HashMap<i32, i32> = HashMap::new();
+    seen.insert(0, 1);
+    let (mut running, mut total) = (0, 0);
+    for x in nums {
+        running += x;
+        total += seen.get(&(running - k)).copied().unwrap_or(0);
+        *seen.entry(running).or_insert(0) += 1;
+    }
+    total
+}
+
+fn main() {
+    println!("{}", subarrays_summing_to(&[1, 1, 1], 2));
+    println!("{}", subarrays_summing_to(&[1, 2, 3], 3));
+    println!("{}", subarrays_summing_to(&[3, 4, 7, 2, -3, 1, 4, 2], 7));
+    println!("{}", subarrays_summing_to(&[1, -1, 0], 0));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func subarraysSummingTo(nums []int, k int) int {
+	seen := map[int]int{0: 1}
+	running, total := 0, 0
+	for _, x := range nums {
+		running += x
+		total += seen[running-k]
+		seen[running]++
+	}
+	return total
+}
+
+func main() {
+	fmt.Println(subarraysSummingTo([]int{1, 1, 1}, 2))
+	fmt.Println(subarraysSummingTo([]int{1, 2, 3}, 3))
+	fmt.Println(subarraysSummingTo([]int{3, 4, 7, 2, -3, 1, 4, 2}, 7))
+	fmt.Println(subarraysSummingTo([]int{1, -1, 0}, 0))
+}`,
+            },
+          ],
         },
       ],
       visual: {

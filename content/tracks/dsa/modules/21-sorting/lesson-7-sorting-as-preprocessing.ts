@@ -55,6 +55,181 @@ print(merge_intervals([[1, 10], [2, 3], [4, 5]]))`,
 [[1, 10]]`,
           explanation:
             "`max(out[-1][1], end)` is the line people leave out. The third case is why: `[1,10]` fully contains `[2,3]`, so the merged end must stay 10 rather than shrink to 3. Without the `max`, sorted-by-start input still produces a wrong answer whenever one interval nests inside another. The second case pins down the boundary convention — touching intervals `[1,4]` and `[4,5]` merge here because the test is `<=`; a problem treating them as disjoint wants `<`.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const grid = (m) => "[" + m.map((r) => "[" + r.join(", ") + "]").join(", ") + "]";
+
+function mergeIntervals(input) {
+  const intervals = [...input].sort((a, b) => a[0] - b[0]);
+  const out = [];
+  for (const [start, end] of intervals) {
+    const last = out[out.length - 1];
+    if (last && start <= last[1]) last[1] = Math.max(last[1], end);
+    else out.push([start, end]);
+  }
+  return out;
+}
+
+console.log(grid(mergeIntervals([[1, 3], [2, 6], [8, 10], [15, 18]])));
+console.log(grid(mergeIntervals([[1, 4], [4, 5]])));
+console.log(grid(mergeIntervals([[1, 10], [2, 3], [4, 5]])));`,
+            },
+            {
+              lang: "typescript",
+              code: `const grid = (m: number[][]): string => "[" + m.map((r) => "[" + r.join(", ") + "]").join(", ") + "]";
+
+function mergeIntervals(input: number[][]): number[][] {
+  const intervals = [...input].sort((a, b) => a[0] - b[0]);
+  const out: number[][] = [];
+  for (const [start, end] of intervals) {
+    const last = out[out.length - 1];
+    if (last && start <= last[1]) last[1] = Math.max(last[1], end);
+    else out.push([start, end]);
+  }
+  return out;
+}
+
+console.log(grid(mergeIntervals([[1, 3], [2, 6], [8, 10], [15, 18]])));
+console.log(grid(mergeIntervals([[1, 4], [4, 5]])));
+console.log(grid(mergeIntervals([[1, 10], [2, 3], [4, 5]])));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String grid(List<int[]> m) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < m.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append("[").append(m.get(i)[0]).append(", ").append(m.get(i)[1]).append("]");
+        }
+        return sb.append("]").toString();
+    }
+
+    static List<int[]> mergeIntervals(int[][] input) {
+        int[][] intervals = input.clone();
+        Arrays.sort(intervals, Comparator.comparingInt(p -> p[0]));
+        List<int[]> out = new ArrayList<>();
+        for (int[] iv : intervals) {
+            if (!out.isEmpty() && iv[0] <= out.get(out.size() - 1)[1]) {
+                int[] last = out.get(out.size() - 1);
+                last[1] = Math.max(last[1], iv[1]);
+            } else {
+                out.add(new int[]{iv[0], iv[1]});
+            }
+        }
+        return out;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(grid(mergeIntervals(new int[][]{{1, 3}, {2, 6}, {8, 10}, {15, 18}})));
+        System.out.println(grid(mergeIntervals(new int[][]{{1, 4}, {4, 5}})));
+        System.out.println(grid(mergeIntervals(new int[][]{{1, 10}, {2, 3}, {4, 5}})));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <array>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string grid(const vector<array<int, 2>>& m) {
+    string out = "[";
+    for (size_t i = 0; i < m.size(); i++) {
+        if (i) out += ", ";
+        out += "[" + to_string(m[i][0]) + ", " + to_string(m[i][1]) + "]";
+    }
+    return out + "]";
+}
+
+vector<array<int, 2>> mergeIntervals(vector<array<int, 2>> intervals) {
+    sort(intervals.begin(), intervals.end(),
+         [](const auto& a, const auto& b) { return a[0] < b[0]; });
+    vector<array<int, 2>> out;
+    for (const auto& iv : intervals) {
+        if (!out.empty() && iv[0] <= out.back()[1]) out.back()[1] = max(out.back()[1], iv[1]);
+        else out.push_back(iv);
+    }
+    return out;
+}
+
+int main() {
+    cout << grid(mergeIntervals({{1, 3}, {2, 6}, {8, 10}, {15, 18}})) << "\\n";
+    cout << grid(mergeIntervals({{1, 4}, {4, 5}})) << "\\n";
+    cout << grid(mergeIntervals({{1, 10}, {2, 3}, {4, 5}})) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn grid(m: &[[i32; 2]]) -> String {
+    let parts: Vec<String> = m.iter().map(|r| format!("[{}, {}]", r[0], r[1])).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn merge_intervals(input: &[[i32; 2]]) -> Vec<[i32; 2]> {
+    let mut intervals = input.to_vec();
+    intervals.sort_by_key(|p| p[0]);
+    let mut out: Vec<[i32; 2]> = Vec::new();
+    for iv in intervals {
+        match out.last_mut() {
+            Some(last) if iv[0] <= last[1] => last[1] = last[1].max(iv[1]),
+            _ => out.push(iv),
+        }
+    }
+    out
+}
+
+fn main() {
+    println!("{}", grid(&merge_intervals(&[[1, 3], [2, 6], [8, 10], [15, 18]])));
+    println!("{}", grid(&merge_intervals(&[[1, 4], [4, 5]])));
+    println!("{}", grid(&merge_intervals(&[[1, 10], [2, 3], [4, 5]])));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+)
+
+func grid(m [][2]int) string {
+	parts := make([]string, len(m))
+	for i, r := range m {
+		parts[i] = fmt.Sprintf("[%d, %d]", r[0], r[1])
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func mergeIntervals(input [][2]int) [][2]int {
+	intervals := slices.Clone(input)
+	slices.SortFunc(intervals, func(a, b [2]int) int { return a[0] - b[0] })
+	out := [][2]int{}
+	for _, iv := range intervals {
+		if n := len(out); n > 0 && iv[0] <= out[n-1][1] {
+			out[n-1][1] = max(out[n-1][1], iv[1])
+		} else {
+			out = append(out, iv)
+		}
+	}
+	return out
+}
+
+func main() {
+	fmt.Println(grid(mergeIntervals([][2]int{{1, 3}, {2, 6}, {8, 10}, {15, 18}})))
+	fmt.Println(grid(mergeIntervals([][2]int{{1, 4}, {4, 5}})))
+	fmt.Println(grid(mergeIntervals([][2]int{{1, 10}, {2, 3}, {4, 5}})))
+}`,
+            },
+          ],
         },
       ],
     },

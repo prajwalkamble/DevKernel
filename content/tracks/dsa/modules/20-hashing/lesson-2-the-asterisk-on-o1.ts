@@ -47,6 +47,178 @@ n=  256  spread=    384  all-collide=    32640
 n= 1024  spread=   7680  all-collide=   523776`,
           explanation:
             "Counting comparisons rather than timing makes this reproducible — the same numbers on any machine. The all-collide column is exactly `n(n-1)/2`: 1024 × 1023 ÷ 2 = 523,776. The spread column grows linearly with n once the table is full, because chains stay a constant few entries long. At n=1024 the ratio is already 68×, and it keeps widening.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `// Equality checks needed to insert n distinct keys, chaining on collision.
+const padL = (v, w) => String(v).padStart(w);
+
+function probes(hashFn, n, buckets = 64) {
+  const table = Array.from({ length: buckets }, () => []);
+  let checks = 0;
+  for (let i = 0; i < n; i++) {
+    const chain = table[hashFn(i) % buckets];
+    checks += chain.length;        // compared against everything already there
+    chain.push(i);
+  }
+  return checks;
+}
+
+const spread = (i) => i * 2654435761;
+const same = () => 0;
+
+for (const n of [64, 256, 1024]) {
+  console.log(
+    \`n=\${padL(n, 5)}  spread=\${padL(probes(spread, n), 7)}  all-collide=\${padL(probes(same, n), 9)}\`
+  );
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `// Equality checks needed to insert n distinct keys, chaining on collision.
+const padL = (v: number, w: number): string => String(v).padStart(w);
+
+function probes(hashFn: (i: number) => number, n: number, buckets = 64): number {
+  const table: number[][] = Array.from({ length: buckets }, () => []);
+  let checks = 0;
+  for (let i = 0; i < n; i++) {
+    const chain = table[hashFn(i) % buckets];
+    checks += chain.length;        // compared against everything already there
+    chain.push(i);
+  }
+  return checks;
+}
+
+const spread = (i: number): number => i * 2654435761;
+const same = (): number => 0;
+
+for (const n of [64, 256, 1024]) {
+  console.log(
+    \`n=\${padL(n, 5)}  spread=\${padL(probes(spread, n), 7)}  all-collide=\${padL(probes(same, n), 9)}\`
+  );
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+import java.util.function.LongUnaryOperator;
+
+public class Main {
+    /** Equality checks needed to insert n distinct keys, chaining on collision. */
+    static long probes(LongUnaryOperator hashFn, int n, int buckets) {
+        List<List<Integer>> table = new ArrayList<>();
+        for (int i = 0; i < buckets; i++) table.add(new ArrayList<>());
+        long checks = 0;
+        for (int i = 0; i < n; i++) {
+            List<Integer> chain = table.get((int) (hashFn.applyAsLong(i) % buckets));
+            checks += chain.size();     // compared against everything already there
+            chain.add(i);
+        }
+        return checks;
+    }
+
+    public static void main(String[] args) {
+        // long, not int: i * 2654435761 leaves 32 bits behind well before n = 1024.
+        LongUnaryOperator spread = i -> i * 2654435761L;
+        LongUnaryOperator same = i -> 0L;
+
+        for (int n : new int[]{64, 256, 1024}) {
+            System.out.printf("n=%5d  spread=%7d  all-collide=%9d%n",
+                    n, probes(spread, n, 64), probes(same, n, 64));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Equality checks needed to insert n distinct keys, chaining on collision.
+long long probes(const function<long long(int)>& hashFn, int n, int buckets = 64) {
+    vector<vector<int>> table(buckets);
+    long long checks = 0;
+    for (int i = 0; i < n; i++) {
+        auto& chain = table[hashFn(i) % buckets];
+        checks += (long long)chain.size();   // compared against everything there
+        chain.push_back(i);
+    }
+    return checks;
+}
+
+int main() {
+    // long long, not int: i * 2654435761 leaves 32 bits behind well before n = 1024.
+    auto spread = [](int i) { return (long long)i * 2654435761LL; };
+    auto same = [](int) { return 0LL; };
+
+    for (int n : {64, 256, 1024}) {
+        cout << "n=" << setw(5) << n
+             << "  spread=" << setw(7) << probes(spread, n)
+             << "  all-collide=" << setw(9) << probes(same, n) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `/// Equality checks needed to insert n distinct keys, chaining on collision.
+fn probes(hash_fn: impl Fn(i64) -> i64, n: i64, buckets: i64) -> i64 {
+    let mut table: Vec<Vec<i64>> = vec![Vec::new(); buckets as usize];
+    let mut checks = 0;
+    for i in 0..n {
+        let chain = &mut table[(hash_fn(i) % buckets) as usize];
+        checks += chain.len() as i64; // compared against everything already there
+        chain.push(i);
+    }
+    checks
+}
+
+fn main() {
+    // i64, not i32: i * 2654435761 leaves 32 bits behind well before n = 1024.
+    let spread = |i: i64| i * 2654435761;
+    let same = |_: i64| 0;
+
+    for n in [64i64, 256, 1024] {
+        println!(
+            "n={:5}  spread={:7}  all-collide={:9}",
+            n,
+            probes(spread, n, 64),
+            probes(same, n, 64)
+        );
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+// Equality checks needed to insert n distinct keys, chaining on collision.
+func probes(hashFn func(int) int, n, buckets int) int {
+	table := make([][]int, buckets)
+	checks := 0
+	for i := 0; i < n; i++ {
+		b := hashFn(i) % buckets
+		checks += len(table[b]) // compared against everything already there
+		table[b] = append(table[b], i)
+	}
+	return checks
+}
+
+func main() {
+	// Go's int is 64-bit here, so i * 2654435761 does not wrap.
+	spread := func(i int) int { return i * 2654435761 }
+	same := func(int) int { return 0 }
+
+	for _, n := range []int{64, 256, 1024} {
+		fmt.Printf("n=%5d  spread=%7d  all-collide=%9d\\n", n, probes(spread, n, 64), probes(same, n, 64))
+	}
+}`,
+            },
+          ],
         },
       ],
       visual: {

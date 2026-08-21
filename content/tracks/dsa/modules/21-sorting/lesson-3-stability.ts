@@ -43,6 +43,211 @@ name first, then age:                 ['ana', 'dee', 'bob', 'cy']
 single compound key:                  ['ana', 'dee', 'bob', 'cy']`,
           explanation:
             "Line one sorts by age alone: within age 30, `cy` still precedes `bob` because that was the input order — stability preserved it. Line two sorts by name first, then stably by age, and now age 30 reads `bob, cy`. **Sort by the least significant key first, most significant last** — the reverse of the intuitive order, and the source of the classic bug. Line three does it in one pass with a tuple key, which is what you should normally write; the two-pass version matters when the second key needs a comparator you cannot express as a tuple.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const names = (ps) => "[" + ps.map(([n]) => \`'\${n}'\`).join(", ") + "]";
+
+const people = [["cy", 30], ["ana", 25], ["bob", 30], ["dee", 25]];
+
+// Array.prototype.sort is stable by specification, so ties keep input order.
+const byAge = [...people].sort((a, b) => a[1] - b[1]);
+console.log("by age, input order kept within ties:", names(byAge));
+
+const byNameThenAge = [...people]
+  .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+  .sort((a, b) => a[1] - b[1]);
+console.log("name first, then age:                ", names(byNameThenAge));
+
+const onePass = [...people].sort(
+  (a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)
+);
+console.log("single compound key:                 ", names(onePass));`,
+            },
+            {
+              lang: "typescript",
+              code: `const names = (ps: [string, number][]): string => "[" + ps.map(([n]) => \`'\${n}'\`).join(", ") + "]";
+
+const people: [string, number][] = [["cy", 30], ["ana", 25], ["bob", 30], ["dee", 25]];
+
+// Array.prototype.sort is stable by specification, so ties keep input order.
+const byAge = [...people].sort((a, b) => a[1] - b[1]);
+console.log("by age, input order kept within ties:", names(byAge));
+
+const byNameThenAge = [...people]
+  .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+  .sort((a, b) => a[1] - b[1]);
+console.log("name first, then age:                ", names(byNameThenAge));
+
+const onePass = [...people].sort(
+  (a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)
+);
+console.log("single compound key:                 ", names(onePass));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    record Person(String name, int age) { }
+
+    static String names(List<Person> ps) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < ps.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append("'").append(ps.get(i).name()).append("'");
+        }
+        return sb.append("]").toString();
+    }
+
+    public static void main(String[] args) {
+        List<Person> people = List.of(
+                new Person("cy", 30), new Person("ana", 25),
+                new Person("bob", 30), new Person("dee", 25));
+
+        // List.sort is stable by contract, so ties keep input order.
+        List<Person> byAge = new ArrayList<>(people);
+        byAge.sort(Comparator.comparingInt(Person::age));
+        System.out.println("by age, input order kept within ties: " + names(byAge));
+
+        List<Person> byNameThenAge = new ArrayList<>(people);
+        byNameThenAge.sort(Comparator.comparing(Person::name));
+        byNameThenAge.sort(Comparator.comparingInt(Person::age));
+        System.out.println("name first, then age:                 " + names(byNameThenAge));
+
+        List<Person> onePass = new ArrayList<>(people);
+        onePass.sort(Comparator.comparingInt(Person::age).thenComparing(Person::name));
+        System.out.println("single compound key:                  " + names(onePass));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+using Person = pair<string, int>;
+
+string names(const vector<Person>& ps) {
+    string out = "[";
+    for (size_t i = 0; i < ps.size(); i++) {
+        if (i) out += ", ";
+        out += "'" + ps[i].first + "'";
+    }
+    return out + "]";
+}
+
+int main() {
+    vector<Person> people = {{"cy", 30}, {"ana", 25}, {"bob", 30}, {"dee", 25}};
+
+    // stable_sort, not sort: only stable_sort promises ties keep input order.
+    vector<Person> byAge = people;
+    stable_sort(byAge.begin(), byAge.end(),
+                [](const Person& a, const Person& b) { return a.second < b.second; });
+    cout << "by age, input order kept within ties: " << names(byAge) << "\\n";
+
+    vector<Person> byNameThenAge = people;
+    stable_sort(byNameThenAge.begin(), byNameThenAge.end(),
+                [](const Person& a, const Person& b) { return a.first < b.first; });
+    stable_sort(byNameThenAge.begin(), byNameThenAge.end(),
+                [](const Person& a, const Person& b) { return a.second < b.second; });
+    cout << "name first, then age:                 " << names(byNameThenAge) << "\\n";
+
+    vector<Person> onePass = people;
+    stable_sort(onePass.begin(), onePass.end(), [](const Person& a, const Person& b) {
+        return make_pair(a.second, a.first) < make_pair(b.second, b.first);
+    });
+    cout << "single compound key:                  " << names(onePass) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `type Person = (String, i32);
+
+fn names(ps: &[Person]) -> String {
+    let parts: Vec<String> = ps.iter().map(|p| format!("'{}'", p.0)).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn main() {
+    let people: Vec<Person> = vec![
+        ("cy".into(), 30),
+        ("ana".into(), 25),
+        ("bob".into(), 30),
+        ("dee".into(), 25),
+    ];
+
+    // \`sort_by\` is stable; \`sort_unstable_by\` is the one that is not.
+    let mut by_age = people.clone();
+    by_age.sort_by_key(|p| p.1);
+    println!("by age, input order kept within ties: {}", names(&by_age));
+
+    let mut by_name_then_age = people.clone();
+    by_name_then_age.sort_by(|a, b| a.0.cmp(&b.0));
+    by_name_then_age.sort_by_key(|p| p.1);
+    println!("name first, then age:                 {}", names(&by_name_then_age));
+
+    let mut one_pass = people.clone();
+    one_pass.sort_by(|a, b| (a.1, &a.0).cmp(&(b.1, &b.0)));
+    println!("single compound key:                  {}", names(&one_pass));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+type person struct {
+	name string
+	age  int
+}
+
+func names(ps []person) string {
+	parts := make([]string, len(ps))
+	for i, p := range ps {
+		parts[i] = "'" + p.name + "'"
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func main() {
+	people := []person{{"cy", 30}, {"ana", 25}, {"bob", 30}, {"dee", 25}}
+	clone := func() []person { return append([]person(nil), people...) }
+
+	// SliceStable, not Slice: only the stable one keeps ties in input order.
+	byAge := clone()
+	sort.SliceStable(byAge, func(i, j int) bool { return byAge[i].age < byAge[j].age })
+	fmt.Println("by age, input order kept within ties:", names(byAge))
+
+	byNameThenAge := clone()
+	sort.SliceStable(byNameThenAge, func(i, j int) bool {
+		return byNameThenAge[i].name < byNameThenAge[j].name
+	})
+	sort.SliceStable(byNameThenAge, func(i, j int) bool {
+		return byNameThenAge[i].age < byNameThenAge[j].age
+	})
+	fmt.Println("name first, then age:                ", names(byNameThenAge))
+
+	onePass := clone()
+	sort.SliceStable(onePass, func(i, j int) bool {
+		if onePass[i].age != onePass[j].age {
+			return onePass[i].age < onePass[j].age
+		}
+		return onePass[i].name < onePass[j].name
+	})
+	fmt.Println("single compound key:                 ", names(onePass))
+}`,
+            },
+          ],
         },
       ],
     },

@@ -42,6 +42,247 @@ print("count >= 85:", len(keys) - bisect.bisect_left(keys, 85))`,
 count >= 85: 3`,
           explanation:
             "Both answers require sorting first — the dict contributed nothing but storage. With four entries that is irrelevant; inside a loop over many queries it is the whole cost. If range and rank queries are the workload, the data wants to live sorted, not hashed.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const pairs = (ps) => "[" + ps.map(([k, v]) => \`('\${k}', \${v})\`).join(", ") + "]";
+const list = (xs) => "[" + xs.join(", ") + "]";
+
+// A Map keeps insertion order, which a sort by value then has to override.
+const scores = new Map([["ana", 91], ["bob", 72], ["cy", 88], ["dee", 95]]);
+
+const byScore = [...scores].sort((a, b) => b[1] - a[1]);
+console.log(pairs(byScore.slice(0, 2)));
+
+// A sorted array answers range questions a hash map cannot.
+const keys = [...scores.values()].sort((a, b) => a - b);
+console.log(list(keys));
+
+function bisectLeft(a, v) {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] < v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+console.log("count >= 85:", keys.length - bisectLeft(keys, 85));`,
+            },
+            {
+              lang: "typescript",
+              code: `const pairs = (ps: [string, number][]): string => "[" + ps.map(([k, v]) => \`('\${k}', \${v})\`).join(", ") + "]";
+const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+// A Map keeps insertion order, which a sort by value then has to override.
+const scores = new Map([["ana", 91], ["bob", 72], ["cy", 88], ["dee", 95]]);
+
+const byScore = [...scores].sort((a, b) => b[1] - a[1]);
+console.log(pairs(byScore.slice(0, 2)));
+
+// A sorted array answers range questions a hash map cannot.
+const keys = [...scores.values()].sort((a, b) => a - b);
+console.log(list(keys));
+
+function bisectLeft(a: number[], v: number): number {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] < v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+console.log("count >= 85:", keys.length - bisectLeft(keys, 85));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String pairs(List<Map.Entry<String, Integer>> ps) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < ps.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append("('").append(ps.get(i).getKey()).append("', ")
+              .append(ps.get(i).getValue()).append(")");
+        }
+        return sb.append("]").toString();
+    }
+
+    static String list(List<Integer> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs.get(i));
+        }
+        return sb.append("]").toString();
+    }
+
+    static int bisectLeft(List<Integer> a, int v) {
+        int lo = 0, hi = a.size();
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (a.get(mid) < v) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    public static void main(String[] args) {
+        // LinkedHashMap keeps insertion order, which the sort by value overrides.
+        Map<String, Integer> scores = new LinkedHashMap<>();
+        scores.put("ana", 91);
+        scores.put("bob", 72);
+        scores.put("cy", 88);
+        scores.put("dee", 95);
+
+        List<Map.Entry<String, Integer>> byScore = new ArrayList<>(scores.entrySet());
+        byScore.sort((a, b) -> b.getValue() - a.getValue());
+        System.out.println(pairs(byScore.subList(0, 2)));
+
+        // A sorted list answers range questions a hash map cannot.
+        List<Integer> keys = new ArrayList<>(scores.values());
+        Collections.sort(keys);
+        System.out.println(list(keys));
+        System.out.println("count >= 85: " + (keys.size() - bisectLeft(keys, 85)));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+string pairsOf(const vector<pair<string, int>>& ps) {
+    string out = "[";
+    for (size_t i = 0; i < ps.size(); i++) {
+        if (i) out += ", ";
+        out += "('" + ps[i].first + "', " + to_string(ps[i].second) + ")";
+    }
+    return out + "]";
+}
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+int main() {
+    // A vector of pairs, not a map: insertion order is the starting point, and
+    // the sort by value overrides it.
+    vector<pair<string, int>> scores = {{"ana", 91}, {"bob", 72}, {"cy", 88}, {"dee", 95}};
+
+    vector<pair<string, int>> byScore = scores;
+    stable_sort(byScore.begin(), byScore.end(),
+                [](const auto& a, const auto& b) { return a.second > b.second; });
+    cout << pairsOf({byScore.begin(), byScore.begin() + 2}) << "\\n";
+
+    // A sorted array answers range questions a hash map cannot.
+    vector<int> keys;
+    for (const auto& kv : scores) keys.push_back(kv.second);
+    sort(keys.begin(), keys.end());
+    cout << list(keys) << "\\n";
+    cout << "count >= 85: "
+         << keys.end() - lower_bound(keys.begin(), keys.end(), 85) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn pairs_of(ps: &[(String, i32)]) -> String {
+    let parts: Vec<String> = ps.iter().map(|(k, v)| format!("('{}', {})", k, v)).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn main() {
+    // A Vec of pairs, not a HashMap: insertion order is the starting point, and
+    // the sort by value overrides it.
+    let scores: Vec<(String, i32)> = vec![
+        ("ana".to_string(), 91),
+        ("bob".to_string(), 72),
+        ("cy".to_string(), 88),
+        ("dee".to_string(), 95),
+    ];
+
+    let mut by_score = scores.clone();
+    by_score.sort_by(|a, b| b.1.cmp(&a.1));
+    println!("{}", pairs_of(&by_score[..2]));
+
+    // A sorted array answers range questions a hash map cannot.
+    let mut keys: Vec<i32> = scores.iter().map(|kv| kv.1).collect();
+    keys.sort();
+    println!("{}", list(&keys));
+    println!("count >= 85: {}", keys.len() - keys.partition_point(|&x| x < 85));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+type entry struct {
+	name  string
+	score int
+}
+
+func pairsOf(ps []entry) string {
+	parts := make([]string, len(ps))
+	for i, p := range ps {
+		parts[i] = fmt.Sprintf("('%s', %d)", p.name, p.score)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func main() {
+	// A slice of pairs, not a map: Go randomises map iteration, and insertion
+	// order is the starting point the sort by value overrides.
+	scores := []entry{{"ana", 91}, {"bob", 72}, {"cy", 88}, {"dee", 95}}
+
+	byScore := append([]entry(nil), scores...)
+	sort.SliceStable(byScore, func(i, j int) bool { return byScore[i].score > byScore[j].score })
+	fmt.Println(pairsOf(byScore[:2]))
+
+	// A sorted slice answers range questions a hash map cannot.
+	keys := make([]int, len(scores))
+	for i, s := range scores {
+		keys[i] = s.score
+	}
+	sort.Ints(keys)
+	fmt.Println(list(keys))
+	fmt.Println("count >= 85:", len(keys)-sort.SearchInts(keys, 85))
+}`,
+            },
+          ],
         },
       ],
     },

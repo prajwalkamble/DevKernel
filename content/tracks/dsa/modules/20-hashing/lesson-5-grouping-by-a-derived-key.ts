@@ -41,6 +41,198 @@ ant ['tan', 'nat']
 abt ['bat']`,
           explanation:
             "`setdefault` is the idiom for \"append into a list I may not have created yet\" — Java spells it `computeIfAbsent`, Go relies on the zero value of a slice, C++ default-constructs on `operator[]`. Sorting each word costs O(k log k), so the whole thing is O(n · k log k). The letter-count alternative — a 26-tuple as the key — is O(n · k), better when words are long.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const strList = (xs) => "[" + xs.map((s) => \`'\${s}'\`).join(", ") + "]";
+const sortedChars = (w) => [...w].sort().join("");
+
+const words = ["eat", "tea", "tan", "ate", "nat", "bat"];
+// A Map, not a plain object: it keeps insertion order for every key type,
+// which is what makes the groups come out in first-seen order.
+const groups = new Map();
+for (const w of words) {
+  const key = sortedChars(w);
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key).push(w);
+}
+
+for (const [key, group] of groups) {
+  console.log(key, strList(group));
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `const strList = (xs: string[]): string => "[" + xs.map((s) => \`'\${s}'\`).join(", ") + "]";
+const sortedChars = (w: string): string => [...w].sort().join("");
+
+const words: string[] = ["eat", "tea", "tan", "ate", "nat", "bat"];
+// A Map, not a plain object: it keeps insertion order for every key type,
+// which is what makes the groups come out in first-seen order.
+const groups = new Map<string, string[]>();
+for (const w of words) {
+  const key = sortedChars(w);
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key)!.push(w);
+}
+
+for (const [key, group] of groups) {
+  console.log(key, strList(group));
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String strList(List<String> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append("'").append(xs.get(i)).append("'");
+        }
+        return sb.append("]").toString();
+    }
+
+    static String sortedChars(String w) {
+        char[] c = w.toCharArray();
+        Arrays.sort(c);
+        return new String(c);
+    }
+
+    public static void main(String[] args) {
+        String[] words = {"eat", "tea", "tan", "ate", "nat", "bat"};
+        // LinkedHashMap, not HashMap: Python's dict iterates in insertion order,
+        // and a plain HashMap would print the groups in hash order instead.
+        Map<String, List<String>> groups = new LinkedHashMap<>();
+        for (String w : words) {
+            groups.computeIfAbsent(sortedChars(w), k -> new ArrayList<>()).add(w);
+        }
+
+        for (Map.Entry<String, List<String>> e : groups.entrySet()) {
+            System.out.println(e.getKey() + " " + strList(e.getValue()));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+string strList(const vector<string>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += "'" + xs[i] + "'";
+    }
+    return out + "]";
+}
+
+string sortedChars(string w) {
+    sort(w.begin(), w.end());
+    return w;
+}
+
+int main() {
+    vector<string> words = {"eat", "tea", "tan", "ate", "nat", "bat"};
+    // Neither map nor unordered_map iterates in insertion order, so the order
+    // keys were first seen in is kept alongside.
+    unordered_map<string, vector<string>> groups;
+    vector<string> order;
+    for (const string& w : words) {
+        string key = sortedChars(w);
+        if (!groups.count(key)) order.push_back(key);
+        groups[key].push_back(w);
+    }
+
+    for (const string& key : order) {
+        cout << key << " " << strList(groups[key]) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `use std::collections::HashMap;
+
+fn str_list(xs: &[String]) -> String {
+    let parts: Vec<String> = xs.iter().map(|s| format!("'{}'", s)).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn sorted_chars(w: &str) -> String {
+    let mut c: Vec<char> = w.chars().collect();
+    c.sort();
+    c.into_iter().collect()
+}
+
+fn main() {
+    let words = ["eat", "tea", "tan", "ate", "nat", "bat"];
+    // HashMap does not iterate in insertion order, so the order keys were first
+    // seen in is kept alongside.
+    let mut groups: HashMap<String, Vec<String>> = HashMap::new();
+    let mut order: Vec<String> = Vec::new();
+    for w in words {
+        let key = sorted_chars(w);
+        if !groups.contains_key(&key) {
+            order.push(key.clone());
+        }
+        groups.entry(key).or_default().push(w.to_string());
+    }
+
+    for key in &order {
+        println!("{} {}", key, str_list(&groups[key]));
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+func strList(xs []string) string {
+	parts := make([]string, len(xs))
+	for i, s := range xs {
+		parts[i] = "'" + s + "'"
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func sortedChars(w string) string {
+	c := strings.Split(w, "")
+	sort.Strings(c)
+	return strings.Join(c, "")
+}
+
+func main() {
+	words := []string{"eat", "tea", "tan", "ate", "nat", "bat"}
+	// Go's map iteration order is deliberately randomised, so the order keys
+	// were first seen in is kept alongside.
+	groups := map[string][]string{}
+	var order []string
+	for _, w := range words {
+		key := sortedChars(w)
+		if _, seen := groups[key]; !seen {
+			order = append(order, key)
+		}
+		groups[key] = append(groups[key], w)
+	}
+
+	for _, key := range order {
+		fmt.Println(key, strList(groups[key]))
+	}
+}`,
+            },
+          ],
         },
       ],
       visual: {
