@@ -85,6 +85,292 @@ searching for 4 (absent):
 1000000 elements needs at most 20 comparisons`,
           explanation:
             "Watch the window in the absent case: `[0,10)`, `[0,5)`, `[0,2)`, `[0,1)`, then empty. Each line halves it, and the loop ends when `lo == hi` — a window containing nothing. Twenty comparisons for a million elements is the entire reason this is worth getting right; a linear scan would average half a million.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `// Half-open convention: lo is inclusive, hi is exclusive. hi starts at length.
+const list = (xs) => "[" + xs.join(", ") + "]";
+const padL = (v, w) => String(v).padStart(w);
+
+function binarySearch(a, target, trace = false) {
+  let lo = 0;
+  let hi = a.length;
+  let steps = 0;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    steps++;
+    if (trace) {
+      console.log(
+        \`  lo=\${padL(lo, 2)} hi=\${padL(hi, 2)} mid=\${padL(mid, 2)} a[mid]=\${padL(a[mid], 3)}\`
+      );
+    }
+    if (a[mid] === target) return { idx: mid, steps };
+    if (a[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+  return { idx: -1, steps };
+}
+
+const a = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+console.log("array:", list(a));
+console.log("\\nsearching for 72:");
+let r = binarySearch(a, 72, true);
+console.log(\`  -> index \${r.idx} in \${r.steps} steps\`);
+
+console.log("\\nsearching for 4 (absent):");
+r = binarySearch(a, 4, true);
+console.log(\`  -> \${r.idx} in \${r.steps} steps\`);
+
+// the search space halves; 2^steps covers the array
+const n = 1000000;
+console.log(\`\\n\${n} elements needs at most \${Math.ceil(Math.log2(n))} comparisons\`);`,
+            },
+            {
+              lang: "typescript",
+              code: `// Half-open convention: lo is inclusive, hi is exclusive. hi starts at length.
+const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+const padL = (v: number, w: number): string => String(v).padStart(w);
+
+function binarySearch(a: number[], target: number, trace = false): { idx: number; steps: number } {
+  let lo = 0;
+  let hi = a.length;
+  let steps = 0;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    steps++;
+    if (trace) {
+      console.log(
+        \`  lo=\${padL(lo, 2)} hi=\${padL(hi, 2)} mid=\${padL(mid, 2)} a[mid]=\${padL(a[mid], 3)}\`
+      );
+    }
+    if (a[mid] === target) return { idx: mid, steps };
+    if (a[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+  return { idx: -1, steps };
+}
+
+const a: number[] = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+console.log("array:", list(a));
+console.log("\\nsearching for 72:");
+let r = binarySearch(a, 72, true);
+console.log(\`  -> index \${r.idx} in \${r.steps} steps\`);
+
+console.log("\\nsearching for 4 (absent):");
+r = binarySearch(a, 4, true);
+console.log(\`  -> \${r.idx} in \${r.steps} steps\`);
+
+// the search space halves; 2^steps covers the array
+const n = 1000000;
+console.log(\`\\n\${n} elements needs at most \${Math.ceil(Math.log2(n))} comparisons\`);`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(int[] xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    static int steps;
+
+    /** Half-open convention: lo is inclusive, hi is exclusive. hi starts at length. */
+    static int binarySearch(int[] a, int target, boolean trace) {
+        int lo = 0, hi = a.length;
+        steps = 0;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            steps++;
+            if (trace) {
+                System.out.printf("  lo=%2d hi=%2d mid=%2d a[mid]=%3d%n", lo, hi, mid, a[mid]);
+            }
+            if (a[mid] == target) return mid;
+            if (a[mid] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        int[] a = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+        System.out.println("array: " + list(a));
+        System.out.println("\\nsearching for 72:");
+        int idx = binarySearch(a, 72, true);
+        System.out.println("  -> index " + idx + " in " + steps + " steps");
+
+        System.out.println("\\nsearching for 4 (absent):");
+        idx = binarySearch(a, 4, true);
+        System.out.println("  -> " + idx + " in " + steps + " steps");
+
+        // the search space halves; 2^steps covers the array
+        int n = 1_000_000;
+        System.out.println("\\n" + n + " elements needs at most "
+                + (int) Math.ceil(Math.log(n) / Math.log(2)) + " comparisons");
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `// Half-open convention: lo is inclusive, hi is exclusive. hi starts at length.
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+int steps;
+
+int binarySearch(const vector<int>& a, int target, bool trace) {
+    int lo = 0, hi = (int)a.size();
+    steps = 0;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        steps++;
+        if (trace) {
+            cout << "  lo=" << setw(2) << lo << " hi=" << setw(2) << hi
+                 << " mid=" << setw(2) << mid << " a[mid]=" << setw(3) << a[mid] << "\\n";
+        }
+        if (a[mid] == target) return mid;
+        if (a[mid] < target) lo = mid + 1;
+        else hi = mid;
+    }
+    return -1;
+}
+
+int main() {
+    vector<int> a = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+    cout << "array: " << list(a) << "\\n";
+    cout << "\\nsearching for 72:\\n";
+    int idx = binarySearch(a, 72, true);
+    cout << "  -> index " << idx << " in " << steps << " steps\\n";
+
+    cout << "\\nsearching for 4 (absent):\\n";
+    idx = binarySearch(a, 4, true);
+    cout << "  -> " << idx << " in " << steps << " steps\\n";
+
+    // the search space halves; 2^steps covers the array
+    int n = 1000000;
+    cout << "\\n" << n << " elements needs at most "
+         << (int)ceil(log2((double)n)) << " comparisons\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// Half-open convention: lo is inclusive, hi is exclusive. hi starts at length.
+fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn binary_search(a: &[i32], target: i32, trace: bool) -> (i32, u32) {
+    let (mut lo, mut hi) = (0usize, a.len());
+    let mut steps = 0;
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        steps += 1;
+        if trace {
+            println!("  lo={:2} hi={:2} mid={:2} a[mid]={:3}", lo, hi, mid, a[mid]);
+        }
+        if a[mid] == target {
+            return (mid as i32, steps);
+        }
+        if a[mid] < target {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    (-1, steps)
+}
+
+fn main() {
+    let a = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+    println!("array: {}", list(&a));
+    println!("\\nsearching for 72:");
+    let (idx, steps) = binary_search(&a, 72, true);
+    println!("  -> index {} in {} steps", idx, steps);
+
+    println!("\\nsearching for 4 (absent):");
+    let (idx, steps) = binary_search(&a, 4, true);
+    println!("  -> {} in {} steps", idx, steps);
+
+    // the search space halves; 2^steps covers the array
+    let n = 1_000_000u32;
+    println!("\\n{} elements needs at most {} comparisons", n, (n as f64).log2().ceil() as u32);
+}`,
+            },
+            {
+              lang: "go",
+              code: `// Half-open convention: lo is inclusive, hi is exclusive. hi starts at length.
+package main
+
+import (
+	"fmt"
+	"math"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func binarySearch(a []int, target int, trace bool) (int, int) {
+	lo, hi, steps := 0, len(a), 0
+	for lo < hi {
+		mid := lo + (hi-lo)/2
+		steps++
+		if trace {
+			fmt.Printf("  lo=%2d hi=%2d mid=%2d a[mid]=%3d\\n", lo, hi, mid, a[mid])
+		}
+		if a[mid] == target {
+			return mid, steps
+		}
+		if a[mid] < target {
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+	return -1, steps
+}
+
+func main() {
+	a := []int{2, 5, 8, 12, 16, 23, 38, 56, 72, 91}
+	fmt.Println("array:", list(a))
+	fmt.Println("\\nsearching for 72:")
+	idx, steps := binarySearch(a, 72, true)
+	fmt.Printf("  -> index %d in %d steps\\n", idx, steps)
+
+	fmt.Println("\\nsearching for 4 (absent):")
+	idx, steps = binarySearch(a, 4, true)
+	fmt.Printf("  -> %d in %d steps\\n", idx, steps)
+
+	// the search space halves; 2^steps covers the array
+	n := 1000000
+	fmt.Printf("\\n%d elements needs at most %d comparisons\\n", n, int(math.Ceil(math.Log2(float64(n)))))
+}`,
+            },
+          ],
         },
       ],
       visual: {
