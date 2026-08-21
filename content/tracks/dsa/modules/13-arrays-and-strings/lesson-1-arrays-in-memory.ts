@@ -54,6 +54,184 @@ double          8    0x7f0000   0x7f0008   0x7f0010   0x7f0038
 indexing is one multiply and one add — the same work for a[0] as for a[999999]`,
           explanation:
             "Read the `int` row: element 7 sits at `0x7f001c`, which is `0x7f0000 + 7 × 4`. Nothing was walked to find it. This is also the honest answer to \"why does indexing start at zero\" — the index is an *offset* from the base, and the first element is zero elements along.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const BASE = 0x7f0000; // a pretend starting address, so the arithmetic is visible
+
+const padL = (s, w) => String(s).padStart(w);
+const padR = (s, w) => String(s).padEnd(w);
+const hex = (n) => "0x" + n.toString(16);
+
+function address(base, index, width) {
+  return base + index * width;
+}
+
+console.log(
+  \`\${padR("type", 10)} \${padL("bytes", 6)}  \${padL("a[0]", 10)} \${padL("a[1]", 10)} \${padL("a[2]", 10)} \${padL("a[7]", 10)}\`
+);
+console.log("-".repeat(62));
+for (const [name, width] of [["byte", 1], ["int", 4], ["long", 8], ["double", 8]]) {
+  const cells = [0, 1, 2, 7].map((i) => padL(hex(address(BASE, i, width)), 11)).join("");
+  console.log(\`\${padR(name, 10)} \${padL(width, 6)} \${cells}\`);
+}
+
+console.log();
+console.log("indexing is one multiply and one add — the same work for a[0] as for a[999999]");`,
+            },
+            {
+              lang: "typescript",
+              code: `const BASE = 0x7f0000; // a pretend starting address, so the arithmetic is visible
+
+const padL = (s: string | number, w: number): string => String(s).padStart(w);
+const padR = (s: string | number, w: number): string => String(s).padEnd(w);
+const hex = (n: number): string => "0x" + n.toString(16);
+
+function address(base: number, index: number, width: number): number {
+  return base + index * width;
+}
+
+console.log(
+  \`\${padR("type", 10)} \${padL("bytes", 6)}  \${padL("a[0]", 10)} \${padL("a[1]", 10)} \${padL("a[2]", 10)} \${padL("a[7]", 10)}\`
+);
+console.log("-".repeat(62));
+const widths: [string, number][] = [["byte", 1], ["int", 4], ["long", 8], ["double", 8]];
+for (const [name, width] of widths) {
+  const cells = [0, 1, 2, 7].map((i) => padL(hex(address(BASE, i, width)), 11)).join("");
+  console.log(\`\${padR(name, 10)} \${padL(width, 6)} \${cells}\`);
+}
+
+console.log();
+console.log("indexing is one multiply and one add — the same work for a[0] as for a[999999]");`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static final long BASE = 0x7f0000L;  // a pretend starting address
+
+    static long address(long base, int index, int width) {
+        return base + (long) index * width;
+    }
+
+    public static void main(String[] args) {
+        System.out.printf("%-10s %6s  %10s %10s %10s %10s%n",
+                "type", "bytes", "a[0]", "a[1]", "a[2]", "a[7]");
+        System.out.println("-".repeat(62));
+        String[] names = {"byte", "int", "long", "double"};
+        int[] widths = {1, 4, 8, 8};
+        for (int k = 0; k < names.length; k++) {
+            StringBuilder cells = new StringBuilder();
+            for (int i : new int[]{0, 1, 2, 7}) {
+                cells.append(String.format("%11s", "0x" + Long.toHexString(address(BASE, i, widths[k]))));
+            }
+            System.out.printf("%-10s %6d %s%n", names[k], widths[k], cells);
+        }
+
+        System.out.println();
+        System.out.println("indexing is one multiply and one add — the same work for a[0] as for a[999999]");
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+const long long BASE = 0x7f0000;  // a pretend starting address
+
+long long address(long long base, int index, int width) {
+    return base + (long long)index * width;
+}
+
+string hexOf(long long n) {
+    ostringstream out;
+    out << "0x" << hex << n;
+    return out.str();
+}
+
+int main() {
+    cout << left << setw(10) << "type" << " " << right << setw(6) << "bytes" << "  "
+         << setw(10) << "a[0]" << " " << setw(10) << "a[1]" << " "
+         << setw(10) << "a[2]" << " " << setw(10) << "a[7]" << "\\n";
+    cout << string(62, '-') << "\\n";
+    vector<pair<string, int>> rows = {{"byte", 1}, {"int", 4}, {"long", 8}, {"double", 8}};
+    for (const auto& [name, width] : rows) {
+        ostringstream cells;
+        for (int i : {0, 1, 2, 7}) cells << setw(11) << hexOf(address(BASE, i, width));
+        cout << left << setw(10) << name << " " << right << setw(6) << width
+             << " " << cells.str() << "\\n";
+    }
+
+    cout << "\\n";
+    cout << "indexing is one multiply and one add — the same work for a[0] as for a[999999]\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `const BASE: u64 = 0x7f0000; // a pretend starting address, so the arithmetic is visible
+
+fn address(base: u64, index: u64, width: u64) -> u64 {
+    base + index * width
+}
+
+fn main() {
+    println!(
+        "{:<10} {:>6}  {:>10} {:>10} {:>10} {:>10}",
+        "type", "bytes", "a[0]", "a[1]", "a[2]", "a[7]"
+    );
+    println!("{}", "-".repeat(62));
+    for (name, width) in [("byte", 1u64), ("int", 4), ("long", 8), ("double", 8)] {
+        let cells: String = [0u64, 1, 2, 7]
+            .iter()
+            .map(|i| format!("{:>11}", format!("0x{:x}", address(BASE, *i, width))))
+            .collect();
+        println!("{:<10} {:>6} {}", name, width, cells);
+    }
+
+    println!();
+    println!("indexing is one multiply and one add — the same work for a[0] as for a[999999]");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+const BASE = 0x7f0000 // a pretend starting address, so the arithmetic is visible
+
+func address(base, index, width int) int {
+	return base + index*width
+}
+
+func main() {
+	fmt.Printf("%-10s %6s  %10s %10s %10s %10s\\n",
+		"type", "bytes", "a[0]", "a[1]", "a[2]", "a[7]")
+	fmt.Println(strings.Repeat("-", 62))
+	type row struct {
+		name  string
+		width int
+	}
+	for _, r := range []row{{"byte", 1}, {"int", 4}, {"long", 8}, {"double", 8}} {
+		var cells strings.Builder
+		for _, i := range []int{0, 1, 2, 7} {
+			fmt.Fprintf(&cells, "%11s", fmt.Sprintf("0x%x", address(BASE, i, r.width)))
+		}
+		fmt.Printf("%-10s %6d %s\\n", r.name, r.width, cells.String())
+	}
+
+	fmt.Println()
+	fmt.Println("indexing is one multiply and one add — the same work for a[0] as for a[999999]")
+}`,
+            },
+          ],
         },
       ],
     },

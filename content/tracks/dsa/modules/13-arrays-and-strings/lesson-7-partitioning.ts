@@ -146,6 +146,341 @@ for case in ([2, 0, 1], [0, 0, 0], [2, 2, 2], [1], [], [2, 1, 0, 2, 1, 0, 2, 1, 
   [2, 1, 0, 2, 1, 0, 2, 1, 0]      -> [0, 0, 0, 1, 1, 1, 2, 2, 2]`,
           explanation:
             "Rows 1 and 4 are the ones to study — `mid` does not move, and on row 1 the loop then immediately looks at the same position again and finds a 0 there. That is the algorithm working exactly as designed. Six iterations for six elements, so this really is one pass, and the loop ends when `mid` passes `high` rather than when `mid` reaches the end. The empty-list case exits without an iteration, since `high` starts at −1.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+const padL = (v, w) => String(v).padStart(w);
+const padR = (v, w) => String(v).padEnd(w);
+
+// low: end of the 0s.  mid: cursor.  high: start of the 2s.
+function sortColours(a, trace = false) {
+  let low = 0;
+  let mid = 0;
+  let high = a.length - 1;
+  if (trace) {
+    console.log(\`  \${padL("low", 3)} \${padL("mid", 3)} \${padL("high", 4)}  \${padR("action", 24)} array\`);
+    console.log("  " + "-".repeat(56));
+  }
+  while (mid <= high) {
+    let action;
+    if (a[mid] === 0) {
+      [a[low], a[mid]] = [a[mid], a[low]];
+      low++;
+      mid++;
+      action = "0: swap low, both ++";
+    } else if (a[mid] === 1) {
+      mid++;
+      action = "1: leave it, mid ++";
+    } else {
+      [a[mid], a[high]] = [a[high], a[mid]];
+      high--;
+      action = "2: swap high, mid stays";
+    }
+    if (trace) {
+      console.log(\`  \${padL(low, 3)} \${padL(mid, 3)} \${padL(high, 4)}  \${padR(action, 24)} \${list(a)}\`);
+    }
+  }
+  return a;
+}
+
+console.log("sort [2, 0, 2, 1, 1, 0] into 0s, 1s, 2s in one pass:");
+sortColours([2, 0, 2, 1, 1, 0], true);
+
+console.log();
+for (const c of [[2, 0, 1], [0, 0, 0], [2, 2, 2], [1], [], [2, 1, 0, 2, 1, 0, 2, 1, 0]]) {
+  const before = list(c);
+  console.log(\`  \${padR(before, 32)} -> \${list(sortColours(c))}\`);
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+const padL = (v: number | string, w: number): string => String(v).padStart(w);
+const padR = (v: string, w: number): string => String(v).padEnd(w);
+
+// low: end of the 0s.  mid: cursor.  high: start of the 2s.
+function sortColours(a: number[], trace = false): number[] {
+  let low = 0;
+  let mid = 0;
+  let high = a.length - 1;
+  if (trace) {
+    console.log(\`  \${padL("low", 3)} \${padL("mid", 3)} \${padL("high", 4)}  \${padR("action", 24)} array\`);
+    console.log("  " + "-".repeat(56));
+  }
+  while (mid <= high) {
+    let action: string;
+    if (a[mid] === 0) {
+      [a[low], a[mid]] = [a[mid], a[low]];
+      low++;
+      mid++;
+      action = "0: swap low, both ++";
+    } else if (a[mid] === 1) {
+      mid++;
+      action = "1: leave it, mid ++";
+    } else {
+      [a[mid], a[high]] = [a[high], a[mid]];
+      high--;
+      action = "2: swap high, mid stays";
+    }
+    if (trace) {
+      console.log(\`  \${padL(low, 3)} \${padL(mid, 3)} \${padL(high, 4)}  \${padR(action, 24)} \${list(a)}\`);
+    }
+  }
+  return a;
+}
+
+console.log("sort [2, 0, 2, 1, 1, 0] into 0s, 1s, 2s in one pass:");
+sortColours([2, 0, 2, 1, 1, 0], true);
+
+console.log();
+const cases: number[][] = [[2, 0, 1], [0, 0, 0], [2, 2, 2], [1], [], [2, 1, 0, 2, 1, 0, 2, 1, 0]];
+for (const c of cases) {
+  const before = list(c);
+  console.log(\`  \${padR(before, 32)} -> \${list(sortColours(c))}\`);
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(int[] xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    /** low: end of the 0s.  mid: cursor.  high: start of the 2s. */
+    static int[] sortColours(int[] a, boolean trace) {
+        int low = 0, mid = 0, high = a.length - 1;
+        if (trace) {
+            System.out.printf("  %3s %3s %4s  %-24s array%n", "low", "mid", "high", "action");
+            System.out.println("  " + "-".repeat(56));
+        }
+        while (mid <= high) {
+            String action;
+            if (a[mid] == 0) {
+                int t = a[low];
+                a[low] = a[mid];
+                a[mid] = t;
+                low++;
+                mid++;
+                action = "0: swap low, both ++";
+            } else if (a[mid] == 1) {
+                mid++;
+                action = "1: leave it, mid ++";
+            } else {
+                int t = a[mid];
+                a[mid] = a[high];
+                a[high] = t;
+                high--;
+                action = "2: swap high, mid stays";
+            }
+            if (trace) {
+                System.out.printf("  %3d %3d %4d  %-24s %s%n", low, mid, high, action, list(a));
+            }
+        }
+        return a;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("sort [2, 0, 2, 1, 1, 0] into 0s, 1s, 2s in one pass:");
+        sortColours(new int[]{2, 0, 2, 1, 1, 0}, true);
+
+        System.out.println();
+        int[][] cases = {{2, 0, 1}, {0, 0, 0}, {2, 2, 2}, {1}, {}, {2, 1, 0, 2, 1, 0, 2, 1, 0}};
+        for (int[] c : cases) {
+            String before = list(c);
+            System.out.printf("  %-32s -> %s%n", before, list(sortColours(c, false)));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// low: end of the 0s.  mid: cursor.  high: start of the 2s.
+vector<int>& sortColours(vector<int>& a, bool trace = false) {
+    int low = 0, mid = 0, high = (int)a.size() - 1;
+    if (trace) {
+        cout << "  " << right << setw(3) << "low" << " " << setw(3) << "mid" << " "
+             << setw(4) << "high" << "  " << left << setw(24) << "action" << " array\\n";
+        cout << "  " << string(56, '-') << "\\n";
+    }
+    while (mid <= high) {
+        string action;
+        if (a[mid] == 0) {
+            swap(a[low], a[mid]);
+            low++;
+            mid++;
+            action = "0: swap low, both ++";
+        } else if (a[mid] == 1) {
+            mid++;
+            action = "1: leave it, mid ++";
+        } else {
+            swap(a[mid], a[high]);
+            high--;
+            action = "2: swap high, mid stays";
+        }
+        if (trace) {
+            cout << "  " << right << setw(3) << low << " " << setw(3) << mid << " "
+                 << setw(4) << high << "  " << left << setw(24) << action << " "
+                 << list(a) << "\\n";
+        }
+    }
+    return a;
+}
+
+int main() {
+    cout << "sort [2, 0, 2, 1, 1, 0] into 0s, 1s, 2s in one pass:\\n";
+    vector<int> traced = {2, 0, 2, 1, 1, 0};
+    sortColours(traced, true);
+
+    cout << "\\n";
+    vector<vector<int>> cases = {{2, 0, 1}, {0, 0, 0}, {2, 2, 2}, {1}, {},
+                                 {2, 1, 0, 2, 1, 0, 2, 1, 0}};
+    for (auto& c : cases) {
+        string before = list(c);
+        cout << "  " << left << setw(32) << before << " -> " << list(sortColours(c)) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// low: end of the 0s.  mid: cursor.  high: start of the 2s.
+fn sort_colours(a: &mut Vec<i32>, trace: bool) {
+    let (mut low, mut mid) = (0i32, 0i32);
+    let mut high = a.len() as i32 - 1;
+    if trace {
+        println!("  {:>3} {:>3} {:>4}  {:<24} array", "low", "mid", "high", "action");
+        println!("  {}", "-".repeat(56));
+    }
+    while mid <= high {
+        let action;
+        if a[mid as usize] == 0 {
+            a.swap(low as usize, mid as usize);
+            low += 1;
+            mid += 1;
+            action = "0: swap low, both ++";
+        } else if a[mid as usize] == 1 {
+            mid += 1;
+            action = "1: leave it, mid ++";
+        } else {
+            a.swap(mid as usize, high as usize);
+            high -= 1;
+            action = "2: swap high, mid stays";
+        }
+        if trace {
+            println!("  {:>3} {:>3} {:>4}  {:<24} {}", low, mid, high, action, list(a));
+        }
+    }
+}
+
+fn main() {
+    println!("sort [2, 0, 2, 1, 1, 0] into 0s, 1s, 2s in one pass:");
+    let mut traced = vec![2, 0, 2, 1, 1, 0];
+    sort_colours(&mut traced, true);
+
+    println!();
+    let cases: Vec<Vec<i32>> = vec![
+        vec![2, 0, 1],
+        vec![0, 0, 0],
+        vec![2, 2, 2],
+        vec![1],
+        vec![],
+        vec![2, 1, 0, 2, 1, 0, 2, 1, 0],
+    ];
+    for c in cases {
+        let mut c = c;
+        let before = list(&c);
+        sort_colours(&mut c, false);
+        println!("  {:<32} -> {}", before, list(&c));
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// low: end of the 0s.  mid: cursor.  high: start of the 2s.
+func sortColours(a []int, trace bool) []int {
+	low, mid, high := 0, 0, len(a)-1
+	if trace {
+		fmt.Printf("  %3s %3s %4s  %-24s array\\n", "low", "mid", "high", "action")
+		fmt.Println("  " + strings.Repeat("-", 56))
+	}
+	for mid <= high {
+		var action string
+		switch a[mid] {
+		case 0:
+			a[low], a[mid] = a[mid], a[low]
+			low++
+			mid++
+			action = "0: swap low, both ++"
+		case 1:
+			mid++
+			action = "1: leave it, mid ++"
+		default:
+			a[mid], a[high] = a[high], a[mid]
+			high--
+			action = "2: swap high, mid stays"
+		}
+		if trace {
+			fmt.Printf("  %3d %3d %4d  %-24s %s\\n", low, mid, high, action, list(a))
+		}
+	}
+	return a
+}
+
+func main() {
+	fmt.Println("sort [2, 0, 2, 1, 1, 0] into 0s, 1s, 2s in one pass:")
+	sortColours([]int{2, 0, 2, 1, 1, 0}, true)
+
+	fmt.Println()
+	cases := [][]int{{2, 0, 1}, {0, 0, 0}, {2, 2, 2}, {1}, {}, {2, 1, 0, 2, 1, 0, 2, 1, 0}}
+	for _, c := range cases {
+		before := list(c)
+		fmt.Printf("  %-32s -> %s\\n", before, list(sortColours(c, false)))
+	}
+}`,
+            },
+          ],
         },
       ],
     },

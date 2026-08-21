@@ -61,6 +61,287 @@ print(f"  final: {data}   kept {kept} non-zero values in a[0:{kept}]")`,
   final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
           explanation:
             "Watch `write` fall behind `read` at row 0 and stay behind. That gap — one, then one, then two — is the count of zeroes seen. This version *swaps* rather than assigns, which is what makes the zeroes accumulate neatly at the end rather than being left as stale copies; if the problem only asks for the first `k` elements and does not care what follows, a plain `a[write] = a[read]` is fine and one operation cheaper. Note that the swap is harmless when `write == read`, which is the case for the whole prefix before the first zero.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+const padL = (s, w) => String(s).padStart(w);
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+function moveZeroes(a) {
+  let write = 0;
+  console.log(\`  \${padL("read", 4)} \${padL("value", 5)} \${padL("keep?", 6)} \${padL("write", 5)}   array\`);
+  console.log("  " + "-".repeat(46));
+  for (let read = 0; read < a.length; read++) {
+    const value = a[read];
+    const keep = value !== 0;
+    if (keep) {
+      [a[write], a[read]] = [a[read], a[write]];
+      write++;
+    }
+    console.log(\`  \${padL(read, 4)} \${padL(value, 5)} \${padL(keep, 6)} \${padL(write, 5)}   \${list(a)}\`);
+  }
+  return write;
+}
+
+console.log("move every zero to the end, keeping the order of the rest");
+const data = [0, 1, 0, 3, 12];
+console.log(\`  start: \${list(data)}\`);
+const kept = moveZeroes(data);
+console.log(\`  final: \${list(data)}   kept \${kept} non-zero values in a[0:\${kept}]\`);`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+const padL = (s: string | number | boolean, w: number): string => String(s).padStart(w);
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+function moveZeroes(a: number[]): number {
+  let write = 0;
+  console.log(\`  \${padL("read", 4)} \${padL("value", 5)} \${padL("keep?", 6)} \${padL("write", 5)}   array\`);
+  console.log("  " + "-".repeat(46));
+  for (let read = 0; read < a.length; read++) {
+    const value = a[read];
+    const keep = value !== 0;
+    if (keep) {
+      [a[write], a[read]] = [a[read], a[write]];
+      write++;
+    }
+    console.log(\`  \${padL(read, 4)} \${padL(value, 5)} \${padL(keep, 6)} \${padL(write, 5)}   \${list(a)}\`);
+  }
+  return write;
+}
+
+console.log("move every zero to the end, keeping the order of the rest");
+const data: number[] = [0, 1, 0, 3, 12];
+console.log(\`  start: \${list(data)}\`);
+const kept = moveZeroes(data);
+console.log(\`  final: \${list(data)}   kept \${kept} non-zero values in a[0:\${kept}]\`);`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(int[] xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    /** Invariant: a[0:write] holds every kept element so far, in order. */
+    static int moveZeroes(int[] a) {
+        int write = 0;
+        System.out.printf("  %4s %5s %6s %5s   array%n", "read", "value", "keep?", "write");
+        System.out.println("  " + "-".repeat(46));
+        for (int read = 0; read < a.length; read++) {
+            int value = a[read];
+            boolean keep = value != 0;
+            if (keep) {
+                int t = a[write];
+                a[write] = a[read];
+                a[read] = t;
+                write++;
+            }
+            System.out.printf("  %4d %5d %6b %5d   %s%n", read, value, keep, write, list(a));
+        }
+        return write;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("move every zero to the end, keeping the order of the rest");
+        int[] data = {0, 1, 0, 3, 12};
+        System.out.println("  start: " + list(data));
+        int kept = moveZeroes(data);
+        System.out.println("  final: " + list(data) + "   kept " + kept
+                + " non-zero values in a[0:" + kept + "]");
+    }
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+size_t moveZeroes(vector<int>& a) {
+    size_t write = 0;
+    cout << "  " << right << setw(4) << "read" << " " << setw(5) << "value"
+         << " " << setw(6) << "keep?" << " " << setw(5) << "write" << "   array\\n";
+    cout << "  " << string(46, '-') << "\\n";
+    for (size_t read = 0; read < a.size(); read++) {
+        int value = a[read];
+        bool keep = value != 0;
+        if (keep) {
+            swap(a[write], a[read]);
+            write++;
+        }
+        cout << "  " << setw(4) << read << " " << setw(5) << value << " "
+             << setw(6) << boolalpha << keep << " " << setw(5) << write
+             << "   " << list(a) << "\\n";
+    }
+    return write;
+}
+
+int main() {
+    cout << "move every zero to the end, keeping the order of the rest\\n";
+    vector<int> data = {0, 1, 0, 3, 12};
+    cout << "  start: " << list(data) << "\\n";
+    size_t kept = moveZeroes(data);
+    cout << "  final: " << list(data) << "   kept " << kept
+         << " non-zero values in a[0:" << kept << "]\\n";
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Invariant: a[0..write] holds every kept element so far, in order.
+fn move_zeroes(a: &mut Vec<i32>) -> usize {
+    let mut write = 0;
+    println!("  {:>4} {:>5} {:>6} {:>5}   array", "read", "value", "keep?", "write");
+    println!("  {}", "-".repeat(46));
+    for read in 0..a.len() {
+        let value = a[read];
+        let keep = value != 0;
+        if keep {
+            a.swap(write, read);
+            write += 1;
+        }
+        println!("  {:>4} {:>5} {:>6} {:>5}   {}", read, value, keep, write, list(a));
+    }
+    write
+}
+
+fn main() {
+    println!("move every zero to the end, keeping the order of the rest");
+    let mut data = vec![0, 1, 0, 3, 12];
+    println!("  start: {}", list(&data));
+    let kept = move_zeroes(&mut data);
+    println!("  final: {}   kept {} non-zero values in a[0:{}]", list(&data), kept, kept);
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+func moveZeroes(a []int) int {
+	write := 0
+	fmt.Printf("  %4s %5s %6s %5s   array\\n", "read", "value", "keep?", "write")
+	fmt.Println("  " + strings.Repeat("-", 46))
+	for read := range a {
+		value := a[read]
+		keep := value != 0
+		if keep {
+			a[write], a[read] = a[read], a[write]
+			write++
+		}
+		fmt.Printf("  %4d %5d %6t %5d   %s\\n", read, value, keep, write, list(a))
+	}
+	return write
+}
+
+func main() {
+	fmt.Println("move every zero to the end, keeping the order of the rest")
+	data := []int{0, 1, 0, 3, 12}
+	fmt.Println("  start:", list(data))
+	kept := moveZeroes(data)
+	fmt.Printf("  final: %s   kept %d non-zero values in a[0:%d]\\n", list(data), kept, kept)
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -127,6 +408,276 @@ drop the negatives
     out k=3  a[0:k]=[5, 0, 7]`,
           explanation:
             "The two middle predicates are the interesting ones, and they are worth reading slowly. **Both compare against the output, not the input** — `a[w - 1]` is the last element already kept, and `a[w - 2]` is the one before it. That is why the at-most-two version generalises to at-most-k by changing a single digit: keeping k copies means checking whether the k-th most recent survivor already has this value. Comparing against `a[r - 1]` instead would be comparing against the input, which fails as soon as a run is longer than the limit.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+function compact(a, keep) {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (keep(a, write, read)) {
+      a[write] = a[read];
+      write++;
+    }
+  }
+  return write;
+}
+
+const cases = [
+  ["remove every 3", [3, 2, 2, 3, 1, 3], (a, w, r) => a[r] !== 3],
+  ["dedupe a sorted array", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w === 0 || a[r] !== a[w - 1]],
+  ["keep at most two of each", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w < 2 || a[r] !== a[w - 2]],
+  ["drop the negatives", [-1, 5, -3, 0, 7, -8], (a, w, r) => a[r] >= 0],
+];
+
+for (const [name, data, keep] of cases) {
+  const before = list(data);
+  const k = compact(data, keep);
+  console.log(name);
+  console.log(\`    in  \${before}\`);
+  console.log(\`    out k=\${k}  a[0:k]=\${list(data.slice(0, k))}\`);
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+type Keep = (a: number[], w: number, r: number) => boolean;
+
+function compact(a: number[], keep: Keep): number {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (keep(a, write, read)) {
+      a[write] = a[read];
+      write++;
+    }
+  }
+  return write;
+}
+
+const cases: [string, number[], Keep][] = [
+  ["remove every 3", [3, 2, 2, 3, 1, 3], (a, w, r) => a[r] !== 3],
+  ["dedupe a sorted array", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w === 0 || a[r] !== a[w - 1]],
+  ["keep at most two of each", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w < 2 || a[r] !== a[w - 2]],
+  ["drop the negatives", [-1, 5, -3, 0, 7, -8], (a, w, r) => a[r] >= 0],
+];
+
+for (const [name, data, keep] of cases) {
+  const before = list(data);
+  const k = compact(data, keep);
+  console.log(name);
+  console.log(\`    in  \${before}\`);
+  console.log(\`    out k=\${k}  a[0:k]=\${list(data.slice(0, k))}\`);
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    interface Keep {
+        boolean test(int[] a, int write, int read);
+    }
+
+    /** The whole pattern. Only \`keep(a, write, read)\` changes between problems. */
+    static int compact(int[] a, Keep keep) {
+        int write = 0;
+        for (int read = 0; read < a.length; read++) {
+            if (keep.test(a, write, read)) {
+                a[write] = a[read];
+                write++;
+            }
+        }
+        return write;
+    }
+
+    static String list(int[] xs, int to) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < to; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    public static void main(String[] args) {
+        String[] names = {"remove every 3", "dedupe a sorted array",
+                          "keep at most two of each", "drop the negatives"};
+        int[][] data = {{3, 2, 2, 3, 1, 3}, {0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+                        {0, 0, 1, 1, 1, 2, 2, 3, 3, 4}, {-1, 5, -3, 0, 7, -8}};
+        Keep[] keeps = {
+            (a, w, r) -> a[r] != 3,
+            (a, w, r) -> w == 0 || a[r] != a[w - 1],
+            (a, w, r) -> w < 2 || a[r] != a[w - 2],
+            (a, w, r) -> a[r] >= 0,
+        };
+
+        for (int i = 0; i < names.length; i++) {
+            String before = list(data[i], data[i].length);
+            int k = compact(data[i], keeps[i]);
+            System.out.println(names[i]);
+            System.out.println("    in  " + before);
+            System.out.println("    out k=" + k + "  a[0:k]=" + list(data[i], k));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+using Keep = function<bool(const vector<int>&, size_t, size_t)>;
+
+string list(const vector<int>& xs, size_t to) {
+    string out = "[";
+    for (size_t i = 0; i < to; i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+size_t compact(vector<int>& a, const Keep& keep) {
+    size_t write = 0;
+    for (size_t read = 0; read < a.size(); read++) {
+        if (keep(a, write, read)) {
+            a[write] = a[read];
+            write++;
+        }
+    }
+    return write;
+}
+
+int main() {
+    vector<string> names = {"remove every 3", "dedupe a sorted array",
+                            "keep at most two of each", "drop the negatives"};
+    vector<vector<int>> data = {{3, 2, 2, 3, 1, 3}, {0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+                                {0, 0, 1, 1, 1, 2, 2, 3, 3, 4}, {-1, 5, -3, 0, 7, -8}};
+    vector<Keep> keeps = {
+        [](const vector<int>& a, size_t, size_t r) { return a[r] != 3; },
+        [](const vector<int>& a, size_t w, size_t r) { return w == 0 || a[r] != a[w - 1]; },
+        [](const vector<int>& a, size_t w, size_t r) { return w < 2 || a[r] != a[w - 2]; },
+        [](const vector<int>& a, size_t, size_t r) { return a[r] >= 0; },
+    };
+
+    for (size_t i = 0; i < names.size(); i++) {
+        string before = list(data[i], data[i].size());
+        size_t k = compact(data[i], keeps[i]);
+        cout << names[i] << "\\n";
+        cout << "    in  " << before << "\\n";
+        cout << "    out k=" << k << "  a[0:k]=" << list(data[i], k) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+fn compact(a: &mut [i32], keep: fn(&[i32], usize, usize) -> bool) -> usize {
+    let mut write = 0;
+    for read in 0..a.len() {
+        if keep(a, write, read) {
+            a[write] = a[read];
+            write += 1;
+        }
+    }
+    write
+}
+
+fn main() {
+    let cases: Vec<(&str, Vec<i32>, fn(&[i32], usize, usize) -> bool)> = vec![
+        ("remove every 3", vec![3, 2, 2, 3, 1, 3], |a, _w, r| a[r] != 3),
+        (
+            "dedupe a sorted array",
+            vec![0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+            |a, w, r| w == 0 || a[r] != a[w - 1],
+        ),
+        (
+            "keep at most two of each",
+            vec![0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+            |a, w, r| w < 2 || a[r] != a[w - 2],
+        ),
+        ("drop the negatives", vec![-1, 5, -3, 0, 7, -8], |a, _w, r| a[r] >= 0),
+    ];
+
+    for (name, data, keep) in cases {
+        let mut data = data;
+        let before = list(&data);
+        let k = compact(&mut data, keep);
+        println!("{}", name);
+        println!("    in  {}", before);
+        println!("    out k={}  a[0:k]={}", k, list(&data[..k]));
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// The whole pattern. Only keep(a, write, read) changes between problems.
+func compact(a []int, keep func([]int, int, int) bool) int {
+	write := 0
+	for read := range a {
+		if keep(a, write, read) {
+			a[write] = a[read]
+			write++
+		}
+	}
+	return write
+}
+
+func main() {
+	type testCase struct {
+		name string
+		data []int
+		keep func([]int, int, int) bool
+	}
+	cases := []testCase{
+		{"remove every 3", []int{3, 2, 2, 3, 1, 3},
+			func(a []int, w, r int) bool { return a[r] != 3 }},
+		{"dedupe a sorted array", []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+			func(a []int, w, r int) bool { return w == 0 || a[r] != a[w-1] }},
+		{"keep at most two of each", []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+			func(a []int, w, r int) bool { return w < 2 || a[r] != a[w-2] }},
+		{"drop the negatives", []int{-1, 5, -3, 0, 7, -8},
+			func(a []int, w, r int) bool { return a[r] >= 0 }},
+	}
+
+	for _, c := range cases {
+		before := list(c.data)
+		k := compact(c.data, c.keep)
+		fmt.Println(c.name)
+		fmt.Println("    in ", before)
+		fmt.Printf("    out k=%d  a[0:k]=%s\\n", k, list(c.data[:k]))
+	}
+}`,
+            },
+          ],
         },
       ],
     },
