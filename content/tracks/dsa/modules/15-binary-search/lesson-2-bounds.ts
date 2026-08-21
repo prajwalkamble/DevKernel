@@ -64,9 +64,10 @@ a = [1, 2, 2, 2, 3, 5, 5, 8]
 print("array:", a, "\\n")
 for t in (2, 5, 4, 0, 9):
     lb, ub = lower_bound(a, t), upper_bound(a, t)
+    first = lb if lb < len(a) and a[lb] == t else "-"
+    last = ub - 1 if ub > lb else "-"
     print(f"target {t}:  lower={lb}  upper={ub}  count={ub - lb}"
-          f"  first={lb if lb < len(a) and a[lb] == t else None}"
-          f"  last={ub - 1 if ub > lb else None}")
+          f"  first={first}  last={last}")
 
 # the two differ in exactly one character, and that is the whole trick
 print("\\nlower_bound uses  a[mid] <  target")
@@ -76,25 +77,433 @@ print("upper_bound uses  a[mid] <= target")
 import bisect
 print("\\nmatches the standard library:")
 for t in (2, 4, 9):
-    print(f"  t={t}: ours lower={lower_bound(a, t)} bisect_left={bisect.bisect_left(a, t)}"
-          f"   ours upper={upper_bound(a, t)} bisect_right={bisect.bisect_right(a, t)}")`,
+    print(f"  t={t}: ours lower={lower_bound(a, t)} lib lower={bisect.bisect_left(a, t)}"
+          f"   ours upper={upper_bound(a, t)} lib upper={bisect.bisect_right(a, t)}")`,
           output: `array: [1, 2, 2, 2, 3, 5, 5, 8] 
 
 target 2:  lower=1  upper=4  count=3  first=1  last=3
 target 5:  lower=5  upper=7  count=2  first=5  last=6
-target 4:  lower=5  upper=5  count=0  first=None  last=None
-target 0:  lower=0  upper=0  count=0  first=None  last=None
-target 9:  lower=8  upper=8  count=0  first=None  last=None
+target 4:  lower=5  upper=5  count=0  first=-  last=-
+target 0:  lower=0  upper=0  count=0  first=-  last=-
+target 9:  lower=8  upper=8  count=0  first=-  last=-
 
 lower_bound uses  a[mid] <  target
 upper_bound uses  a[mid] <= target
 
 matches the standard library:
-  t=2: ours lower=1 bisect_left=1   ours upper=4 bisect_right=4
-  t=4: ours lower=5 bisect_left=5   ours upper=5 bisect_right=5
-  t=9: ours lower=8 bisect_left=8   ours upper=8 bisect_right=8`,
+  t=2: ours lower=1 lib lower=1   ours upper=4 lib upper=4
+  t=4: ours lower=5 lib lower=5   ours upper=5 lib upper=5
+  t=9: ours lower=8 lib lower=8   ours upper=8 lib upper=8`,
           explanation:
             "The whole difference is `<` against `<=`. With `<`, an element equal to the target fails the test and the window collapses towards it from the right, landing on the first equal element. With `<=`, an equal element passes and gets skipped, landing just past the last one.\n\nEverything else is arithmetic. **Count** is `upper - lower`, and it is zero exactly when the value is absent — which is also the presence test, so you never need a separate one. **First occurrence** is `lower`, valid only if `lower < len` and `a[lower] == t`. **Last occurrence** is `upper - 1`.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+// First index with a[i] >= target. Equals a.length when there is none.
+function lowerBound(a, target) {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+// First index with a[i] > target.
+function upperBound(a, target) {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] <= target) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+const a = [1, 2, 2, 2, 3, 5, 5, 8];
+console.log("array:", list(a), "\\n");
+for (const t of [2, 5, 4, 0, 9]) {
+  const lb = lowerBound(a, t);
+  const ub = upperBound(a, t);
+  const first = lb < a.length && a[lb] === t ? lb : "-";
+  const last = ub > lb ? ub - 1 : "-";
+  console.log(
+    \`target \${t}:  lower=\${lb}  upper=\${ub}  count=\${ub - lb}  first=\${first}  last=\${last}\`
+  );
+}
+
+// the two differ in exactly one character, and that is the whole trick
+console.log("\\nlower_bound uses  a[mid] <  target");
+console.log("upper_bound uses  a[mid] <= target");
+
+// The Python original ends by checking these against \`bisect\`. JavaScript has
+// no lower/upper bound in its standard library — Array.prototype.indexOf is a
+// linear scan — so there is nothing here to check against, and the program
+// stops rather than comparing the function to itself.`,
+              output: `array: [1, 2, 2, 2, 3, 5, 5, 8]
+
+target 2:  lower=1  upper=4  count=3  first=1  last=3
+target 5:  lower=5  upper=7  count=2  first=5  last=6
+target 4:  lower=5  upper=5  count=0  first=-  last=-
+target 0:  lower=0  upper=0  count=0  first=-  last=-
+target 9:  lower=8  upper=8  count=0  first=-  last=-
+
+lower_bound uses  a[mid] <  target
+upper_bound uses  a[mid] <= target`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+// First index with a[i] >= target. Equals a.length when there is none.
+function lowerBound(a: number[], target: number): number {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+// First index with a[i] > target.
+function upperBound(a: number[], target: number): number {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] <= target) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+const a: number[] = [1, 2, 2, 2, 3, 5, 5, 8];
+console.log("array:", list(a), "\\n");
+for (const t of [2, 5, 4, 0, 9]) {
+  const lb = lowerBound(a, t);
+  const ub = upperBound(a, t);
+  const first = lb < a.length && a[lb] === t ? lb : "-";
+  const last = ub > lb ? ub - 1 : "-";
+  console.log(
+    \`target \${t}:  lower=\${lb}  upper=\${ub}  count=\${ub - lb}  first=\${first}  last=\${last}\`
+  );
+}
+
+// the two differ in exactly one character, and that is the whole trick
+console.log("\\nlower_bound uses  a[mid] <  target");
+console.log("upper_bound uses  a[mid] <= target");
+
+// The Python original ends by checking these against \`bisect\`. TypeScript has
+// no lower/upper bound in its standard library — Array.prototype.indexOf is a
+// linear scan — so there is nothing here to check against, and the program
+// stops rather than comparing the function to itself.`,
+              output: `array: [1, 2, 2, 2, 3, 5, 5, 8]
+
+target 2:  lower=1  upper=4  count=3  first=1  last=3
+target 5:  lower=5  upper=7  count=2  first=5  last=6
+target 4:  lower=5  upper=5  count=0  first=-  last=-
+target 0:  lower=0  upper=0  count=0  first=-  last=-
+target 9:  lower=8  upper=8  count=0  first=-  last=-
+
+lower_bound uses  a[mid] <  target
+upper_bound uses  a[mid] <= target`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(int[] xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    /** First index with a[i] >= target. Equals a.length when there is none. */
+    static int lowerBound(int[] a, int target) {
+        int lo = 0, hi = a.length;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (a[mid] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    /** First index with a[i] > target. */
+    static int upperBound(int[] a, int target) {
+        int lo = 0, hi = a.length;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (a[mid] <= target) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    public static void main(String[] args) {
+        int[] a = {1, 2, 2, 2, 3, 5, 5, 8};
+        System.out.println("array: " + list(a) + " \\n");
+        for (int t : new int[]{2, 5, 4, 0, 9}) {
+            int lb = lowerBound(a, t), ub = upperBound(a, t);
+            String first = (lb < a.length && a[lb] == t) ? String.valueOf(lb) : "-";
+            String last = ub > lb ? String.valueOf(ub - 1) : "-";
+            System.out.println("target " + t + ":  lower=" + lb + "  upper=" + ub
+                    + "  count=" + (ub - lb) + "  first=" + first + "  last=" + last);
+        }
+
+        // the two differ in exactly one character, and that is the whole trick
+        System.out.println("\\nlower_bound uses  a[mid] <  target");
+        System.out.println("upper_bound uses  a[mid] <= target");
+
+        // The Python original ends by checking these against \`bisect\`. Java has
+        // no equivalent: Arrays.binarySearch returns -(insertion point) - 1 when
+        // the value is absent, and an *arbitrary* matching index when it is
+        // present, so it cannot answer either question on a run of duplicates.
+    }
+}`,
+              output: `array: [1, 2, 2, 2, 3, 5, 5, 8]
+
+target 2:  lower=1  upper=4  count=3  first=1  last=3
+target 5:  lower=5  upper=7  count=2  first=5  last=6
+target 4:  lower=5  upper=5  count=0  first=-  last=-
+target 0:  lower=0  upper=0  count=0  first=-  last=-
+target 9:  lower=8  upper=8  count=0  first=-  last=-
+
+lower_bound uses  a[mid] <  target
+upper_bound uses  a[mid] <= target`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// First index with a[i] >= target. Equals a.size() when there is none.
+size_t lowerBound(const vector<int>& a, int target) {
+    size_t lo = 0, hi = a.size();
+    while (lo < hi) {
+        size_t mid = lo + (hi - lo) / 2;
+        if (a[mid] < target) lo = mid + 1;
+        else hi = mid;
+    }
+    return lo;
+}
+
+// First index with a[i] > target.
+size_t upperBound(const vector<int>& a, int target) {
+    size_t lo = 0, hi = a.size();
+    while (lo < hi) {
+        size_t mid = lo + (hi - lo) / 2;
+        if (a[mid] <= target) lo = mid + 1;
+        else hi = mid;
+    }
+    return lo;
+}
+
+int main() {
+    vector<int> a = {1, 2, 2, 2, 3, 5, 5, 8};
+    cout << "array: " << list(a) << " \\n\\n";
+    for (int t : {2, 5, 4, 0, 9}) {
+        size_t lb = lowerBound(a, t), ub = upperBound(a, t);
+        string first = (lb < a.size() && a[lb] == t) ? to_string(lb) : "-";
+        string last = ub > lb ? to_string(ub - 1) : "-";
+        cout << "target " << t << ":  lower=" << lb << "  upper=" << ub
+             << "  count=" << ub - lb << "  first=" << first
+             << "  last=" << last << "\\n";
+    }
+
+    // the two differ in exactly one character, and that is the whole trick
+    cout << "\\nlower_bound uses  a[mid] <  target\\n";
+    cout << "upper_bound uses  a[mid] <= target\\n";
+
+    // insertion point: lower_bound is where a new value goes to keep order
+    cout << "\\nmatches the standard library:\\n";
+    for (int t : {2, 4, 9}) {
+        size_t libLower = std::lower_bound(a.begin(), a.end(), t) - a.begin();
+        size_t libUpper = std::upper_bound(a.begin(), a.end(), t) - a.begin();
+        cout << "  t=" << t << ": ours lower=" << lowerBound(a, t)
+             << " lib lower=" << libLower
+             << "   ours upper=" << upperBound(a, t)
+             << " lib upper=" << libUpper << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// First index with a[i] >= target. Equals a.len() when there is none.
+fn lower_bound(a: &[i32], target: i32) -> usize {
+    let (mut lo, mut hi) = (0usize, a.len());
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if a[mid] < target {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    lo
+}
+
+/// First index with a[i] > target.
+fn upper_bound(a: &[i32], target: i32) -> usize {
+    let (mut lo, mut hi) = (0usize, a.len());
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if a[mid] <= target {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    lo
+}
+
+fn main() {
+    let a = [1, 2, 2, 2, 3, 5, 5, 8];
+    println!("array: {} \\n", list(&a));
+    for t in [2, 5, 4, 0, 9] {
+        let (lb, ub) = (lower_bound(&a, t), upper_bound(&a, t));
+        let first = if lb < a.len() && a[lb] == t { lb.to_string() } else { "-".to_string() };
+        let last = if ub > lb { (ub - 1).to_string() } else { "-".to_string() };
+        println!(
+            "target {}:  lower={}  upper={}  count={}  first={}  last={}",
+            t,
+            lb,
+            ub,
+            ub - lb,
+            first,
+            last
+        );
+    }
+
+    // the two differ in exactly one character, and that is the whole trick
+    println!("\\nlower_bound uses  a[mid] <  target");
+    println!("upper_bound uses  a[mid] <= target");
+
+    // insertion point: lower_bound is where a new value goes to keep order.
+    // Rust spells both of these \`partition_point\`, with the predicate carrying
+    // the difference the two functions above carry in their comparison.
+    println!("\\nmatches the standard library:");
+    for t in [2, 4, 9] {
+        let lib_lower = a.partition_point(|&x| x < t);
+        let lib_upper = a.partition_point(|&x| x <= t);
+        println!(
+            "  t={}: ours lower={} lib lower={}   ours upper={} lib upper={}",
+            t,
+            lower_bound(&a, t),
+            lib_lower,
+            upper_bound(&a, t),
+            lib_upper
+        );
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// First index with a[i] >= target. Equals len(a) when there is none.
+func lowerBound(a []int, target int) int {
+	lo, hi := 0, len(a)
+	for lo < hi {
+		mid := lo + (hi-lo)/2
+		if a[mid] < target {
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+	return lo
+}
+
+// First index with a[i] > target.
+func upperBound(a []int, target int) int {
+	lo, hi := 0, len(a)
+	for lo < hi {
+		mid := lo + (hi-lo)/2
+		if a[mid] <= target {
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+	return lo
+}
+
+func main() {
+	a := []int{1, 2, 2, 2, 3, 5, 5, 8}
+	fmt.Println("array:", list(a), "\\n")
+	for _, t := range []int{2, 5, 4, 0, 9} {
+		lb, ub := lowerBound(a, t), upperBound(a, t)
+		first, last := "-", "-"
+		if lb < len(a) && a[lb] == t {
+			first = fmt.Sprint(lb)
+		}
+		if ub > lb {
+			last = fmt.Sprint(ub - 1)
+		}
+		fmt.Printf("target %d:  lower=%d  upper=%d  count=%d  first=%s  last=%s\\n",
+			t, lb, ub, ub-lb, first, last)
+	}
+
+	// the two differ in exactly one character, and that is the whole trick
+	fmt.Println("\\nlower_bound uses  a[mid] <  target")
+	fmt.Println("upper_bound uses  a[mid] <= target")
+
+	// insertion point: lower_bound is where a new value goes to keep order.
+	// Go's sort.SearchInts is lower_bound; upper_bound is sort.Search with the
+	// predicate loosened by one character, exactly as above.
+	fmt.Println("\\nmatches the standard library:")
+	for _, t := range []int{2, 4, 9} {
+		libLower := sort.SearchInts(a, t)
+		libUpper := sort.Search(len(a), func(i int) bool { return a[i] > t })
+		fmt.Printf("  t=%d: ours lower=%d lib lower=%d   ours upper=%d lib upper=%d\\n",
+			t, lowerBound(a, t), libLower, upperBound(a, t), libUpper)
+	}
+}`,
+            },
+          ],
         },
       ],
     },

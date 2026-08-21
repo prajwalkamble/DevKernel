@@ -88,11 +88,20 @@ def lis_quadratic(a):
                 best[i] = max(best[i], best[j] + 1)
     return max(best)
 
-import random
-random.seed(7)
-c = [random.randint(0, 1000) for _ in range(400)]
-print("\\nboth agree on 400 random values:", lis_length(c) == lis_quadratic(c),
-      "->", lis_length(c))`,
+# A Lehmer generator rather than \`random\`: every language has to produce the
+# same 400 values for the two implementations to be compared on the same input,
+# and no other language reproduces Python's Mersenne Twister. Every product here
+# stays under 2^53, so a double holds it exactly too.
+seed = 7
+def next_rand():
+    global seed
+    seed = (seed * 16807) % 2147483647
+    return seed
+
+c = [next_rand() % 1001 for _ in range(400)]
+fast, slow = lis_length(c), lis_quadratic(c)
+print(f"\\nboth agree on 400 pseudo-random values: {fast} vs {slow}"
+      f"  {'ok' if fast == slow else 'MISMATCH'}")`,
           output: `input: [10, 9, 2, 5, 3, 7, 101, 18]
 trace:
   saw  10 -> tails [10]
@@ -110,9 +119,619 @@ it is only ever the same *length* as one.
 
 [2, 2, 2, 3, 3]: strict=2  non-decreasing=5
 
-both agree on 400 random values: True -> 39`,
+both agree on 400 pseudo-random values: 35 vs 35  ok`,
           explanation:
             "Follow the trace. Seeing `3` when `tails` is `[2, 5]` replaces the 5: there is still a length-2 subsequence, but now it ends on 3 rather than 5, which leaves more room for whatever comes next. **Replacing never changes the length; appending is the only thing that grows it.**\n\nThe warning in the middle matters. The final `tails` is `[2, 3, 7, 18]`, which is *not* an increasing subsequence of the input — 18 comes after 101, and the actual LIS is `[2, 3, 7, 101]` or `[2, 3, 7, 18]`. `tails` is only guaranteed to have the right *length*. Reconstructing the subsequence itself needs a parallel array of predecessor indices.\n\nStrict versus non-decreasing is one function call. `bisect_left` finds the first slot `>= v` and so overwrites an equal value, forbidding repeats. `bisect_right` skips past equals and appends, allowing them. `[2, 2, 2, 3, 3]` gives 2 and 5 respectively — a difference no amount of testing on distinct values would reveal.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+const padL = (v, w) => String(v).padStart(w);
+
+// \`bisect_left\` and \`bisect_right\`, written out: the only difference is
+// whether an equal element counts as already-placed.
+function bisectLeft(a, v) {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] < v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function bisectRight(a, v) {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] <= v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+// Longest strictly increasing subsequence, O(n log n).
+//
+// \`tails[k]\` is the smallest possible tail of an increasing subsequence of
+// length k+1. It is sorted, which is what lets binary search find the slot.
+function lisLength(a, trace = false) {
+  const tails = [];
+  for (const v of a) {
+    const i = bisectLeft(tails, v);
+    if (i === tails.length) tails.push(v);
+    else tails[i] = v;
+    if (trace) console.log(\`  saw \${padL(v, 3)} -> tails \${list(tails)}\`);
+  }
+  return tails.length;
+}
+
+const a = [10, 9, 2, 5, 3, 7, 101, 18];
+console.log("input:", list(a));
+console.log("trace:");
+const n = lisLength(a, true);
+console.log("LIS length:", n);
+
+console.log("\\nnote: tails is NOT the subsequence itself —");
+console.log("it is only ever the same *length* as one.");
+
+// non-decreasing needs bisectRight instead
+function lisNonDecreasing(a) {
+  const tails = [];
+  for (const v of a) {
+    const i = bisectRight(tails, v);
+    if (i === tails.length) tails.push(v);
+    else tails[i] = v;
+  }
+  return tails.length;
+}
+
+const b = [2, 2, 2, 3, 3];
+console.log(\`\\n\${list(b)}: strict=\${lisLength(b)}  non-decreasing=\${lisNonDecreasing(b)}\`);
+
+// the O(n^2) version, for comparison on a small input
+function lisQuadratic(a) {
+  if (a.length === 0) return 0;
+  const best = new Array(a.length).fill(1);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (a[j] < a[i]) best[i] = Math.max(best[i], best[j] + 1);
+    }
+  }
+  return Math.max(...best);
+}
+
+// A Lehmer generator rather than a library RNG: every language has to produce
+// the same 400 values for the two implementations to be compared on the same
+// input. Every product here stays under 2^53, so a double holds it exactly.
+let seed = 7;
+function nextRand() {
+  seed = (seed * 16807) % 2147483647;
+  return seed;
+}
+
+const c = [];
+for (let i = 0; i < 400; i++) c.push(nextRand() % 1001);
+const fast = lisLength(c);
+const slow = lisQuadratic(c);
+console.log(
+  \`\\nboth agree on 400 pseudo-random values: \${fast} vs \${slow}  \${fast === slow ? "ok" : "MISMATCH"}\`
+);`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+const padL = (v: number, w: number): string => String(v).padStart(w);
+
+// \`bisect_left\` and \`bisect_right\`, written out: the only difference is
+// whether an equal element counts as already-placed.
+function bisectLeft(a: number[], v: number): number {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] < v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function bisectRight(a: number[], v: number): number {
+  let lo = 0;
+  let hi = a.length;
+  while (lo < hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    if (a[mid] <= v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+// Longest strictly increasing subsequence, O(n log n).
+//
+// \`tails[k]\` is the smallest possible tail of an increasing subsequence of
+// length k+1. It is sorted, which is what lets binary search find the slot.
+function lisLength(a: number[], trace = false): number {
+  const tails: number[] = [];
+  for (const v of a) {
+    const i = bisectLeft(tails, v);
+    if (i === tails.length) tails.push(v);
+    else tails[i] = v;
+    if (trace) console.log(\`  saw \${padL(v, 3)} -> tails \${list(tails)}\`);
+  }
+  return tails.length;
+}
+
+const a: number[] = [10, 9, 2, 5, 3, 7, 101, 18];
+console.log("input:", list(a));
+console.log("trace:");
+const n = lisLength(a, true);
+console.log("LIS length:", n);
+
+console.log("\\nnote: tails is NOT the subsequence itself —");
+console.log("it is only ever the same *length* as one.");
+
+// non-decreasing needs bisectRight instead
+function lisNonDecreasing(a: number[]): number {
+  const tails: number[] = [];
+  for (const v of a) {
+    const i = bisectRight(tails, v);
+    if (i === tails.length) tails.push(v);
+    else tails[i] = v;
+  }
+  return tails.length;
+}
+
+const b: number[] = [2, 2, 2, 3, 3];
+console.log(\`\\n\${list(b)}: strict=\${lisLength(b)}  non-decreasing=\${lisNonDecreasing(b)}\`);
+
+// the O(n^2) version, for comparison on a small input
+function lisQuadratic(a: number[]): number {
+  if (a.length === 0) return 0;
+  const best = new Array(a.length).fill(1);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (a[j] < a[i]) best[i] = Math.max(best[i], best[j] + 1);
+    }
+  }
+  return Math.max(...best);
+}
+
+// A Lehmer generator rather than a library RNG: every language has to produce
+// the same 400 values for the two implementations to be compared on the same
+// input. Every product here stays under 2^53, so a double holds it exactly.
+let seed = 7;
+function nextRand() {
+  seed = (seed * 16807) % 2147483647;
+  return seed;
+}
+
+const c: number[] = [];
+for (let i = 0; i < 400; i++) c.push(nextRand() % 1001);
+const fast = lisLength(c);
+const slow = lisQuadratic(c);
+console.log(
+  \`\\nboth agree on 400 pseudo-random values: \${fast} vs \${slow}  \${fast === slow ? "ok" : "MISMATCH"}\`
+);`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(List<Integer> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs.get(i));
+        }
+        return sb.append("]").toString();
+    }
+
+    static String list(int[] xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    /* \`bisect_left\` and \`bisect_right\`, written out. Arrays.binarySearch cannot
+       stand in: on a run of equal values it returns an arbitrary one of them. */
+    static int bisectLeft(List<Integer> a, int v) {
+        int lo = 0, hi = a.size();
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (a.get(mid) < v) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    static int bisectRight(List<Integer> a, int v) {
+        int lo = 0, hi = a.size();
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (a.get(mid) <= v) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    /**
+     * Longest strictly increasing subsequence, O(n log n).
+     *
+     * \`tails[k]\` is the smallest possible tail of an increasing subsequence of
+     * length k+1. It is sorted, which is what lets binary search find the slot.
+     */
+    static int lisLength(int[] a, boolean trace) {
+        List<Integer> tails = new ArrayList<>();
+        for (int v : a) {
+            int i = bisectLeft(tails, v);
+            if (i == tails.size()) tails.add(v);
+            else tails.set(i, v);
+            if (trace) System.out.printf("  saw %3d -> tails %s%n", v, list(tails));
+        }
+        return tails.size();
+    }
+
+    /** non-decreasing needs bisectRight instead */
+    static int lisNonDecreasing(int[] a) {
+        List<Integer> tails = new ArrayList<>();
+        for (int v : a) {
+            int i = bisectRight(tails, v);
+            if (i == tails.size()) tails.add(v);
+            else tails.set(i, v);
+        }
+        return tails.size();
+    }
+
+    /** the O(n^2) version, for comparison on a small input */
+    static int lisQuadratic(int[] a) {
+        if (a.length == 0) return 0;
+        int[] best = new int[a.length];
+        Arrays.fill(best, 1);
+        int answer = 1;
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (a[j] < a[i]) best[i] = Math.max(best[i], best[j] + 1);
+            }
+            answer = Math.max(answer, best[i]);
+        }
+        return answer;
+    }
+
+    static long seed = 7;
+
+    static long nextRand() {
+        seed = (seed * 16807) % 2147483647L;
+        return seed;
+    }
+
+    public static void main(String[] args) {
+        int[] a = {10, 9, 2, 5, 3, 7, 101, 18};
+        System.out.println("input: " + list(a));
+        System.out.println("trace:");
+        int n = lisLength(a, true);
+        System.out.println("LIS length: " + n);
+
+        System.out.println("\\nnote: tails is NOT the subsequence itself —");
+        System.out.println("it is only ever the same *length* as one.");
+
+        int[] b = {2, 2, 2, 3, 3};
+        System.out.println("\\n" + list(b) + ": strict=" + lisLength(b, false)
+                + "  non-decreasing=" + lisNonDecreasing(b));
+
+        // A Lehmer generator rather than a library RNG: every language has to
+        // produce the same 400 values for the two implementations to be
+        // compared on the same input.
+        int[] c = new int[400];
+        for (int i = 0; i < 400; i++) c[i] = (int) (nextRand() % 1001);
+        int fast = lisLength(c, false), slow = lisQuadratic(c);
+        System.out.println("\\nboth agree on 400 pseudo-random values: " + fast + " vs " + slow
+                + "  " + (fast == slow ? "ok" : "MISMATCH"));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+/* Longest strictly increasing subsequence, O(n log n).
+
+   \`tails[k]\` is the smallest possible tail of an increasing subsequence of
+   length k+1. It is sorted, which is what lets binary search find the slot. */
+size_t lisLength(const vector<int>& a, bool trace) {
+    vector<int> tails;
+    for (int v : a) {
+        auto it = lower_bound(tails.begin(), tails.end(), v);
+        if (it == tails.end()) tails.push_back(v);
+        else *it = v;
+        if (trace) {
+            cout << "  saw " << setw(3) << v << " -> tails " << list(tails) << "\\n";
+        }
+    }
+    return tails.size();
+}
+
+// non-decreasing needs upper_bound instead
+size_t lisNonDecreasing(const vector<int>& a) {
+    vector<int> tails;
+    for (int v : a) {
+        auto it = upper_bound(tails.begin(), tails.end(), v);
+        if (it == tails.end()) tails.push_back(v);
+        else *it = v;
+    }
+    return tails.size();
+}
+
+// the O(n^2) version, for comparison on a small input
+size_t lisQuadratic(const vector<int>& a) {
+    if (a.empty()) return 0;
+    vector<int> best(a.size(), 1);
+    int answer = 1;
+    for (size_t i = 0; i < a.size(); i++) {
+        for (size_t j = 0; j < i; j++) {
+            if (a[j] < a[i]) best[i] = max(best[i], best[j] + 1);
+        }
+        answer = max(answer, best[i]);
+    }
+    return (size_t)answer;
+}
+
+long long seed = 7;
+
+long long nextRand() {
+    seed = (seed * 16807) % 2147483647LL;
+    return seed;
+}
+
+int main() {
+    vector<int> a = {10, 9, 2, 5, 3, 7, 101, 18};
+    cout << "input: " << list(a) << "\\n";
+    cout << "trace:\\n";
+    size_t n = lisLength(a, true);
+    cout << "LIS length: " << n << "\\n";
+
+    cout << "\\nnote: tails is NOT the subsequence itself —\\n";
+    cout << "it is only ever the same *length* as one.\\n";
+
+    vector<int> b = {2, 2, 2, 3, 3};
+    cout << "\\n" << list(b) << ": strict=" << lisLength(b, false)
+         << "  non-decreasing=" << lisNonDecreasing(b) << "\\n";
+
+    // A Lehmer generator rather than a library RNG: every language has to
+    // produce the same 400 values for the two implementations to be compared
+    // on the same input.
+    vector<int> c;
+    for (int i = 0; i < 400; i++) c.push_back((int)(nextRand() % 1001));
+    size_t fast = lisLength(c, false), slow = lisQuadratic(c);
+    cout << "\\nboth agree on 400 pseudo-random values: " << fast << " vs " << slow
+         << "  " << (fast == slow ? "ok" : "MISMATCH") << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Longest strictly increasing subsequence, O(n log n).
+///
+/// \`tails[k]\` is the smallest possible tail of an increasing subsequence of
+/// length k+1. It is sorted, which is what lets binary search find the slot.
+/// Rust spells both bisects \`partition_point\`; the predicate carries the
+/// difference between them.
+fn lis_length(a: &[i32], trace: bool) -> usize {
+    let mut tails: Vec<i32> = Vec::new();
+    for &v in a {
+        let i = tails.partition_point(|&x| x < v);
+        if i == tails.len() {
+            tails.push(v);
+        } else {
+            tails[i] = v;
+        }
+        if trace {
+            println!("  saw {:3} -> tails {}", v, list(&tails));
+        }
+    }
+    tails.len()
+}
+
+/// non-decreasing needs \`<=\` in the predicate instead
+fn lis_non_decreasing(a: &[i32]) -> usize {
+    let mut tails: Vec<i32> = Vec::new();
+    for &v in a {
+        let i = tails.partition_point(|&x| x <= v);
+        if i == tails.len() {
+            tails.push(v);
+        } else {
+            tails[i] = v;
+        }
+    }
+    tails.len()
+}
+
+/// the O(n^2) version, for comparison on a small input
+fn lis_quadratic(a: &[i32]) -> usize {
+    if a.is_empty() {
+        return 0;
+    }
+    let mut best = vec![1usize; a.len()];
+    let mut answer = 1;
+    for i in 0..a.len() {
+        for j in 0..i {
+            if a[j] < a[i] {
+                best[i] = best[i].max(best[j] + 1);
+            }
+        }
+        answer = answer.max(best[i]);
+    }
+    answer
+}
+
+fn main() {
+    let a = [10, 9, 2, 5, 3, 7, 101, 18];
+    println!("input: {}", list(&a));
+    println!("trace:");
+    let n = lis_length(&a, true);
+    println!("LIS length: {}", n);
+
+    println!("\\nnote: tails is NOT the subsequence itself —");
+    println!("it is only ever the same *length* as one.");
+
+    let b = [2, 2, 2, 3, 3];
+    println!(
+        "\\n{}: strict={}  non-decreasing={}",
+        list(&b),
+        lis_length(&b, false),
+        lis_non_decreasing(&b)
+    );
+
+    // A Lehmer generator rather than a library RNG: every language has to
+    // produce the same 400 values for the two implementations to be compared
+    // on the same input.
+    let mut seed: i64 = 7;
+    let mut next_rand = || {
+        seed = (seed * 16807) % 2147483647;
+        seed
+    };
+    let c: Vec<i32> = (0..400).map(|_| (next_rand() % 1001) as i32).collect();
+    let (fast, slow) = (lis_length(&c, false), lis_quadratic(&c));
+    println!(
+        "\\nboth agree on 400 pseudo-random values: {} vs {}  {}",
+        fast,
+        slow,
+        if fast == slow { "ok" } else { "MISMATCH" }
+    );
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// Longest strictly increasing subsequence, O(n log n).
+//
+// tails[k] is the smallest possible tail of an increasing subsequence of
+// length k+1. It is sorted, which is what lets binary search find the slot.
+// sort.SearchInts is bisect_left; bisect_right is sort.Search with the
+// predicate loosened by one character.
+func lisLength(a []int, trace bool) int {
+	tails := []int{}
+	for _, v := range a {
+		i := sort.SearchInts(tails, v)
+		if i == len(tails) {
+			tails = append(tails, v)
+		} else {
+			tails[i] = v
+		}
+		if trace {
+			fmt.Printf("  saw %3d -> tails %s\\n", v, list(tails))
+		}
+	}
+	return len(tails)
+}
+
+// non-decreasing needs the strict predicate instead
+func lisNonDecreasing(a []int) int {
+	tails := []int{}
+	for _, v := range a {
+		i := sort.Search(len(tails), func(i int) bool { return tails[i] > v })
+		if i == len(tails) {
+			tails = append(tails, v)
+		} else {
+			tails[i] = v
+		}
+	}
+	return len(tails)
+}
+
+// the O(n^2) version, for comparison on a small input
+func lisQuadratic(a []int) int {
+	if len(a) == 0 {
+		return 0
+	}
+	best := make([]int, len(a))
+	answer := 1
+	for i := range a {
+		best[i] = 1
+		for j := 0; j < i; j++ {
+			if a[j] < a[i] {
+				best[i] = max(best[i], best[j]+1)
+			}
+		}
+		answer = max(answer, best[i])
+	}
+	return answer
+}
+
+var seed int64 = 7
+
+func nextRand() int64 {
+	seed = (seed * 16807) % 2147483647
+	return seed
+}
+
+func main() {
+	a := []int{10, 9, 2, 5, 3, 7, 101, 18}
+	fmt.Println("input:", list(a))
+	fmt.Println("trace:")
+	n := lisLength(a, true)
+	fmt.Println("LIS length:", n)
+
+	fmt.Println("\\nnote: tails is NOT the subsequence itself —")
+	fmt.Println("it is only ever the same *length* as one.")
+
+	b := []int{2, 2, 2, 3, 3}
+	fmt.Printf("\\n%s: strict=%d  non-decreasing=%d\\n", list(b), lisLength(b, false), lisNonDecreasing(b))
+
+	// A Lehmer generator rather than a library RNG: every language has to
+	// produce the same 400 values for the two implementations to be compared
+	// on the same input.
+	c := make([]int, 400)
+	for i := range c {
+		c[i] = int(nextRand() % 1001)
+	}
+	fast, slow := lisLength(c, false), lisQuadratic(c)
+	verdict := "MISMATCH"
+	if fast == slow {
+		verdict = "ok"
+	}
+	fmt.Printf("\\nboth agree on 400 pseudo-random values: %d vs %d  %s\\n", fast, slow, verdict)
+}`,
+            },
+          ],
         },
       ],
     },
