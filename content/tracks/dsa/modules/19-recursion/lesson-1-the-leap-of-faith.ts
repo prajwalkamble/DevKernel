@@ -86,6 +86,289 @@ calls roughly double for each +1 in n — that is the 2^n shape.
 The tree has depth n and branches twice at every node.`,
           explanation:
             "Read the trace's shape: every call goes all the way down before any of them come back up. The `= 24` line prints **last**, not first. Work that happens *before* the recursive call runs top-down; work *after* it runs bottom-up — and choosing which side to put your work on is most of what tree traversals are about.\n\nThe Fibonacci counts show the other thing worth reading off a trace. `fib(30)` makes 2.7 million calls to compute a number you could reach in thirty additions, because the tree recomputes the same subproblems endlessly. That waste is exactly what memoisation removes, and it is why the DP module starts here.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `// The stack unwinding, and the cost of a recursion tree.
+const commas = (n) => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+const padL = (v, w) => String(v).padStart(w);
+
+function factorial(n, depth = 0) {
+  const pad = "  ".repeat(depth);
+  console.log(\`\${pad}factorial(\${n}) called\`);
+  if (n <= 1) {
+    console.log(\`\${pad}factorial(\${n}) = 1  (base case)\`);
+    return 1;
+  }
+  const result = n * factorial(n - 1, depth + 1);
+  console.log(\`\${pad}factorial(\${n}) = \${n} * \${result / n} = \${result}\`);
+  return result;
+}
+
+console.log("=== the stack unwinding ===");
+factorial(4);
+
+function fib(n, calls) {
+  if (calls) calls.count++;
+  if (n < 2) return n;
+  return fib(n - 1, calls) + fib(n - 2, calls);
+}
+
+console.log("\\n=== the recursion tree's cost ===");
+for (const n of [10, 20, 25, 30]) {
+  const calls = { count: 0 };
+  const value = fib(n, calls);
+  console.log(\`  fib(\${padL(n, 2)}) = \${padL(value, 7)}  calls = \${padL(commas(calls.count), 9)}\`);
+}
+
+console.log("\\ncalls roughly double for each +1 in n — that is the 2^n shape.");
+console.log("The tree has depth n and branches twice at every node.");`,
+            },
+            {
+              lang: "typescript",
+              code: `// The stack unwinding, and the cost of a recursion tree.
+const commas = (n: number): string => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+const padL = (v: number | string, w: number): string => String(v).padStart(w);
+
+function factorial(n: number, depth = 0): number {
+  const pad = "  ".repeat(depth);
+  console.log(\`\${pad}factorial(\${n}) called\`);
+  if (n <= 1) {
+    console.log(\`\${pad}factorial(\${n}) = 1  (base case)\`);
+    return 1;
+  }
+  const result = n * factorial(n - 1, depth + 1);
+  console.log(\`\${pad}factorial(\${n}) = \${n} * \${result / n} = \${result}\`);
+  return result;
+}
+
+console.log("=== the stack unwinding ===");
+factorial(4);
+
+function fib(n: number, calls?: { count: number }): number {
+  if (calls) calls.count++;
+  if (n < 2) return n;
+  return fib(n - 1, calls) + fib(n - 2, calls);
+}
+
+console.log("\\n=== the recursion tree's cost ===");
+for (const n of [10, 20, 25, 30]) {
+  const calls = { count: 0 };
+  const value = fib(n, calls);
+  console.log(\`  fib(\${padL(n, 2)}) = \${padL(value, 7)}  calls = \${padL(commas(calls.count), 9)}\`);
+}
+
+console.log("\\ncalls roughly double for each +1 in n — that is the 2^n shape.");
+console.log("The tree has depth n and branches twice at every node.");`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+/** The stack unwinding, and the cost of a recursion tree. */
+public class Main {
+    static long factorial(long n, int depth) {
+        String pad = "  ".repeat(depth);
+        System.out.println(pad + "factorial(" + n + ") called");
+        if (n <= 1) {
+            System.out.println(pad + "factorial(" + n + ") = 1  (base case)");
+            return 1;
+        }
+        long result = n * factorial(n - 1, depth + 1);
+        System.out.println(pad + "factorial(" + n + ") = " + n + " * " + result / n + " = " + result);
+        return result;
+    }
+
+    static long calls;
+
+    static long fib(int n) {
+        calls++;
+        if (n < 2) return n;
+        return fib(n - 1) + fib(n - 2);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("=== the stack unwinding ===");
+        factorial(4, 0);
+
+        System.out.println("\\n=== the recursion tree's cost ===");
+        for (int n : new int[]{10, 20, 25, 30}) {
+            calls = 0;
+            long value = fib(n);
+            System.out.printf(Locale.ROOT, "  fib(%2d) = %7d  calls = %9s%n",
+                    n, value, String.format(Locale.ROOT, "%,d", calls));
+        }
+
+        System.out.println("\\ncalls roughly double for each +1 in n — that is the 2^n shape.");
+        System.out.println("The tree has depth n and branches twice at every node.");
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `// The stack unwinding, and the cost of a recursion tree.
+#include <iomanip>
+#include <iostream>
+#include <string>
+using namespace std;
+
+string commas(long long n) {
+    string s = to_string(n), out;
+    int c = 0;
+    for (int i = (int)s.size() - 1; i >= 0; i--) {
+        out += s[i];
+        if (++c % 3 == 0 && i > 0) out += ',';
+    }
+    return string(out.rbegin(), out.rend());
+}
+
+long long factorial(long long n, int depth) {
+    string pad(depth * 2, ' ');
+    cout << pad << "factorial(" << n << ") called\\n";
+    if (n <= 1) {
+        cout << pad << "factorial(" << n << ") = 1  (base case)\\n";
+        return 1;
+    }
+    long long result = n * factorial(n - 1, depth + 1);
+    cout << pad << "factorial(" << n << ") = " << n << " * " << result / n
+         << " = " << result << "\\n";
+    return result;
+}
+
+long long calls;
+
+long long fib(int n) {
+    calls++;
+    if (n < 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+
+int main() {
+    cout << "=== the stack unwinding ===\\n";
+    factorial(4, 0);
+
+    cout << "\\n=== the recursion tree's cost ===\\n";
+    for (int n : {10, 20, 25, 30}) {
+        calls = 0;
+        long long value = fib(n);
+        cout << "  fib(" << setw(2) << n << ") = " << setw(7) << value
+             << "  calls = " << setw(9) << commas(calls) << "\\n";
+    }
+
+    cout << "\\ncalls roughly double for each +1 in n — that is the 2^n shape.\\n";
+    cout << "The tree has depth n and branches twice at every node.\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// The stack unwinding, and the cost of a recursion tree.
+fn commas(n: u64) -> String {
+    let s = n.to_string();
+    let mut out = String::new();
+    for (i, ch) in s.chars().enumerate() {
+        if i > 0 && (s.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(ch);
+    }
+    out
+}
+
+fn factorial(n: u64, depth: usize) -> u64 {
+    let pad = "  ".repeat(depth);
+    println!("{}factorial({}) called", pad, n);
+    if n <= 1 {
+        println!("{}factorial({}) = 1  (base case)", pad, n);
+        return 1;
+    }
+    let result = n * factorial(n - 1, depth + 1);
+    println!("{}factorial({}) = {} * {} = {}", pad, n, n, result / n, result);
+    result
+}
+
+fn fib(n: u32, calls: &mut u64) -> u64 {
+    *calls += 1;
+    if n < 2 {
+        return n as u64;
+    }
+    fib(n - 1, calls) + fib(n - 2, calls)
+}
+
+fn main() {
+    println!("=== the stack unwinding ===");
+    factorial(4, 0);
+
+    println!("\\n=== the recursion tree's cost ===");
+    for n in [10u32, 20, 25, 30] {
+        let mut calls = 0u64;
+        let value = fib(n, &mut calls);
+        println!("  fib({:2}) = {:7}  calls = {:>9}", n, value, commas(calls));
+    }
+
+    println!("\\ncalls roughly double for each +1 in n — that is the 2^n shape.");
+    println!("The tree has depth n and branches twice at every node.");
+}`,
+            },
+            {
+              lang: "go",
+              code: `// The stack unwinding, and the cost of a recursion tree.
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func commas(n int) string {
+	s := fmt.Sprint(n)
+	var b strings.Builder
+	for i, ch := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			b.WriteByte(',')
+		}
+		b.WriteRune(ch)
+	}
+	return b.String()
+}
+
+func factorial(n, depth int) int {
+	pad := strings.Repeat("  ", depth)
+	fmt.Printf("%sfactorial(%d) called\\n", pad, n)
+	if n <= 1 {
+		fmt.Printf("%sfactorial(%d) = 1  (base case)\\n", pad, n)
+		return 1
+	}
+	result := n * factorial(n-1, depth+1)
+	fmt.Printf("%sfactorial(%d) = %d * %d = %d\\n", pad, n, n, result/n, result)
+	return result
+}
+
+var calls int
+
+func fib(n int) int {
+	calls++
+	if n < 2 {
+		return n
+	}
+	return fib(n-1) + fib(n-2)
+}
+
+func main() {
+	fmt.Println("=== the stack unwinding ===")
+	factorial(4, 0)
+
+	fmt.Println("\\n=== the recursion tree's cost ===")
+	for _, n := range []int{10, 20, 25, 30} {
+		calls = 0
+		value := fib(n)
+		fmt.Printf("  fib(%2d) = %7d  calls = %9s\\n", n, value, commas(calls))
+	}
+
+	fmt.Println("\\ncalls roughly double for each +1 in n — that is the 2^n shape.")
+	fmt.Println("The tree has depth n and branches twice at every node.")
+}`,
+            },
+          ],
         },
       ],
       visual: {

@@ -90,6 +90,479 @@ move zeroes: [1, 3, 12, 0, 0]
   5 from end of [10, 20, 30, 40, 50] -> index 0 value 10`,
           explanation:
             "The dedup leaves `[2, 3, 5, 5]` behind the write pointer — deliberate garbage. The function returns a *length*, and the caller reads only that prefix. Problems in this family say \"return k, and the first k elements should be…\", which is exactly this contract.\n\n`move_zeroes` swaps rather than overwrites, which is what gets the zeros to the back in one pass instead of needing a fill loop afterwards.\n\n**Lag by k** is the trick behind \"remove the nth node from the end\" on a linked list, where you cannot ask for the length. Start one pointer k ahead; walk both until the leader falls off the end; the trailer is sitting exactly k from the end. On an array this is arithmetic, but on a list it is the only single-pass way.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `// Same-direction pointers: read/write, fast/slow, and lag-by-k.
+const list = (xs) => "[" + xs.join(", ") + "]";
+
+// Sorted input. \`write\` marks where the next kept element goes.
+function removeDuplicates(a) {
+  if (a.length === 0) return 0;
+  let write = 1;
+  for (let read = 1; read < a.length; read++) {
+    if (a[read] !== a[write - 1]) {
+      a[write] = a[read];
+      write++;
+    }
+  }
+  return write;
+}
+
+const a = [1, 1, 2, 2, 2, 3, 5, 5];
+const n = removeDuplicates(a);
+console.log("after dedup:", list(a.slice(0, n)), " tail (ignored):", list(a.slice(n)));
+
+function moveZeroes(a) {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (a[read] !== 0) {
+      [a[write], a[read]] = [a[read], a[write]];
+      write++;
+    }
+  }
+  return a;
+}
+
+console.log("move zeroes:", list(moveZeroes([0, 1, 0, 3, 12])));
+
+// Fast/slow on a list, expressed on an array for clarity.
+function middle(a) {
+  let slow = 0;
+  let fast = 0;
+  while (fast + 1 < a.length) {
+    slow++;
+    fast += 2;
+  }
+  return slow;
+}
+
+for (const xs of [[1, 2, 3, 4, 5], [1, 2, 3, 4], [1], [1, 2]]) {
+  const m = middle(xs);
+  console.log(\`  middle of \${list(xs).padEnd(15)} -> index \${m} value \${xs[m]}\`);
+}
+
+// Lag by k: the nth node from the end, in one pass.
+function nthFromEnd(a, k) {
+  let lead = k;
+  let trail = 0;
+  while (lead < a.length) {
+    lead++;
+    trail++;
+  }
+  return trail;
+}
+
+const b = [10, 20, 30, 40, 50];
+for (const k of [1, 2, 5]) {
+  const i = nthFromEnd(b, k);
+  console.log(\`  \${k} from end of \${list(b)} -> index \${i} value \${b[i]}\`);
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `// Same-direction pointers: read/write, fast/slow, and lag-by-k.
+const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+// Sorted input. \`write\` marks where the next kept element goes.
+function removeDuplicates(a: number[]): number {
+  if (a.length === 0) return 0;
+  let write = 1;
+  for (let read = 1; read < a.length; read++) {
+    if (a[read] !== a[write - 1]) {
+      a[write] = a[read];
+      write++;
+    }
+  }
+  return write;
+}
+
+const a: number[] = [1, 1, 2, 2, 2, 3, 5, 5];
+const n = removeDuplicates(a);
+console.log("after dedup:", list(a.slice(0, n)), " tail (ignored):", list(a.slice(n)));
+
+function moveZeroes(a: number[]): number[] {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (a[read] !== 0) {
+      [a[write], a[read]] = [a[read], a[write]];
+      write++;
+    }
+  }
+  return a;
+}
+
+console.log("move zeroes:", list(moveZeroes([0, 1, 0, 3, 12])));
+
+// Fast/slow on a list, expressed on an array for clarity.
+function middle(a: number[]): number {
+  let slow = 0;
+  let fast = 0;
+  while (fast + 1 < a.length) {
+    slow++;
+    fast += 2;
+  }
+  return slow;
+}
+
+for (const xs of [[1, 2, 3, 4, 5], [1, 2, 3, 4], [1], [1, 2]]) {
+  const m = middle(xs);
+  console.log(\`  middle of \${list(xs).padEnd(15)} -> index \${m} value \${xs[m]}\`);
+}
+
+// Lag by k: the nth node from the end, in one pass.
+function nthFromEnd(a: number[], k: number): number {
+  let lead = k;
+  let trail = 0;
+  while (lead < a.length) {
+    lead++;
+    trail++;
+  }
+  return trail;
+}
+
+const b: number[] = [10, 20, 30, 40, 50];
+for (const k of [1, 2, 5]) {
+  const i = nthFromEnd(b, k);
+  console.log(\`  \${k} from end of \${list(b)} -> index \${i} value \${b[i]}\`);
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(int[] xs, int from, int to) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = from; i < to; i++) {
+            if (i > from) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    static String list(int[] xs) {
+        return list(xs, 0, xs.length);
+    }
+
+    /** Sorted input. \`write\` marks where the next kept element goes. */
+    static int removeDuplicates(int[] a) {
+        if (a.length == 0) return 0;
+        int write = 1;
+        for (int read = 1; read < a.length; read++) {
+            if (a[read] != a[write - 1]) {
+                a[write] = a[read];
+                write++;
+            }
+        }
+        return write;
+    }
+
+    static int[] moveZeroes(int[] a) {
+        int write = 0;
+        for (int read = 0; read < a.length; read++) {
+            if (a[read] != 0) {
+                int t = a[write];
+                a[write] = a[read];
+                a[read] = t;
+                write++;
+            }
+        }
+        return a;
+    }
+
+    /** Fast/slow on a list, expressed on an array for clarity. */
+    static int middle(int[] a) {
+        int slow = 0, fast = 0;
+        while (fast + 1 < a.length) {
+            slow++;
+            fast += 2;
+        }
+        return slow;
+    }
+
+    /** Lag by k: the nth node from the end, in one pass. */
+    static int nthFromEnd(int[] a, int k) {
+        int lead = k, trail = 0;
+        while (lead < a.length) {
+            lead++;
+            trail++;
+        }
+        return trail;
+    }
+
+    public static void main(String[] args) {
+        int[] a = {1, 1, 2, 2, 2, 3, 5, 5};
+        int n = removeDuplicates(a);
+        System.out.println("after dedup: " + list(a, 0, n)
+                + "  tail (ignored): " + list(a, n, a.length));
+
+        System.out.println("move zeroes: " + list(moveZeroes(new int[]{0, 1, 0, 3, 12})));
+
+        int[][] cases = {{1, 2, 3, 4, 5}, {1, 2, 3, 4}, {1}, {1, 2}};
+        for (int[] xs : cases) {
+            int m = middle(xs);
+            System.out.printf("  middle of %-15s -> index %d value %d%n", list(xs), m, xs[m]);
+        }
+
+        int[] b = {10, 20, 30, 40, 50};
+        for (int k : new int[]{1, 2, 5}) {
+            int i = nthFromEnd(b, k);
+            System.out.printf("  %d from end of %s -> index %d value %d%n", k, list(b), i, b[i]);
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `// Same-direction pointers: read/write, fast/slow, and lag-by-k.
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs, size_t from, size_t to) {
+    string out = "[";
+    for (size_t i = from; i < to; i++) {
+        if (i > from) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+string list(const vector<int>& xs) { return list(xs, 0, xs.size()); }
+
+// Sorted input. \`write\` marks where the next kept element goes.
+size_t removeDuplicates(vector<int>& a) {
+    if (a.empty()) return 0;
+    size_t write = 1;
+    for (size_t read = 1; read < a.size(); read++) {
+        if (a[read] != a[write - 1]) {
+            a[write] = a[read];
+            write++;
+        }
+    }
+    return write;
+}
+
+vector<int> moveZeroes(vector<int> a) {
+    size_t write = 0;
+    for (size_t read = 0; read < a.size(); read++) {
+        if (a[read] != 0) {
+            swap(a[write], a[read]);
+            write++;
+        }
+    }
+    return a;
+}
+
+// Fast/slow on a list, expressed on an array for clarity.
+size_t middle(const vector<int>& a) {
+    size_t slow = 0, fast = 0;
+    while (fast + 1 < a.size()) {
+        slow++;
+        fast += 2;
+    }
+    return slow;
+}
+
+// Lag by k: the nth node from the end, in one pass.
+size_t nthFromEnd(const vector<int>& a, size_t k) {
+    size_t lead = k, trail = 0;
+    while (lead < a.size()) {
+        lead++;
+        trail++;
+    }
+    return trail;
+}
+
+int main() {
+    vector<int> a = {1, 1, 2, 2, 2, 3, 5, 5};
+    size_t n = removeDuplicates(a);
+    cout << "after dedup: " << list(a, 0, n)
+         << "  tail (ignored): " << list(a, n, a.size()) << "\\n";
+
+    cout << "move zeroes: " << list(moveZeroes({0, 1, 0, 3, 12})) << "\\n";
+
+    vector<vector<int>> cases = {{1, 2, 3, 4, 5}, {1, 2, 3, 4}, {1}, {1, 2}};
+    for (const auto& xs : cases) {
+        size_t m = middle(xs);
+        cout << "  middle of " << left << setw(15) << list(xs)
+             << " -> index " << m << " value " << xs[m] << "\\n";
+    }
+
+    vector<int> b = {10, 20, 30, 40, 50};
+    for (size_t k : {1, 2, 5}) {
+        size_t i = nthFromEnd(b, k);
+        cout << "  " << k << " from end of " << list(b)
+             << " -> index " << i << " value " << b[i] << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// Same-direction pointers: read/write, fast/slow, and lag-by-k.
+fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Sorted input. \`write\` marks where the next kept element goes.
+fn remove_duplicates(a: &mut [i32]) -> usize {
+    if a.is_empty() {
+        return 0;
+    }
+    let mut write = 1;
+    for read in 1..a.len() {
+        if a[read] != a[write - 1] {
+            a[write] = a[read];
+            write += 1;
+        }
+    }
+    write
+}
+
+fn move_zeroes(mut a: Vec<i32>) -> Vec<i32> {
+    let mut write = 0;
+    for read in 0..a.len() {
+        if a[read] != 0 {
+            a.swap(write, read);
+            write += 1;
+        }
+    }
+    a
+}
+
+/// Fast/slow on a list, expressed on an array for clarity.
+fn middle(a: &[i32]) -> usize {
+    let (mut slow, mut fast) = (0usize, 0usize);
+    while fast + 1 < a.len() {
+        slow += 1;
+        fast += 2;
+    }
+    slow
+}
+
+/// Lag by k: the nth node from the end, in one pass.
+fn nth_from_end(a: &[i32], k: usize) -> usize {
+    let (mut lead, mut trail) = (k, 0usize);
+    while lead < a.len() {
+        lead += 1;
+        trail += 1;
+    }
+    trail
+}
+
+fn main() {
+    let mut a = vec![1, 1, 2, 2, 2, 3, 5, 5];
+    let n = remove_duplicates(&mut a);
+    println!(
+        "after dedup: {}  tail (ignored): {}",
+        list(&a[..n]),
+        list(&a[n..])
+    );
+
+    println!("move zeroes: {}", list(&move_zeroes(vec![0, 1, 0, 3, 12])));
+
+    let cases: Vec<Vec<i32>> = vec![vec![1, 2, 3, 4, 5], vec![1, 2, 3, 4], vec![1], vec![1, 2]];
+    for xs in &cases {
+        let m = middle(xs);
+        println!("  middle of {:<15} -> index {} value {}", list(xs), m, xs[m]);
+    }
+
+    let b = [10, 20, 30, 40, 50];
+    for k in [1usize, 2, 5] {
+        let i = nth_from_end(&b, k);
+        println!("  {} from end of {} -> index {} value {}", k, list(&b), i, b[i]);
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `// Same-direction pointers: read/write, fast/slow, and lag-by-k.
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// Sorted input. \`write\` marks where the next kept element goes.
+func removeDuplicates(a []int) int {
+	if len(a) == 0 {
+		return 0
+	}
+	write := 1
+	for read := 1; read < len(a); read++ {
+		if a[read] != a[write-1] {
+			a[write] = a[read]
+			write++
+		}
+	}
+	return write
+}
+
+func moveZeroes(a []int) []int {
+	write := 0
+	for read := range a {
+		if a[read] != 0 {
+			a[write], a[read] = a[read], a[write]
+			write++
+		}
+	}
+	return a
+}
+
+// Fast/slow on a list, expressed on an array for clarity.
+func middle(a []int) int {
+	slow, fast := 0, 0
+	for fast+1 < len(a) {
+		slow++
+		fast += 2
+	}
+	return slow
+}
+
+// Lag by k: the nth node from the end, in one pass.
+func nthFromEnd(a []int, k int) int {
+	lead, trail := k, 0
+	for lead < len(a) {
+		lead++
+		trail++
+	}
+	return trail
+}
+
+func main() {
+	a := []int{1, 1, 2, 2, 2, 3, 5, 5}
+	n := removeDuplicates(a)
+	fmt.Println("after dedup:", list(a[:n]), " tail (ignored):", list(a[n:]))
+
+	fmt.Println("move zeroes:", list(moveZeroes([]int{0, 1, 0, 3, 12})))
+
+	cases := [][]int{{1, 2, 3, 4, 5}, {1, 2, 3, 4}, {1}, {1, 2}}
+	for _, xs := range cases {
+		m := middle(xs)
+		fmt.Printf("  middle of %-15s -> index %d value %d\\n", list(xs), m, xs[m])
+	}
+
+	b := []int{10, 20, 30, 40, 50}
+	for _, k := range []int{1, 2, 5} {
+		i := nthFromEnd(b, k)
+		fmt.Printf("  %d from end of %s -> index %d value %d\\n", k, list(b), i, b[i])
+	}
+}`,
+            },
+          ],
         },
       ],
     },
