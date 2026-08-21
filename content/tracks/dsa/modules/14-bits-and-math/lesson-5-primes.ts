@@ -116,6 +116,583 @@ divisors(1024) = 11
 spf factorise(84) = [2, 2, 3, 7]`,
           explanation:
             "Three things to notice. The `if n > 1` at the end of `factorise` is not optional — it catches the final prime factor larger than `sqrt(n)`, which is why `factorise(999983)` returns the number itself rather than an empty list. The divisor count never enumerates a divisor: `360 = 2³ · 3² · 5`, so a divisor picks an exponent from 0-3, 0-2 and 0-1 independently, giving `4 · 3 · 2 = 24`. And the SPF sieve stores, for each number, its *smallest* prime factor, so factorising afterwards is just repeated division with no searching at all.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+// True at i means i is prime. O(n log log n).
+function sieve(n) {
+  const isPrime = new Array(n + 1).fill(true);
+  isPrime[0] = isPrime[1] = false;
+  for (let i = 2; i * i <= n; i++) {
+    if (isPrime[i]) {
+      // start at i*i: everything below is already crossed off
+      for (let j = i * i; j <= n; j += i) isPrime[j] = false;
+    }
+  }
+  return isPrime;
+}
+
+const flags = sieve(50);
+const primes = [];
+flags.forEach((p, i) => {
+  if (p) primes.push(i);
+});
+console.log("primes to 50:", list(primes));
+console.log("count        :", primes.length);
+
+// Trial division to sqrt(n). O(sqrt n).
+function factorise(n) {
+  const out = [];
+  let d = 2;
+  while (d * d <= n) {
+    while (n % d === 0) {
+      out.push(d);
+      n = Math.floor(n / d);
+    }
+    d++;
+  }
+  if (n > 1) out.push(n);
+  return out;
+}
+
+for (const n of [360, 97, 1024, 999983]) {
+  console.log(\`factorise(\${n}) = \${list(factorise(n))}\`);
+}
+
+// divisor count from the factorisation: multiply (exponent + 1)
+function divisorCount(n) {
+  const counts = new Map();
+  for (const f of factorise(n)) counts.set(f, (counts.get(f) ?? 0) + 1);
+  let total = 1;
+  for (const e of counts.values()) total *= e + 1;
+  return total;
+}
+
+for (const n of [360, 97, 1024]) {
+  console.log(\`divisors(\${n}) = \${divisorCount(n)}\`);
+}
+
+// smallest prime factor sieve: factorise in O(log n) after an O(n log log n) build
+function spfSieve(n) {
+  const spf = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 2; i * i <= n; i++) {
+    if (spf[i] === i) {
+      for (let j = i * i; j <= n; j += i) {
+        if (spf[j] === j) spf[j] = i;
+      }
+    }
+  }
+  return spf;
+}
+
+const spf = spfSieve(100);
+function fastFactorise(n, spf) {
+  const out = [];
+  while (n > 1) {
+    out.push(spf[n]);
+    n = Math.floor(n / spf[n]);
+  }
+  return out;
+}
+
+console.log("\\nspf factorise(84) =", list(fastFactorise(84, spf)));`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+// True at i means i is prime. O(n log log n).
+function sieve(n: number): boolean[] {
+  const isPrime = new Array(n + 1).fill(true);
+  isPrime[0] = isPrime[1] = false;
+  for (let i = 2; i * i <= n; i++) {
+    if (isPrime[i]) {
+      // start at i*i: everything below is already crossed off
+      for (let j = i * i; j <= n; j += i) isPrime[j] = false;
+    }
+  }
+  return isPrime;
+}
+
+const flags = sieve(50);
+const primes: number[] = [];
+flags.forEach((p, i) => {
+  if (p) primes.push(i);
+});
+console.log("primes to 50:", list(primes));
+console.log("count        :", primes.length);
+
+// Trial division to sqrt(n). O(sqrt n).
+function factorise(n: number): number[] {
+  const out: number[] = [];
+  let d = 2;
+  while (d * d <= n) {
+    while (n % d === 0) {
+      out.push(d);
+      n = Math.floor(n / d);
+    }
+    d++;
+  }
+  if (n > 1) out.push(n);
+  return out;
+}
+
+for (const n of [360, 97, 1024, 999983]) {
+  console.log(\`factorise(\${n}) = \${list(factorise(n))}\`);
+}
+
+// divisor count from the factorisation: multiply (exponent + 1)
+function divisorCount(n: number): number {
+  const counts = new Map<number, number>();
+  for (const f of factorise(n)) counts.set(f, (counts.get(f) ?? 0) + 1);
+  let total = 1;
+  for (const e of counts.values()) total *= e + 1;
+  return total;
+}
+
+for (const n of [360, 97, 1024]) {
+  console.log(\`divisors(\${n}) = \${divisorCount(n)}\`);
+}
+
+// smallest prime factor sieve: factorise in O(log n) after an O(n log log n) build
+function spfSieve(n: number): number[] {
+  const spf = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 2; i * i <= n; i++) {
+    if (spf[i] === i) {
+      for (let j = i * i; j <= n; j += i) {
+        if (spf[j] === j) spf[j] = i;
+      }
+    }
+  }
+  return spf;
+}
+
+const spf = spfSieve(100);
+function fastFactorise(n: number, spf: number[]): number[] {
+  const out: number[] = [];
+  while (n > 1) {
+    out.push(spf[n]);
+    n = Math.floor(n / spf[n]);
+  }
+  return out;
+}
+
+console.log("\\nspf factorise(84) =", list(fastFactorise(84, spf)));`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(List<Integer> xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs.get(i));
+        }
+        return sb.append("]").toString();
+    }
+
+    /** True at i means i is prime. O(n log log n). */
+    static boolean[] sieve(int n) {
+        boolean[] isPrime = new boolean[n + 1];
+        Arrays.fill(isPrime, true);
+        isPrime[0] = isPrime[1] = false;
+        for (int i = 2; (long) i * i <= n; i++) {
+            if (isPrime[i]) {
+                // start at i*i: everything below is already crossed off
+                for (int j = i * i; j <= n; j += i) isPrime[j] = false;
+            }
+        }
+        return isPrime;
+    }
+
+    /** Trial division to sqrt(n). O(sqrt n). */
+    static List<Integer> factorise(int n) {
+        List<Integer> out = new ArrayList<>();
+        for (int d = 2; (long) d * d <= n; d++) {
+            while (n % d == 0) {
+                out.add(d);
+                n /= d;
+            }
+        }
+        if (n > 1) out.add(n);
+        return out;
+    }
+
+    /** divisor count from the factorisation: multiply (exponent + 1) */
+    static int divisorCount(int n) {
+        Map<Integer, Integer> counts = new LinkedHashMap<>();
+        for (int f : factorise(n)) counts.merge(f, 1, Integer::sum);
+        int total = 1;
+        for (int e : counts.values()) total *= e + 1;
+        return total;
+    }
+
+    /** smallest prime factor sieve: O(log n) per factorisation after the build */
+    static int[] spfSieve(int n) {
+        int[] spf = new int[n + 1];
+        for (int i = 0; i <= n; i++) spf[i] = i;
+        for (int i = 2; (long) i * i <= n; i++) {
+            if (spf[i] == i) {
+                for (int j = i * i; j <= n; j += i) {
+                    if (spf[j] == j) spf[j] = i;
+                }
+            }
+        }
+        return spf;
+    }
+
+    static List<Integer> fastFactorise(int n, int[] spf) {
+        List<Integer> out = new ArrayList<>();
+        while (n > 1) {
+            out.add(spf[n]);
+            n /= spf[n];
+        }
+        return out;
+    }
+
+    public static void main(String[] args) {
+        boolean[] flags = sieve(50);
+        List<Integer> primes = new ArrayList<>();
+        for (int i = 0; i < flags.length; i++) {
+            if (flags[i]) primes.add(i);
+        }
+        System.out.println("primes to 50: " + list(primes));
+        System.out.println("count        : " + primes.size());
+
+        for (int n : new int[]{360, 97, 1024, 999983}) {
+            System.out.println("factorise(" + n + ") = " + list(factorise(n)));
+        }
+
+        for (int n : new int[]{360, 97, 1024}) {
+            System.out.println("divisors(" + n + ") = " + divisorCount(n));
+        }
+
+        int[] spf = spfSieve(100);
+        System.out.println("\\nspf factorise(84) = " + list(fastFactorise(84, spf)));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <map>
+#include <numeric>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// True at i means i is prime. O(n log log n).
+vector<bool> sieve(int n) {
+    vector<bool> isPrime(n + 1, true);
+    isPrime[0] = isPrime[1] = false;
+    for (long long i = 2; i * i <= n; i++) {
+        if (isPrime[i]) {
+            // start at i*i: everything below is already crossed off
+            for (long long j = i * i; j <= n; j += i) isPrime[j] = false;
+        }
+    }
+    return isPrime;
+}
+
+// Trial division to sqrt(n). O(sqrt n).
+vector<int> factorise(int n) {
+    vector<int> out;
+    for (long long d = 2; d * d <= n; d++) {
+        while (n % d == 0) {
+            out.push_back((int)d);
+            n /= (int)d;
+        }
+    }
+    if (n > 1) out.push_back(n);
+    return out;
+}
+
+// divisor count from the factorisation: multiply (exponent + 1)
+int divisorCount(int n) {
+    map<int, int> counts;
+    for (int f : factorise(n)) counts[f]++;
+    int total = 1;
+    for (const auto& [_, e] : counts) total *= e + 1;
+    return total;
+}
+
+// smallest prime factor sieve: O(log n) per factorisation after the build
+vector<int> spfSieve(int n) {
+    vector<int> spf(n + 1);
+    iota(spf.begin(), spf.end(), 0);
+    for (long long i = 2; i * i <= n; i++) {
+        if (spf[i] == i) {
+            for (long long j = i * i; j <= n; j += i) {
+                if (spf[j] == j) spf[j] = (int)i;
+            }
+        }
+    }
+    return spf;
+}
+
+vector<int> fastFactorise(int n, const vector<int>& spf) {
+    vector<int> out;
+    while (n > 1) {
+        out.push_back(spf[n]);
+        n /= spf[n];
+    }
+    return out;
+}
+
+int main() {
+    vector<bool> flags = sieve(50);
+    vector<int> primes;
+    for (size_t i = 0; i < flags.size(); i++) {
+        if (flags[i]) primes.push_back((int)i);
+    }
+    cout << "primes to 50: " << list(primes) << "\\n";
+    cout << "count        : " << primes.size() << "\\n";
+
+    for (int n : {360, 97, 1024, 999983}) {
+        cout << "factorise(" << n << ") = " << list(factorise(n)) << "\\n";
+    }
+
+    for (int n : {360, 97, 1024}) {
+        cout << "divisors(" << n << ") = " << divisorCount(n) << "\\n";
+    }
+
+    vector<int> spf = spfSieve(100);
+    cout << "\\nspf factorise(84) = " << list(fastFactorise(84, spf)) << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `use std::collections::BTreeMap;
+
+fn list(xs: &[i64]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// True at i means i is prime. O(n log log n).
+fn sieve(n: usize) -> Vec<bool> {
+    let mut is_prime = vec![true; n + 1];
+    is_prime[0] = false;
+    is_prime[1] = false;
+    let mut i = 2;
+    while i * i <= n {
+        if is_prime[i] {
+            // start at i*i: everything below is already crossed off
+            let mut j = i * i;
+            while j <= n {
+                is_prime[j] = false;
+                j += i;
+            }
+        }
+        i += 1;
+    }
+    is_prime
+}
+
+/// Trial division to sqrt(n). O(sqrt n).
+fn factorise(mut n: i64) -> Vec<i64> {
+    let mut out = Vec::new();
+    let mut d = 2;
+    while d * d <= n {
+        while n % d == 0 {
+            out.push(d);
+            n /= d;
+        }
+        d += 1;
+    }
+    if n > 1 {
+        out.push(n);
+    }
+    out
+}
+
+/// divisor count from the factorisation: multiply (exponent + 1)
+fn divisor_count(n: i64) -> i64 {
+    let mut counts: BTreeMap<i64, i64> = BTreeMap::new();
+    for f in factorise(n) {
+        *counts.entry(f).or_insert(0) += 1;
+    }
+    counts.values().map(|e| e + 1).product()
+}
+
+/// smallest prime factor sieve: O(log n) per factorisation after the build
+fn spf_sieve(n: usize) -> Vec<usize> {
+    let mut spf: Vec<usize> = (0..=n).collect();
+    let mut i = 2;
+    while i * i <= n {
+        if spf[i] == i {
+            let mut j = i * i;
+            while j <= n {
+                if spf[j] == j {
+                    spf[j] = i;
+                }
+                j += i;
+            }
+        }
+        i += 1;
+    }
+    spf
+}
+
+fn fast_factorise(mut n: usize, spf: &[usize]) -> Vec<i64> {
+    let mut out = Vec::new();
+    while n > 1 {
+        out.push(spf[n] as i64);
+        n /= spf[n];
+    }
+    out
+}
+
+fn main() {
+    let flags = sieve(50);
+    let primes: Vec<i64> = flags
+        .iter()
+        .enumerate()
+        .filter(|(_, p)| **p)
+        .map(|(i, _)| i as i64)
+        .collect();
+    println!("primes to 50: {}", list(&primes));
+    println!("count        : {}", primes.len());
+
+    for n in [360i64, 97, 1024, 999983] {
+        println!("factorise({}) = {}", n, list(&factorise(n)));
+    }
+
+    for n in [360i64, 97, 1024] {
+        println!("divisors({}) = {}", n, divisor_count(n));
+    }
+
+    let spf = spf_sieve(100);
+    println!("\\nspf factorise(84) = {}", list(&fast_factorise(84, &spf)));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// True at i means i is prime. O(n log log n).
+func sieve(n int) []bool {
+	isPrime := make([]bool, n+1)
+	for i := range isPrime {
+		isPrime[i] = true
+	}
+	isPrime[0], isPrime[1] = false, false
+	for i := 2; i*i <= n; i++ {
+		if isPrime[i] {
+			// start at i*i: everything below is already crossed off
+			for j := i * i; j <= n; j += i {
+				isPrime[j] = false
+			}
+		}
+	}
+	return isPrime
+}
+
+// Trial division to sqrt(n). O(sqrt n).
+func factorise(n int) []int {
+	var out []int
+	for d := 2; d*d <= n; d++ {
+		for n%d == 0 {
+			out = append(out, d)
+			n /= d
+		}
+	}
+	if n > 1 {
+		out = append(out, n)
+	}
+	return out
+}
+
+// divisor count from the factorisation: multiply (exponent + 1)
+func divisorCount(n int) int {
+	counts := map[int]int{}
+	for _, f := range factorise(n) {
+		counts[f]++
+	}
+	total := 1
+	for _, e := range counts {
+		total *= e + 1
+	}
+	return total
+}
+
+// smallest prime factor sieve: O(log n) per factorisation after the build
+func spfSieve(n int) []int {
+	spf := make([]int, n+1)
+	for i := range spf {
+		spf[i] = i
+	}
+	for i := 2; i*i <= n; i++ {
+		if spf[i] == i {
+			for j := i * i; j <= n; j += i {
+				if spf[j] == j {
+					spf[j] = i
+				}
+			}
+		}
+	}
+	return spf
+}
+
+func fastFactorise(n int, spf []int) []int {
+	var out []int
+	for n > 1 {
+		out = append(out, spf[n])
+		n /= spf[n]
+	}
+	return out
+}
+
+func main() {
+	flags := sieve(50)
+	var primes []int
+	for i, p := range flags {
+		if p {
+			primes = append(primes, i)
+		}
+	}
+	fmt.Println("primes to 50:", list(primes))
+	fmt.Println("count        :", len(primes))
+
+	for _, n := range []int{360, 97, 1024, 999983} {
+		fmt.Printf("factorise(%d) = %s\\n", n, list(factorise(n)))
+	}
+
+	for _, n := range []int{360, 97, 1024} {
+		fmt.Printf("divisors(%d) = %d\\n", n, divisorCount(n))
+	}
+
+	spf := spfSieve(100)
+	fmt.Println("\\nspf factorise(84) =", list(fastFactorise(84, spf)))
+}`,
+            },
+          ],
         },
       ],
     },
