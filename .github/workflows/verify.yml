@@ -1,0 +1,60 @@
+# The gates, on every push.
+#
+# Split in two on purpose. `checks` is the fast half — types, lint, the visual
+# frame generators and a production build — and finishes in a few minutes, so it
+# is the one that gates a pull request.
+#
+# `lesson-code` is the slow half: it compiles and runs every example and every
+# translation in the content tree, in seven languages, and takes the better part
+# of half an hour. It is the check that makes the course's central promise true —
+# that no output in a lesson was ever typed from memory — so it runs, but it runs
+# beside the fast half rather than in front of it.
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run build
+
+  lesson-code:
+    runs-on: ubuntu-latest
+    # Every example is a compile and a run; the whole DSA track is ~900 of them.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      # Pinned, and not for tidiness: a recorded output is only reproducible on
+      # the toolchain it was recorded against. The runner's default JDK printed
+      # `1.15292150460684698E18` where every lesson says `1.152921504606847E18`,
+      # because Double.toString switched to the shortest round-tripping decimal
+      # in JDK 19. These are the versions the outputs were taken from.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      # nasm is the one the image does not carry at all, and a missing assembler
+      # is indistinguishable from a program that printed nothing.
+      - run: sudo apt-get update && sudo apt-get install -y nasm
+      - run: npm ci
+      - run: npm run verify:code

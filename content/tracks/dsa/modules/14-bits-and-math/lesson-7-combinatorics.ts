@@ -91,6 +91,476 @@ exact C(10,5) = 252
 row 5 of Pascal = [1, 5, 10, 10, 5, 1]`,
           explanation:
             "The backwards inverse-factorial loop is the part worth understanding. Inverting each factorial separately would cost n exponentiations — O(n log m). Instead, invert only the *largest* one, then use `inv_fact[i-1] = inv_fact[i] * i`, which holds because `1/(i-1)! = (1/i!) · i`. One exponentiation and n multiplications: O(n + log m).\n\nThe `r < 0 or r > n` guard is not decoration. Without it, `inv_fact[n - r]` indexes with a negative number — which in Python silently reads from the end of the list and returns a plausible wrong answer, and in Java throws. Both are bad; the guard costs nothing.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `// BigInt for the modular arithmetic: fact[i-1] * i reaches 1e18, past 2^53.
+const MOD = 10n ** 9n + 7n;
+
+const center = (s, width) => {
+  const left = Math.floor((width - s.length) / 2);
+  return " ".repeat(left) + s + " ".repeat(width - s.length - left);
+};
+const pad3 = (v) => String(v).padStart(3);
+
+// Pascal's triangle: no division, no modular inverse needed
+function pascal(rows) {
+  const tri = [[1n]];
+  for (let r = 1; r < rows; r++) {
+    const prev = tri[tri.length - 1];
+    const row = [1n];
+    for (let i = 0; i < prev.length - 1; i++) row.push((prev[i] + prev[i + 1]) % MOD);
+    row.push(1n);
+    tri.push(row);
+  }
+  return tri;
+}
+
+for (const row of pascal(6)) {
+  console.log(center(row.map(pad3).join(" "), 28));
+}
+
+// factorials + inverse factorials: O(n) build, O(1) per query
+const N = 200000;
+const fact = new Array(N + 1).fill(1n);
+for (let i = 1; i <= N; i++) fact[i] = (fact[i - 1] * BigInt(i)) % MOD;
+
+function power(base, exp, mod) {
+  let result = 1n;
+  base %= mod;
+  while (exp > 0n) {
+    if (exp & 1n) result = (result * base) % mod;
+    base = (base * base) % mod;
+    exp >>= 1n;
+  }
+  return result;
+}
+
+const invFact = new Array(N + 1).fill(1n);
+invFact[N] = power(fact[N], MOD - 2n, MOD);
+for (let i = N; i > 0; i--) invFact[i - 1] = (invFact[i] * BigInt(i)) % MOD;
+
+function nCr(n, r) {
+  if (r < 0 || r > n) return 0n;
+  return (((fact[n] * invFact[r]) % MOD) * invFact[n - r]) % MOD;
+}
+
+console.log("\\nC(5,2)      =", String(nCr(5, 2)));
+console.log("C(10,5)     =", String(nCr(10, 5)));
+console.log("C(100000,50000) mod M =", String(nCr(100000, 50000)));
+console.log("C(5,7)      =", String(nCr(5, 7)), "(r > n)");
+
+// checking the small ones against the real value
+function comb(n, r) {
+  let out = 1n;
+  for (let i = 0; i < r; i++) out = (out * BigInt(n - i)) / BigInt(i + 1);
+  return out;
+}
+console.log("\\nexact C(10,5) =", String(comb(10, 5)));
+console.log("row 5 of Pascal =", "[" + pascal(6)[5].map(String).join(", ") + "]");`,
+            },
+            {
+              lang: "typescript",
+              code: `// BigInt for the modular arithmetic: fact[i-1] * i reaches 1e18, past 2^53.
+const MOD = 10n ** 9n + 7n;
+
+const center = (s: string, width: number): string => {
+  const left = Math.floor((width - s.length) / 2);
+  return " ".repeat(left) + s + " ".repeat(width - s.length - left);
+};
+const pad3 = (v: bigint): string => String(v).padStart(3);
+
+// Pascal's triangle: no division, no modular inverse needed
+function pascal(rows: number): bigint[][] {
+  const tri: bigint[][] = [[1n]];
+  for (let r = 1; r < rows; r++) {
+    const prev = tri[tri.length - 1];
+    const row: bigint[] = [1n];
+    for (let i = 0; i < prev.length - 1; i++) row.push((prev[i] + prev[i + 1]) % MOD);
+    row.push(1n);
+    tri.push(row);
+  }
+  return tri;
+}
+
+for (const row of pascal(6)) {
+  console.log(center(row.map(pad3).join(" "), 28));
+}
+
+// factorials + inverse factorials: O(n) build, O(1) per query
+const N = 200000;
+const fact: bigint[] = new Array(N + 1).fill(1n);
+for (let i = 1; i <= N; i++) fact[i] = (fact[i - 1] * BigInt(i)) % MOD;
+
+function power(base: bigint, exp: bigint, mod: bigint): bigint {
+  let result = 1n;
+  base %= mod;
+  while (exp > 0n) {
+    if (exp & 1n) result = (result * base) % mod;
+    base = (base * base) % mod;
+    exp >>= 1n;
+  }
+  return result;
+}
+
+const invFact: bigint[] = new Array(N + 1).fill(1n);
+invFact[N] = power(fact[N], MOD - 2n, MOD);
+for (let i = N; i > 0; i--) invFact[i - 1] = (invFact[i] * BigInt(i)) % MOD;
+
+function nCr(n: number, r: number): bigint {
+  if (r < 0 || r > n) return 0n;
+  return (((fact[n] * invFact[r]) % MOD) * invFact[n - r]) % MOD;
+}
+
+console.log("\\nC(5,2)      =", String(nCr(5, 2)));
+console.log("C(10,5)     =", String(nCr(10, 5)));
+console.log("C(100000,50000) mod M =", String(nCr(100000, 50000)));
+console.log("C(5,7)      =", String(nCr(5, 7)), "(r > n)");
+
+// checking the small ones against the real value
+function comb(n: number, r: number): bigint {
+  let out = 1n;
+  for (let i = 0; i < r; i++) out = (out * BigInt(n - i)) / BigInt(i + 1);
+  return out;
+}
+console.log("\\nexact C(10,5) =", String(comb(10, 5)));
+console.log("row 5 of Pascal =", "[" + pascal(6)[5].map(String).join(", ") + "]");`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static final long MOD = 1_000_000_007L;
+    static final int N = 200_000;
+
+    static String center(String s, int width) {
+        int left = (width - s.length()) / 2;
+        return " ".repeat(left) + s + " ".repeat(width - s.length() - left);
+    }
+
+    /** Pascal's triangle: no division, no modular inverse needed */
+    static List<long[]> pascal(int rows) {
+        List<long[]> tri = new ArrayList<>();
+        tri.add(new long[]{1});
+        for (int r = 1; r < rows; r++) {
+            long[] prev = tri.get(tri.size() - 1);
+            long[] row = new long[prev.length + 1];
+            row[0] = 1;
+            row[row.length - 1] = 1;
+            for (int i = 0; i < prev.length - 1; i++) row[i + 1] = (prev[i] + prev[i + 1]) % MOD;
+            tri.add(row);
+        }
+        return tri;
+    }
+
+    static long power(long base, long exp, long mod) {
+        long result = 1;
+        base %= mod;
+        while (exp > 0) {
+            if ((exp & 1) == 1) result = result * base % mod;
+            base = base * base % mod;
+            exp >>= 1;
+        }
+        return result;
+    }
+
+    static long[] fact = new long[N + 1];
+    static long[] invFact = new long[N + 1];
+
+    static long nCr(int n, int r) {
+        if (r < 0 || r > n) return 0;
+        return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+    }
+
+    public static void main(String[] args) {
+        for (long[] row : pascal(6)) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < row.length; i++) {
+                if (i > 0) sb.append(" ");
+                sb.append(String.format("%3d", row[i]));
+            }
+            System.out.println(center(sb.toString(), 28));
+        }
+
+        // factorials + inverse factorials: O(n) build, O(1) per query
+        fact[0] = 1;
+        for (int i = 1; i <= N; i++) fact[i] = fact[i - 1] * i % MOD;
+        invFact[N] = power(fact[N], MOD - 2, MOD);
+        for (int i = N; i > 0; i--) invFact[i - 1] = invFact[i] * i % MOD;
+
+        System.out.println("\\nC(5,2)      = " + nCr(5, 2));
+        System.out.println("C(10,5)     = " + nCr(10, 5));
+        System.out.println("C(100000,50000) mod M = " + nCr(100000, 50000));
+        System.out.println("C(5,7)      = " + nCr(5, 7) + " (r > n)");
+
+        // checking the small ones against the real value
+        long exact = 1;
+        for (int i = 0; i < 5; i++) exact = exact * (10 - i) / (i + 1);
+        System.out.println("\\nexact C(10,5) = " + exact);
+        long[] row5 = pascal(6).get(5);
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < row5.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(row5[i]);
+        }
+        System.out.println("row 5 of Pascal = " + sb.append("]"));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+const long long MOD = 1000000007LL;
+const int N = 200000;
+
+string center(const string& s, int width) {
+    int left = (width - (int)s.size()) / 2;
+    return string(left, ' ') + s + string(width - (int)s.size() - left, ' ');
+}
+
+// Pascal's triangle: no division, no modular inverse needed
+vector<vector<long long>> pascal(int rows) {
+    vector<vector<long long>> tri = {{1}};
+    for (int r = 1; r < rows; r++) {
+        const auto& prev = tri.back();
+        vector<long long> row = {1};
+        for (size_t i = 0; i + 1 < prev.size(); i++) row.push_back((prev[i] + prev[i + 1]) % MOD);
+        row.push_back(1);
+        tri.push_back(row);
+    }
+    return tri;
+}
+
+long long power(long long base, long long exp, long long mod) {
+    long long result = 1;
+    base %= mod;
+    while (exp > 0) {
+        if (exp & 1) result = result * base % mod;
+        base = base * base % mod;
+        exp >>= 1;
+    }
+    return result;
+}
+
+vector<long long> fact(N + 1, 1), invFact(N + 1, 1);
+
+long long nCr(int n, int r) {
+    if (r < 0 || r > n) return 0;
+    return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+}
+
+int main() {
+    for (const auto& row : pascal(6)) {
+        ostringstream line;
+        for (size_t i = 0; i < row.size(); i++) {
+            if (i) line << " ";
+            line << setw(3) << row[i];
+        }
+        cout << center(line.str(), 28) << "\\n";
+    }
+
+    // factorials + inverse factorials: O(n) build, O(1) per query
+    for (int i = 1; i <= N; i++) fact[i] = fact[i - 1] * i % MOD;
+    invFact[N] = power(fact[N], MOD - 2, MOD);
+    for (int i = N; i > 0; i--) invFact[i - 1] = invFact[i] * i % MOD;
+
+    cout << "\\nC(5,2)      = " << nCr(5, 2) << "\\n";
+    cout << "C(10,5)     = " << nCr(10, 5) << "\\n";
+    cout << "C(100000,50000) mod M = " << nCr(100000, 50000) << "\\n";
+    cout << "C(5,7)      = " << nCr(5, 7) << " (r > n)\\n";
+
+    // checking the small ones against the real value
+    long long exact = 1;
+    for (int i = 0; i < 5; i++) exact = exact * (10 - i) / (i + 1);
+    cout << "\\nexact C(10,5) = " << exact << "\\n";
+    auto row5 = pascal(6)[5];
+    cout << "row 5 of Pascal = [";
+    for (size_t i = 0; i < row5.size(); i++) {
+        if (i) cout << ", ";
+        cout << row5[i];
+    }
+    cout << "]\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `const MOD: i64 = 1_000_000_007;
+const N: usize = 200_000;
+
+fn center(s: &str, width: usize) -> String {
+    let left = (width - s.len()) / 2;
+    format!("{}{}{}", " ".repeat(left), s, " ".repeat(width - s.len() - left))
+}
+
+/// Pascal's triangle: no division, no modular inverse needed
+fn pascal(rows: usize) -> Vec<Vec<i64>> {
+    let mut tri: Vec<Vec<i64>> = vec![vec![1]];
+    for _ in 1..rows {
+        let prev = tri.last().unwrap().clone();
+        let mut row = vec![1i64];
+        for i in 0..prev.len().saturating_sub(1) {
+            row.push((prev[i] + prev[i + 1]) % MOD);
+        }
+        row.push(1);
+        tri.push(row);
+    }
+    tri
+}
+
+fn power(mut base: i64, mut exp: i64, mod_: i64) -> i64 {
+    let mut result = 1i64;
+    base %= mod_;
+    while exp > 0 {
+        if exp & 1 == 1 {
+            result = result * base % mod_;
+        }
+        base = base * base % mod_;
+        exp >>= 1;
+    }
+    result
+}
+
+fn n_cr(fact: &[i64], inv_fact: &[i64], n: usize, r: i64) -> i64 {
+    if r < 0 || r > n as i64 {
+        return 0;
+    }
+    let r = r as usize;
+    fact[n] * inv_fact[r] % MOD * inv_fact[n - r] % MOD
+}
+
+fn main() {
+    for row in pascal(6) {
+        let line: Vec<String> = row.iter().map(|v| format!("{:3}", v)).collect();
+        println!("{}", center(&line.join(" "), 28));
+    }
+
+    // factorials + inverse factorials: O(n) build, O(1) per query
+    let mut fact = vec![1i64; N + 1];
+    for i in 1..=N {
+        fact[i] = fact[i - 1] * i as i64 % MOD;
+    }
+    let mut inv_fact = vec![1i64; N + 1];
+    inv_fact[N] = power(fact[N], MOD - 2, MOD);
+    for i in (1..=N).rev() {
+        inv_fact[i - 1] = inv_fact[i] * i as i64 % MOD;
+    }
+
+    println!("\\nC(5,2)      = {}", n_cr(&fact, &inv_fact, 5, 2));
+    println!("C(10,5)     = {}", n_cr(&fact, &inv_fact, 10, 5));
+    println!("C(100000,50000) mod M = {}", n_cr(&fact, &inv_fact, 100000, 50000));
+    println!("C(5,7)      = {} (r > n)", n_cr(&fact, &inv_fact, 5, 7));
+
+    // checking the small ones against the real value
+    let mut exact: i64 = 1;
+    for i in 0..5 {
+        exact = exact * (10 - i) / (i + 1);
+    }
+    println!("\\nexact C(10,5) = {}", exact);
+    let row5: Vec<String> = pascal(6)[5].iter().map(|v| v.to_string()).collect();
+    println!("row 5 of Pascal = [{}]", row5.join(", "));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+const MOD int64 = 1_000_000_007
+const N = 200_000
+
+func center(s string, width int) string {
+	left := (width - len(s)) / 2
+	return strings.Repeat(" ", left) + s + strings.Repeat(" ", width-len(s)-left)
+}
+
+// Pascal's triangle: no division, no modular inverse needed
+func pascal(rows int) [][]int64 {
+	tri := [][]int64{{1}}
+	for r := 1; r < rows; r++ {
+		prev := tri[len(tri)-1]
+		row := []int64{1}
+		for i := 0; i+1 < len(prev); i++ {
+			row = append(row, (prev[i]+prev[i+1])%MOD)
+		}
+		row = append(row, 1)
+		tri = append(tri, row)
+	}
+	return tri
+}
+
+func power(base, exp, mod int64) int64 {
+	var result int64 = 1
+	base %= mod
+	for exp > 0 {
+		if exp&1 == 1 {
+			result = result * base % mod
+		}
+		base = base * base % mod
+		exp >>= 1
+	}
+	return result
+}
+
+var fact = make([]int64, N+1)
+var invFact = make([]int64, N+1)
+
+func nCr(n, r int) int64 {
+	if r < 0 || r > n {
+		return 0
+	}
+	return fact[n] * invFact[r] % MOD * invFact[n-r] % MOD
+}
+
+func main() {
+	for _, row := range pascal(6) {
+		parts := make([]string, len(row))
+		for i, v := range row {
+			parts[i] = fmt.Sprintf("%3d", v)
+		}
+		fmt.Println(center(strings.Join(parts, " "), 28))
+	}
+
+	// factorials + inverse factorials: O(n) build, O(1) per query
+	fact[0] = 1
+	for i := 1; i <= N; i++ {
+		fact[i] = fact[i-1] * int64(i) % MOD
+	}
+	invFact[N] = power(fact[N], MOD-2, MOD)
+	for i := N; i > 0; i-- {
+		invFact[i-1] = invFact[i] * int64(i) % MOD
+	}
+
+	fmt.Println("\\nC(5,2)      =", nCr(5, 2))
+	fmt.Println("C(10,5)     =", nCr(10, 5))
+	fmt.Println("C(100000,50000) mod M =", nCr(100000, 50000))
+	fmt.Println("C(5,7)      =", nCr(5, 7), "(r > n)")
+
+	// checking the small ones against the real value
+	var exact int64 = 1
+	for i := int64(0); i < 5; i++ {
+		exact = exact * (10 - i) / (i + 1)
+	}
+	fmt.Println("\\nexact C(10,5) =", exact)
+	row5 := pascal(6)[5]
+	parts := make([]string, len(row5))
+	for i, v := range row5 {
+		parts[i] = fmt.Sprint(v)
+	}
+	fmt.Println("row 5 of Pascal = [" + strings.Join(parts, ", ") + "]")
+}`,
+            },
+          ],
         },
       ],
     },

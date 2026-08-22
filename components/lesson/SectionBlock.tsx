@@ -2,6 +2,7 @@ import type { Section } from "@/content/types";
 import { Prose } from "./Prose";
 import { ComparisonPanel } from "./ComparisonPanel";
 import { PitfallCallout } from "./PitfallCallout";
+import { Visual } from "@/components/visuals/Visual";
 
 export function SectionBlock({ section }: { section: Section }) {
   return (
@@ -13,6 +14,7 @@ export function SectionBlock({ section }: { section: Section }) {
       {section.examples?.map((example) => (
         <ComparisonPanel key={example.id} example={example} />
       ))}
+      {section.visual && <Visual spec={section.visual} />}
       {section.pitfalls?.map((pitfall, i) => (
         <PitfallCallout key={i} pitfall={pitfall} />
       ))}

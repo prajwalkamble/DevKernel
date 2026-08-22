@@ -61,8 +61,296 @@ print(f"  final: {data}   kept {kept} non-zero values in a[0:{kept}]")`,
   final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
           explanation:
             "Watch `write` fall behind `read` at row 0 and stay behind. That gap — one, then one, then two — is the count of zeroes seen. This version *swaps* rather than assigns, which is what makes the zeroes accumulate neatly at the end rather than being left as stale copies; if the problem only asks for the first `k` elements and does not care what follows, a plain `a[write] = a[read]` is fine and one operation cheaper. Note that the swap is harmless when `write == read`, which is the case for the whole prefix before the first zero.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+const padL = (s, w) => String(s).padStart(w);
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+function moveZeroes(a) {
+  let write = 0;
+  console.log(\`  \${padL("read", 4)} \${padL("value", 5)} \${padL("keep?", 6)} \${padL("write", 5)}   array\`);
+  console.log("  " + "-".repeat(46));
+  for (let read = 0; read < a.length; read++) {
+    const value = a[read];
+    const keep = value !== 0;
+    if (keep) {
+      [a[write], a[read]] = [a[read], a[write]];
+      write++;
+    }
+    console.log(\`  \${padL(read, 4)} \${padL(value, 5)} \${padL(keep, 6)} \${padL(write, 5)}   \${list(a)}\`);
+  }
+  return write;
+}
+
+console.log("move every zero to the end, keeping the order of the rest");
+const data = [0, 1, 0, 3, 12];
+console.log(\`  start: \${list(data)}\`);
+const kept = moveZeroes(data);
+console.log(\`  final: \${list(data)}   kept \${kept} non-zero values in a[0:\${kept}]\`);`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+const padL = (s: string | number | boolean, w: number): string => String(s).padStart(w);
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+function moveZeroes(a: number[]): number {
+  let write = 0;
+  console.log(\`  \${padL("read", 4)} \${padL("value", 5)} \${padL("keep?", 6)} \${padL("write", 5)}   array\`);
+  console.log("  " + "-".repeat(46));
+  for (let read = 0; read < a.length; read++) {
+    const value = a[read];
+    const keep = value !== 0;
+    if (keep) {
+      [a[write], a[read]] = [a[read], a[write]];
+      write++;
+    }
+    console.log(\`  \${padL(read, 4)} \${padL(value, 5)} \${padL(keep, 6)} \${padL(write, 5)}   \${list(a)}\`);
+  }
+  return write;
+}
+
+console.log("move every zero to the end, keeping the order of the rest");
+const data: number[] = [0, 1, 0, 3, 12];
+console.log(\`  start: \${list(data)}\`);
+const kept = moveZeroes(data);
+console.log(\`  final: \${list(data)}   kept \${kept} non-zero values in a[0:\${kept}]\`);`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    static String list(int[] xs) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < xs.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    /** Invariant: a[0:write] holds every kept element so far, in order. */
+    static int moveZeroes(int[] a) {
+        int write = 0;
+        System.out.printf("  %4s %5s %6s %5s   array%n", "read", "value", "keep?", "write");
+        System.out.println("  " + "-".repeat(46));
+        for (int read = 0; read < a.length; read++) {
+            int value = a[read];
+            boolean keep = value != 0;
+            if (keep) {
+                int t = a[write];
+                a[write] = a[read];
+                a[read] = t;
+                write++;
+            }
+            System.out.printf("  %4d %5d %6b %5d   %s%n", read, value, keep, write, list(a));
+        }
+        return write;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("move every zero to the end, keeping the order of the rest");
+        int[] data = {0, 1, 0, 3, 12};
+        System.out.println("  start: " + list(data));
+        int kept = moveZeroes(data);
+        System.out.println("  final: " + list(data) + "   kept " + kept
+                + " non-zero values in a[0:" + kept + "]");
+    }
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+size_t moveZeroes(vector<int>& a) {
+    size_t write = 0;
+    cout << "  " << right << setw(4) << "read" << " " << setw(5) << "value"
+         << " " << setw(6) << "keep?" << " " << setw(5) << "write" << "   array\\n";
+    cout << "  " << string(46, '-') << "\\n";
+    for (size_t read = 0; read < a.size(); read++) {
+        int value = a[read];
+        bool keep = value != 0;
+        if (keep) {
+            swap(a[write], a[read]);
+            write++;
+        }
+        cout << "  " << setw(4) << read << " " << setw(5) << value << " "
+             << setw(6) << boolalpha << keep << " " << setw(5) << write
+             << "   " << list(a) << "\\n";
+    }
+    return write;
+}
+
+int main() {
+    cout << "move every zero to the end, keeping the order of the rest\\n";
+    vector<int> data = {0, 1, 0, 3, 12};
+    cout << "  start: " << list(data) << "\\n";
+    size_t kept = moveZeroes(data);
+    cout << "  final: " << list(data) << "   kept " << kept
+         << " non-zero values in a[0:" << kept << "]\\n";
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Invariant: a[0..write] holds every kept element so far, in order.
+fn move_zeroes(a: &mut Vec<i32>) -> usize {
+    let mut write = 0;
+    println!("  {:>4} {:>5} {:>6} {:>5}   array", "read", "value", "keep?", "write");
+    println!("  {}", "-".repeat(46));
+    for read in 0..a.len() {
+        let value = a[read];
+        let keep = value != 0;
+        if keep {
+            a.swap(write, read);
+            write += 1;
+        }
+        println!("  {:>4} {:>5} {:>6} {:>5}   {}", read, value, keep, write, list(a));
+    }
+    write
+}
+
+fn main() {
+    println!("move every zero to the end, keeping the order of the rest");
+    let mut data = vec![0, 1, 0, 3, 12];
+    println!("  start: {}", list(&data));
+    let kept = move_zeroes(&mut data);
+    println!("  final: {}   kept {} non-zero values in a[0:{}]", list(&data), kept, kept);
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// Invariant: a[0:write] holds every kept element so far, in order.
+func moveZeroes(a []int) int {
+	write := 0
+	fmt.Printf("  %4s %5s %6s %5s   array\\n", "read", "value", "keep?", "write")
+	fmt.Println("  " + strings.Repeat("-", 46))
+	for read := range a {
+		value := a[read]
+		keep := value != 0
+		if keep {
+			a[write], a[read] = a[read], a[write]
+			write++
+		}
+		fmt.Printf("  %4d %5d %6t %5d   %s\\n", read, value, keep, write, list(a))
+	}
+	return write
+}
+
+func main() {
+	fmt.Println("move every zero to the end, keeping the order of the rest")
+	data := []int{0, 1, 0, 3, 12}
+	fmt.Println("  start:", list(data))
+	kept := moveZeroes(data)
+	fmt.Printf("  final: %s   kept %d non-zero values in a[0:%d]\\n", list(data), kept, kept)
+}`,
+              output: `move every zero to the end, keeping the order of the rest
+  start: [0, 1, 0, 3, 12]
+  read value  keep? write   array
+  ----------------------------------------------
+     0     0  false     0   [0, 1, 0, 3, 12]
+     1     1   true     1   [1, 0, 0, 3, 12]
+     2     0  false     1   [1, 0, 0, 3, 12]
+     3     3   true     2   [1, 3, 0, 0, 12]
+     4    12   true     3   [1, 3, 12, 0, 0]
+  final: [1, 3, 12, 0, 0]   kept 3 non-zero values in a[0:3]`,
+            },
+          ],
         },
       ],
+      visual: {
+        id: "readwrite-visual",
+        kind: "pattern",
+        algorithm: "readwrite",
+        lockAlgorithm: true,
+        title: "The writer lagging behind the reader",
+      },
       pitfalls: [
         {
           title: "Advancing `write` unconditionally",
@@ -127,6 +415,276 @@ drop the negatives
     out k=3  a[0:k]=[5, 0, 7]`,
           explanation:
             "The two middle predicates are the interesting ones, and they are worth reading slowly. **Both compare against the output, not the input** — `a[w - 1]` is the last element already kept, and `a[w - 2]` is the one before it. That is why the at-most-two version generalises to at-most-k by changing a single digit: keeping k copies means checking whether the k-th most recent survivor already has this value. Comparing against `a[r - 1]` instead would be comparing against the input, which fails as soon as a run is longer than the limit.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+function compact(a, keep) {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (keep(a, write, read)) {
+      a[write] = a[read];
+      write++;
+    }
+  }
+  return write;
+}
+
+const cases = [
+  ["remove every 3", [3, 2, 2, 3, 1, 3], (a, w, r) => a[r] !== 3],
+  ["dedupe a sorted array", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w === 0 || a[r] !== a[w - 1]],
+  ["keep at most two of each", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w < 2 || a[r] !== a[w - 2]],
+  ["drop the negatives", [-1, 5, -3, 0, 7, -8], (a, w, r) => a[r] >= 0],
+];
+
+for (const [name, data, keep] of cases) {
+  const before = list(data);
+  const k = compact(data, keep);
+  console.log(name);
+  console.log(\`    in  \${before}\`);
+  console.log(\`    out k=\${k}  a[0:k]=\${list(data.slice(0, k))}\`);
+}`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+type Keep = (a: number[], w: number, r: number) => boolean;
+
+function compact(a: number[], keep: Keep): number {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (keep(a, write, read)) {
+      a[write] = a[read];
+      write++;
+    }
+  }
+  return write;
+}
+
+const cases: [string, number[], Keep][] = [
+  ["remove every 3", [3, 2, 2, 3, 1, 3], (a, w, r) => a[r] !== 3],
+  ["dedupe a sorted array", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w === 0 || a[r] !== a[w - 1]],
+  ["keep at most two of each", [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], (a, w, r) => w < 2 || a[r] !== a[w - 2]],
+  ["drop the negatives", [-1, 5, -3, 0, 7, -8], (a, w, r) => a[r] >= 0],
+];
+
+for (const [name, data, keep] of cases) {
+  const before = list(data);
+  const k = compact(data, keep);
+  console.log(name);
+  console.log(\`    in  \${before}\`);
+  console.log(\`    out k=\${k}  a[0:k]=\${list(data.slice(0, k))}\`);
+}`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.*;
+
+public class Main {
+    interface Keep {
+        boolean test(int[] a, int write, int read);
+    }
+
+    /** The whole pattern. Only \`keep(a, write, read)\` changes between problems. */
+    static int compact(int[] a, Keep keep) {
+        int write = 0;
+        for (int read = 0; read < a.length; read++) {
+            if (keep.test(a, write, read)) {
+                a[write] = a[read];
+                write++;
+            }
+        }
+        return write;
+    }
+
+    static String list(int[] xs, int to) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < to; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(xs[i]);
+        }
+        return sb.append("]").toString();
+    }
+
+    public static void main(String[] args) {
+        String[] names = {"remove every 3", "dedupe a sorted array",
+                          "keep at most two of each", "drop the negatives"};
+        int[][] data = {{3, 2, 2, 3, 1, 3}, {0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+                        {0, 0, 1, 1, 1, 2, 2, 3, 3, 4}, {-1, 5, -3, 0, 7, -8}};
+        Keep[] keeps = {
+            (a, w, r) -> a[r] != 3,
+            (a, w, r) -> w == 0 || a[r] != a[w - 1],
+            (a, w, r) -> w < 2 || a[r] != a[w - 2],
+            (a, w, r) -> a[r] >= 0,
+        };
+
+        for (int i = 0; i < names.length; i++) {
+            String before = list(data[i], data[i].length);
+            int k = compact(data[i], keeps[i]);
+            System.out.println(names[i]);
+            System.out.println("    in  " + before);
+            System.out.println("    out k=" + k + "  a[0:k]=" + list(data[i], k));
+        }
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+using Keep = function<bool(const vector<int>&, size_t, size_t)>;
+
+string list(const vector<int>& xs, size_t to) {
+    string out = "[";
+    for (size_t i = 0; i < to; i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+size_t compact(vector<int>& a, const Keep& keep) {
+    size_t write = 0;
+    for (size_t read = 0; read < a.size(); read++) {
+        if (keep(a, write, read)) {
+            a[write] = a[read];
+            write++;
+        }
+    }
+    return write;
+}
+
+int main() {
+    vector<string> names = {"remove every 3", "dedupe a sorted array",
+                            "keep at most two of each", "drop the negatives"};
+    vector<vector<int>> data = {{3, 2, 2, 3, 1, 3}, {0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+                                {0, 0, 1, 1, 1, 2, 2, 3, 3, 4}, {-1, 5, -3, 0, 7, -8}};
+    vector<Keep> keeps = {
+        [](const vector<int>& a, size_t, size_t r) { return a[r] != 3; },
+        [](const vector<int>& a, size_t w, size_t r) { return w == 0 || a[r] != a[w - 1]; },
+        [](const vector<int>& a, size_t w, size_t r) { return w < 2 || a[r] != a[w - 2]; },
+        [](const vector<int>& a, size_t, size_t r) { return a[r] >= 0; },
+    };
+
+    for (size_t i = 0; i < names.size(); i++) {
+        string before = list(data[i], data[i].size());
+        size_t k = compact(data[i], keeps[i]);
+        cout << names[i] << "\\n";
+        cout << "    in  " << before << "\\n";
+        cout << "    out k=" << k << "  a[0:k]=" << list(data[i], k) << "\\n";
+    }
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// The whole pattern. Only \`keep(a, write, read)\` changes between problems.
+fn compact(a: &mut [i32], keep: fn(&[i32], usize, usize) -> bool) -> usize {
+    let mut write = 0;
+    for read in 0..a.len() {
+        if keep(a, write, read) {
+            a[write] = a[read];
+            write += 1;
+        }
+    }
+    write
+}
+
+fn main() {
+    let cases: Vec<(&str, Vec<i32>, fn(&[i32], usize, usize) -> bool)> = vec![
+        ("remove every 3", vec![3, 2, 2, 3, 1, 3], |a, _w, r| a[r] != 3),
+        (
+            "dedupe a sorted array",
+            vec![0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+            |a, w, r| w == 0 || a[r] != a[w - 1],
+        ),
+        (
+            "keep at most two of each",
+            vec![0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+            |a, w, r| w < 2 || a[r] != a[w - 2],
+        ),
+        ("drop the negatives", vec![-1, 5, -3, 0, 7, -8], |a, _w, r| a[r] >= 0),
+    ];
+
+    for (name, data, keep) in cases {
+        let mut data = data;
+        let before = list(&data);
+        let k = compact(&mut data, keep);
+        println!("{}", name);
+        println!("    in  {}", before);
+        println!("    out k={}  a[0:k]={}", k, list(&data[..k]));
+    }
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// The whole pattern. Only keep(a, write, read) changes between problems.
+func compact(a []int, keep func([]int, int, int) bool) int {
+	write := 0
+	for read := range a {
+		if keep(a, write, read) {
+			a[write] = a[read]
+			write++
+		}
+	}
+	return write
+}
+
+func main() {
+	type testCase struct {
+		name string
+		data []int
+		keep func([]int, int, int) bool
+	}
+	cases := []testCase{
+		{"remove every 3", []int{3, 2, 2, 3, 1, 3},
+			func(a []int, w, r int) bool { return a[r] != 3 }},
+		{"dedupe a sorted array", []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+			func(a []int, w, r int) bool { return w == 0 || a[r] != a[w-1] }},
+		{"keep at most two of each", []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4},
+			func(a []int, w, r int) bool { return w < 2 || a[r] != a[w-2] }},
+		{"drop the negatives", []int{-1, 5, -3, 0, 7, -8},
+			func(a []int, w, r int) bool { return a[r] >= 0 }},
+	}
+
+	for _, c := range cases {
+		before := list(c.data)
+		k := compact(c.data, c.keep)
+		fmt.Println(c.name)
+		fmt.Println("    in ", before)
+		fmt.Printf("    out k=%d  a[0:k]=%s\\n", k, list(c.data[:k]))
+	}
+}`,
+            },
+          ],
         },
       ],
     },
@@ -219,6 +777,468 @@ swap-end  k=5  [4, 2, 2, 5, 1]  writes=3
   swap-end writes = 1`,
           explanation:
             "**Same k, different arrays** — both answers are correct for a problem that says order does not matter, and only one is correct for a problem that says it does. The second measurement is the reason to know the trick: 99,999 writes against 1, for the same result. Both loops are still O(n), because both still *read* every element; what changed is the number of writes, which is a constant factor and occasionally a large one. In the stable version the `a[write++] = a[read]` when `write == read` is a genuine write of an element onto itself, and guarding it with `if (write != read)` is a legitimate small saving.",
+          alternates: [
+            {
+              lang: "python",
+              code: `writes = 0
+
+
+def compact_stable(a, drop):
+    """Stable: survivors keep their relative order."""
+    global writes
+    write = 0
+    for read in range(len(a)):
+        if a[read] != drop:
+            a[write] = a[read]
+            write += 1
+            writes += 1
+    return write
+
+
+def compact_swap_end(a, drop):
+    """Unstable: pull a survivor in from the end instead of shifting."""
+    global writes
+    i, n = 0, len(a)
+    while i < n:
+        if a[i] == drop:
+            a[i] = a[n - 1]
+            writes += 1
+            n -= 1
+        else:
+            i += 1
+    return n
+
+
+base = [3, 2, 2, 3, 1, 3, 5, 4]
+
+a = base[:]
+writes = 0
+k1 = compact_stable(a, 3)
+print(f"stable    k={k1}  {a[:k1]}  writes={writes}")
+
+b = base[:]
+writes = 0
+k2 = compact_swap_end(b, 3)
+print(f"swap-end  k={k2}  {b[:k2]}  writes={writes}")
+
+# now a case where almost nothing is removed
+big = [1] * 100_000
+big[0] = 3
+
+c = big[:]
+writes = 0
+compact_stable(c, 3)
+stable_writes = writes
+
+d = big[:]
+writes = 0
+compact_swap_end(d, 3)
+swap_writes = writes
+
+print()
+print("100,000 elements, exactly one of them removed:")
+print(f"  stable   writes = {stable_writes:,}")
+print(f"  swap-end writes = {swap_writes:,}")`,
+            },
+            {
+              lang: "javascript",
+              code: `let writes = 0;
+
+/** Stable: survivors keep their relative order. */
+function compactStable(a, drop) {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (a[read] !== drop) {
+      a[write++] = a[read];
+      writes++;
+    }
+  }
+  return write;
+}
+
+/** Unstable: pull a survivor in from the end instead of shifting. */
+function compactSwapEnd(a, drop) {
+  let i = 0;
+  let n = a.length;
+  while (i < n) {
+    if (a[i] === drop) {
+      a[i] = a[n - 1];
+      writes++;
+      n--;
+    } else {
+      i++;
+    }
+  }
+  return n;
+}
+
+const show = (a) => \`[\${a.join(", ")}]\`;
+const group = (n) => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+
+const base = [3, 2, 2, 3, 1, 3, 5, 4];
+
+const a = base.slice();
+writes = 0;
+const k1 = compactStable(a, 3);
+console.log(\`stable    k=\${k1}  \${show(a.slice(0, k1))}  writes=\${writes}\`);
+
+const b = base.slice();
+writes = 0;
+const k2 = compactSwapEnd(b, 3);
+console.log(\`swap-end  k=\${k2}  \${show(b.slice(0, k2))}  writes=\${writes}\`);
+
+// now a case where almost nothing is removed
+const big = new Array(100000).fill(1);
+big[0] = 3;
+
+const c = big.slice();
+writes = 0;
+compactStable(c, 3);
+const stableWrites = writes;
+
+const d = big.slice();
+writes = 0;
+compactSwapEnd(d, 3);
+const swapWrites = writes;
+
+console.log();
+console.log("100,000 elements, exactly one of them removed:");
+console.log(\`  stable   writes = \${group(stableWrites)}\`);
+console.log(\`  swap-end writes = \${group(swapWrites)}\`);`,
+            },
+            {
+              lang: "typescript",
+              code: `let writes = 0;
+
+/** Stable: survivors keep their relative order. */
+function compactStable(a: number[], drop: number): number {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (a[read] !== drop) {
+      a[write++] = a[read];
+      writes++;
+    }
+  }
+  return write;
+}
+
+/** Unstable: pull a survivor in from the end instead of shifting. */
+function compactSwapEnd(a: number[], drop: number): number {
+  let i = 0;
+  let n = a.length;
+  while (i < n) {
+    if (a[i] === drop) {
+      a[i] = a[n - 1];
+      writes++;
+      n--;
+    } else {
+      i++;
+    }
+  }
+  return n;
+}
+
+const show = (a: number[]): string => \`[\${a.join(", ")}]\`;
+const group = (n: number): string => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+
+const base = [3, 2, 2, 3, 1, 3, 5, 4];
+
+const a = base.slice();
+writes = 0;
+const k1 = compactStable(a, 3);
+console.log(\`stable    k=\${k1}  \${show(a.slice(0, k1))}  writes=\${writes}\`);
+
+const b = base.slice();
+writes = 0;
+const k2 = compactSwapEnd(b, 3);
+console.log(\`swap-end  k=\${k2}  \${show(b.slice(0, k2))}  writes=\${writes}\`);
+
+// now a case where almost nothing is removed
+const big = new Array(100000).fill(1);
+big[0] = 3;
+
+const c = big.slice();
+writes = 0;
+compactStable(c, 3);
+const stableWrites = writes;
+
+const d = big.slice();
+writes = 0;
+compactSwapEnd(d, 3);
+const swapWrites = writes;
+
+console.log();
+console.log("100,000 elements, exactly one of them removed:");
+console.log(\`  stable   writes = \${group(stableWrites)}\`);
+console.log(\`  swap-end writes = \${group(swapWrites)}\`);`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+
+static long long writes = 0;
+
+// Stable: survivors keep their relative order.
+static size_t compact_stable(std::vector<int>& a, int drop) {
+    size_t write = 0;
+    for (size_t read = 0; read < a.size(); ++read) {
+        if (a[read] != drop) {
+            a[write++] = a[read];
+            writes++;
+        }
+    }
+    return write;
+}
+
+// Unstable: pull a survivor in from the end instead of shifting.
+static size_t compact_swap_end(std::vector<int>& a, int drop) {
+    size_t i = 0, n = a.size();
+    while (i < n) {
+        if (a[i] == drop) {
+            a[i] = a[n - 1];
+            writes++;
+            n--;
+        } else {
+            i++;
+        }
+    }
+    return n;
+}
+
+static std::string show(const std::vector<int>& a, size_t k) {
+    std::string out = "[";
+    for (size_t i = 0; i < k; ++i) {
+        if (i) out += ", ";
+        out += std::to_string(a[i]);
+    }
+    return out + "]";
+}
+
+static std::string group(long long n) {
+    std::string s = std::to_string(n), out;
+    for (size_t i = 0; i < s.size(); ++i) {
+        if (i > 0 && (s.size() - i) % 3 == 0) out += ',';
+        out += s[i];
+    }
+    return out;
+}
+
+int main() {
+    const std::vector<int> base = {3, 2, 2, 3, 1, 3, 5, 4};
+
+    std::vector<int> a = base;
+    writes = 0;
+    size_t k1 = compact_stable(a, 3);
+    std::cout << "stable    k=" << k1 << "  " << show(a, k1) << "  writes=" << writes << '\\n';
+
+    std::vector<int> b = base;
+    writes = 0;
+    size_t k2 = compact_swap_end(b, 3);
+    std::cout << "swap-end  k=" << k2 << "  " << show(b, k2) << "  writes=" << writes << '\\n';
+
+    // now a case where almost nothing is removed
+    std::vector<int> big(100000, 1);
+    big[0] = 3;
+
+    std::vector<int> c = big;
+    writes = 0;
+    compact_stable(c, 3);
+    long long stable_writes = writes;
+
+    std::vector<int> d = big;
+    writes = 0;
+    compact_swap_end(d, 3);
+    long long swap_writes = writes;
+
+    std::cout << '\\n';
+    std::cout << "100,000 elements, exactly one of them removed:\\n";
+    std::cout << "  stable   writes = " << group(stable_writes) << '\\n';
+    std::cout << "  swap-end writes = " << group(swap_writes) << '\\n';
+}`,
+            },
+            {
+              lang: "rust",
+              code: `/// Stable: survivors keep their relative order.
+///
+/// The counter travels as an argument rather than living in a global, which is
+/// what the other languages use: a mutable static is \`unsafe\` to touch in Rust,
+/// and this is the same information passed explicitly.
+fn compact_stable(a: &mut [i32], drop: i32, writes: &mut i64) -> usize {
+    let mut write = 0;
+    for read in 0..a.len() {
+        if a[read] != drop {
+            a[write] = a[read];
+            write += 1;
+            *writes += 1;
+        }
+    }
+    write
+}
+
+/// Unstable: pull a survivor in from the end instead of shifting.
+fn compact_swap_end(a: &mut [i32], drop: i32, writes: &mut i64) -> usize {
+    let (mut i, mut n) = (0usize, a.len());
+    while i < n {
+        if a[i] == drop {
+            a[i] = a[n - 1];
+            *writes += 1;
+            n -= 1;
+        } else {
+            i += 1;
+        }
+    }
+    n
+}
+
+fn show(a: &[i32]) -> String {
+    let parts: Vec<String> = a.iter().map(|v| v.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn group(n: i64) -> String {
+    let s = n.to_string();
+    let mut out = String::new();
+    for (i, c) in s.chars().enumerate() {
+        if i > 0 && (s.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
+fn main() {
+    let base = [3, 2, 2, 3, 1, 3, 5, 4];
+
+    let mut a = base;
+    let mut writes = 0i64;
+    let k1 = compact_stable(&mut a, 3, &mut writes);
+    println!("stable    k={}  {}  writes={}", k1, show(&a[..k1]), writes);
+
+    let mut b = base;
+    writes = 0;
+    let k2 = compact_swap_end(&mut b, 3, &mut writes);
+    println!("swap-end  k={}  {}  writes={}", k2, show(&b[..k2]), writes);
+
+    // now a case where almost nothing is removed
+    let mut big = vec![1i32; 100_000];
+    big[0] = 3;
+
+    let mut c = big.clone();
+    writes = 0;
+    compact_stable(&mut c, 3, &mut writes);
+    let stable_writes = writes;
+
+    let mut d = big.clone();
+    writes = 0;
+    compact_swap_end(&mut d, 3, &mut writes);
+    let swap_writes = writes;
+
+    println!();
+    println!("100,000 elements, exactly one of them removed:");
+    println!("  stable   writes = {}", group(stable_writes));
+    println!("  swap-end writes = {}", group(swap_writes));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+var writes int64
+
+// compactStable is stable: survivors keep their relative order.
+func compactStable(a []int, drop int) int {
+	write := 0
+	for read := 0; read < len(a); read++ {
+		if a[read] != drop {
+			a[write] = a[read]
+			write++
+			writes++
+		}
+	}
+	return write
+}
+
+// compactSwapEnd is unstable: it pulls a survivor in from the end instead of shifting.
+func compactSwapEnd(a []int, drop int) int {
+	i, n := 0, len(a)
+	for i < n {
+		if a[i] == drop {
+			a[i] = a[n-1]
+			writes++
+			n--
+		} else {
+			i++
+		}
+	}
+	return n
+}
+
+func show(a []int) string {
+	parts := make([]string, len(a))
+	for i, v := range a {
+		parts[i] = strconv.Itoa(v)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func group(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	var out strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			out.WriteByte(',')
+		}
+		out.WriteRune(c)
+	}
+	return out.String()
+}
+
+func main() {
+	base := []int{3, 2, 2, 3, 1, 3, 5, 4}
+
+	a := append([]int(nil), base...)
+	writes = 0
+	k1 := compactStable(a, 3)
+	fmt.Printf("stable    k=%d  %s  writes=%d\\n", k1, show(a[:k1]), writes)
+
+	b := append([]int(nil), base...)
+	writes = 0
+	k2 := compactSwapEnd(b, 3)
+	fmt.Printf("swap-end  k=%d  %s  writes=%d\\n", k2, show(b[:k2]), writes)
+
+	// now a case where almost nothing is removed
+	big := make([]int, 100000)
+	for i := range big {
+		big[i] = 1
+	}
+	big[0] = 3
+
+	c := append([]int(nil), big...)
+	writes = 0
+	compactStable(c, 3)
+	stableWrites := writes
+
+	d := append([]int(nil), big...)
+	writes = 0
+	compactSwapEnd(d, 3)
+	swapWrites := writes
+
+	fmt.Println()
+	fmt.Println("100,000 elements, exactly one of them removed:")
+	fmt.Printf("  stable   writes = %s\\n", group(stableWrites))
+	fmt.Printf("  swap-end writes = %s\\n", group(swapWrites))
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

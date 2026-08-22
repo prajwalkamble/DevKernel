@@ -20,6 +20,29 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Checks
+
+Nothing in a lesson is written from memory. Four gates hold that up, and the
+first two run in CI on every push (`.github/workflows/verify.yml`):
+
+| Command | What it proves | Needs |
+| --- | --- | --- |
+| `npm run verify` | Types, lint, and every visualisation's frames — a few seconds | node |
+| `npm run build` | Every page renders | node |
+| `npm run verify:code` | Every example *and every translation* compiles and prints what the lesson says it prints | JDK 25, Python 3.13, Go 1.24, g++, rustc, nasm |
+| `npm run verify:visuals` | The player actually advances, at each of the four speeds | a running server and Chromium |
+
+The toolchain versions matter. A recorded output is only reproducible on the toolchain it was recorded on — `Double.toString` switched to the shortest round-tripping decimal in JDK 19, so an older JDK disagrees with every lesson that prints a large double. CI pins them for this reason.
+
+`npm run verify:code` takes an optional track and module — `npm run verify:code -- dsa arrays-and-strings` — which is how to use it while writing.
+`npm run verify:visuals` needs the site already up (`npm run dev`, or `npm run build && npm start`); it measures real elapsed time, so it takes a few minutes by design.
+
+To run the fast gates before every commit:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

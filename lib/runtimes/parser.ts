@@ -179,14 +179,36 @@ export class Parser {
       this.next();
       out += "::" + this.identifier();
     }
-    // Java nests types inside types and spells it with a dot: `Map.Entry<K, V>`.
-    // Only a capitalised segment counts, which keeps `System.out.println(...)`
-    // — where the callers try `parseType` speculatively — from being read as a
-    // type name three segments long.
-    while (this.dialect === "java" && this.at(".") && /^[A-Z]/.test(this.peek(1).text ?? "")) {
-      this.next();
-      out += "." + this.identifier();
+    // Java spells a nested type with a dot — `Map.Entry<K, V>` — and a
+    // fully-qualified one with lowercase package segments in front of it:
+    // `java.util.Map<K, V>`.
+    //
+    // A lowercase segment is only swallowed when a capitalised one actually
+    // follows it, because that is the whole difference between a package path
+    // and a method call. `System.out.println(...)` has no capitalised segment
+    // after `System`, so it stops there and stays an expression — which
+    // matters, since callers reach this speculatively from
+    // `looksLikeDeclaration`.
+    while (this.dialect === "java") {
+      let ahead = 0;
+      let target = -1;
+      while (this.at(".", ahead) && this.peek(ahead + 1).kind === "ident") {
+        if (/^[A-Z]/.test(this.peek(ahead + 1).text)) { target = ahead; break; }
+        ahead += 2;
+      }
+      if (target === -1) break;
+      for (let i = 0; i <= target; i += 2) {
+        this.next();
+        out += "." + this.identifier();
+      }
     }
+    // Drop the package path once it has been consumed, so that
+    // `java.util.Map` and an imported `Map` are one name from here on. Every
+    // later consumer — the constructor table, default construction, integer
+    // width — keys off the bare type, and normalising here means none of them
+    // needs to know packages exist. A nested type such as `Map.Entry` starts
+    // with a capital and is left whole.
+    if (this.dialect === "java") out = out.replace(/^(?:[a-z][A-Za-z0-9_]*\.)+/, "");
     if (this.at("<")) {
       let depth = 0;
       do {
@@ -363,7 +385,19 @@ export class Parser {
         }
         const name = this.identifier().replace(/!$/, "");
         if (this.at("(")) {
-          target = { k: "method", target, name, args: this.parseArgs(), line: tok.line };
+          const args = this.parseArgs();
+          /**
+           * Rust's entry API, folded into an indexing expression.
+           *
+           * `*counts.entry(c).or_insert(0) += 1` means exactly `counts[c] += 1`
+           * with a default for the missing case, so it becomes that. The
+           * alternative was a new kind of value standing for "a writable place
+           * inside a map", which would have had to be understood by every
+           * switch over `Value` — printing, comparison, copying — to buy one
+           * idiom. The deref in front is dropped in `parseUnary`.
+           */
+          const folded = this.foldEntryApi(target, name, args, tok.line);
+          target = folded ?? { k: "method", target, name, args, line: tok.line };
         } else {
           target = { k: "field", target, name, line: tok.line };
         }
@@ -371,6 +405,38 @@ export class Parser {
       }
       if (tok.text === "[") {
         this.next();
+        // Go writes a slice with a colon and either bound optional:
+        // `a[1:3]`, `a[:k]`, `a[2:]`, `a[:]`.
+        if (this.dialect === "go") {
+          const from = this.at(":") ? undefined : this.parseExpr();
+          if (this.accept(":")) {
+            const to = this.at("]") ? undefined : this.parseExpr();
+            this.expect("]");
+            target = { k: "slice", target, from, to, inclusive: false, line: tok.line };
+            continue;
+          }
+          this.expect("]");
+          target = { k: "index", target, index: from!, line: tok.line };
+          continue;
+        }
+        // Rust spells the same thing with a range, and either end may be
+        // left off: `&v[1..3]`, `&v[..k]`, `&v[3..]`, `&v[..]`. The bounds are
+        // read with `parseBinary` rather than `parseExpr` so that the `..`
+        // stays visible here instead of being folded into a range value that
+        // cannot represent a missing end.
+        if (this.dialect === "rust") {
+          const from = this.at("..") || this.at("..=") ? undefined : this.parseBinary(0, false);
+          if (this.at("..") || this.at("..=")) {
+            const inclusive = this.next().text === "..=";
+            const to = this.at("]") ? undefined : this.parseBinary(0, false);
+            this.expect("]");
+            target = { k: "slice", target, from, to, inclusive, line: tok.line };
+            continue;
+          }
+          this.expect("]");
+          target = { k: "index", target, index: from!, line: tok.line };
+          continue;
+        }
         const index = this.parseExpr();
         this.expect("]");
         target = { k: "index", target, index, line: tok.line };
@@ -906,6 +972,11 @@ export class Parser {
         const bindings: string[] = [];
         if (this.accept("(")) {
           while (!this.at(")")) {
+            // `Some(&x)` and `Some(ref x)` bind what `Some(x)` binds: this
+            // runtime has no separate borrowed value to distinguish them.
+            while (this.at("&")) this.next();
+            if (this.peek().kind === "ident" && this.peek().text === "ref") this.next();
+            if (this.peek().kind === "ident" && this.peek().text === "mut") this.next();
             bindings.push(this.identifier());
             if (!this.accept(",")) break;
           }
@@ -928,6 +999,33 @@ export class Parser {
       if (!this.accept("|")) break;
     }
     return options.length === 1 ? options[0] : { k: "or", options };
+  }
+
+  /**
+   * Turns `m.entry(k).or_insert(d)` into `m[k]`, carrying `d` as the value to
+   * store when the key is absent.
+   *
+   * `or_insert_with(f)` defers to a call, so `Vec::new` is only invoked on a
+   * miss. `or_default()` is deliberately left alone: the default depends on a
+   * type this runtime does not track, and guessing zero would silently be
+   * wrong for every map whose values are not numbers.
+   */
+  private foldEntryApi(target: Expr, name: string, args: Expr[], line: number): Expr | null {
+    if (this.dialect !== "rust") return null;
+    if (target.k !== "method" || target.name !== "entry" || target.args.length !== 1) return null;
+    if (name === "or_insert" && args.length === 1) {
+      return { k: "index", target: target.target, index: target.args[0], orInsert: args[0], line };
+    }
+    if (name === "or_insert_with" && args.length === 1) {
+      return {
+        k: "index",
+        target: target.target,
+        index: target.args[0],
+        orInsert: { k: "call", callee: args[0], args: [], line },
+        line,
+      };
+    }
+    return null;
   }
 
   // -------------------------------------------------------------- statements
@@ -968,6 +1066,25 @@ export class Parser {
         }
         case "if": {
           this.next();
+          // `if let Some(x) = e { .. } else { .. }` is the same thing as a
+          // two-arm match, so it becomes one rather than growing a second
+          // pattern-matching path that could drift from the first.
+          if (this.dialect === "rust" && this.at("let")) {
+            this.next();
+            const pattern = this.parsePattern();
+            this.expect("=");
+            const subject = this.parseExpr(true);
+            const then = this.parseBlockBody();
+            let other: Stmt[] = [];
+            if (this.accept("else")) {
+              other = this.at("if") ? [this.parseStmt()] : this.parseBlockBody();
+            }
+            const arms: MatchArm[] = [
+              { pattern, body: { k: "block", body: then, line } },
+              { pattern: null, body: { k: "block", body: other, line } },
+            ];
+            return { k: "expr", expr: { k: "match", subject, arms, line }, line };
+          }
           const cond = this.parseExpr(true);
           const then = this.parseBody();
           let other: Stmt | undefined;
@@ -976,6 +1093,26 @@ export class Parser {
         }
         case "while": {
           this.next();
+          // `while let Some(x) = stack.pop()` — loop until the pattern stops
+          // matching. Built as `loop { match .. { pat => body, _ => break } }`
+          // for the same reason as `if let`: one pattern matcher, not two.
+          if (this.dialect === "rust" && this.at("let")) {
+            this.next();
+            const pattern = this.parsePattern();
+            this.expect("=");
+            const subject = this.parseExpr(true);
+            const body = this.parseBlockBody();
+            const arms: MatchArm[] = [
+              { pattern, body: { k: "block", body, line } },
+              { pattern: null, body: { k: "block", body: [{ k: "break", line }], line } },
+            ];
+            return {
+              k: "while",
+              cond: { k: "bool", v: true, line },
+              body: { k: "expr", expr: { k: "match", subject, arms, line }, line },
+              line,
+            };
+          }
           const cond = this.dialect === "rust" ? this.parseExpr(true) : this.parenExpr();
           return { k: "while", cond, body: this.parseBody(), line };
         }
@@ -1078,7 +1215,13 @@ export class Parser {
 
   private parseFor(line: number): Stmt {
     if (this.dialect === "rust") {
-      const name = this.at("(") ? this.destructureLoopName() : this.identifier();
+      if (this.at("(")) {
+        const names = this.destructureLoopPattern();
+        this.expect("in");
+        const iterable = this.parseExpr(true);
+        return { k: "forIn", name: names[0], names, iterable, body: this.parseBody(), line };
+      }
+      const name = this.identifier();
       this.expect("in");
       const iterable = this.parseExpr(true);
       return { k: "forIn", name, iterable, body: this.parseBody(), line };
@@ -1117,9 +1260,25 @@ export class Parser {
     return { k: "forC", init, cond, step, body: this.parseBody(), line };
   }
 
-  private destructureLoopName(): string {
-    // `for (i, item) in ...` is not supported; say so rather than guess.
-    throw new UnsupportedError("destructuring in a `for` pattern", this.line);
+  /**
+   * A Rust tuple pattern in a `for` header: `for (i, x) in ...`.
+   *
+   * `&` and `ref` are accepted and dropped. The interpreter has no separate
+   * notion of a borrow, so `for (i, &x)` binds exactly what `for (i, x)` does
+   * — and rejecting the ampersand would turn ordinary Rust into a parse error
+   * over a distinction this runtime does not model anyway.
+   */
+  private destructureLoopPattern(): string[] {
+    this.expect("(");
+    const names: string[] = [];
+    do {
+      while (this.at("&")) this.next();
+      if (this.peek().kind === "ident" && this.peek().text === "ref") this.next();
+      if (this.peek().kind === "ident" && this.peek().text === "mut") this.next();
+      names.push(this.identifier());
+    } while (this.accept(","));
+    this.expect(")");
+    return names;
   }
 
   /** `int x = 3, y = 4;` becomes a block of `let` statements. */

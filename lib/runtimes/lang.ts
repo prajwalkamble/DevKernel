@@ -318,10 +318,26 @@ export type Expr =
   | { k: "call"; callee: Expr; args: Expr[]; line: number }
   | { k: "method"; target: Expr; name: string; args: Expr[]; line: number }
   | { k: "field"; target: Expr; name: string; line: number }
-  | { k: "index"; target: Expr; index: Expr; line: number }
+  /**
+   * `orInsert` carries Rust's entry API: when the key is missing, the default
+   * is evaluated and stored, then indexed as usual. It is evaluated lazily so
+   * that `or_insert_with(Vec::new)` allocates only on a miss.
+   */
+  | { k: "index"; target: Expr; index: Expr; orInsert?: Expr; line: number }
   | { k: "list"; items: Expr[]; repeat?: Expr; line: number }
   | { k: "tuple"; items: Expr[]; line: number }
   | { k: "range"; from: Expr; to: Expr; inclusive: boolean; line: number }
+  /**
+   * `a[lo:hi]` in Go, `&v[lo..hi]` in Rust. Either bound may be absent, which
+   * is why this is its own node rather than an index by a range value: the
+   * missing bound needs the target's length, and reaching for it through a
+   * synthesised `len(a)` would evaluate the target twice.
+   *
+   * The result is a copy. Go's slices alias their backing array, so writing
+   * through one is visible in the original; that aliasing is not modelled
+   * here. Reads — which is what slicing is overwhelmingly used for — agree.
+   */
+  | { k: "slice"; target: Expr; from?: Expr; to?: Expr; inclusive: boolean; line: number }
   | { k: "cast"; value: Expr; type: string; line: number }
   | { k: "path"; segments: string[]; line: number }
   | { k: "macro"; name: string; args: Expr[]; line: number }
@@ -368,6 +384,16 @@ export type Stmt =
       name: string;
       name2?: string;
       indexed?: boolean;
+      /**
+       * A Rust tuple pattern: `for (i, x) in xs.iter().enumerate()`.
+       *
+       * Distinct from Go's `name2`. Go's `range` *supplies* a position that is
+       * nowhere in the iterated value, whereas here the iterator genuinely
+       * yields tuples — `enumerate` and `zip` build them — and the pattern
+       * takes them apart. Conflating the two would make `for (a, b) in pairs`
+       * silently ignore the tuples and hand back positions instead.
+       */
+      names?: string[];
       iterable: Expr;
       body: Stmt;
       line: number;
@@ -737,7 +763,17 @@ export class Evaluator {
         for (const item of this.iterate(iterable, stmt.line)) {
           this.out.step();
           const inner = new Env(env);
-          if (!positional) {
+          if (stmt.names) {
+            const parts = item.t === "tuple" ? item.v : undefined;
+            if (!parts || parts.length !== stmt.names.length) {
+              throw new ProgramError(
+                `this loop pattern binds ${stmt.names.length} names, but the ` +
+                  `iterator yields ${parts ? parts.length : 1}`,
+                stmt.line
+              );
+            }
+            stmt.names.forEach((n, i) => inner.declare(n, parts[i], true));
+          } else if (!positional) {
             inner.declare(stmt.name, item, true);
           } else if (overMap) {
             const pair = item as TupleValue;
@@ -912,9 +948,34 @@ export class Evaluator {
         this.store(expr.target, updated, env, expr.line);
         return expr.prefix ? updated : current;
       }
+      case "slice": {
+        const target = this.eval(expr.target, env);
+        const bound = (e: Expr | undefined, fallback: number) =>
+          e === undefined ? fallback : Number(this.asInt(this.eval(e, env), expr.line));
+        if (target.t === "list" || target.t === "str") {
+          const length = target.t === "list"
+            ? target.v.length
+            : new TextEncoder().encode(target.v).length;
+          const from = bound(expr.from, 0);
+          const to = bound(expr.to, length) + (expr.inclusive ? 1 : 0);
+          if (from < 0 || to > length || from > to) {
+            throw new ProgramError(
+              `slice bounds out of range [${from}:${to}] with length ${length}`,
+              expr.line
+            );
+          }
+          if (target.t === "list") return { t: "list", v: target.v.slice(from, to), kind: target.kind };
+          const bytes = new TextEncoder().encode(target.v);
+          return { t: "str", v: new TextDecoder().decode(bytes.slice(from, to)) };
+        }
+        throw new ProgramError(`cannot slice ${describe(target)}`, expr.line);
+      }
       case "index": {
         const target = this.eval(expr.target, env);
         const index = this.eval(expr.index, env);
+        if (expr.orInsert && target.t === "map" && !target.v.has(keyOf(index))) {
+          target.v.set(keyOf(index), [index, this.eval(expr.orInsert, env)]);
+        }
         return this.indexInto(target, index, expr.line);
       }
       case "field": {

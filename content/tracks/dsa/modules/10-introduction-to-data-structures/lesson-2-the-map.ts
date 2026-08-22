@@ -61,6 +61,11 @@ worth knowing cold      : 8`,
             "Nineteen names, six ideas. Note the ordering of the families is roughly the order this course covers them, and it is roughly the order of increasing structure: a row, a row with links, a row with rules, keyed access, a hierarchy, an arbitrary graph.",
         },
       ],
+      visual: {
+        id: "list-visual",
+        kind: "linked-list",
+        title: "A linked list: cheap to splice, expensive to reach",
+      },
     },
     {
       id: "the-eight",

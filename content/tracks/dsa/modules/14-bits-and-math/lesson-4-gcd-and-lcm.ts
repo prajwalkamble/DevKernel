@@ -82,8 +82,361 @@ ext_gcd(240, 46) -> g=2, x=-9, y=47
 check: 240*-9 + 46*47 = 2`,
           explanation:
             "Three divisions for a pair over a thousand. `gcd(0, 5) = 5` falls out of the base case without a special branch, which is worth checking because problems do hand you zeros. And `reduce` extends it to a list for free, because gcd is associative — `gcd(a, b, c)` is `gcd(gcd(a, b), c)`.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const list = (xs) => "[" + xs.join(", ") + "]";
+
+function gcdTrace(a, b) {
+  console.log(\`gcd(\${a}, \${b})\`);
+  while (b) {
+    console.log(\`  \${a} = \${Math.floor(a / b)} * \${b} + \${a % b}\`);
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+
+// Computed before the print: the call logs its own lines, which belong above.
+const traced = gcdTrace(1071, 462);
+console.log("result:", traced);
+console.log();
+
+function gcd(a, b) {
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+
+function lcm(a, b) {
+  return Math.floor(a / gcd(a, b)) * b;
+}
+
+console.log("gcd(12, 18) =", gcd(12, 18));
+console.log("lcm(12, 18) =", lcm(12, 18));
+console.log("gcd(0, 5)   =", gcd(0, 5));
+console.log("gcd(7, 13)  =", gcd(7, 13), "(coprime)");
+
+// gcd of a whole list
+const xs = [12, 18, 30];
+console.log("gcd of", list(xs), "=", xs.reduce(gcd));
+
+// extended euclid: finds x, y with ax + by = gcd(a, b)
+function extGcd(a, b) {
+  if (b === 0) return [a, 1, 0];
+  const [g, x1, y1] = extGcd(b, a % b);
+  return [g, y1, x1 - Math.floor(a / b) * y1];
+}
+
+const [g, x, y] = extGcd(240, 46);
+console.log(\`\\next_gcd(240, 46) -> g=\${g}, x=\${x}, y=\${y}\`);
+console.log(\`check: 240*\${x} + 46*\${y} = \${240 * x + 46 * y}\`);`,
+            },
+            {
+              lang: "typescript",
+              code: `const list = (xs: number[]): string => "[" + xs.join(", ") + "]";
+
+function gcdTrace(a: number, b: number): number {
+  console.log(\`gcd(\${a}, \${b})\`);
+  while (b) {
+    console.log(\`  \${a} = \${Math.floor(a / b)} * \${b} + \${a % b}\`);
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+
+// Computed before the print: the call logs its own lines, which belong above.
+const traced = gcdTrace(1071, 462);
+console.log("result:", traced);
+console.log();
+
+function gcd(a: number, b: number): number {
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+
+function lcm(a: number, b: number): number {
+  return Math.floor(a / gcd(a, b)) * b;
+}
+
+console.log("gcd(12, 18) =", gcd(12, 18));
+console.log("lcm(12, 18) =", lcm(12, 18));
+console.log("gcd(0, 5)   =", gcd(0, 5));
+console.log("gcd(7, 13)  =", gcd(7, 13), "(coprime)");
+
+// gcd of a whole list
+const xs: number[] = [12, 18, 30];
+console.log("gcd of", list(xs), "=", xs.reduce(gcd));
+
+// extended euclid: finds x, y with ax + by = gcd(a, b)
+function extGcd(a: number, b: number): [number, number, number] {
+  if (b === 0) return [a, 1, 0];
+  const [g, x1, y1] = extGcd(b, a % b);
+  return [g, y1, x1 - Math.floor(a / b) * y1];
+}
+
+const [g, x, y] = extGcd(240, 46);
+console.log(\`\\next_gcd(240, 46) -> g=\${g}, x=\${x}, y=\${y}\`);
+console.log(\`check: 240*\${x} + 46*\${y} = \${240 * x + 46 * y}\`);`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static int gcdTrace(int a, int b) {
+        System.out.println("gcd(" + a + ", " + b + ")");
+        while (b != 0) {
+            System.out.println("  " + a + " = " + a / b + " * " + b + " + " + a % b);
+            int t = a % b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+
+    static int gcd(int a, int b) {
+        while (b != 0) {
+            int t = a % b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+
+    static int lcm(int a, int b) {
+        return a / gcd(a, b) * b;
+    }
+
+    /** extended euclid: finds x, y with ax + by = gcd(a, b) */
+    static int[] extGcd(int a, int b) {
+        if (b == 0) return new int[]{a, 1, 0};
+        int[] r = extGcd(b, a % b);
+        return new int[]{r[0], r[2], r[1] - (a / b) * r[2]};
+    }
+
+    public static void main(String[] args) {
+        int traced = gcdTrace(1071, 462);
+        System.out.println("result: " + traced);
+        System.out.println();
+
+        System.out.println("gcd(12, 18) = " + gcd(12, 18));
+        System.out.println("lcm(12, 18) = " + lcm(12, 18));
+        System.out.println("gcd(0, 5)   = " + gcd(0, 5));
+        System.out.println("gcd(7, 13)  = " + gcd(7, 13) + " (coprime)");
+
+        // gcd of a whole list
+        int[] xs = {12, 18, 30};
+        int acc = xs[0];
+        for (int i = 1; i < xs.length; i++) acc = gcd(acc, xs[i]);
+        System.out.println("gcd of [12, 18, 30] = " + acc);
+
+        int[] e = extGcd(240, 46);
+        System.out.println("\\next_gcd(240, 46) -> g=" + e[0] + ", x=" + e[1] + ", y=" + e[2]);
+        System.out.println("check: 240*" + e[1] + " + 46*" + e[2]
+                + " = " + (240 * e[1] + 46 * e[2]));
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <array>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string list(const vector<int>& xs) {
+    string out = "[";
+    for (size_t i = 0; i < xs.size(); i++) {
+        if (i) out += ", ";
+        out += to_string(xs[i]);
+    }
+    return out + "]";
+}
+
+int gcdTrace(int a, int b) {
+    cout << "gcd(" << a << ", " << b << ")\\n";
+    while (b) {
+        cout << "  " << a << " = " << a / b << " * " << b << " + " << a % b << "\\n";
+        int t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
+
+int gcd(int a, int b) {
+    while (b) {
+        int t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
+
+int lcm(int a, int b) { return a / gcd(a, b) * b; }
+
+// extended euclid: finds x, y with ax + by = gcd(a, b)
+array<int, 3> extGcd(int a, int b) {
+    if (b == 0) return {a, 1, 0};
+    auto [g, x1, y1] = extGcd(b, a % b);
+    return {g, y1, x1 - (a / b) * y1};
+}
+
+int main() {
+    int traced = gcdTrace(1071, 462);
+    cout << "result: " << traced << "\\n\\n";
+
+    cout << "gcd(12, 18) = " << gcd(12, 18) << "\\n";
+    cout << "lcm(12, 18) = " << lcm(12, 18) << "\\n";
+    cout << "gcd(0, 5)   = " << gcd(0, 5) << "\\n";
+    cout << "gcd(7, 13)  = " << gcd(7, 13) << " (coprime)\\n";
+
+    // gcd of a whole list
+    vector<int> xs = {12, 18, 30};
+    int acc = xs[0];
+    for (size_t i = 1; i < xs.size(); i++) acc = gcd(acc, xs[i]);
+    cout << "gcd of " << list(xs) << " = " << acc << "\\n";
+
+    auto [g, x, y] = extGcd(240, 46);
+    cout << "\\next_gcd(240, 46) -> g=" << g << ", x=" << x << ", y=" << y << "\\n";
+    cout << "check: 240*" << x << " + 46*" << y << " = " << 240 * x + 46 * y << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn list(xs: &[i32]) -> String {
+    let parts: Vec<String> = xs.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn gcd_trace(mut a: i32, mut b: i32) -> i32 {
+    println!("gcd({}, {})", a, b);
+    while b != 0 {
+        println!("  {} = {} * {} + {}", a, a / b, b, a % b);
+        let t = a % b;
+        a = b;
+        b = t;
+    }
+    a
+}
+
+fn gcd(mut a: i32, mut b: i32) -> i32 {
+    while b != 0 {
+        let t = a % b;
+        a = b;
+        b = t;
+    }
+    a
+}
+
+fn lcm(a: i32, b: i32) -> i32 {
+    a / gcd(a, b) * b
+}
+
+/// extended euclid: finds x, y with ax + by = gcd(a, b)
+fn ext_gcd(a: i32, b: i32) -> (i32, i32, i32) {
+    if b == 0 {
+        return (a, 1, 0);
+    }
+    let (g, x1, y1) = ext_gcd(b, a % b);
+    (g, y1, x1 - (a / b) * y1)
+}
+
+fn main() {
+    let traced = gcd_trace(1071, 462);
+    println!("result: {}", traced);
+    println!();
+
+    println!("gcd(12, 18) = {}", gcd(12, 18));
+    println!("lcm(12, 18) = {}", lcm(12, 18));
+    println!("gcd(0, 5)   = {}", gcd(0, 5));
+    println!("gcd(7, 13)  = {} (coprime)", gcd(7, 13));
+
+    // gcd of a whole list
+    let xs = [12, 18, 30];
+    let acc = xs.iter().copied().reduce(gcd).unwrap();
+    println!("gcd of {} = {}", list(&xs), acc);
+
+    let (g, x, y) = ext_gcd(240, 46);
+    println!("\\next_gcd(240, 46) -> g={}, x={}, y={}", g, x, y);
+    println!("check: 240*{} + 46*{} = {}", x, y, 240 * x + 46 * y);
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func list(xs []int) string {
+	parts := make([]string, len(xs))
+	for i, x := range xs {
+		parts[i] = fmt.Sprint(x)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func gcdTrace(a, b int) int {
+	fmt.Printf("gcd(%d, %d)\\n", a, b)
+	for b != 0 {
+		fmt.Printf("  %d = %d * %d + %d\\n", a, a/b, b, a%b)
+		a, b = b, a%b
+	}
+	return a
+}
+
+func gcd(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+func lcm(a, b int) int { return a / gcd(a, b) * b }
+
+// extended euclid: finds x, y with ax + by = gcd(a, b)
+func extGcd(a, b int) (int, int, int) {
+	if b == 0 {
+		return a, 1, 0
+	}
+	g, x1, y1 := extGcd(b, a%b)
+	return g, y1, x1 - (a/b)*y1
+}
+
+func main() {
+	traced := gcdTrace(1071, 462)
+	fmt.Println("result:", traced)
+	fmt.Println()
+
+	fmt.Println("gcd(12, 18) =", gcd(12, 18))
+	fmt.Println("lcm(12, 18) =", lcm(12, 18))
+	fmt.Println("gcd(0, 5)   =", gcd(0, 5))
+	fmt.Println("gcd(7, 13)  =", gcd(7, 13), "(coprime)")
+
+	// gcd of a whole list
+	xs := []int{12, 18, 30}
+	acc := xs[0]
+	for _, v := range xs[1:] {
+		acc = gcd(acc, v)
+	}
+	fmt.Println("gcd of", list(xs), "=", acc)
+
+	g, x, y := extGcd(240, 46)
+	fmt.Printf("\\next_gcd(240, 46) -> g=%d, x=%d, y=%d\\n", g, x, y)
+	fmt.Printf("check: 240*%d + 46*%d = %d\\n", x, y, 240*x+46*y)
+}`,
+            },
+          ],
         },
       ],
+      visual: {
+        id: "euclid-visual",
+        kind: "bits-and-math",
+        algorithm: "euclid",
+        lockAlgorithm: true,
+        title: "Each step smaller, the divisors unchanged",
+      },
     },
     {
       id: "why-fast",

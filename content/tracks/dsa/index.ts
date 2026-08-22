@@ -14,6 +14,16 @@ import { complexityModule } from "./modules/11-time-and-space-complexity";
 import { dsaFrameworkModule } from "./modules/05-framework";
 import { arraysStringsInPlaceModule } from "./modules/13-arrays-and-strings";
 import { bitsAndMathModule } from "./modules/14-bits-and-math";
+import { binarySearchModule } from "./modules/15-binary-search";
+import { twoPointersModule } from "./modules/16-two-pointers";
+import { slidingWindowsModule } from "./modules/17-sliding-windows";
+import { prefixSumsModule } from "./modules/18-prefix-sums";
+import { recursionModule } from "./modules/19-recursion";
+import { hashingModule } from "./modules/20-hashing";
+import { sortingModule } from "./modules/21-sorting";
+import { linkedListsModule } from "./modules/22-linked-lists";
+import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
+import { treesModule } from "./modules/24-trees";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -104,196 +114,16 @@ export const dsaTrack: TrackDefinition = {
     // Module 1 — Linear DSA, then non-linear DSA
     // ---------------------------------------------------------------------
     arraysStringsInPlaceModule,
-    createComingSoonModule({
-      id: "dsa-two-pointers",
-      slug: "two-pointers",
-      title: "Two Pointers",
-      order: 16,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "The first pattern that turns an O(n²) loop into an O(n) one, and the exchange argument that proves it is allowed to.",
-      topics: [
-        "Opposite ends: the invariant, and why moving a pointer discards nothing you need",
-        "Proving a pointer move is safe — the argument interviewers actually ask for",
-        "Same direction: fast and slow, and lag by a fixed distance",
-        "Sorting first, and what it costs you when indices matter",
-        "Handling duplicates without a set",
-        "Three pointers, and where k-Sum stops being worth it",
-        "Palindromes, container problems, and trapping rain water",
-        "The sheet: Two Sum II, 3Sum, Container With Most Water and friends",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-sliding-window",
-      slug: "sliding-windows",
-      title: "Sliding Windows",
-      order: 17,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "\"Longest or shortest contiguous stretch such that…\" — one shape, a dozen problems, and one condition that decides whether it applies at all.",
-      topics: [
-        "Fixed-size windows: one in, one out",
-        "Variable-size windows: grow right, shrink left",
-        "The monotonicity condition, and how to check it before you commit",
-        "Window state: counts, sums, distinct-element tallies",
-        "Why negative numbers break the sum-based window, and what replaces it",
-        "At most k distinct, and the exactly-k trick built from it",
-        "Minimum window substring, and windows that shrink for a different reason",
-        "The sheet: the window problems, easiest first",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-prefix-sums",
-      slug: "prefix-sums-and-range-queries",
-      title: "Prefix Sums & Range Queries",
-      order: 18,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "Precompute once, answer forever — and the hash-map pairing that finds subarrays a window cannot.",
-      topics: [
-        "The prefix array, the leading zero, and why it removes an edge case",
-        "Range sums in O(1), and range products with their zero problem",
-        "Prefix sums with a hash map: subarrays summing to k, with negatives",
-        "Difference arrays, and range updates in O(1)",
-        "Two-dimensional prefix sums and submatrix queries",
-        "Prefix XOR, prefix max, and other invertible aggregates",
-        "When the array changes: why prefix sums stop working",
-        "The sheet: the prefix problems, including the ones that look like windows",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-sorting",
-      slug: "sorting",
-      title: "Sorting",
-      order: 21,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "A tool rather than a topic. You will rarely implement one and constantly rely on one — so this is mostly about what your language's sort really is and when order is the whole solution.",
-      topics: [
-        "Insertion, merge, quick and heap sort, and what each is good at",
-        "The O(n log n) lower bound, and the counting sorts that beat it",
-        "Stability, and the moments it silently matters",
-        "What Arrays.sort and list.sort actually are, including the quadratic worst case",
-        "Custom comparators, sorting by several keys, and comparator contracts",
-        "Bucket sort and counting sort, when the key range is small",
-        "Sorting as preprocessing: intervals, duplicates, and greedy setups",
-        "The sheet: the problems where sorting is the entire idea",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-binary-search",
-      slug: "binary-search",
-      title: "Binary Search & Binary Search on the Answer",
-      order: 15,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "The most-failed easy question there is, and then the technique that quietly solves a whole family of hard ones.",
-      topics: [
-        "Writing it correctly: the two conventions, and never mixing them",
-        "The off-by-one, the overflow, and the infinite loop",
-        "Lower bound and upper bound, and finding the first or last occurrence",
-        "Searching a rotated array, a 2D matrix, and an unbounded stream",
-        "Binary search on the answer: recognising \"the minimum X such that…\"",
-        "Writing the feasibility check, and proving it is monotone",
-        "Choosing the bounds so the answer is definitely inside them",
-        "The sheet: Koko, shipping capacity, split array, and the rest of the family",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-hashing",
-      slug: "hashing",
-      title: "Hashing: Maps, Sets & Frequency",
-      order: 20,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "The structure that collapses a nested loop into a single pass more often than any other, and the reason its O(1) carries an asterisk.",
-      topics: [
-        "Hash functions, buckets, collision resolution, and load factor",
-        "Why O(1) is average and not worst case — and how judges exploit that",
-        "The complement pattern: check before you insert, and why the order matters",
-        "Frequency counting, and the problems it collapses to nothing",
-        "Grouping by a derived key: canonical forms and anagram classes",
-        "Hashing your own types: the equals/hashCode contract",
-        "Prefix-sum plus hash map, the combination that beats the window",
-        "When a sorted structure beats a hash map outright",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-linked-lists",
-      slug: "linked-lists",
-      title: "Linked Lists",
-      order: 22,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "Rarely the right structure in production, permanently popular in interviews — because pointer manipulation is where sloppy reasoning shows up immediately.",
-      topics: [
-        "Singly, doubly and circular lists, and the cost of each operation",
-        "Why a linked list loses to an array in practice, despite O(1) insertion",
-        "The dummy head, and why it removes half your edge cases",
-        "Reversal, iteratively and recursively",
-        "Fast and slow pointers: cycle detection, the middle, the nth from the end",
-        "Finding the start of a cycle, and why Floyd's argument works",
-        "Merging, partitioning and sorting a list",
-        "Building an LRU cache from a list and a map",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-stacks-queues",
-      slug: "stacks-and-queues",
-      title: "Stacks, Queues & Monotonic Structures",
-      order: 23,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "Two structures with one rule each — and the monotonic variants that answer \"the next element greater than this one\" for every index in linear time.",
-      topics: [
-        "Stacks: LIFO, and the problems that are secretly about nesting",
-        "Queues, deques and circular buffers",
-        "Expression parsing, bracket matching, and infix to postfix",
-        "The monotonic stack, and next-greater-element in O(n)",
-        "The amortised argument: why a nested while loop is still linear",
-        "Largest rectangle in a histogram, and the family around it",
-        "The monotonic deque, and sliding-window maximum",
-        "Min-stack, and augmenting a structure to answer a new question",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-recursion",
-      slug: "recursion-and-backtracking",
-      title: "Recursion & Backtracking",
-      order: 19,
-      phase: "Module 1 · Linear DSA",
-      description:
-        "The mental model everything after this depends on. How to trust a recursive call, how to see the recursion tree, and how to prune it before it explodes.",
-      topics: [
-        "The base case, the recursive case, and the leap of faith",
-        "Drawing the recursion tree, and reading its cost off the drawing",
-        "The call stack, stack overflow, and converting to iteration",
-        "Divide and conquer as a shape rather than a trick",
-        "Backtracking: choose, explore, un-choose",
-        "Subsets, permutations and combinations, with duplicates handled",
-        "Constraint problems: N-queens, sudoku, word search",
-        "Pruning, and the difference it makes to a factorial search",
-      ],
-    }),
-    createComingSoonModule({
-      id: "dsa-trees",
-      slug: "trees",
-      title: "Trees & Binary Search Trees",
-      order: 24,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "Where recursion stops being a party trick. Traversals, the ordering invariant that makes a BST searchable, and the balancing that stops it degenerating into a linked list.",
-      topics: [
-        "Terminology, height, depth, and the shapes that matter",
-        "Traversals: preorder, inorder, postorder — recursive and iterative",
-        "Level-order traversal, and the level-width snapshot",
-        "The BST invariant, and search, insert and delete",
-        "Why validating a BST is not a local comparison",
-        "Balanced trees: AVL and red-black, and what your language's TreeMap is",
-        "Lowest common ancestor, diameter, and path problems",
-        "Serialising and reconstructing a tree",
-      ],
-    }),
+    twoPointersModule,
+    slidingWindowsModule,
+    prefixSumsModule,
+    sortingModule,
+    binarySearchModule,
+    hashingModule,
+    linkedListsModule,
+    stacksAndQueuesModule,
+    recursionModule,
+    treesModule,
     createComingSoonModule({
       id: "dsa-heaps",
       slug: "heaps-and-priority-queues",

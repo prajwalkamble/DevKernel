@@ -363,8 +363,14 @@ export const rustDialect: Dialect = {
             ? { t: "enum", name: "Option", variant: "None", payload: [] }
             : { t: "enum", name: "Option", variant: "Some", payload: [item] };
         }
-        case "sort": {
-          target.v.sort((a, b) => (ev.asInt(a, line) < ev.asInt(b, line) ? -1 : 1));
+        case "sort":
+        case "sort_unstable": {
+          // Was `asInt(a) < asInt(b) ? -1 : 1`, which panicked on any element
+          // that is not an integer — sorting a `Vec<&str>` is ordinary Rust —
+          // and never returned 0, so equal elements were reported as
+          // out-of-order and swapped. `sort` promises stability, and the
+          // shared comparator is the one every other language here sorts with.
+          sortInPlace(target.v, compareValues);
           return UNIT;
         }
         case "sum": {
@@ -445,6 +451,20 @@ export const rustDialect: Dialect = {
         case "skip": return list(target.v.slice(Number(ev.asInt(args[0], line))));
         case "enumerate":
           return list(target.v.map((item, i) => ({ t: "tuple" as const, v: [int(BigInt(i), 64, false), item] })));
+        case "zip": {
+          // Stops at the shorter side, as Rust's does — pairing past the end
+          // would invent elements the program never had.
+          const other = args[0];
+          if (!other || other.t !== "list") {
+            throw new UnsupportedError("`zip` with that kind of iterator", line);
+          }
+          const n = Math.min(target.v.length, other.v.length);
+          const pairs: Value[] = [];
+          for (let i = 0; i < n; i++) {
+            pairs.push({ t: "tuple", v: [target.v[i], other.v[i]] });
+          }
+          return list(pairs);
+        }
         case "join":
           return { t: "str", v: target.v.map((x) => rustDisplay(x, false)).join(rustDisplay(args[0], false)) };
       }

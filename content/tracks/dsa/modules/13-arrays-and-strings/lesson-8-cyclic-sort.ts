@@ -64,8 +64,266 @@ every swap puts one value in its final place, so there are at most n of them
 -> O(n) total work, even though the loop is a while and not a for`,
           explanation:
             "Three swaps sorted a five-element array, and `i` never went backwards. Watch index 0 in the trace: it is the site of all three swaps, because each one brings in another misplaced value, and the chain only ends when the value that belongs at index 0 arrives there. **The comparison is `a[i] != a[target]` rather than `i != target`**, and that difference is what makes it survive duplicates — if two elements hold the same value, the second one finds its target already occupied by an equal value and the loop moves on instead of swapping forever.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const show = (a) => \`[\${a.join(", ")}]\`;
+
+/** Values are 1..n. Put value v at index v-1, one swap at a time. */
+function cyclicSort(a, trace = false) {
+  let i = 0;
+  let swaps = 0;
+  while (i < a.length) {
+    const target = a[i] - 1;
+    if (a[i] !== a[target]) {
+      const t = a[i];
+      a[i] = a[target];
+      a[target] = t;
+      swaps++;
+      // a[target] now holds what a[i] held a line ago — the value that just
+      // reached its final place, which is the one worth naming.
+      if (trace) console.log(\`    a[\${i}]=\${a[target]} belongs at index \${target}  -> swap  \${show(a)}\`);
+    } else {
+      i++;
+    }
+  }
+  return swaps;
+}
+
+const data = [3, 1, 5, 4, 2];
+console.log(\`start: \${show(data)}\`);
+const swaps = cyclicSort(data, true);
+console.log(\`final: \${show(data)}   swaps=\${swaps}, and i advanced \${data.length} times\`);
+
+console.log();
+console.log("every swap puts one value in its final place, so there are at most n of them");
+console.log("-> O(n) total work, even though the loop is a while and not a for");`,
+            },
+            {
+              lang: "typescript",
+              code: `const show = (a: number[]): string => \`[\${a.join(", ")}]\`;
+
+/** Values are 1..n. Put value v at index v-1, one swap at a time. */
+function cyclicSort(a: number[], trace = false): number {
+  let i = 0;
+  let swaps = 0;
+  while (i < a.length) {
+    const target = a[i] - 1;
+    if (a[i] !== a[target]) {
+      const t = a[i];
+      a[i] = a[target];
+      a[target] = t;
+      swaps++;
+      // a[target] now holds what a[i] held a line ago — the value that just
+      // reached its final place, which is the one worth naming.
+      if (trace) console.log(\`    a[\${i}]=\${a[target]} belongs at index \${target}  -> swap  \${show(a)}\`);
+    } else {
+      i++;
+    }
+  }
+  return swaps;
+}
+
+const data = [3, 1, 5, 4, 2];
+console.log(\`start: \${show(data)}\`);
+const swaps = cyclicSort(data, true);
+console.log(\`final: \${show(data)}   swaps=\${swaps}, and i advanced \${data.length} times\`);
+
+console.log();
+console.log("every swap puts one value in its final place, so there are at most n of them");
+console.log("-> O(n) total work, even though the loop is a while and not a for");`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.Arrays;
+
+public class Main {
+    static String show(int[] a) {
+        return Arrays.toString(a);
+    }
+
+    /** Values are 1..n. Put value v at index v-1, one swap at a time. */
+    static int cyclicSort(int[] a, boolean trace) {
+        int i = 0, swaps = 0;
+        while (i < a.length) {
+            int target = a[i] - 1;
+            if (a[i] != a[target]) {
+                int t = a[i];
+                a[i] = a[target];
+                a[target] = t;
+                swaps++;
+                // a[target] now holds what a[i] held a line ago — the value that
+                // just reached its final place, which is the one worth naming.
+                if (trace) {
+                    System.out.printf("    a[%d]=%d belongs at index %d  -> swap  %s%n",
+                            i, a[target], target, show(a));
+                }
+            } else {
+                i++;
+            }
+        }
+        return swaps;
+    }
+
+    public static void main(String[] args) {
+        int[] data = {3, 1, 5, 4, 2};
+        System.out.println("start: " + show(data));
+        int swaps = cyclicSort(data, true);
+        System.out.printf("final: %s   swaps=%d, and i advanced %d times%n", show(data), swaps, data.length);
+
+        System.out.println();
+        System.out.println("every swap puts one value in its final place, so there are at most n of them");
+        System.out.println("-> O(n) total work, even though the loop is a while and not a for");
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+
+static std::string show(const std::vector<int>& a) {
+    std::string out = "[";
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (i) out += ", ";
+        out += std::to_string(a[i]);
+    }
+    return out + "]";
+}
+
+// Values are 1..n. Put value v at index v-1, one swap at a time.
+static int cyclic_sort(std::vector<int>& a, bool trace) {
+    size_t i = 0;
+    int swaps = 0;
+    while (i < a.size()) {
+        size_t target = static_cast<size_t>(a[i] - 1);
+        if (a[i] != a[target]) {
+            std::swap(a[i], a[target]);
+            swaps++;
+            // a[target] now holds what a[i] held a line ago — the value that
+            // just reached its final place, which is the one worth naming.
+            if (trace) {
+                std::cout << "    a[" << i << "]=" << a[target] << " belongs at index "
+                          << target << "  -> swap  " << show(a) << '\\n';
+            }
+        } else {
+            i++;
+        }
+    }
+    return swaps;
+}
+
+int main() {
+    std::vector<int> data = {3, 1, 5, 4, 2};
+    std::cout << "start: " << show(data) << '\\n';
+    int swaps = cyclic_sort(data, true);
+    std::cout << "final: " << show(data) << "   swaps=" << swaps
+              << ", and i advanced " << data.size() << " times\\n";
+
+    std::cout << '\\n';
+    std::cout << "every swap puts one value in its final place, so there are at most n of them\\n";
+    std::cout << "-> O(n) total work, even though the loop is a while and not a for\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn show(a: &[i32]) -> String {
+    let parts: Vec<String> = a.iter().map(|v| v.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Values are 1..n. Put value v at index v-1, one swap at a time.
+fn cyclic_sort(a: &mut Vec<i32>, trace: bool) -> i32 {
+    let mut i = 0usize;
+    let mut swaps = 0;
+    while i < a.len() {
+        let target = (a[i] - 1) as usize;
+        if a[i] != a[target] {
+            a.swap(i, target);
+            swaps += 1;
+            // a[target] now holds what a[i] held a line ago — the value that
+            // just reached its final place, which is the one worth naming.
+            if trace {
+                println!("    a[{}]={} belongs at index {}  -> swap  {}", i, a[target], target, show(a));
+            }
+        } else {
+            i += 1;
+        }
+    }
+    swaps
+}
+
+fn main() {
+    let mut data = vec![3, 1, 5, 4, 2];
+    println!("start: {}", show(&data));
+    let swaps = cyclic_sort(&mut data, true);
+    println!("final: {}   swaps={}, and i advanced {} times", show(&data), swaps, data.len());
+
+    println!();
+    println!("every swap puts one value in its final place, so there are at most n of them");
+    println!("-> O(n) total work, even though the loop is a while and not a for");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func show(a []int) string {
+	parts := make([]string, len(a))
+	for i, v := range a {
+		parts[i] = strconv.Itoa(v)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// cyclicSort assumes values are 1..n. It puts value v at index v-1, one swap at a time.
+func cyclicSort(a []int, trace bool) int {
+	i, swaps := 0, 0
+	for i < len(a) {
+		target := a[i] - 1
+		if a[i] != a[target] {
+			a[i], a[target] = a[target], a[i]
+			swaps++
+			// a[target] now holds what a[i] held a line ago — the value that
+			// just reached its final place, which is the one worth naming.
+			if trace {
+				fmt.Printf("    a[%d]=%d belongs at index %d  -> swap  %s\\n", i, a[target], target, show(a))
+			}
+		} else {
+			i++
+		}
+	}
+	return swaps
+}
+
+func main() {
+	data := []int{3, 1, 5, 4, 2}
+	fmt.Printf("start: %s\\n", show(data))
+	swaps := cyclicSort(data, true)
+	fmt.Printf("final: %s   swaps=%d, and i advanced %d times\\n", show(data), swaps, len(data))
+
+	fmt.Println()
+	fmt.Println("every swap puts one value in its final place, so there are at most n of them")
+	fmt.Println("-> O(n) total work, even though the loop is a while and not a for")
+}`,
+            },
+          ],
         },
       ],
+      visual: {
+        id: "cyclicsort-visual",
+        kind: "pattern",
+        algorithm: "cyclicsort",
+        lockAlgorithm: true,
+        title: "Sending each value to the index it names",
+      },
       pitfalls: [
         {
           title: "Comparing indices instead of values",
@@ -158,6 +416,498 @@ all disappeared            [4, 3, 2, 7, 8, 2, 3, 1]     [5, 6]
 one loop, four problems — only the final scan changes`,
           explanation:
             "**First missing positive is the one usually rated hard**, and here it is four lines after the shared pass — which is the whole argument for learning the pattern rather than the problems. Its three test cases cover the three shapes: a gap in the middle, a full prefix so the answer is n + 1, and values entirely out of range so the answer is 1. The `0 <= target < n` guard is what lets `-1`, `0` and `11` be present without breaking anything; they are simply never placed, and they come to rest in the slots whose real values are missing. The shift by one in `missing_number` is worth noticing as a technique in itself — rather than write a second loop for 0-based values, translate the input into the form the existing loop expects.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `/** Cyclic sort, tolerant of duplicates and out-of-range values. */
+function place(a) {
+  let i = 0;
+  const n = a.length;
+  while (i < n) {
+    const target = a[i] - 1;
+    if (target >= 0 && target < n && a[i] !== a[target]) {
+      const t = a[i];
+      a[i] = a[target];
+      a[target] = t;
+    } else {
+      i++;
+    }
+  }
+  return a;
+}
+
+function missingNumber(a) {            // values 0..n with one absent
+  const b = a.map((v) => v + 1);       // shift to 1..n+1 so the same loop applies
+  place(b);
+  for (let i = 0; i < b.length; i++) if (b[i] !== i + 1) return i;
+  return a.length;
+}
+
+function findDuplicate(a) {            // values 1..n-1, one appears twice
+  place(a);
+  for (let i = 0; i < a.length; i++) if (a[i] !== i + 1) return a[i];
+  return -1;
+}
+
+function firstMissingPositive(a) {     // any integers; find the smallest absent positive
+  place(a);
+  for (let i = 0; i < a.length; i++) if (a[i] !== i + 1) return i + 1;
+  return a.length + 1;
+}
+
+function allDisappeared(a) {           // values 1..n, some absent, some repeated
+  place(a);
+  const out = [];
+  for (let i = 0; i < a.length; i++) if (a[i] !== i + 1) out.push(i + 1);
+  return out;
+}
+
+const show = (a) => \`[\${a.join(", ")}]\`;
+
+console.log(\`\${"problem".padEnd(26)} \${"input".padEnd(28)} answer\`);
+console.log("-".repeat(70));
+const cases = [
+  ["missing number", (d) => String(missingNumber(d)), [3, 0, 1]],
+  ["missing number", (d) => String(missingNumber(d)), [0, 1]],
+  ["find the duplicate", (d) => String(findDuplicate(d)), [1, 3, 4, 2, 2]],
+  ["first missing positive", (d) => String(firstMissingPositive(d)), [3, 4, -1, 1]],
+  ["first missing positive", (d) => String(firstMissingPositive(d)), [1, 2, 0]],
+  ["first missing positive", (d) => String(firstMissingPositive(d)), [7, 8, 9, 11, 12]],
+  ["all disappeared", (d) => show(allDisappeared(d)), [4, 3, 2, 7, 8, 2, 3, 1]],
+];
+for (const [name, fn, data] of cases) {
+  console.log(\`\${name.padEnd(26)} \${show(data).padEnd(28)} \${fn(data.slice())}\`);
+}
+
+console.log();
+console.log("one loop, four problems — only the final scan changes");`,
+            },
+            {
+              lang: "typescript",
+              code: `/** Cyclic sort, tolerant of duplicates and out-of-range values. */
+function place(a: number[]): number[] {
+  let i = 0;
+  const n = a.length;
+  while (i < n) {
+    const target = a[i] - 1;
+    if (target >= 0 && target < n && a[i] !== a[target]) {
+      const t = a[i];
+      a[i] = a[target];
+      a[target] = t;
+    } else {
+      i++;
+    }
+  }
+  return a;
+}
+
+function missingNumber(a: number[]): number {            // values 0..n with one absent
+  const b = a.map((v: number) => v + 1);       // shift to 1..n+1 so the same loop applies
+  place(b);
+  for (let i = 0; i < b.length; i++) if (b[i] !== i + 1) return i;
+  return a.length;
+}
+
+function findDuplicate(a: number[]): number {            // values 1..n-1, one appears twice
+  place(a);
+  for (let i = 0; i < a.length; i++) if (a[i] !== i + 1) return a[i];
+  return -1;
+}
+
+function firstMissingPositive(a: number[]): number {     // any integers; find the smallest absent positive
+  place(a);
+  for (let i = 0; i < a.length; i++) if (a[i] !== i + 1) return i + 1;
+  return a.length + 1;
+}
+
+function allDisappeared(a: number[]): number[] {           // values 1..n, some absent, some repeated
+  place(a);
+  const out: number[] = [];
+  for (let i = 0; i < a.length; i++) if (a[i] !== i + 1) out.push(i + 1);
+  return out;
+}
+
+const show = (a: number[]): string => \`[\${a.join(", ")}]\`;
+
+console.log(\`\${"problem".padEnd(26)} \${"input".padEnd(28)} answer\`);
+console.log("-".repeat(70));
+const cases: [string, (d: number[]) => string, number[]][] = [
+  ["missing number", (d: number[]) => String(missingNumber(d)), [3, 0, 1]],
+  ["missing number", (d: number[]) => String(missingNumber(d)), [0, 1]],
+  ["find the duplicate", (d: number[]) => String(findDuplicate(d)), [1, 3, 4, 2, 2]],
+  ["first missing positive", (d: number[]) => String(firstMissingPositive(d)), [3, 4, -1, 1]],
+  ["first missing positive", (d: number[]) => String(firstMissingPositive(d)), [1, 2, 0]],
+  ["first missing positive", (d: number[]) => String(firstMissingPositive(d)), [7, 8, 9, 11, 12]],
+  ["all disappeared", (d: number[]) => show(allDisappeared(d)), [4, 3, 2, 7, 8, 2, 3, 1]],
+];
+for (const [name, fn, data] of cases) {
+  console.log(\`\${name.padEnd(26)} \${show(data).padEnd(28)} \${fn(data.slice())}\`);
+}
+
+console.log();
+console.log("one loop, four problems — only the final scan changes");`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+
+public class Main {
+    /** Cyclic sort, tolerant of duplicates and out-of-range values. */
+    static int[] place(int[] a) {
+        int i = 0, n = a.length;
+        while (i < n) {
+            int target = a[i] - 1;
+            if (target >= 0 && target < n && a[i] != a[target]) {
+                int t = a[i];
+                a[i] = a[target];
+                a[target] = t;
+            } else {
+                i++;
+            }
+        }
+        return a;
+    }
+
+    static int missingNumber(int[] a) {          // values 0..n with one absent
+        int[] b = new int[a.length];
+        for (int i = 0; i < a.length; i++) b[i] = a[i] + 1;   // shift to 1..n+1
+        place(b);
+        for (int i = 0; i < b.length; i++) if (b[i] != i + 1) return i;
+        return a.length;
+    }
+
+    static int findDuplicate(int[] a) {          // values 1..n-1, one appears twice
+        place(a);
+        for (int i = 0; i < a.length; i++) if (a[i] != i + 1) return a[i];
+        return -1;
+    }
+
+    static int firstMissingPositive(int[] a) {   // any integers; smallest absent positive
+        place(a);
+        for (int i = 0; i < a.length; i++) if (a[i] != i + 1) return i + 1;
+        return a.length + 1;
+    }
+
+    static List<Integer> allDisappeared(int[] a) { // values 1..n, some absent, some repeated
+        place(a);
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < a.length; i++) if (a[i] != i + 1) out.add(i + 1);
+        return out;
+    }
+
+    /* Python prints whatever the function returned, int or list alike. Here the
+       four return types have to meet somewhere, so each case carries a small
+       function that renders its own answer. */
+    record Case(String name, Function<int[], String> fn, int[] data) {}
+
+    public static void main(String[] args) {
+        System.out.printf("%-26s %-28s answer%n", "problem", "input");
+        System.out.println("-".repeat(70));
+        Case[] cases = {
+            new Case("missing number", d -> String.valueOf(missingNumber(d)), new int[]{3, 0, 1}),
+            new Case("missing number", d -> String.valueOf(missingNumber(d)), new int[]{0, 1}),
+            new Case("find the duplicate", d -> String.valueOf(findDuplicate(d)), new int[]{1, 3, 4, 2, 2}),
+            new Case("first missing positive", d -> String.valueOf(firstMissingPositive(d)), new int[]{3, 4, -1, 1}),
+            new Case("first missing positive", d -> String.valueOf(firstMissingPositive(d)), new int[]{1, 2, 0}),
+            new Case("first missing positive", d -> String.valueOf(firstMissingPositive(d)), new int[]{7, 8, 9, 11, 12}),
+            new Case("all disappeared", d -> allDisappeared(d).toString(), new int[]{4, 3, 2, 7, 8, 2, 3, 1}),
+        };
+        for (Case c : cases) {
+            System.out.printf("%-26s %-28s %s%n", c.name(), Arrays.toString(c.data()), c.fn().apply(c.data().clone()));
+        }
+
+        System.out.println();
+        System.out.println("one loop, four problems — only the final scan changes");
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
+// Cyclic sort, tolerant of duplicates and out-of-range values.
+static std::vector<int>& place(std::vector<int>& a) {
+    size_t i = 0, n = a.size();
+    while (i < n) {
+        long long target = static_cast<long long>(a[i]) - 1;
+        if (target >= 0 && target < static_cast<long long>(n) && a[i] != a[target]) {
+            std::swap(a[i], a[target]);
+        } else {
+            i++;
+        }
+    }
+    return a;
+}
+
+static int missing_number(std::vector<int> a) {          // values 0..n with one absent
+    std::vector<int> b;
+    for (int v : a) b.push_back(v + 1);                  // shift to 1..n+1
+    place(b);
+    for (size_t i = 0; i < b.size(); ++i)
+        if (b[i] != static_cast<int>(i) + 1) return static_cast<int>(i);
+    return static_cast<int>(a.size());
+}
+
+static int find_duplicate(std::vector<int> a) {          // values 1..n-1, one appears twice
+    place(a);
+    for (size_t i = 0; i < a.size(); ++i)
+        if (a[i] != static_cast<int>(i) + 1) return a[i];
+    return -1;
+}
+
+static int first_missing_positive(std::vector<int> a) {  // smallest absent positive
+    place(a);
+    for (size_t i = 0; i < a.size(); ++i)
+        if (a[i] != static_cast<int>(i) + 1) return static_cast<int>(i) + 1;
+    return static_cast<int>(a.size()) + 1;
+}
+
+static std::vector<int> all_disappeared(std::vector<int> a) { // some absent, some repeated
+    place(a);
+    std::vector<int> out;
+    for (size_t i = 0; i < a.size(); ++i)
+        if (a[i] != static_cast<int>(i) + 1) out.push_back(static_cast<int>(i) + 1);
+    return out;
+}
+
+static std::string show(const std::vector<int>& a) {
+    std::string out = "[";
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (i) out += ", ";
+        out += std::to_string(a[i]);
+    }
+    return out + "]";
+}
+
+int main() {
+    std::cout << std::left << std::setw(26) << "problem" << ' '
+              << std::setw(28) << "input" << " answer\\n";
+    std::cout << std::string(70, '-') << '\\n';
+
+    /* Python prints whatever the function returned, int or vector alike. Here the
+       four return types have to meet somewhere, so each case carries a small
+       function that renders its own answer. */
+    using Fn = std::function<std::string(std::vector<int>)>;
+    const std::vector<std::tuple<std::string, Fn, std::vector<int>>> cases = {
+        {"missing number", [](std::vector<int> d) { return std::to_string(missing_number(d)); }, {3, 0, 1}},
+        {"missing number", [](std::vector<int> d) { return std::to_string(missing_number(d)); }, {0, 1}},
+        {"find the duplicate", [](std::vector<int> d) { return std::to_string(find_duplicate(d)); }, {1, 3, 4, 2, 2}},
+        {"first missing positive", [](std::vector<int> d) { return std::to_string(first_missing_positive(d)); }, {3, 4, -1, 1}},
+        {"first missing positive", [](std::vector<int> d) { return std::to_string(first_missing_positive(d)); }, {1, 2, 0}},
+        {"first missing positive", [](std::vector<int> d) { return std::to_string(first_missing_positive(d)); }, {7, 8, 9, 11, 12}},
+        {"all disappeared", [](std::vector<int> d) { return show(all_disappeared(d)); }, {4, 3, 2, 7, 8, 2, 3, 1}},
+    };
+    for (const auto& c : cases) {
+        // The call runs first: \`<<\` evaluates left to right, and the answer has
+        // to exist before the row it belongs to is streamed.
+        std::string answer = std::get<1>(c)(std::get<2>(c));
+        std::cout << std::left << std::setw(26) << std::get<0>(c) << ' '
+                  << std::setw(28) << show(std::get<2>(c)) << ' ' << answer << '\\n';
+    }
+
+    std::cout << '\\n';
+    std::cout << "one loop, four problems — only the final scan changes\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `/// Cyclic sort, tolerant of duplicates and out-of-range values.
+fn place(a: &mut Vec<i32>) {
+    let (mut i, n) = (0usize, a.len());
+    while i < n {
+        let target = a[i] - 1;
+        if target >= 0 && (target as usize) < n && a[i] != a[target as usize] {
+            a.swap(i, target as usize);
+        } else {
+            i += 1;
+        }
+    }
+}
+
+fn missing_number(a: Vec<i32>) -> i32 {          // values 0..n with one absent
+    let mut b: Vec<i32> = a.iter().map(|v| v + 1).collect();   // shift to 1..n+1
+    place(&mut b);
+    for (i, &v) in b.iter().enumerate() {
+        if v != i as i32 + 1 {
+            return i as i32;
+        }
+    }
+    a.len() as i32
+}
+
+fn find_duplicate(mut a: Vec<i32>) -> i32 {      // values 1..n-1, one appears twice
+    place(&mut a);
+    for (i, &v) in a.iter().enumerate() {
+        if v != i as i32 + 1 {
+            return v;
+        }
+    }
+    -1
+}
+
+fn first_missing_positive(mut a: Vec<i32>) -> i32 {  // smallest absent positive
+    place(&mut a);
+    for (i, &v) in a.iter().enumerate() {
+        if v != i as i32 + 1 {
+            return i as i32 + 1;
+        }
+    }
+    a.len() as i32 + 1
+}
+
+fn all_disappeared(mut a: Vec<i32>) -> Vec<i32> {    // some absent, some repeated
+    place(&mut a);
+    a.iter()
+        .enumerate()
+        .filter(|(i, &v)| v != *i as i32 + 1)
+        .map(|(i, _)| i as i32 + 1)
+        .collect()
+}
+
+fn show(a: &[i32]) -> String {
+    let parts: Vec<String> = a.iter().map(|v| v.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn main() {
+    println!("{:<26} {:<28} answer", "problem", "input");
+    println!("{}", "-".repeat(70));
+
+    // Python prints whatever the function returned, int or list alike. Here the
+    // four return types have to meet somewhere, so each case carries a small
+    // closure that renders its own answer.
+    type Answer = Box<dyn Fn(Vec<i32>) -> String>;
+    let cases: Vec<(&str, Answer, Vec<i32>)> = vec![
+        ("missing number", Box::new(|d| missing_number(d).to_string()), vec![3, 0, 1]),
+        ("missing number", Box::new(|d| missing_number(d).to_string()), vec![0, 1]),
+        ("find the duplicate", Box::new(|d| find_duplicate(d).to_string()), vec![1, 3, 4, 2, 2]),
+        ("first missing positive", Box::new(|d| first_missing_positive(d).to_string()), vec![3, 4, -1, 1]),
+        ("first missing positive", Box::new(|d| first_missing_positive(d).to_string()), vec![1, 2, 0]),
+        ("first missing positive", Box::new(|d| first_missing_positive(d).to_string()), vec![7, 8, 9, 11, 12]),
+        ("all disappeared", Box::new(|d| show(&all_disappeared(d))), vec![4, 3, 2, 7, 8, 2, 3, 1]),
+    ];
+    for (name, f, data) in &cases {
+        println!("{:<26} {:<28} {}", name, show(data), f(data.clone()));
+    }
+
+    println!();
+    println!("one loop, four problems — only the final scan changes");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+// place is a cyclic sort, tolerant of duplicates and out-of-range values.
+func place(a []int) []int {
+	i, n := 0, len(a)
+	for i < n {
+		target := a[i] - 1
+		if target >= 0 && target < n && a[i] != a[target] {
+			a[i], a[target] = a[target], a[i]
+		} else {
+			i++
+		}
+	}
+	return a
+}
+
+func missingNumber(a []int) int { // values 0..n with one absent
+	b := make([]int, len(a))
+	for i, v := range a {
+		b[i] = v + 1 // shift to 1..n+1 so the same loop applies
+	}
+	place(b)
+	for i, v := range b {
+		if v != i+1 {
+			return i
+		}
+	}
+	return len(a)
+}
+
+func findDuplicate(a []int) int { // values 1..n-1, one appears twice
+	place(a)
+	for i, v := range a {
+		if v != i+1 {
+			return v
+		}
+	}
+	return -1
+}
+
+func firstMissingPositive(a []int) int { // smallest absent positive
+	place(a)
+	for i, v := range a {
+		if v != i+1 {
+			return i + 1
+		}
+	}
+	return len(a) + 1
+}
+
+func allDisappeared(a []int) []int { // values 1..n, some absent, some repeated
+	place(a)
+	var out []int
+	for i, v := range a {
+		if v != i+1 {
+			out = append(out, i+1)
+		}
+	}
+	return out
+}
+
+func show(a []int) string {
+	parts := make([]string, len(a))
+	for i, v := range a {
+		parts[i] = strconv.Itoa(v)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func main() {
+	fmt.Printf("%-26s %-28s answer\\n", "problem", "input")
+	fmt.Println(strings.Repeat("-", 70))
+
+	// Python prints whatever the function returned, int or list alike. Here the
+	// four return types have to meet somewhere, so each case carries a small
+	// function that renders its own answer.
+	cases := []struct {
+		name string
+		fn   func([]int) string
+		data []int
+	}{
+		{"missing number", func(d []int) string { return strconv.Itoa(missingNumber(d)) }, []int{3, 0, 1}},
+		{"missing number", func(d []int) string { return strconv.Itoa(missingNumber(d)) }, []int{0, 1}},
+		{"find the duplicate", func(d []int) string { return strconv.Itoa(findDuplicate(d)) }, []int{1, 3, 4, 2, 2}},
+		{"first missing positive", func(d []int) string { return strconv.Itoa(firstMissingPositive(d)) }, []int{3, 4, -1, 1}},
+		{"first missing positive", func(d []int) string { return strconv.Itoa(firstMissingPositive(d)) }, []int{1, 2, 0}},
+		{"first missing positive", func(d []int) string { return strconv.Itoa(firstMissingPositive(d)) }, []int{7, 8, 9, 11, 12}},
+		{"all disappeared", func(d []int) string { return show(allDisappeared(d)) }, []int{4, 3, 2, 7, 8, 2, 3, 1}},
+	}
+	for _, c := range cases {
+		d := append([]int(nil), c.data...)
+		fmt.Printf("%-26s %-28s %s\\n", c.name, show(c.data), c.fn(d))
+	}
+
+	fmt.Println()
+	fmt.Println("one loop, four problems — only the final scan changes")
+}`,
+            },
+          ],
         },
       ],
     },

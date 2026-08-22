@@ -85,8 +85,316 @@ show("reverse rows, then transpose", mat2)`,
       1   4   7`,
           explanation:
             "Check the corner: `1` starts top-left and ends top-right under a clockwise rotation, which is what a physical quarter-turn does. That one check catches a reversed direction instantly and is worth doing every time. The transpose is O(n²) time and O(1) space, and it touches each off-diagonal pair exactly once — the diagonal itself is never touched, correctly, since `m[r][r]` swapped with itself is a no-op.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const padL = (v, w) => String(v).padStart(w);
+
+function show(label, m) {
+  console.log(\`  \${label}\`);
+  for (const row of m) console.log("    " + row.map((v) => padL(v, 3)).join(" "));
+}
+
+// Swap across the main diagonal. Only the upper triangle is visited.
+function transpose(m) {
+  const n = m.length;
+  for (let r = 0; r < n; r++) {
+    for (let c = r + 1; c < n; c++) {
+      [m[r][c], m[c][r]] = [m[c][r], m[r][c]];
+    }
+  }
+}
+
+function reverseEachRow(m) {
+  for (const row of m) row.reverse();
+}
+
+const mat = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+];
+
+show("start", mat);
+transpose(mat);
+show("after transpose (r,c) -> (c,r)", mat);
+reverseEachRow(mat);
+show("after reversing each row = rotated 90 clockwise", mat);
+
+console.log();
+console.log("  counter-clockwise is the same two steps in the other order:");
+const mat2 = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+];
+reverseEachRow(mat2);
+transpose(mat2);
+show("reverse rows, then transpose", mat2);`,
+            },
+            {
+              lang: "typescript",
+              code: `const padL = (v: number, w: number): string => String(v).padStart(w);
+
+function show(label: string, m: number[][]): void {
+  console.log(\`  \${label}\`);
+  for (const row of m) console.log("    " + row.map((v) => padL(v, 3)).join(" "));
+}
+
+// Swap across the main diagonal. Only the upper triangle is visited.
+function transpose(m: number[][]): void {
+  const n = m.length;
+  for (let r = 0; r < n; r++) {
+    for (let c = r + 1; c < n; c++) {
+      [m[r][c], m[c][r]] = [m[c][r], m[r][c]];
+    }
+  }
+}
+
+function reverseEachRow(m: number[][]): void {
+  for (const row of m) row.reverse();
+}
+
+const mat: number[][] = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+];
+
+show("start", mat);
+transpose(mat);
+show("after transpose (r,c) -> (c,r)", mat);
+reverseEachRow(mat);
+show("after reversing each row = rotated 90 clockwise", mat);
+
+console.log();
+console.log("  counter-clockwise is the same two steps in the other order:");
+const mat2: number[][] = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+];
+reverseEachRow(mat2);
+transpose(mat2);
+show("reverse rows, then transpose", mat2);`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static void show(String label, int[][] m) {
+        System.out.println("  " + label);
+        for (int[] row : m) System.out.println("    " + joined(row));
+    }
+
+    static String joined(int[] row) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < row.length; i++) {
+            if (i > 0) sb.append(" ");
+            sb.append(String.format("%3d", row[i]));
+        }
+        return sb.toString();
+    }
+
+    /** Swap across the main diagonal. Only the upper triangle is visited. */
+    static void transpose(int[][] m) {
+        int n = m.length;
+        for (int r = 0; r < n; r++) {
+            for (int c = r + 1; c < n; c++) {
+                int t = m[r][c];
+                m[r][c] = m[c][r];
+                m[c][r] = t;
+            }
+        }
+    }
+
+    static void reverseEachRow(int[][] m) {
+        for (int[] row : m) {
+            for (int lo = 0, hi = row.length - 1; lo < hi; lo++, hi--) {
+                int t = row[lo];
+                row[lo] = row[hi];
+                row[hi] = t;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+
+        show("start", mat);
+        transpose(mat);
+        show("after transpose (r,c) -> (c,r)", mat);
+        reverseEachRow(mat);
+        show("after reversing each row = rotated 90 clockwise", mat);
+
+        System.out.println();
+        System.out.println("  counter-clockwise is the same two steps in the other order:");
+        int[][] mat2 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        reverseEachRow(mat2);
+        transpose(mat2);
+        show("reverse rows, then transpose", mat2);
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+void show(const string& label, const vector<vector<int>>& m) {
+    cout << "  " << label << "\\n";
+    for (const auto& row : m) {
+        ostringstream line;
+        for (size_t i = 0; i < row.size(); i++) {
+            if (i) line << " ";
+            line << setw(3) << row[i];
+        }
+        cout << "    " << line.str() << "\\n";
+    }
+}
+
+// Swap across the main diagonal. Only the upper triangle is visited.
+void transpose(vector<vector<int>>& m) {
+    size_t n = m.size();
+    for (size_t r = 0; r < n; r++) {
+        for (size_t c = r + 1; c < n; c++) swap(m[r][c], m[c][r]);
+    }
+}
+
+void reverseEachRow(vector<vector<int>>& m) {
+    for (auto& row : m) reverse(row.begin(), row.end());
+}
+
+int main() {
+    vector<vector<int>> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+
+    show("start", mat);
+    transpose(mat);
+    show("after transpose (r,c) -> (c,r)", mat);
+    reverseEachRow(mat);
+    show("after reversing each row = rotated 90 clockwise", mat);
+
+    cout << "\\n";
+    cout << "  counter-clockwise is the same two steps in the other order:\\n";
+    vector<vector<int>> mat2 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    reverseEachRow(mat2);
+    transpose(mat2);
+    show("reverse rows, then transpose", mat2);
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn show(label: &str, m: &[Vec<i32>]) {
+    println!("  {}", label);
+    for row in m {
+        let cells: Vec<String> = row.iter().map(|v| format!("{:>3}", v)).collect();
+        println!("    {}", cells.join(" "));
+    }
+}
+
+/// Swap across the main diagonal. Only the upper triangle is visited.
+fn transpose(m: &mut [Vec<i32>]) {
+    let n = m.len();
+    for r in 0..n {
+        for c in r + 1..n {
+            let t = m[r][c];
+            m[r][c] = m[c][r];
+            m[c][r] = t;
+        }
+    }
+}
+
+fn reverse_each_row(m: &mut [Vec<i32>]) {
+    for row in m.iter_mut() {
+        row.reverse();
+    }
+}
+
+fn main() {
+    let mut mat = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+
+    show("start", &mat);
+    transpose(&mut mat);
+    show("after transpose (r,c) -> (c,r)", &mat);
+    reverse_each_row(&mut mat);
+    show("after reversing each row = rotated 90 clockwise", &mat);
+
+    println!();
+    println!("  counter-clockwise is the same two steps in the other order:");
+    let mut mat2 = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    reverse_each_row(&mut mat2);
+    transpose(&mut mat2);
+    show("reverse rows, then transpose", &mat2);
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+)
+
+func show(label string, m [][]int) {
+	fmt.Println(" ", label)
+	for _, row := range m {
+		cells := make([]string, len(row))
+		for i, v := range row {
+			cells[i] = fmt.Sprintf("%3d", v)
+		}
+		fmt.Println("   ", strings.Join(cells, " "))
+	}
+}
+
+// Swap across the main diagonal. Only the upper triangle is visited.
+func transpose(m [][]int) {
+	n := len(m)
+	for r := 0; r < n; r++ {
+		for c := r + 1; c < n; c++ {
+			m[r][c], m[c][r] = m[c][r], m[r][c]
+		}
+	}
+}
+
+func reverseEachRow(m [][]int) {
+	for _, row := range m {
+		slices.Reverse(row)
+	}
+}
+
+func main() {
+	mat := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+
+	show("start", mat)
+	transpose(mat)
+	show("after transpose (r,c) -> (c,r)", mat)
+	reverseEachRow(mat)
+	show("after reversing each row = rotated 90 clockwise", mat)
+
+	fmt.Println()
+	fmt.Println("  counter-clockwise is the same two steps in the other order:")
+	mat2 := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	reverseEachRow(mat2)
+	transpose(mat2)
+	show("reverse rows, then transpose", mat2)
+}`,
+            },
+          ],
         },
       ],
+      visual: {
+        id: "rotate-visual",
+        kind: "pattern",
+        algorithm: "rotatematrix",
+        lockAlgorithm: true,
+        title: "Transpose, then reverse each row",
+      },
       pitfalls: [
         {
           title: "Transposing a non-square matrix in place",
@@ -166,6 +474,362 @@ show("final", mat)`,
      0  0  0  0`,
           explanation:
             "The middle snapshot is the one to study. After marking, `m[1][0]` and `m[3][0]` are zero because rows 1 and 3 contain a zero, and `m[0][1]` and `m[0][2]` are zero because columns 1 and 2 do — the borders are now a pair of boolean arrays that happen to live inside the data. The two flags captured *before* any marking are what make the last phase safe. Read the first row of the final matrix: it is `1 0 0 5` rather than all zeroes, correctly, because the original first row contained no zero and the ones there now are marks rather than data.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const padL = (v, w) => String(v).padStart(w);
+
+function show(label, m) {
+  console.log(\`  \${label}\`);
+  for (const row of m) console.log("    " + row.map((v) => padL(v, 2)).join(" "));
+}
+
+// Row 0 and column 0 become the marker arrays, so no extra space is used.
+function setZeroes(m) {
+  const rows = m.length;
+  const cols = m[0].length;
+  const firstRowHasZero = m[0].some((v) => v === 0);
+  const firstColHasZero = m.some((row) => row[0] === 0);
+
+  for (let r = 1; r < rows; r++) {          // mark, using the borders
+    for (let c = 1; c < cols; c++) {
+      if (m[r][c] === 0) {
+        m[r][0] = 0;
+        m[0][c] = 0;
+      }
+    }
+  }
+
+  show("after marking (borders now hold the flags)", m);
+
+  for (let r = 1; r < rows; r++) {          // apply, reading the borders
+    for (let c = 1; c < cols; c++) {
+      if (m[r][0] === 0 || m[0][c] === 0) m[r][c] = 0;
+    }
+  }
+
+  if (firstRowHasZero) {                    // the borders themselves, last
+    for (let c = 0; c < cols; c++) m[0][c] = 0;
+  }
+  if (firstColHasZero) {
+    for (let r = 0; r < rows; r++) m[r][0] = 0;
+  }
+}
+
+const mat = [
+  [1, 1, 1, 5],
+  [1, 0, 1, 6],
+  [2, 3, 1, 7],
+  [4, 8, 0, 9],
+];
+
+show("start", mat);
+setZeroes(mat);
+show("final", mat);`,
+            },
+            {
+              lang: "typescript",
+              code: `const padL = (v: number, w: number): string => String(v).padStart(w);
+
+function show(label: string, m: number[][]): void {
+  console.log(\`  \${label}\`);
+  for (const row of m) console.log("    " + row.map((v) => padL(v, 2)).join(" "));
+}
+
+// Row 0 and column 0 become the marker arrays, so no extra space is used.
+function setZeroes(m: number[][]): void {
+  const rows = m.length;
+  const cols = m[0].length;
+  const firstRowHasZero = m[0].some((v) => v === 0);
+  const firstColHasZero = m.some((row) => row[0] === 0);
+
+  for (let r = 1; r < rows; r++) {          // mark, using the borders
+    for (let c = 1; c < cols; c++) {
+      if (m[r][c] === 0) {
+        m[r][0] = 0;
+        m[0][c] = 0;
+      }
+    }
+  }
+
+  show("after marking (borders now hold the flags)", m);
+
+  for (let r = 1; r < rows; r++) {          // apply, reading the borders
+    for (let c = 1; c < cols; c++) {
+      if (m[r][0] === 0 || m[0][c] === 0) m[r][c] = 0;
+    }
+  }
+
+  if (firstRowHasZero) {                    // the borders themselves, last
+    for (let c = 0; c < cols; c++) m[0][c] = 0;
+  }
+  if (firstColHasZero) {
+    for (let r = 0; r < rows; r++) m[r][0] = 0;
+  }
+}
+
+const mat: number[][] = [
+  [1, 1, 1, 5],
+  [1, 0, 1, 6],
+  [2, 3, 1, 7],
+  [4, 8, 0, 9],
+];
+
+show("start", mat);
+setZeroes(mat);
+show("final", mat);`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    static void show(String label, int[][] m) {
+        System.out.println("  " + label);
+        for (int[] row : m) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < row.length; i++) {
+                if (i > 0) sb.append(" ");
+                sb.append(String.format("%2d", row[i]));
+            }
+            System.out.println("    " + sb);
+        }
+    }
+
+    /** Row 0 and column 0 become the marker arrays, so no extra space is used. */
+    static void setZeroes(int[][] m) {
+        int rows = m.length, cols = m[0].length;
+        boolean firstRowHasZero = false, firstColHasZero = false;
+        for (int c = 0; c < cols; c++) if (m[0][c] == 0) firstRowHasZero = true;
+        for (int r = 0; r < rows; r++) if (m[r][0] == 0) firstColHasZero = true;
+
+        for (int r = 1; r < rows; r++) {          // mark, using the borders
+            for (int c = 1; c < cols; c++) {
+                if (m[r][c] == 0) {
+                    m[r][0] = 0;
+                    m[0][c] = 0;
+                }
+            }
+        }
+
+        show("after marking (borders now hold the flags)", m);
+
+        for (int r = 1; r < rows; r++) {          // apply, reading the borders
+            for (int c = 1; c < cols; c++) {
+                if (m[r][0] == 0 || m[0][c] == 0) m[r][c] = 0;
+            }
+        }
+
+        if (firstRowHasZero) {                    // the borders themselves, last
+            for (int c = 0; c < cols; c++) m[0][c] = 0;
+        }
+        if (firstColHasZero) {
+            for (int r = 0; r < rows; r++) m[r][0] = 0;
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] mat = {{1, 1, 1, 5}, {1, 0, 1, 6}, {2, 3, 1, 7}, {4, 8, 0, 9}};
+        show("start", mat);
+        setZeroes(mat);
+        show("final", mat);
+    }
+}`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+void show(const string& label, const vector<vector<int>>& m) {
+    cout << "  " << label << "\\n";
+    for (const auto& row : m) {
+        ostringstream line;
+        for (size_t i = 0; i < row.size(); i++) {
+            if (i) line << " ";
+            line << setw(2) << row[i];
+        }
+        cout << "    " << line.str() << "\\n";
+    }
+}
+
+// Row 0 and column 0 become the marker arrays, so no extra space is used.
+void setZeroes(vector<vector<int>>& m) {
+    size_t rows = m.size(), cols = m[0].size();
+    bool firstRowHasZero = false, firstColHasZero = false;
+    for (size_t c = 0; c < cols; c++) if (m[0][c] == 0) firstRowHasZero = true;
+    for (size_t r = 0; r < rows; r++) if (m[r][0] == 0) firstColHasZero = true;
+
+    for (size_t r = 1; r < rows; r++) {          // mark, using the borders
+        for (size_t c = 1; c < cols; c++) {
+            if (m[r][c] == 0) {
+                m[r][0] = 0;
+                m[0][c] = 0;
+            }
+        }
+    }
+
+    show("after marking (borders now hold the flags)", m);
+
+    for (size_t r = 1; r < rows; r++) {          // apply, reading the borders
+        for (size_t c = 1; c < cols; c++) {
+            if (m[r][0] == 0 || m[0][c] == 0) m[r][c] = 0;
+        }
+    }
+
+    if (firstRowHasZero) {                       // the borders themselves, last
+        for (size_t c = 0; c < cols; c++) m[0][c] = 0;
+    }
+    if (firstColHasZero) {
+        for (size_t r = 0; r < rows; r++) m[r][0] = 0;
+    }
+}
+
+int main() {
+    vector<vector<int>> mat = {{1, 1, 1, 5}, {1, 0, 1, 6}, {2, 3, 1, 7}, {4, 8, 0, 9}};
+    show("start", mat);
+    setZeroes(mat);
+    show("final", mat);
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn show(label: &str, m: &[Vec<i32>]) {
+    println!("  {}", label);
+    for row in m {
+        let cells: Vec<String> = row.iter().map(|v| format!("{:>2}", v)).collect();
+        println!("    {}", cells.join(" "));
+    }
+}
+
+/// Row 0 and column 0 become the marker arrays, so no extra space is used.
+fn set_zeroes(m: &mut Vec<Vec<i32>>) {
+    let (rows, cols) = (m.len(), m[0].len());
+    let first_row_has_zero = m[0].iter().any(|v| *v == 0);
+    let first_col_has_zero = m.iter().any(|row| row[0] == 0);
+
+    for r in 1..rows {
+        // mark, using the borders
+        for c in 1..cols {
+            if m[r][c] == 0 {
+                m[r][0] = 0;
+                m[0][c] = 0;
+            }
+        }
+    }
+
+    show("after marking (borders now hold the flags)", m);
+
+    for r in 1..rows {
+        // apply, reading the borders
+        for c in 1..cols {
+            if m[r][0] == 0 || m[0][c] == 0 {
+                m[r][c] = 0;
+            }
+        }
+    }
+
+    if first_row_has_zero {
+        // the borders themselves, last
+        for c in 0..cols {
+            m[0][c] = 0;
+        }
+    }
+    if first_col_has_zero {
+        for r in 0..rows {
+            m[r][0] = 0;
+        }
+    }
+}
+
+fn main() {
+    let mut mat = vec![
+        vec![1, 1, 1, 5],
+        vec![1, 0, 1, 6],
+        vec![2, 3, 1, 7],
+        vec![4, 8, 0, 9],
+    ];
+    show("start", &mat);
+    set_zeroes(&mut mat);
+    show("final", &mat);
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func show(label string, m [][]int) {
+	fmt.Println(" ", label)
+	for _, row := range m {
+		cells := make([]string, len(row))
+		for i, v := range row {
+			cells[i] = fmt.Sprintf("%2d", v)
+		}
+		fmt.Println("   ", strings.Join(cells, " "))
+	}
+}
+
+// Row 0 and column 0 become the marker arrays, so no extra space is used.
+func setZeroes(m [][]int) {
+	rows, cols := len(m), len(m[0])
+	firstRowHasZero, firstColHasZero := false, false
+	for c := 0; c < cols; c++ {
+		if m[0][c] == 0 {
+			firstRowHasZero = true
+		}
+	}
+	for r := 0; r < rows; r++ {
+		if m[r][0] == 0 {
+			firstColHasZero = true
+		}
+	}
+
+	for r := 1; r < rows; r++ { // mark, using the borders
+		for c := 1; c < cols; c++ {
+			if m[r][c] == 0 {
+				m[r][0] = 0
+				m[0][c] = 0
+			}
+		}
+	}
+
+	show("after marking (borders now hold the flags)", m)
+
+	for r := 1; r < rows; r++ { // apply, reading the borders
+		for c := 1; c < cols; c++ {
+			if m[r][0] == 0 || m[0][c] == 0 {
+				m[r][c] = 0
+			}
+		}
+	}
+
+	if firstRowHasZero { // the borders themselves, last
+		for c := 0; c < cols; c++ {
+			m[0][c] = 0
+		}
+	}
+	if firstColHasZero {
+		for r := 0; r < rows; r++ {
+			m[r][0] = 0
+		}
+	}
+}
+
+func main() {
+	mat := [][]int{{1, 1, 1, 5}, {1, 0, 1, 6}, {2, 3, 1, 7}, {4, 8, 0, 9}}
+	show("start", mat)
+	setZeroes(mat)
+	show("final", mat)
+}`,
+            },
+          ],
         },
       ],
     },
@@ -231,6 +895,205 @@ read as a 3x4 matrix, index = r * COLS + c:
 divide and remainder invert the multiply and add — that is all a 2D index is`,
           explanation:
             "Index 3 and index 4 are the interesting pair: consecutive in the flat array, and on different rows in the matrix. **The divisor is always the number of columns**, never the number of rows, and getting that backwards is the single most common bug in this conversion — it produces plausible-looking output on a square matrix and garbage on a rectangular one, which is exactly the wrong way round for catching it early. Test flattening code on a non-square grid.",
+          alternates: [
+            {
+              lang: "python",
+              code: `ROWS, COLS = 3, 4
+flat = [10 + i for i in range(ROWS * COLS)]
+
+print("one flat array: " + str(flat))
+print()
+print(f"read as a {ROWS}x{COLS} matrix, index = r * COLS + c:")
+for r in range(ROWS):
+    line = "   "
+    for c in range(COLS):
+        line += f"{flat[r * COLS + c]:4d}"
+    print(line)
+
+print()
+print(f"{'index':>8} {'row':>6} {'col':>6} {'value':>8}")
+print("   " + "-" * 29)
+for i in (0, 3, 4, 7, 11):
+    r, c = divmod(i, COLS)
+    print(f"{i:8d} {r:6d} {c:6d} {flat[i]:8d}")
+
+print()
+print("divide and remainder invert the multiply and add — that is all a 2D index is")`,
+            },
+            {
+              lang: "javascript",
+              code: `const ROWS = 3;
+const COLS = 4;
+const flat = Array.from({ length: ROWS * COLS }, (_, i) => 10 + i);
+
+const right = (s, w) => String(s).padStart(w);
+
+console.log("one flat array: [" + flat.join(", ") + "]");
+console.log();
+console.log(\`read as a \${ROWS}x\${COLS} matrix, index = r * COLS + c:\`);
+for (let r = 0; r < ROWS; r++) {
+  let line = "   ";
+  for (let c = 0; c < COLS; c++) line += right(flat[r * COLS + c], 4);
+  console.log(line);
+}
+
+console.log();
+console.log(\`\${right("index", 8)} \${right("row", 6)} \${right("col", 6)} \${right("value", 8)}\`);
+console.log("   " + "-".repeat(29));
+for (const i of [0, 3, 4, 7, 11]) {
+  const r = Math.floor(i / COLS);
+  const c = i % COLS;
+  console.log(\`\${right(i, 8)} \${right(r, 6)} \${right(c, 6)} \${right(flat[i], 8)}\`);
+}
+
+console.log();
+console.log("divide and remainder invert the multiply and add — that is all a 2D index is");`,
+            },
+            {
+              lang: "typescript",
+              code: `const ROWS = 3;
+const COLS = 4;
+const flat: number[] = Array.from({ length: ROWS * COLS }, (_, i: number) => 10 + i);
+
+const right = (s: string | number, w: number): string => String(s).padStart(w);
+
+console.log("one flat array: [" + flat.join(", ") + "]");
+console.log();
+console.log(\`read as a \${ROWS}x\${COLS} matrix, index = r * COLS + c:\`);
+for (let r = 0; r < ROWS; r++) {
+  let line = "   ";
+  for (let c = 0; c < COLS; c++) line += right(flat[r * COLS + c], 4);
+  console.log(line);
+}
+
+console.log();
+console.log(\`\${right("index", 8)} \${right("row", 6)} \${right("col", 6)} \${right("value", 8)}\`);
+console.log("   " + "-".repeat(29));
+for (const i of [0, 3, 4, 7, 11]) {
+  const r = Math.floor(i / COLS);
+  const c = i % COLS;
+  console.log(\`\${right(i, 8)} \${right(r, 6)} \${right(c, 6)} \${right(flat[i], 8)}\`);
+}
+
+console.log();
+console.log("divide and remainder invert the multiply and add — that is all a 2D index is");`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
+int main() {
+    const int ROWS = 3, COLS = 4;
+    std::vector<int> flat(ROWS * COLS);
+    for (size_t i = 0; i < flat.size(); ++i) flat[i] = 10 + static_cast<int>(i);
+
+    std::string joined;
+    for (size_t i = 0; i < flat.size(); ++i) {
+        if (i) joined += ", ";
+        joined += std::to_string(flat[i]);
+    }
+    std::cout << "one flat array: [" << joined << "]\\n\\n";
+    std::cout << "read as a " << ROWS << "x" << COLS << " matrix, index = r * COLS + c:\\n";
+    for (int r = 0; r < ROWS; ++r) {
+        std::cout << "   ";
+        for (int c = 0; c < COLS; ++c) std::cout << std::setw(4) << flat[r * COLS + c];
+        std::cout << '\\n';
+    }
+
+    std::cout << '\\n';
+    std::cout << std::right << std::setw(8) << "index" << ' ' << std::setw(6) << "row"
+              << ' ' << std::setw(6) << "col" << ' ' << std::setw(8) << "value" << '\\n';
+    std::cout << "   " << std::string(29, '-') << '\\n';
+    for (int i : {0, 3, 4, 7, 11}) {
+        int r = i / COLS, c = i % COLS;
+        std::cout << std::setw(8) << i << ' ' << std::setw(6) << r << ' '
+                  << std::setw(6) << c << ' ' << std::setw(8) << flat[i] << '\\n';
+    }
+
+    std::cout << '\\n';
+    std::cout << "divide and remainder invert the multiply and add — that is all a 2D index is\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    const ROWS: usize = 3;
+    const COLS: usize = 4;
+    let flat: Vec<i32> = (0..ROWS * COLS).map(|i| 10 + i as i32).collect();
+
+    let joined: Vec<String> = flat.iter().map(|v| v.to_string()).collect();
+    println!("one flat array: [{}]", joined.join(", "));
+    println!();
+    println!("read as a {}x{} matrix, index = r * COLS + c:", ROWS, COLS);
+    for r in 0..ROWS {
+        let mut line = String::from("   ");
+        for c in 0..COLS {
+            line.push_str(&format!("{:4}", flat[r * COLS + c]));
+        }
+        println!("{}", line);
+    }
+
+    println!();
+    println!("{:>8} {:>6} {:>6} {:>8}", "index", "row", "col", "value");
+    println!("   {}", "-".repeat(29));
+    for i in [0usize, 3, 4, 7, 11] {
+        let (r, c) = (i / COLS, i % COLS);
+        println!("{:8} {:6} {:6} {:8}", i, r, c, flat[i]);
+    }
+
+    println!();
+    println!("divide and remainder invert the multiply and add — that is all a 2D index is");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	const ROWS, COLS = 3, 4
+	flat := make([]int, ROWS*COLS)
+	for i := range flat {
+		flat[i] = 10 + i
+	}
+
+	parts := make([]string, len(flat))
+	for i, v := range flat {
+		parts[i] = strconv.Itoa(v)
+	}
+	fmt.Println("one flat array: [" + strings.Join(parts, ", ") + "]")
+	fmt.Println()
+	fmt.Printf("read as a %dx%d matrix, index = r * COLS + c:\\n", ROWS, COLS)
+	for r := 0; r < ROWS; r++ {
+		var line strings.Builder
+		line.WriteString("   ")
+		for c := 0; c < COLS; c++ {
+			fmt.Fprintf(&line, "%4d", flat[r*COLS+c])
+		}
+		fmt.Println(line.String())
+	}
+
+	fmt.Println()
+	fmt.Printf("%8s %6s %6s %8s\\n", "index", "row", "col", "value")
+	fmt.Println("   " + strings.Repeat("-", 29))
+	for _, i := range []int{0, 3, 4, 7, 11} {
+		r, c := i/COLS, i%COLS
+		fmt.Printf("%8d %6d %6d %8d\\n", i, r, c, flat[i])
+	}
+
+	fmt.Println()
+	fmt.Println("divide and remainder invert the multiply and add — that is all a 2D index is")
+}`,
+            },
+          ],
         },
       ],
     },

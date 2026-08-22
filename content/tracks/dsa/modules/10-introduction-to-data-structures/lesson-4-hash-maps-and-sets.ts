@@ -87,6 +87,11 @@ show(16)`,
           body: "It is randomised per process by a seed, as a defence against denial-of-service attacks that deliberately collide keys. So `hash(\"apple\")` gives a different number every time you start Python, and any code depending on a specific hash value or on bucket order is not reproducible. That randomisation is also why the example above defines its own hash instead of calling the built-in.",
         },
       ],
+      visual: {
+        id: "hash-visual",
+        kind: "hash-table",
+        title: "Hashing keys into buckets, collisions and all",
+      },
     },
     {
       id: "load-factor",

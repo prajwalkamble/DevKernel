@@ -11,7 +11,11 @@
     "prebuild": "npm run assets",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify:code": "node scripts/verify-lesson-code.mjs",
+    "verify": "next typegen && tsc --noEmit && eslint . && npm run verify:frames",
+  "verify:frames": "tsx scripts/verify-visual-frames.ts",
+  "verify:visuals": "node scripts/verify-visual-playback.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -33,6 +37,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.12",
+    "typescript": "^5",
+    "ws": "^8.21.3"
   }
 }

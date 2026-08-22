@@ -71,6 +71,11 @@ for t in ["([]{})", "([)]", "(", "", "))"]:
             "Bracket matching is the canonical stack problem because the requirement *is* the stack's semantics: the bracket that must close next is always the most recent unclosed one. Note the three failure modes are all handled and each needs a different check — wrong type on `([)]`, leftovers on `(`, and an empty stack on `))`. Forgetting the last one is the standard bug, and it crashes rather than returning false.",
         },
       ],
+      visual: {
+        id: "stack-visual",
+        kind: "stack",
+        title: "A stack, one operation at a time",
+      },
     },
     {
       id: "recognising",
@@ -139,6 +144,11 @@ maxlen=3 keeps the last three: [3, 4, 5]`,
           body: "`d[0]` and `d[-1]` are O(1), but `d[n // 2]` is O(n), because a deque is a chain of blocks rather than one array. It is the mirror image of the list's problem. If you need both fast middle access and fast front removal, you need a different structure — usually two stacks, or an index into a list you never actually shrink.",
         },
       ],
+      visual: {
+        id: "queue-visual",
+        kind: "queue",
+        title: "A queue: join at the rear, leave from the front",
+      },
     },
     {
       id: "java-side",

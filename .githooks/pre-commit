@@ -1,0 +1,13 @@
+#!/bin/sh
+# Runs the fast gates before a commit is written.
+#
+# Enable it once per clone, since git will not pick up a hooks directory on its
+# own:
+#
+#     git config core.hooksPath .githooks
+#
+# Only the fast half runs here — types, lint and the visual frame generators,
+# a couple of seconds in total. The lesson-code verifier compiles and runs every
+# example in seven languages and belongs in CI, not in the way of a commit.
+set -e
+npm run verify

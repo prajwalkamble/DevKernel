@@ -74,6 +74,11 @@ descending: [9, 5, 3, 1]`,
           body: "`int k = map.ceilingKey(99);` throws a `NullPointerException` when no such key exists, because the null `Integer` is unboxed into an `int`. Assign to an `Integer` and check for null. The same applies to every `get`, `floorKey`, `poll` and `peek` in the collections API — anywhere a boxed type can be null.",
         },
       ],
+      visual: {
+        id: "bst-visual",
+        kind: "bst",
+        title: "A binary search tree, built one insert at a time",
+      },
     },
     {
       id: "python-workaround",

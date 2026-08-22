@@ -29,7 +29,40 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 const ROOT = process.cwd();
+/**
+ * Languages checked for a lesson's *primary* example.
+ *
+ * Deliberately still three. Turning the full set on here also starts checking
+ * the C++ and Rust tracks, whose examples are written against particular build
+ * invocations this runner does not reproduce — `-Wall` for the warning
+ * lessons, `g++ -E` for the preprocessor one, a deliberate non-zero exit for
+ * another, and a few that print timings and so can never match. Those examples
+ * are not wrong; this runner is simply not how they are meant to be built, and
+ * making it so is its own piece of work.
+ */
+/**
+ * How long one example may take.
+ *
+ * Generous on purpose. The n-queens pruning example measures an unpruned
+ * 19-million-node search and lands within a couple of seconds of two minutes,
+ * so a 120s limit made it pass or fail depending on what else the machine was
+ * doing. A slow example is a slow example; a flaky one is a broken signal.
+ */
+const RUN_TIMEOUT_MS = 300000;
+
 const RUNNABLE = new Set(["java", "python", "go"]);
+
+/**
+ * Languages checked for a *translation*.
+ *
+ * Translations are plain programs written to be run exactly this way — no
+ * diagnostics, no special flags — so the whole toolchain set is safe here.
+ * Every one is a real compiler: the dropdown promises the same program in
+ * another language, and an unverified translation makes that a lie.
+ */
+const TRANSLATABLE = new Set([
+  "java", "python", "go", "cpp", "rust", "javascript", "typescript", "asm",
+]);
 const onlyTrack = process.argv[2];
 const onlyModule = process.argv[3];
 
@@ -103,7 +136,7 @@ function runJava(code) {
   writeFileSync(file, javaProgram(code));
   const result = spawnSync("java", [file], {
     encoding: "utf8",
-    timeout: 120000,
+    timeout: RUN_TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024,
   });
   return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
@@ -126,7 +159,7 @@ function runGo(code) {
   writeFileSync(file, code);
   const result = spawnSync("go", ["run", file], {
     encoding: "utf8",
-    timeout: 120000,
+    timeout: RUN_TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024,
     env: { ...process.env, GOFLAGS: "-mod=mod", GOTOOLCHAIN: "local" },
   });
@@ -138,10 +171,127 @@ function runPython(code) {
   writeFileSync(file, code);
   const result = spawnSync("python3", [file], {
     encoding: "utf8",
-    timeout: 120000,
+    timeout: RUN_TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024,
   });
   return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
+let cppSeq = 0;
+
+function runCpp(code) {
+  const dir = path.join(work, `cpp${cppSeq++}`);
+  mkdirSync(dir, { recursive: true });
+  const src = path.join(dir, "main.cpp");
+  const bin = path.join(dir, "a.out");
+  writeFileSync(src, code);
+  const compiled = spawnSync("g++", ["-std=c++20", "-O0", "-o", bin, src], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  if (compiled.status !== 0) {
+    return { text: (compiled.stdout ?? "") + (compiled.stderr ?? ""), status: compiled.status };
+  }
+  const result = spawnSync(bin, [], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
+let rustSeq = 0;
+
+function runRust(code) {
+  const dir = path.join(work, `rust${rustSeq++}`);
+  mkdirSync(dir, { recursive: true });
+  const src = path.join(dir, "main.rs");
+  const bin = path.join(dir, "main");
+  writeFileSync(src, code);
+  const compiled = spawnSync("rustc", ["--edition", "2021", "-o", bin, src], {
+    encoding: "utf8", timeout: 180000, maxBuffer: 16 * 1024 * 1024,
+  });
+  if (compiled.status !== 0) {
+    return { text: (compiled.stdout ?? "") + (compiled.stderr ?? ""), status: compiled.status };
+  }
+  const result = spawnSync(bin, [], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
+function runNode(code) {
+  const file = path.join(work, `snippet${nodeSeq++}.mjs`);
+  writeFileSync(file, code);
+  const result = spawnSync("node", [file], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
+let nodeSeq = 0;
+let tsSeq = 0;
+
+/**
+ * TypeScript runs through the tsx loader already in devDependencies, which
+ * type-strips rather than type-checks — the repo's own `tsc --noEmit` is what
+ * checks types, and running a second full type-check per example would make
+ * this script unusably slow.
+ */
+function runTypeScript(code) {
+  const file = path.join(work, `snippet${tsSeq++}.ts`);
+  writeFileSync(file, code);
+  // The local binary directly: `npx tsx` re-resolves the package on every call,
+  // which costs more than the type-strip does and adds up once many examples
+  // carry a TypeScript translation.
+  const result = spawnSync(path.join(ROOT, "node_modules", ".bin", "tsx"), [file], {
+    encoding: "utf8", timeout: 180000, maxBuffer: 16 * 1024 * 1024,
+    cwd: ROOT,
+  });
+  return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
+let asmSeq = 0;
+
+/**
+ * x86-64 assembly, assembled with NASM and linked bare — no libc, so examples
+ * exit through the syscall rather than through `main` returning.
+ */
+function runAsm(code) {
+  const dir = path.join(work, `asm${asmSeq++}`);
+  mkdirSync(dir, { recursive: true });
+  const src = path.join(dir, "main.asm");
+  const obj = path.join(dir, "main.o");
+  const bin = path.join(dir, "main");
+  writeFileSync(src, code);
+  const assembled = spawnSync("nasm", ["-f", "elf64", "-o", obj, src], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  if (assembled.status !== 0) {
+    return { text: (assembled.stdout ?? "") + (assembled.stderr ?? ""), status: assembled.status };
+  }
+  const linked = spawnSync("ld", ["-o", bin, obj], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  if (linked.status !== 0) {
+    return { text: (linked.stdout ?? "") + (linked.stderr ?? ""), status: linked.status };
+  }
+  const result = spawnSync(bin, [], {
+    encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+  });
+  return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
+/** Dispatches to whichever toolchain the language needs. */
+function runIn(lang, code) {
+  switch (lang) {
+    case "java": return runJava(code);
+    case "go": return runGo(code);
+    case "python": return runPython(code);
+    case "cpp": return runCpp(code);
+    case "rust": return runRust(code);
+    case "javascript": return runNode(code);
+    case "typescript": return runTypeScript(code);
+    case "asm": return runAsm(code);
+    default: throw new Error(`no runner for ${lang}`);
+  }
 }
 
 /**
@@ -161,6 +311,10 @@ function normalise(text) {
     // errors and panic stack traces quote the path. A learner runs `go run
     // main.go` in a directory of their own, so that is the name to compare.
     .replace(/(^|[^\w/])\.?\/*(?:go\d+\/)?main\.go/g, "$1main.go")
+    // The same courtesy for the C++ and Rust scratch directories, so a
+    // diagnostic quotes the filename a learner would see.
+    .replace(/(^|[^\w/])\.?\/*(?:cpp\d+\/)?main\.cpp/g, "$1main.cpp")
+    .replace(/(^|[^\w/])\.?\/*(?:rust\d+\/)?main\.rs/g, "$1main.rs")
     .split("\n")
     .map((line) => line.replace(/\s+$/, ""))
     .join("\n")
@@ -184,40 +338,62 @@ function main() {
       for (const lesson of mod.lessons) {
         for (const section of lesson.sections ?? []) {
           for (const example of section.examples ?? []) {
-            if (!example.lang || !RUNNABLE.has(example.lang)) continue;
-            if (example.output === undefined) {
-              skipped++;
-              continue;
-            }
+            const base = `${track.slug}/${mod.slug}/${lesson.slug} › ${example.id}`;
 
-            const where = `${track.slug}/${mod.slug}/${lesson.slug} › ${example.id}`;
+            /**
+             * The primary program and every translation of it are checked the
+             * same way, against the same expected output. A translation that
+             * has drifted from the original is the failure this is here to
+             * catch — the dropdown promises the same program in another
+             * language, and an unverified translation makes that a lie.
+             */
+            const runs = [
+              { lang: example.lang, code: example.code, output: example.output,
+                requires: example.requires, label: base, allowed: RUNNABLE },
+              ...(example.alternates ?? []).map((v) => ({
+                lang: v.lang,
+                code: v.code,
+                output: v.output ?? example.output,
+                requires: v.requires,
+                label: `${base} [${v.lang}]`,
+                allowed: TRANSLATABLE,
+              })),
+            ];
 
-            // Verified against a toolchain this harness cannot stand up. Say so
-            // rather than reporting a mismatch nobody can act on.
-            if (example.requires) {
-              skipped++;
-              console.log(`skip  ${where}  (needs ${example.requires})`);
-              continue;
-            }
-            const { text, status } =
-              example.lang === "java" ? runJava(example.code)
-                : example.lang === "go" ? runGo(example.code)
-                  : runPython(example.code);
+            for (const run of runs) {
+              if (!run.lang || !run.allowed.has(run.lang) || !run.code) continue;
+              if (run.output === undefined) {
+                skipped++;
+                continue;
+              }
 
-            checked++;
-            const actual = normalise(text);
-            const expected = normalise(example.output);
+              // Verified against a toolchain this harness cannot stand up. Say
+              // so rather than reporting a mismatch nobody can act on.
+              if (run.requires) {
+                skipped++;
+                console.log(`skip  ${run.label}  (needs ${run.requires})`);
+                continue;
+              }
 
-            // The output is the whole contract, and a non-zero exit is not a
-            // failure here: several lessons teach an error message on purpose,
-            // and those examples are supposed to fail to compile or to run.
-            if (actual !== expected) {
-              failed++;
-              console.log(
-                `FAIL  ${where}\n      expected:\n${indent(expected)}\n      actual:\n${indent(actual)}\n`
-              );
-            } else {
-              console.log(`ok    ${where}${status === 0 ? "" : `  (exit ${status}, as intended)`}`);
+              const { text, status } = runIn(run.lang, run.code);
+
+              checked++;
+              const actual = normalise(text);
+              const expected = normalise(run.output);
+
+              // The output is the whole contract, and a non-zero exit is not a
+              // failure here: several lessons teach an error message on
+              // purpose, and those examples are supposed to fail.
+              if (actual !== expected) {
+                failed++;
+                console.log(
+                  `FAIL  ${run.label}\n      expected:\n${indent(expected)}\n      actual:\n${indent(actual)}\n`
+                );
+              } else {
+                console.log(
+                  `ok    ${run.label}${status === 0 ? "" : `  (exit ${status}, as intended)`}`
+                );
+              }
             }
           }
         }
