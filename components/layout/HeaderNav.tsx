@@ -22,7 +22,7 @@ const LINKS = [
      stays lit while you are reading one. */
   { href: "/curriculum", label: "Tracks", also: ["/learn"] },
   { href: "/practice", label: "Problems" },
-  { href: "/visualize", label: "Visualise" },
+  { href: "/visualize", label: "Visualize" },
   { href: "/playground", label: "Playground" },
 ] as const;
 

@@ -154,7 +154,7 @@ export function VisualizeGallery() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[13rem_1fr]">
-        <nav aria-label="Visualisations" className="space-y-4">
+        <nav aria-label="Visualizations" className="space-y-4">
           {groups.map((group) => (
             <div key={group}>
               <p className="mb-1.5 text-xs font-semibold tracking-wide text-muted uppercase">

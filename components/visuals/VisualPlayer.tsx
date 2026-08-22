@@ -100,7 +100,7 @@ export function VisualPlayer({
       onKeyDown={onKeyDown}
       tabIndex={0}
       role="group"
-      aria-label={title ? `${title} visualisation` : "Visualisation"}
+      aria-label={title ? `${title} visualization` : "Visualization"}
     >
       {(title || controls) && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5">
@@ -152,7 +152,7 @@ export function VisualPlayer({
           max={last}
           value={clamped}
           onChange={(e) => { setPlaying(false); setIndex(Number(e.target.value)); }}
-          aria-label="Step through the visualisation"
+          aria-label="Step through the visualization"
           className="h-1 min-w-0 flex-1 cursor-pointer accent-accent"
         />
 
