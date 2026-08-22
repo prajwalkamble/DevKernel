@@ -2,28 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { Shuffle } from "lucide-react";
-import type { VisualKind, VisualSpec } from "@/content/types";
+import type { VisualSpec } from "@/content/types";
 import type { Frame, Visualisation } from "@/lib/visuals/types";
 import { SORTERS, type SorterName } from "@/lib/visuals/sorting";
 import { SEARCHERS, type SearcherName } from "@/lib/visuals/searching";
-import { GRAPH_ALGOS } from "@/lib/visuals/graphs";
-import { DP_ALGOS } from "@/lib/visuals/dp";
-import { STRING_ALGOS } from "@/lib/visuals/strings";
-import { PATTERN_ALGOS } from "@/lib/visuals/patterns";
-import { TREE_ALGOS } from "@/lib/visuals/trees";
 import {
-  bstDemo, hashTableDemo, heapDemo, linkedListDemo, queueDemo, stackDemo, trieDemo,
-} from "@/lib/visuals/structures";
-import {
-  circularBuffer, dequeDemo, doublyLinkedList, dynamicArray, fenwickTree, lruCache, segmentTree,
-} from "@/lib/visuals/structures2";
+  DEFAULT_ARRAY, DEFAULT_SORTED, FAMILIES, STRUCTURE_TITLE, missingTarget, randomValues,
+  runStructure, type StructureKind,
+} from "@/lib/visuals/resolve";
 import { VisualPlayer } from "./VisualPlayer";
 import {
   ArrayCanvas, BucketCanvas, GraphCanvas, HeapCanvas, MatrixCanvas, SequenceCanvas, TreeCanvas,
 } from "./canvases";
-
-const DEFAULT_ARRAY = [42, 17, 93, 8, 65, 31, 76, 24];
-const DEFAULT_SORTED = [4, 9, 14, 22, 31, 47, 58, 63, 79, 88];
 
 function draw(frame: Frame) {
   switch (frame.kind) {
@@ -69,17 +59,6 @@ function ShuffleButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function randomValues(n: number) {
-  return Array.from({ length: n }, () => Math.floor(Math.random() * 95) + 5);
-}
-
-/** A value inside the array's range that is not in it. */
-function missingTarget(values: number[]): number {
-  const present = new Set(values);
-  for (let v = values[0]; v <= values[values.length - 1]; v++) if (!present.has(v)) return v;
-  return values[values.length - 1] + 1;
-}
-
 /**
  * Renders a lesson's `visual` spec.
  *
@@ -91,11 +70,11 @@ export function Visual({ spec }: { spec: VisualSpec }) {
   switch (spec.kind) {
     case "sorting": return <SortingVisual spec={spec} />;
     case "searching": return <SearchingVisual spec={spec} />;
-    case "graph": return <FamilyVisual spec={spec} table={GRAPH_ALGOS} fallback="bfs" />;
-    case "dp": return <FamilyVisual spec={spec} table={DP_ALGOS} fallback="fibonacci" />;
-    case "string-matching": return <FamilyVisual spec={spec} table={STRING_ALGOS} fallback="kmp" />;
-    case "pattern": return <FamilyVisual spec={spec} table={PATTERN_ALGOS} fallback="twopointers" />;
-    case "tree-algorithm": return <FamilyVisual spec={spec} table={TREE_ALGOS} fallback="inorder" />;
+    case "graph": return <FamilyVisual spec={spec} {...FAMILIES.graph} />;
+    case "dp": return <FamilyVisual spec={spec} {...FAMILIES.dp} />;
+    case "string-matching": return <FamilyVisual spec={spec} {...FAMILIES["string-matching"]} />;
+    case "pattern": return <FamilyVisual spec={spec} {...FAMILIES.pattern} />;
+    case "tree-algorithm": return <FamilyVisual spec={spec} {...FAMILIES["tree-algorithm"]} />;
     default: return <StructureVisual spec={spec} kind={spec.kind} />;
   }
 }
@@ -205,68 +184,6 @@ function SearchingVisual({ spec }: { spec: VisualSpec }) {
 }
 
 /* ------------------------------------------------------------- structures -- */
-
-type StructureKind = Exclude<
-  VisualKind,
-  "sorting" | "searching" | "graph" | "dp" | "string-matching" | "pattern" | "tree-algorithm"
->;
-
-const STRUCTURE_TITLE: Record<StructureKind, string> = {
-  stack: "Stack",
-  queue: "Queue",
-  deque: "Deque",
-  "linked-list": "Linked list",
-  "doubly-linked-list": "Doubly linked list",
-  "circular-buffer": "Circular buffer",
-  "dynamic-array": "Dynamic array",
-  bst: "Binary search tree",
-  trie: "Trie",
-  heap: "Binary min-heap",
-  "hash-table": "Hash table with chaining",
-  "segment-tree": "Segment tree",
-  "fenwick-tree": "Fenwick tree",
-  "lru-cache": "LRU cache",
-};
-
-function runStructure(kind: StructureKind, spec: VisualSpec, seed: number): Visualisation {
-  const numbers = spec.data;
-  const words = spec.words;
-  switch (kind) {
-    case "stack":
-      return stackDemo(numbers ? [...numbers, "pop", "pop"] : [3, 7, 1, "pop", 9, "pop", "pop", "pop"]);
-    case "queue":
-      return queueDemo(numbers ? [...numbers, "dequeue", "dequeue"] : [3, 7, 1, "dequeue", 9, "dequeue", "dequeue"]);
-    case "deque":
-      return dequeDemo();
-    case "linked-list":
-      return linkedListDemo([
-        { op: "prepend", value: 7 }, { op: "prepend", value: 3 },
-        { op: "append", value: 9 }, { op: "append", value: 12 }, { op: "delete", value: 9 },
-      ]);
-    case "doubly-linked-list":
-      return doublyLinkedList();
-    case "circular-buffer":
-      return circularBuffer();
-    case "dynamic-array":
-      return dynamicArray();
-    case "bst": {
-      const inserts = numbers ?? (seed === 0 ? [50, 30, 70, 20, 40, 60, 80] : randomValues(7));
-      return bstDemo(inserts, spec.target ?? inserts[inserts.length - 1]);
-    }
-    case "trie":
-      return trieDemo(words ?? ["cat", "car", "card", "dog"], spec.lookup ?? "car");
-    case "heap":
-      return heapDemo(numbers ?? (seed === 0 ? [5, 3, 8, 1, 9, 2] : randomValues(6)), 2);
-    case "hash-table":
-      return hashTableDemo(words ?? ["ana", "bob", "cy", "dee", "eve", "fay"]);
-    case "segment-tree":
-      return segmentTree(numbers);
-    case "fenwick-tree":
-      return fenwickTree(numbers);
-    case "lru-cache":
-      return lruCache();
-  }
-}
 
 function StructureVisual({ spec, kind }: { spec: VisualSpec; kind: StructureKind }) {
   const [seed, setSeed] = useState(0);

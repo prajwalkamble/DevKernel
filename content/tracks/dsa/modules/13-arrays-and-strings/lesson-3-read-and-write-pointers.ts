@@ -344,6 +344,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "readwrite-visual",
+        kind: "pattern",
+        algorithm: "readwrite",
+        lockAlgorithm: true,
+        title: "The writer lagging behind the reader",
+      },
       pitfalls: [
         {
           title: "Advancing `write` unconditionally",

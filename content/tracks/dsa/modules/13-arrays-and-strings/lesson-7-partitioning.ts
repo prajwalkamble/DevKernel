@@ -747,6 +747,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "dutchflag-visual",
+        kind: "pattern",
+        algorithm: "dutchflag",
+        lockAlgorithm: true,
+        title: "Three regions growing at once",
+      },
     },
     {
       id: "the-bug",

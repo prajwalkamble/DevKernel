@@ -438,6 +438,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "spiral-visual",
+        kind: "pattern",
+        algorithm: "spiral",
+        lockAlgorithm: true,
+        title: "The four boundaries closing in",
+      },
     },
     {
       id: "guards",

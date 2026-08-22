@@ -13,7 +13,8 @@
     "start": "next start",
     "lint": "eslint",
     "verify:code": "node scripts/verify-lesson-code.mjs",
-    "verify:visuals": "node scripts/verify-visual-playback.mjs"
+    "verify:frames": "tsx scripts/verify-visual-frames.ts",
+  "verify:visuals": "node scripts/verify-visual-playback.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

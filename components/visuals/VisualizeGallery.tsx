@@ -43,7 +43,7 @@ const ENTRIES: Entry[] = [
   },
   {
     id: "pattern", group: "Algorithms", label: "Patterns",
-    blurb: "Two pointers, sliding windows, prefix sums, Kadane's and Floyd's cycle detection — the shapes the DSA track is built around.",
+    blurb: "Eleven shapes the DSA track is built around: two pointers and sliding windows, prefix sums and Kadane's, Floyd's cycle detection, and the in-place array work — compaction, rotation by reversal, the Dutch national flag, cyclic sort, spiral order and rotating a grid.",
     spec: { id: "g-pattern", kind: "pattern", algorithm: "twopointers" },
   },
   {

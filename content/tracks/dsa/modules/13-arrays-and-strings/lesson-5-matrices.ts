@@ -388,6 +388,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "rotate-visual",
+        kind: "pattern",
+        algorithm: "rotatematrix",
+        lockAlgorithm: true,
+        title: "Transpose, then reverse each row",
+      },
       pitfalls: [
         {
           title: "Transposing a non-square matrix in place",

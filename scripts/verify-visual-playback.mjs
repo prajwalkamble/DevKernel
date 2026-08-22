@@ -1,9 +1,9 @@
 /**
  * Presses Play on every visualisation and checks the animation actually runs.
  *
- * The frame generators are already covered: `allvis.mjs` proves every frame is
- * well-formed and that the algorithms in `lib/visuals` compute the right
- * answers. None of that can catch the failure this script exists for, because
+ * The frame generators are already covered: `verify-visual-frames.ts` runs every
+ * one of them and proves each frame is well-formed. None of that can catch the
+ * failure this script exists for, because
  * that failure lives in the player rather than the data — the frames were
  * perfect while the animation advanced one step and stalled.
  *

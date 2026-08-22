@@ -317,6 +317,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "cyclicsort-visual",
+        kind: "pattern",
+        algorithm: "cyclicsort",
+        lockAlgorithm: true,
+        title: "Sending each value to the index it names",
+      },
       pitfalls: [
         {
           title: "Comparing indices instead of values",
