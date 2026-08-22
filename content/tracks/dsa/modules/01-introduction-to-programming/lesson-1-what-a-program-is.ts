@@ -11,8 +11,8 @@ export const whatAProgramIsLesson: Lesson = {
   status: "available",
   objectives: [
     "Describe what happens between the file you write and the work the machine does",
-    "State the difference between a compiler and an interpreter, and where Java and Python each sit",
-    "Explain why a Java mistake is often caught before the program runs and the same mistake in Python is not",
+    "State the difference between a compiler and an interpreter, and where each of the track's languages sits",
+    "Explain why the same mistake stops a compiled language before it starts and an interpreted one only when it is reached",
     "Say what memory is, at the level of detail the rest of this track needs",
   ],
   sections: [
@@ -30,35 +30,37 @@ export const whatAProgramIsLesson: Lesson = {
       id: "compilers-and-interpreters",
       heading: "Two ways to bridge the gap",
       body: [
-        "There are two broad strategies for getting from your text to running instructions, and the two languages this track uses are the textbook examples of each.",
+        "There are two broad strategies for getting from your text to running instructions, and the language you end up solving problems in will use one of them.",
         "A **compiler** reads your entire source file before anything runs, checks that it makes sense, and translates it into instructions in one go. If anything in the file is wrong — a misspelled name, a missing bracket, an attempt to put text into a slot that only holds numbers — it stops and tells you, and no part of your program runs at all.",
         "An **interpreter** reads your source a piece at a time *while the program is running*, working out what each piece means as it reaches it. It does not check the whole file first. If line 40 contains nonsense, lines 1 to 39 will run perfectly happily, and you will find out about line 40 only when execution arrives there.",
-        "Python is interpreted. Java is compiled — although with a twist worth knowing, because it explains the word most people meet without explanation.",
-        "Java's compiler does not produce instructions for your particular machine. It produces instructions for an imaginary one, called **bytecode**, and then a program called the **Java Virtual Machine** — the JVM — runs that bytecode on whatever real machine you happen to have. That is the whole reason the same compiled Java file runs on Windows, macOS and Linux without being rebuilt: the differences between them are the JVM's problem, not yours.",
+        "Here is where each of this track's languages sits. **Python** and **JavaScript** are interpreted — you hand the file straight to `python3` or `node` and it starts running. **C++**, **Rust** and **Go** are compiled all the way down to instructions for your actual processor, by `g++`, `rustc` and `go build`; what you get back is a file the machine runs directly, with nothing standing between.",
+        "**Java** is compiled too, but with a twist worth knowing because it explains a word most people meet without explanation. Its compiler does not produce instructions for your particular machine. It produces instructions for an imaginary one, called **bytecode**, and then a program called the **Java Virtual Machine** — the JVM — runs that bytecode on whatever real machine you have. That is why the same compiled Java file runs on Windows, macOS and Linux without being rebuilt: the differences are the JVM's problem, not yours.",
+        "The line is blurrier than the two words suggest, and it is worth knowing that now rather than being surprised later. Python compiles to its own bytecode before interpreting it. JavaScript is parsed in full before anything runs — so a *syntax* error stops it before line 1, while an undefined name does not — and then compiled to machine code as it goes. What actually matters for you is not the label but the question the next section answers: **when does a mistake reach you?**",
       ],
       examples: [
         {
           id: "pipeline",
-          title: "The same journey, two routes",
+          title: "Three routes from a file to running instructions",
           lang: "bash",
-          code: `JAVA                                  PYTHON
+          code: `COMPILED TO THE MACHINE        COMPILED TO BYTECODE        INTERPRETED
+  C++ / Rust / Go                Java                        Python / JavaScript
 
-  Main.java     (you write this)        main.py      (you write this)
-      |                                     |
-      | javac  — the compiler               | python3 — the interpreter
-      | reads the WHOLE file first          | reads and runs a line at a time
-      |                                     |
-      v                                     v
-  Main.class    (bytecode)              (no separate file you ever see)
-      |                                     |
-      | java — the JVM                      |
-      v                                     v
-  the machine does the work             the machine does the work
+  main.cpp                       Main.java                   main.py
+      |                              |                           |
+      | g++ / rustc / go build       | javac                     | python3 / node
+      | reads the WHOLE file         | reads the WHOLE file      | reads and runs
+      |                              |                           | a piece at a time
+      v                              v                           |
+  an executable                  Main.class  (bytecode)          |
+      |                              |                           |
+      |                              | java — the JVM            |
+      v                              v                           v
+  the machine does the work      the machine does the work   the machine does the work
 
-  Mistakes on line 40 stop you          Mistakes on line 40 are found
-  BEFORE line 1 runs.                   only when line 40 is reached.`,
+  A bad name on line 4 stops     Same — javac refuses to     A bad name on line 4 is
+  the build. Nothing runs.       produce a .class file.      found when line 4 runs.`,
           explanation:
-            "The two columns are not better and worse — they are a trade. Java makes you satisfy the compiler before you get to see anything happen at all, which is slower to start and catches a whole class of mistake for free. Python lets you run immediately and finds those same mistakes at the worst possible moment, which is faster to start and less forgiving later.",
+            "The columns are not better and worse — they are a trade, and every language in the track has picked a side of it. A compiler makes you satisfy it before you see anything happen at all, which is slower to start and catches a whole class of mistake for free. An interpreter lets you run immediately and finds those same mistakes at the worst possible moment, which is faster to start and less forgiving later. The middle column buys something else again: compile once, run anywhere there is a JVM.",
         },
       ],
       pitfalls: [
@@ -76,13 +78,13 @@ export const whatAProgramIsLesson: Lesson = {
       id: "seeing-it",
       heading: "Seeing the difference for yourself",
       body: [
-        "This is not an abstract distinction. Here is the same mistake — using a name that was never defined — in both languages, with the same structure: some work that succeeds, then the mistake.",
-        "Read the outputs carefully. They are the whole lesson.",
+        "This is not an abstract distinction. Here is the same mistake — using a name that was never defined — in all six languages, with the same structure: three lines of work that succeed, then the mistake, then one more line that should never be reached.",
+        "Read the outputs carefully, switching the language as you go. They are the whole lesson.",
       ],
       examples: [
         {
-          id: "python-late-failure",
-          title: "Python: the first three lines run, and then it stops",
+          id: "when-it-fails",
+          title: "The same mistake in six languages, and the moment each one notices",
           lang: "python",
           code: `print("step one")
 print("step two")
@@ -98,13 +100,30 @@ Traceback (most recent call last):
           ^^^^^^^^^^^^^^
 NameError: name 'undefined_name' is not defined`,
           explanation:
-            "Three lines of output appeared before the failure. The interpreter had no idea line 4 was broken until it got there — and if line 4 had been inside a branch that only runs on Tuesdays, you would have found out on a Tuesday. Note also that line 5 never ran: once a program fails this way, it stops.",
-        },
-        {
-          id: "java-early-failure",
-          title: "Java: nothing runs at all",
-          lang: "java",
-          code: `public class Main {
+            "Change the language above and watch *where the output stops*. Python and JavaScript print three lines and then fail, because neither looked at line 4 until it arrived there — and if that line sat in a branch that runs once a year, this is the year you would find out. Java, C++, Rust and Go print nothing at all: each read the whole file, found that the name refers to nothing, and refused to produce a program, so there was never anything to run. That is the entire compiled-or-interpreted distinction, and it lands better as five seconds of switching a dropdown than as a paragraph. One detail worth naming: the JavaScript version catches the error so its message stays short enough to print. Left uncaught it stops on that line exactly as Python does, and `step five` never appears.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `console.log("step one");
+console.log("step two");
+console.log("step three");
+try {
+  // Uncaught, Node prints a stack trace whose internal frames move between
+  // releases. The error itself is what matters, so it is caught and named.
+  console.log(undefinedName);
+} catch (error) {
+  console.log(\`\${error.name}: \${error.message}\`);
+}
+console.log("step five");`,
+              output: `step one
+step two
+step three
+ReferenceError: undefinedName is not defined
+step five`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
     public static void main(String[] args) {
         System.out.println("step one");
         System.out.println("step two");
@@ -113,21 +132,72 @@ NameError: name 'undefined_name' is not defined`,
         System.out.println("step five");
     }
 }`,
-          output: `Main.java:6: error: cannot find symbol
+              output: `Main.java:6: error: cannot find symbol
         System.out.println(undefinedName);
                            ^
   symbol:   variable undefinedName
   location: class Main
 1 error
 error: compilation failed`,
-          explanation:
-            "No \"step one\". The compiler read the entire file, found that `undefinedName` refers to nothing, and refused to produce a program at all — so there was never anything to run. That refusal is the feature: the mistake was found without the program being executed even once, and it would have been found the same way if line 6 were buried in a branch that runs once a year.",
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+
+int main() {
+    std::cout << "step one\\n";
+    std::cout << "step two\\n";
+    std::cout << "step three\\n";
+    std::cout << undefinedName << "\\n";
+    std::cout << "step five\\n";
+}`,
+              output: `main.cpp: In function ‘int main()’:
+main.cpp:7:18: error: ‘undefinedName’ was not declared in this scope
+    7 |     std::cout << undefinedName << "\\n";
+      |                  ^~~~~~~~~~~~~`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    println!("step one");
+    println!("step two");
+    println!("step three");
+    println!("{}", undefined_name);
+    println!("step five");
+}`,
+              output: `error[E0425]: cannot find value \`undefined_name\` in this scope
+ --> main.rs:5:20
+  |
+5 |     println!("{}", undefined_name);
+  |                    ^^^^^^^^^^^^^^ not found in this scope
+
+error: aborting due to 1 previous error
+
+For more information about this error, try \`rustc --explain E0425\`.`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("step one")
+	fmt.Println("step two")
+	fmt.Println("step three")
+	fmt.Println(undefinedName)
+	fmt.Println("step five")
+}`,
+              output: `# command-line-arguments
+main.go:9:14: undefined: undefinedName`,
+            },
+          ],
         },
       ],
       pitfalls: [
         {
           title: "Reading only the last line of an error",
-          body: "Both messages above tell you the file, the line number and the column. Beginners tend to see a wall of red and scroll past it; the information you need is almost always in the first two lines. Get into the habit now of reading the line number first — you will spend a meaningful fraction of your career doing exactly this.",
+          body: "Every one of those messages tells you the file, the line number and the column. Beginners tend to see a wall of red and scroll past it; the information you need is almost always in the first two lines. Get into the habit now of reading the line number first — you will spend a meaningful fraction of your career doing exactly this.",
         },
       ],
     },
