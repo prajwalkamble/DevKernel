@@ -6,14 +6,14 @@ export const variablesAndValuesLesson: Lesson = {
   moduleSlug: "introduction-to-programming",
   title: "Variables, Values & What They Cost",
   summary:
-    "What a variable really is, why Java makes you declare a type and Python does not, and the first place a fixed-size box will silently give you a wrong answer.",
+    "What a variable really is, why some languages make you declare a type and others do not, and the first place a fixed-size box will silently give you a wrong answer.",
   estimatedMinutes: 30,
   status: "available",
   objectives: [
     "Explain what happens in memory when you assign a value to a name",
-    "Declare variables in both languages and say what the type annotation is for",
+    "Declare a variable in any of the track's languages, and say what a type annotation is for",
     "Predict the result of integer division and integer overflow before running the code",
-    "Recognise the two arithmetic traps that produce wrong answers with no error message",
+    "Recognise the two arithmetic traps that produce wrong answers with no error message, and how each language handles them",
   ],
   sections: [
     {
