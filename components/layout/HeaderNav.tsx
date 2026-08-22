@@ -10,6 +10,11 @@ import { usePathname } from "next/navigation";
  * lessons — and only this part needs the current path. The active link is
  * marked two ways on purpose: an underline for the eye, and `aria-current` for
  * a screen reader, which the underline alone tells nothing.
+ *
+ * The underline is a positioned bar rather than `text-decoration`, because a
+ * text decoration cannot be animated — it is there or it is not. A bar can be
+ * scaled from nothing to full width, so hovering wipes it in and the current
+ * section simply starts at full width and stays there.
  */
 const LINKS = [
   { href: "/roadmap", label: "Roadmap" },
@@ -42,14 +47,19 @@ export function HeaderNav() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={[
-              "rounded-md px-2 py-1.5 font-medium transition-colors sm:px-3",
-              "underline-offset-[10px] decoration-2",
-              active
-                ? "text-foreground underline decoration-accent"
-                : "text-foreground/80 hover:bg-surface-hover hover:text-foreground",
+              "group relative rounded-md px-2 py-1.5 font-medium transition-colors sm:px-3",
+              active ? "text-foreground" : "text-foreground/80 hover:text-foreground",
             ].join(" ")}
           >
             {label}
+            <span
+              aria-hidden
+              className={[
+                "pointer-events-none absolute inset-x-2 bottom-0.5 h-0.5 rounded-full bg-accent sm:inset-x-3",
+                "origin-left transition-transform duration-200 ease-out motion-reduce:transition-none",
+                active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+              ].join(" ")}
+            />
           </Link>
         );
       })}

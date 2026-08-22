@@ -144,7 +144,7 @@ export function VisualizeGallery() {
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Visualise
+          Visualize
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Every animation here is produced by running the real algorithm and recording
