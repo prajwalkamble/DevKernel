@@ -100,7 +100,7 @@ Traceback (most recent call last):
           ^^^^^^^^^^^^^^
 NameError: name 'undefined_name' is not defined`,
           explanation:
-            "Change the language above and watch *where the output stops*. Python and JavaScript print three lines and then fail, because neither looked at line 4 until it arrived there — and if that line sat in a branch that runs once a year, this is the year you would find out. Java, C++, Rust and Go print nothing at all: each read the whole file, found that the name refers to nothing, and refused to produce a program, so there was never anything to run. That is the entire compiled-or-interpreted distinction, and it lands better as five seconds of switching a dropdown than as a paragraph. One detail worth naming: the JavaScript version catches the error so its message stays short enough to print. Left uncaught it stops on that line exactly as Python does, and `step five` never appears.",
+            "Change the language above and watch *where the output stops*. Python and JavaScript print three lines and then fail, because neither looked at line 4 until it arrived there — and if that line sat in a branch that runs once a year, this is the year you would find out. Java, C++, Rust and Go print nothing at all: each read the whole file, found that the name refers to nothing, and refused to produce a program, so there was never anything to run. That is the entire compiled-or-interpreted distinction, and it lands better as five seconds of switching a dropdown than as a paragraph. One detail worth naming: the JavaScript version catches the error so its message stays short enough to print. Left uncaught it stops on that line exactly as Python does, and `step five` never appears. TypeScript is the interesting seventh case: `tsc` rejects that file outright, so in an editor the mistake is underlined before anything is run at all — and it still fails at runtime here, because the runner strips the types rather than checking them, which is exactly what a dev server or a bundler does. A language can sit on both sides of this line depending on which tool you point at it.",
           alternates: [
             {
               lang: "javascript",
@@ -113,6 +113,26 @@ try {
   console.log(undefinedName);
 } catch (error) {
   console.log(\`\${error.name}: \${error.message}\`);
+}
+console.log("step five");`,
+              output: `step one
+step two
+step three
+ReferenceError: undefinedName is not defined
+step five`,
+            },
+            {
+              lang: "typescript",
+              code: `console.log("step one");
+console.log("step two");
+console.log("step three");
+try {
+  // \`tsc\` rejects this file outright — \`undefinedName\` is not declared. It runs
+  // here because the runner strips the types rather than checking them, which
+  // is what every dev server and bundler does too.
+  console.log(undefinedName);
+} catch (error) {
+  console.log(\`\${(error as Error).name}: \${(error as Error).message}\`);
 }
 console.log("step five");`,
               output: `step one

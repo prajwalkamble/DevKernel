@@ -49,7 +49,7 @@ export const variablesAndValuesLesson: Lesson = {
     },
     {
       id: "types",
-      heading: "Why Java asks you for a type",
+      heading: "Why some languages ask you for a type",
       body: [
         "The word `int` in `int count` is a **type**: a promise about what kind of value this box will hold. Java requires one for every variable. Python requires none.",
         "The reason for the difference is not arbitrary. A box has to be a particular size, and the type is how Java knows what size to make it — a whole number and a piece of text need very different amounts of room. Java decides this before the program runs; Python works it out as it goes, which is why a Python variable can hold a number on one line and text on the next.",
@@ -124,47 +124,173 @@ error: compilation failed`,
       ],
       examples: [
         {
-          id: "int-division-java",
-          title: "Java: division between whole numbers throws the remainder away",
-          lang: "java",
-          code: `public class Main {
-    public static void main(String[] args) {
-        System.out.println(7 / 2);
-        System.out.println(1 / 2);
-        System.out.println(7 / 2.0);
-        System.out.println((double) 7 / 2);
+          id: "integer-division",
+          title: "The same four divisions, seven languages",
+          lang: "python",
+          code: `print("what / gives for 7 and 2  :", 7 / 2)
+print("integer division, 7 by 2  :", 7 // 2)
+print("integer division, 1 by 2  :", 1 // 2)
+print("integer division, -7 by 2 :", -7 // 2)
+print()
+print("Python has two operators. \`/\` always produces a float, even for 7 / 2,")
+print("and \`//\` is the integer one. Note -7 // 2 is -4 and not -3: Python floors,")
+print("rounding toward negative infinity. Every other language here truncates")
+print("toward zero, so this one line is a real source of off-by-one bugs.")`,
+          output: `what / gives for 7 and 2  : 3.5
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -4
 
-        int total = 7;
-        int count = 2;
-        System.out.println("average: " + total / count);
-        System.out.println("average: " + (double) total / count);
+Python has two operators. \`/\` always produces a float, even for 7 / 2,
+and \`//\` is the integer one. Note -7 // 2 is -4 and not -3: Python floors,
+rounding toward negative infinity. Every other language here truncates
+toward zero, so this one line is a real source of off-by-one bugs.`,
+          explanation:
+            "Switch the language and watch the last number. Every one of these is integer division of −7 by 2, and Python answers −4 where the other six answer −3. Python *floors* — it rounds toward negative infinity — and everything else *truncates* toward zero. On positive numbers the two agree, which is why this survives testing and then fails on the one input with a negative in it. The second thing to notice is that the languages disagree about what `/` even means: in Python, JavaScript and TypeScript it always produces a decimal and integer division needs a second operator, while in Java, C++, Rust and Go the same symbol quietly changes behaviour depending on the types either side of it. Dividing two integer variables and expecting a decimal is the single most common arithmetic bug in this track.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `console.log("what / gives for 7 and 2  :", 7 / 2);
+console.log("integer division, 7 by 2  :", Math.trunc(7 / 2));
+console.log("integer division, 1 by 2  :", Math.trunc(1 / 2));
+console.log("integer division, -7 by 2 :", Math.trunc(-7 / 2));
+console.log();
+console.log("JavaScript has one number type and it is a float, so \`/\` never divides");
+console.log("as an integer and there is no operator that does. Math.trunc is the");
+console.log("usual stand-in, and it cuts toward zero — so -7 becomes -3, not -4.");
+console.log("Math.floor would give -4, which is why the choice has to be deliberate.");`,
+              output: `what / gives for 7 and 2  : 3.5
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -3
+
+JavaScript has one number type and it is a float, so \`/\` never divides
+as an integer and there is no operator that does. Math.trunc is the
+usual stand-in, and it cuts toward zero — so -7 becomes -3, not -4.
+Math.floor would give -4, which is why the choice has to be deliberate.`,
+            },
+            {
+              lang: "typescript",
+              code: `console.log("what / gives for 7 and 2  :", 7 / 2);
+console.log("integer division, 7 by 2  :", Math.trunc(7 / 2));
+console.log("integer division, 1 by 2  :", Math.trunc(1 / 2));
+console.log("integer division, -7 by 2 :", Math.trunc(-7 / 2));
+console.log();
+console.log("JavaScript has one number type and it is a float, so \`/\` never divides");
+console.log("as an integer and there is no operator that does. Math.trunc is the");
+console.log("usual stand-in, and it cuts toward zero — so -7 becomes -3, not -4.");
+console.log("Math.floor would give -4, which is why the choice has to be deliberate.");`,
+              output: `what / gives for 7 and 2  : 3.5
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -3
+
+JavaScript has one number type and it is a float, so \`/\` never divides
+as an integer and there is no operator that does. Math.trunc is the
+usual stand-in, and it cuts toward zero — so -7 becomes -3, not -4.
+Math.floor would give -4, which is why the choice has to be deliberate.`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    public static void main(String[] args) {
+        System.out.println("what / gives for 7 and 2  : " + 7 / 2);
+        System.out.println("integer division, 7 by 2  : " + 7 / 2);
+        System.out.println("integer division, 1 by 2  : " + 1 / 2);
+        System.out.println("integer division, -7 by 2 : " + -7 / 2);
+        System.out.println();
+        System.out.println("\`/\` on two ints IS integer division in Java — the same symbol does");
+        System.out.println("both jobs and picks by the types on either side, so 7 / 2 is 3 and");
+        System.out.println("7 / 2.0 is 3.5. It truncates toward zero, so -7 / 2 is -3.");
+        System.out.println("Dividing two int variables and expecting a decimal is the classic bug.");
     }
 }`,
-          output: `3
-0
-3.5
-3.5
-average: 3
-average: 3.5`,
-          explanation:
-            "`1 / 2` giving 0 is the one that bites hardest — it looks so obviously like a half. The fix is to make one side fractional, either by writing `2.0` or by casting with `(double)`. Note that casting one side is enough: once either operand is a `double`, the whole expression becomes one.",
-        },
-        {
-          id: "int-division-python",
-          title: "Python: two operators, no ambiguity",
-          lang: "python",
-          code: `print(7 / 2)
-print(7 // 2)
-print(1 / 2)
-print(1 // 2)
-print(-7 // 2)`,
-          output: `3.5
-3
-0.5
-0
--4`,
-          explanation:
-            "The last line is the one to remember. Python's `//` rounds *down* — towards negative infinity — so `-7 // 2` is −4, not −3. Java rounds towards zero and gives −3 for the same division. Any problem involving negative numbers and division needs you to know which language you are in, and this is the exact line that decides it.",
+              output: `what / gives for 7 and 2  : 3
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -3
+
+\`/\` on two ints IS integer division in Java — the same symbol does
+both jobs and picks by the types on either side, so 7 / 2 is 3 and
+7 / 2.0 is 3.5. It truncates toward zero, so -7 / 2 is -3.
+Dividing two int variables and expecting a decimal is the classic bug.`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+
+int main() {
+    std::cout << "what / gives for 7 and 2  : " << 7 / 2 << "\\n";
+    std::cout << "integer division, 7 by 2  : " << 7 / 2 << "\\n";
+    std::cout << "integer division, 1 by 2  : " << 1 / 2 << "\\n";
+    std::cout << "integer division, -7 by 2 : " << -7 / 2 << "\\n";
+    std::cout << "\\n";
+    std::cout << "\`/\` on two ints IS integer division in C++, exactly as in Java, and\\n";
+    std::cout << "the same symbol switches behaviour on the types around it. Since C++11\\n";
+    std::cout << "the standard requires truncation toward zero, so -7 / 2 is -3.\\n";
+    std::cout << "Write 7 / 2.0 when you wanted the decimal.\\n";
+}`,
+              output: `what / gives for 7 and 2  : 3
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -3
+
+\`/\` on two ints IS integer division in C++, exactly as in Java, and
+the same symbol switches behaviour on the types around it. Since C++11
+the standard requires truncation toward zero, so -7 / 2 is -3.
+Write 7 / 2.0 when you wanted the decimal.`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    println!("what / gives for 7 and 2  : {}", 7 / 2);
+    println!("integer division, 7 by 2  : {}", 7 / 2);
+    println!("integer division, 1 by 2  : {}", 1 / 2);
+    println!("integer division, -7 by 2 : {}", -7 / 2);
+    println!();
+    println!("\`/\` picks its meaning from the types, and 7 and 2 are integers here,");
+    println!("so this is integer division truncating toward zero: -7 / 2 is -3.");
+    println!("Rust will not silently mix the two — 7 / 2.0 does not compile, because");
+    println!("an integer and a float are different types and neither converts on its own.");
+}`,
+              output: `what / gives for 7 and 2  : 3
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -3
+
+\`/\` picks its meaning from the types, and 7 and 2 are integers here,
+so this is integer division truncating toward zero: -7 / 2 is -3.
+Rust will not silently mix the two — 7 / 2.0 does not compile, because
+an integer and a float are different types and neither converts on its own.`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("what / gives for 7 and 2  :", 7/2)
+	fmt.Println("integer division, 7 by 2  :", 7/2)
+	fmt.Println("integer division, 1 by 2  :", 1/2)
+	fmt.Println("integer division, -7 by 2 :", -7/2)
+	fmt.Println()
+	fmt.Println("\`/\` on two integers is integer division, truncating toward zero,")
+	fmt.Println("so -7 / 2 is -3. Go is stricter than Java or C++ about mixing:")
+	fmt.Println("an int and a float64 will not divide without an explicit conversion,")
+	fmt.Println("which turns a whole family of silent-wrong-answer bugs into compile errors.")
+}`,
+              output: `what / gives for 7 and 2  : 3
+integer division, 7 by 2  : 3
+integer division, 1 by 2  : 0
+integer division, -7 by 2 : -3
+
+\`/\` on two integers is integer division, truncating toward zero,
+so -7 / 2 is -3. Go is stricter than Java or C++ about mixing:
+an int and a float64 will not divide without an explicit conversion,
+which turns a whole family of silent-wrong-answer bugs into compile errors.`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -184,41 +310,190 @@ print(-7 // 2)`,
       ],
       examples: [
         {
-          id: "overflow-java",
-          title: "Java: silently wrong",
-          lang: "java",
-          code: `public class Main {
-    public static void main(String[] args) {
-        int max = 2147483647;
-        System.out.println("max int      : " + max);
-        System.out.println("max + 1      : " + (max + 1));
+          id: "overflow",
+          title: "One past the top, in seven languages",
+          lang: "python",
+          code: `biggest = 2 ** 31 - 1
+print("the largest 32-bit signed integer :", biggest)
+print("add one to it                     :", biggest + 1)
+print("and keep going                    :", 2 ** 200)
+print()
+print("Python has no fixed-width integer at all. It grows the number as far as")
+print("memory allows, so nothing here overflows and nothing wraps. That is a")
+print("real advantage for competitive programming and a real cost everywhere")
+print("else: arithmetic on huge values is slower, and the bug the other")
+print("languages would have shouted about is silently absent.")`,
+          output: `the largest 32-bit signed integer : 2147483647
+add one to it                     : 2147483648
+and keep going                    : 1606938044258990275541962092341162602522202993782792835301376
 
-        int a = 100000;
-        int b = 100000;
-        System.out.println("a * b as int : " + (a * b));
-        System.out.println("a * b as long: " + ((long) a * b));
+Python has no fixed-width integer at all. It grows the number as far as
+memory allows, so nothing here overflows and nothing wraps. That is a
+real advantage for competitive programming and a real cost everywhere
+else: arithmetic on huge values is slower, and the bug the other
+languages would have shouted about is silently absent.`,
+          explanation:
+            "This is the widest split in the module, and every answer is a different design decision rather than a different amount of care. Java and Go wrap silently and define it, so the wrong answer is at least reproducible. C++ wraps too, but only for unsigned types — signed overflow is *undefined behaviour*, which means the compiler may assume it never happens and optimise accordingly, and that is a worse failure than a wrong number. Rust refuses to guess: a plain `+` panics in a debug build so you find it while testing, and `wrapping_add` and `checked_add` are how you say which you meant. Python has no fixed width at all and simply keeps going. JavaScript and TypeScript have neither — one float type that is exact to 2^53 and rounds silently past it. The lesson underneath all seven is the same: multiply the constraints out before you pick a type.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `const biggest = 2 ** 31 - 1;
+console.log("the largest 32-bit signed integer :", biggest);
+console.log("add one to it                     :", biggest + 1);
+console.log("and past 2^53                     :", 2 ** 53 + 1);
+console.log();
+console.log("JavaScript has one number type, a 64-bit float, so 32 bits is not a");
+console.log("boundary it knows about. It holds whole numbers exactly up to 2^53 and");
+console.log("then starts rounding: 2^53 + 1 comes back as 2^53. Nothing wraps and");
+console.log("nothing throws — the digits just quietly stop being right, which is why");
+console.log("BigInt exists and why any modular arithmetic needs it.");`,
+              output: `the largest 32-bit signed integer : 2147483647
+add one to it                     : 2147483648
+and past 2^53                     : 9007199254740992
+
+JavaScript has one number type, a 64-bit float, so 32 bits is not a
+boundary it knows about. It holds whole numbers exactly up to 2^53 and
+then starts rounding: 2^53 + 1 comes back as 2^53. Nothing wraps and
+nothing throws — the digits just quietly stop being right, which is why
+BigInt exists and why any modular arithmetic needs it.`,
+            },
+            {
+              lang: "typescript",
+              code: `const biggest = 2 ** 31 - 1;
+console.log("the largest 32-bit signed integer :", biggest);
+console.log("add one to it                     :", biggest + 1);
+console.log("and past 2^53                     :", 2 ** 53 + 1);
+console.log();
+console.log("JavaScript has one number type, a 64-bit float, so 32 bits is not a");
+console.log("boundary it knows about. It holds whole numbers exactly up to 2^53 and");
+console.log("then starts rounding: 2^53 + 1 comes back as 2^53. Nothing wraps and");
+console.log("nothing throws — the digits just quietly stop being right, which is why");
+console.log("BigInt exists and why any modular arithmetic needs it.");`,
+              output: `the largest 32-bit signed integer : 2147483647
+add one to it                     : 2147483648
+and past 2^53                     : 9007199254740992
+
+JavaScript has one number type, a 64-bit float, so 32 bits is not a
+boundary it knows about. It holds whole numbers exactly up to 2^53 and
+then starts rounding: 2^53 + 1 comes back as 2^53. Nothing wraps and
+nothing throws — the digits just quietly stop being right, which is why
+BigInt exists and why any modular arithmetic needs it.`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
+    public static void main(String[] args) {
+        int biggest = Integer.MAX_VALUE;
+        System.out.println("the largest 32-bit signed integer : " + biggest);
+        System.out.println("add one to it                     : " + (biggest + 1));
+        System.out.println("as a long instead                 : " + ((long) biggest + 1));
+        System.out.println();
+        System.out.println("An int is exactly 32 bits and adding past the top wraps around to the");
+        System.out.println("bottom — silently, with no error of any kind. Java defines this, so it");
+        System.out.println("is at least predictable. The fix is to notice before it happens and use");
+        System.out.println("a long, which is why every constraint in a problem statement is worth");
+        System.out.println("multiplying out before you choose a type.");
     }
 }`,
-          output: `max int      : 2147483647
-max + 1      : -2147483648
-a * b as int : 1410065408
-a * b as long: 10000000000`,
-          explanation:
-            "100,000 × 100,000 is ten billion. The `int` calculation reports 1,410,065,408 — not an error, not a warning, just a wrong number that every subsequent line will trust. Note where the cast goes in the fix: `(long) a * b` converts `a` first so the multiplication itself happens in 64 bits. Writing `(long) (a * b)` would be useless, because the damage is done inside the brackets before the cast runs.",
-        },
-        {
-          id: "overflow-python",
-          title: "Python: the box grows",
-          lang: "python",
-          code: `a = 100000
-b = 100000
-print(a * b)
+              output: `the largest 32-bit signed integer : 2147483647
+add one to it                     : -2147483648
+as a long instead                 : 2147483648
 
-print(2 ** 200)`,
-          output: `10000000000
-1606938044258990275541962092341162602522202993782792835301376`,
-          explanation:
-            "Python integers have no fixed size — they grow to hold whatever you put in them, limited only by memory. Two raised to the power of 200 is printed exactly. This single behaviour removes an entire class of silent wrong answers, and it is the strongest practical argument for solving problems in Python.",
+An int is exactly 32 bits and adding past the top wraps around to the
+bottom — silently, with no error of any kind. Java defines this, so it
+is at least predictable. The fix is to notice before it happens and use
+a long, which is why every constraint in a problem statement is worth
+multiplying out before you choose a type.`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <cstdint>
+#include <iostream>
+#include <limits>
+
+int main() {
+    int biggest = std::numeric_limits<int>::max();
+    std::cout << "the largest 32-bit signed integer : " << biggest << "\\n";
+    // Signed overflow is undefined behaviour, so this is done on an unsigned
+    // type, where wrapping is what the standard actually promises.
+    unsigned int wrapped = static_cast<unsigned int>(biggest) + 1;
+    std::cout << "add one, as unsigned              : " << wrapped << "\\n";
+    std::cout << "as a 64-bit integer instead       : " << static_cast<int64_t>(biggest) + 1 << "\\n";
+    std::cout << "\\n";
+    std::cout << "C++ is the sharpest edge here. Overflowing a *signed* integer is not\\n";
+    std::cout << "defined to wrap — it is undefined behaviour, which means the compiler is\\n";
+    std::cout << "entitled to assume it never happens and optimise on that basis. Unsigned\\n";
+    std::cout << "types do wrap, and that is guaranteed. Reach for int64_t before you need it.\\n";
+}`,
+              output: `the largest 32-bit signed integer : 2147483647
+add one, as unsigned              : 2147483648
+as a 64-bit integer instead       : 2147483648
+
+C++ is the sharpest edge here. Overflowing a *signed* integer is not
+defined to wrap — it is undefined behaviour, which means the compiler is
+entitled to assume it never happens and optimise on that basis. Unsigned
+types do wrap, and that is guaranteed. Reach for int64_t before you need it.`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    let biggest = i32::MAX;
+    println!("the largest 32-bit signed integer : {}", biggest);
+    // \`biggest + 1\` would not compile past the checker in a release build and
+    // panics in a debug one, so the two outcomes are asked for explicitly.
+    println!("add one, wrapping on purpose      : {}", biggest.wrapping_add(1));
+    println!("add one, checked                  : {:?}", biggest.checked_add(1));
+    println!("as a 64-bit integer instead       : {}", biggest as i64 + 1);
+    println!();
+    println!("Rust makes you say which one you meant. A plain \`biggest + 1\` panics in a");
+    println!("debug build and wraps in a release one, which is deliberate: the panic finds");
+    println!("the bug while you are testing. \`wrapping_add\` and \`checked_add\` are the two");
+    println!("ways to opt in, and \`checked_add\` returning None is the one to reach for");
+    println!("when overflow is a case rather than a mistake.");
+}`,
+              output: `the largest 32-bit signed integer : 2147483647
+add one, wrapping on purpose      : -2147483648
+add one, checked                  : None
+as a 64-bit integer instead       : 2147483648
+
+Rust makes you say which one you meant. A plain \`biggest + 1\` panics in a
+debug build and wraps in a release one, which is deliberate: the panic finds
+the bug while you are testing. \`wrapping_add\` and \`checked_add\` are the two
+ways to opt in, and \`checked_add\` returning None is the one to reach for
+when overflow is a case rather than a mistake.`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"math"
+)
+
+func main() {
+	var biggest int32 = math.MaxInt32
+	fmt.Println("the largest 32-bit signed integer :", biggest)
+	fmt.Println("add one to it                     :", biggest+1)
+	fmt.Println("as a 64-bit integer instead       :", int64(biggest)+1)
+	fmt.Println()
+	fmt.Println("Go wraps, like Java, and defines it. The difference is that Go's plain")
+	fmt.Println("\`int\` is 64 bits on every machine you will run this on, so you have to ask")
+	fmt.Println("for int32 to see the problem at all. That makes overflow rarer here than in")
+	fmt.Println("Java or C++ — and rarer is not never, which is why the constraint in the")
+	fmt.Println("problem statement is still the thing to read first.")
+}`,
+              output: `the largest 32-bit signed integer : 2147483647
+add one to it                     : -2147483648
+as a 64-bit integer instead       : 2147483648
+
+Go wraps, like Java, and defines it. The difference is that Go's plain
+\`int\` is 64 bits on every machine you will run this on, so you have to ask
+for int32 to see the problem at all. That makes overflow rarer here than in
+Java or C++ — and rarer is not never, which is why the constraint in the
+problem statement is still the thing to read first.`,
+            },
+          ],
         },
       ],
       pitfalls: [

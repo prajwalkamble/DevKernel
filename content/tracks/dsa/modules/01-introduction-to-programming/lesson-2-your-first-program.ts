@@ -70,10 +70,14 @@ javac 25.0.3`,
           code: `print("Hello, world!")`,
           output: `Hello, world!`,
           explanation:
-            "One line of output, six ways of asking for it. What differs is not the idea but how much ceremony each language wants before it will let you say anything: Python and JavaScript need one line, Go and Rust need a function for the program to start in, C++ needs that plus an instruction to bring the printing machinery into scope, and Java needs a class to put the function inside. None of that ceremony is doing work — every one of these programs prints the same eleven characters — and it is worth seeing that plainly now, because it is the last time in this track that the differences between the languages will be this large a fraction of the program.",
+            "One line of output, seven ways of asking for it. What differs is not the idea but how much ceremony each language wants before it will let you say anything: Python, JavaScript and TypeScript need one line, Go and Rust need a function for the program to start in, C++ needs that plus an instruction to bring the printing machinery into scope, and Java needs a class to put the function inside. None of that ceremony is doing work — every one of these programs prints the same thirteen characters — and it is worth seeing that plainly now, because it is the last time in this track that the differences between the languages will be this large a fraction of the program.",
           alternates: [
             {
               lang: "javascript",
+              code: `console.log("Hello, world!");`,
+            },
+            {
+              lang: "typescript",
               code: `console.log("Hello, world!");`,
             },
             {
