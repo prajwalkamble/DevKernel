@@ -25,9 +25,9 @@ export const variablesAndValuesLesson: Lesson = {
         "Two operations exist and it is worth separating them in your head from the start. **Declaring** is bringing a variable into existence. **Assigning** is putting a value into it. Python does both at once and never mentions it. Java lets you do them separately, and that difference is the reason the two languages feel so unalike.",
       ],
       examples: [
-        {
+                {
           id: "declare-assign",
-          title: "Declaring and assigning",
+          title: "Declaring, assigning, and the gap between them",
           lang: "java",
           code: `public class Main {
     public static void main(String[] args) {
@@ -40,10 +40,83 @@ export const variablesAndValuesLesson: Lesson = {
         System.out.println(total);
     }
 }`,
-          output: `6
-10`,
+          output: `6\n10`,
           explanation:
-            "`count = count + 1` reads oddly as mathematics and is the line worth pausing on. It is not an equation claiming `count` equals `count` plus one — nothing would satisfy that. `=` means *put the value on the right into the box on the left*, so this reads the current value, adds one, and stores the result back. Once you read `=` as \"becomes\" rather than \"equals\", it stops looking strange.",
+            "Declaring and assigning are two different acts, and most languages let you do them separately even though you will normally write them on one line. Switch through the seven and the differences are exactly where you would expect: Python has no declaration step at all — the first assignment creates the name — while everything else names a type or infers one. Two are worth pausing on. C++ leaves a declared-but-unassigned variable holding whatever was already in that memory, and reading it is undefined behaviour; Rust refuses to compile a read before the assignment, which is the same hazard turned into an error. Go splits the difference by filling every declared variable with a zero value.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `let count;              // declared: the name exists, holding nothing yet
+count = 5;              // assigned: the value 5 goes in
+const total = 10;       // both at once, and \`const\` says it will not be reassigned
+
+count = count + 1;      // read the box, add one, put it back
+console.log(count);
+console.log(total);`,
+            },
+            {
+              lang: "typescript",
+              code: `let count: number;      // declared with a type, holding nothing yet
+count = 5;              // assigned: the value 5 goes in
+const total = 10;       // both at once; the type is inferred as number
+
+count = count + 1;      // read the box, add one, put it back
+console.log(count);
+console.log(total);`,
+            },
+            {
+              lang: "python",
+              code: `# Python has no declaration step at all: the first assignment creates the name.
+count = 5
+total = 10
+
+count = count + 1       # read the box, add one, put it back
+print(count)
+print(total)`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+
+int main() {
+    int count;              // declared: a box exists, holding whatever was there
+    count = 5;              // assigned: the value 5 goes in
+    int total = 10;         // both at once, which is what you normally write
+
+    count = count + 1;      // read the box, add one, put it back
+    std::cout << count << "\\n";
+    std::cout << total << "\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    let mut count: i32;     // declared: Rust will not let it be read until assigned
+    count = 5;              // assigned: the value 5 goes in
+    let total = 10;         // both at once, and immutable unless you say \`mut\`
+
+    count = count + 1;      // read the box, add one, put it back
+    println!("{}", count);
+    println!("{}", total);
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func main() {
+	var count int // declared: a box exists, holding the zero value 0
+	count = 5     // assigned: the value 5 goes in
+	total := 10   // both at once, with the type inferred
+
+	count = count + 1 // read the box, add one, put it back
+	fmt.Println(count)
+	fmt.Println(total)
+}`,
+            },
+          ],
         },
       ],
     },
@@ -57,41 +130,121 @@ export const variablesAndValuesLesson: Lesson = {
       ],
       examples: [
         {
-          id: "python-dynamic",
-          title: "Python: the name does not care what it holds",
+          id: "one-name-three-types",
+          title: "Asking one name to hold three kinds of thing",
           lang: "python",
           code: `value = 42
-print(value, type(value))
+print(value, type(value).__name__)
 
 value = "now I am text"
-print(value, type(value))
+print(value, type(value).__name__)
 
 value = [1, 2, 3]
-print(value, type(value))`,
-          output: `42 <class 'int'>
-now I am text <class 'str'>
-[1, 2, 3] <class 'list'>`,
+print(value, type(value).__name__)`,
+          output: `42 int
+now I am text str
+[1, 2, 3] list`,
           explanation:
-            "One name, three completely different kinds of value, no complaint. This is convenient and occasionally disastrous: if a function is supposed to return a number and returns text under some condition, nothing notices until something tries to do arithmetic on it — possibly a long way from the mistake.",
-        },
-        {
-          id: "java-static",
-          title: "Java: the type is a promise the compiler enforces",
-          lang: "java",
-          code: `public class Main {
+            "One name, asked to hold three different kinds of thing. Python, JavaScript and TypeScript run it and report a different type each time; Java, C++, Rust and Go refuse to build at all, each with a message naming the line. That is what \"statically typed\" means in practice — the type belongs to the *name*, fixed when it is declared, and the compiler checks every assignment against it before the program exists. Dynamically typed means the type belongs to the *value*, and the name is only a label that can be moved. TypeScript is the odd one out and worth switching to: the file genuinely does not type-check, and `tsc` says `Type 'string' is not assignable to type 'number'` — but it runs here regardless, because stripping the annotations and checking them are separate steps and only one of them happened.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `let value = 42;
+console.log(value, typeof value);
+
+value = "now I am text";
+console.log(value, typeof value);
+
+value = [1, 2, 3];
+console.log(value, typeof value);`,
+              output: `42 number
+now I am text string
+[ 1, 2, 3 ] object`,
+            },
+            {
+              lang: "typescript",
+              code: `// This file does not type-check. \`tsc\` rejects both reassignments — \`value\` was
+// inferred as a number and a string is not one — so an editor flags them before
+// anything is run. It still executes here, because a type-stripping runner like
+// the one a dev server uses removes the annotations without checking them.
+let value = 42;
+console.log(value, typeof value);
+
+value = "now I am text";
+console.log(value, typeof value);
+
+value = [1, 2, 3];
+console.log(value, typeof value);`,
+              output: `42 number
+now I am text string
+[ 1, 2, 3 ] object`,
+            },
+            {
+              lang: "java",
+              code: `public class Main {
     public static void main(String[] args) {
         int value = 42;
         value = "now I am text";
         System.out.println(value);
     }
 }`,
-          output: `Main.java:4: error: incompatible types: String cannot be converted to int
+              output: `Main.java:4: error: incompatible types: String cannot be converted to int
         value = "now I am text";
                 ^
 1 error
 error: compilation failed`,
-          explanation:
-            "Refused, before the program ran. In exchange for having to write `int`, you get a guarantee that this box holds a whole number for its entire life — so every later line that does arithmetic on it is safe by construction. That is the trade in one screen: Python trusts you and finds out late, Java checks you and finds out early.",
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+
+int main() {
+    int value = 42;
+    value = "now I am text";
+    std::cout << value << "\\n";
+}`,
+              output: `main.cpp: In function ‘int main()’:
+main.cpp:6:13: error: invalid conversion from ‘const char*’ to ‘int’ [-fpermissive]
+    6 |     value = "now I am text";
+      |             ^~~~~~~~~~~~~~~
+      |             |
+      |             const char*`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    let mut value = 42;
+    value = "now I am text";
+    println!("{}", value);
+}`,
+              output: `error[E0308]: mismatched types
+ --> main.rs:3:13
+  |
+2 |     let mut value = 42;
+  |                     -- expected due to this value
+3 |     value = "now I am text";
+  |             ^^^^^^^^^^^^^^^ expected integer, found \`&str\`
+
+error: aborting due to 1 previous error
+
+For more information about this error, try \`rustc --explain E0308\`.`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func main() {
+	value := 42
+	value = "now I am text"
+	fmt.Println(value)
+}`,
+              output: `# command-line-arguments
+./main.go:7:10: cannot use "now I am text" (untyped string constant) as int value in assignment`,
+            },
+          ],
         },
       ],
       pitfalls: [
