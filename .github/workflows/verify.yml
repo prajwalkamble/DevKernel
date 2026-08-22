@@ -38,7 +38,23 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      # The runner image already carries python3, go, g++, java and rustc, which
-      # is every toolchain `verify:code` reaches for.
+      # Pinned, and not for tidiness: a recorded output is only reproducible on
+      # the toolchain it was recorded against. The runner's default JDK printed
+      # `1.15292150460684698E18` where every lesson says `1.152921504606847E18`,
+      # because Double.toString switched to the shortest round-tripping decimal
+      # in JDK 19. These are the versions the outputs were taken from.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      # nasm is the one the image does not carry at all, and a missing assembler
+      # is indistinguishable from a program that printed nothing.
+      - run: sudo apt-get update && sudo apt-get install -y nasm
       - run: npm ci
       - run: npm run verify:code
