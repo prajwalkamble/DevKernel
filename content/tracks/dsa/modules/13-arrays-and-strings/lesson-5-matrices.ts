@@ -888,6 +888,205 @@ read as a 3x4 matrix, index = r * COLS + c:
 divide and remainder invert the multiply and add — that is all a 2D index is`,
           explanation:
             "Index 3 and index 4 are the interesting pair: consecutive in the flat array, and on different rows in the matrix. **The divisor is always the number of columns**, never the number of rows, and getting that backwards is the single most common bug in this conversion — it produces plausible-looking output on a square matrix and garbage on a rectangular one, which is exactly the wrong way round for catching it early. Test flattening code on a non-square grid.",
+          alternates: [
+            {
+              lang: "python",
+              code: `ROWS, COLS = 3, 4
+flat = [10 + i for i in range(ROWS * COLS)]
+
+print("one flat array: " + str(flat))
+print()
+print(f"read as a {ROWS}x{COLS} matrix, index = r * COLS + c:")
+for r in range(ROWS):
+    line = "   "
+    for c in range(COLS):
+        line += f"{flat[r * COLS + c]:4d}"
+    print(line)
+
+print()
+print(f"{'index':>8} {'row':>6} {'col':>6} {'value':>8}")
+print("   " + "-" * 29)
+for i in (0, 3, 4, 7, 11):
+    r, c = divmod(i, COLS)
+    print(f"{i:8d} {r:6d} {c:6d} {flat[i]:8d}")
+
+print()
+print("divide and remainder invert the multiply and add — that is all a 2D index is")`,
+            },
+            {
+              lang: "javascript",
+              code: `const ROWS = 3;
+const COLS = 4;
+const flat = Array.from({ length: ROWS * COLS }, (_, i) => 10 + i);
+
+const right = (s, w) => String(s).padStart(w);
+
+console.log("one flat array: [" + flat.join(", ") + "]");
+console.log();
+console.log(\`read as a \${ROWS}x\${COLS} matrix, index = r * COLS + c:\`);
+for (let r = 0; r < ROWS; r++) {
+  let line = "   ";
+  for (let c = 0; c < COLS; c++) line += right(flat[r * COLS + c], 4);
+  console.log(line);
+}
+
+console.log();
+console.log(\`\${right("index", 8)} \${right("row", 6)} \${right("col", 6)} \${right("value", 8)}\`);
+console.log("   " + "-".repeat(29));
+for (const i of [0, 3, 4, 7, 11]) {
+  const r = Math.floor(i / COLS);
+  const c = i % COLS;
+  console.log(\`\${right(i, 8)} \${right(r, 6)} \${right(c, 6)} \${right(flat[i], 8)}\`);
+}
+
+console.log();
+console.log("divide and remainder invert the multiply and add — that is all a 2D index is");`,
+            },
+            {
+              lang: "typescript",
+              code: `const ROWS = 3;
+const COLS = 4;
+const flat: number[] = Array.from({ length: ROWS * COLS }, (_, i: number) => 10 + i);
+
+const right = (s: string | number, w: number): string => String(s).padStart(w);
+
+console.log("one flat array: [" + flat.join(", ") + "]");
+console.log();
+console.log(\`read as a \${ROWS}x\${COLS} matrix, index = r * COLS + c:\`);
+for (let r = 0; r < ROWS; r++) {
+  let line = "   ";
+  for (let c = 0; c < COLS; c++) line += right(flat[r * COLS + c], 4);
+  console.log(line);
+}
+
+console.log();
+console.log(\`\${right("index", 8)} \${right("row", 6)} \${right("col", 6)} \${right("value", 8)}\`);
+console.log("   " + "-".repeat(29));
+for (const i of [0, 3, 4, 7, 11]) {
+  const r = Math.floor(i / COLS);
+  const c = i % COLS;
+  console.log(\`\${right(i, 8)} \${right(r, 6)} \${right(c, 6)} \${right(flat[i], 8)}\`);
+}
+
+console.log();
+console.log("divide and remainder invert the multiply and add — that is all a 2D index is");`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
+int main() {
+    const int ROWS = 3, COLS = 4;
+    std::vector<int> flat(ROWS * COLS);
+    for (size_t i = 0; i < flat.size(); ++i) flat[i] = 10 + static_cast<int>(i);
+
+    std::string joined;
+    for (size_t i = 0; i < flat.size(); ++i) {
+        if (i) joined += ", ";
+        joined += std::to_string(flat[i]);
+    }
+    std::cout << "one flat array: [" << joined << "]\\n\\n";
+    std::cout << "read as a " << ROWS << "x" << COLS << " matrix, index = r * COLS + c:\\n";
+    for (int r = 0; r < ROWS; ++r) {
+        std::cout << "   ";
+        for (int c = 0; c < COLS; ++c) std::cout << std::setw(4) << flat[r * COLS + c];
+        std::cout << '\\n';
+    }
+
+    std::cout << '\\n';
+    std::cout << std::right << std::setw(8) << "index" << ' ' << std::setw(6) << "row"
+              << ' ' << std::setw(6) << "col" << ' ' << std::setw(8) << "value" << '\\n';
+    std::cout << "   " << std::string(29, '-') << '\\n';
+    for (int i : {0, 3, 4, 7, 11}) {
+        int r = i / COLS, c = i % COLS;
+        std::cout << std::setw(8) << i << ' ' << std::setw(6) << r << ' '
+                  << std::setw(6) << c << ' ' << std::setw(8) << flat[i] << '\\n';
+    }
+
+    std::cout << '\\n';
+    std::cout << "divide and remainder invert the multiply and add — that is all a 2D index is\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    const ROWS: usize = 3;
+    const COLS: usize = 4;
+    let flat: Vec<i32> = (0..ROWS * COLS).map(|i| 10 + i as i32).collect();
+
+    let joined: Vec<String> = flat.iter().map(|v| v.to_string()).collect();
+    println!("one flat array: [{}]", joined.join(", "));
+    println!();
+    println!("read as a {}x{} matrix, index = r * COLS + c:", ROWS, COLS);
+    for r in 0..ROWS {
+        let mut line = String::from("   ");
+        for c in 0..COLS {
+            line.push_str(&format!("{:4}", flat[r * COLS + c]));
+        }
+        println!("{}", line);
+    }
+
+    println!();
+    println!("{:>8} {:>6} {:>6} {:>8}", "index", "row", "col", "value");
+    println!("   {}", "-".repeat(29));
+    for i in [0usize, 3, 4, 7, 11] {
+        let (r, c) = (i / COLS, i % COLS);
+        println!("{:8} {:6} {:6} {:8}", i, r, c, flat[i]);
+    }
+
+    println!();
+    println!("divide and remainder invert the multiply and add — that is all a 2D index is");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	const ROWS, COLS = 3, 4
+	flat := make([]int, ROWS*COLS)
+	for i := range flat {
+		flat[i] = 10 + i
+	}
+
+	parts := make([]string, len(flat))
+	for i, v := range flat {
+		parts[i] = strconv.Itoa(v)
+	}
+	fmt.Println("one flat array: [" + strings.Join(parts, ", ") + "]")
+	fmt.Println()
+	fmt.Printf("read as a %dx%d matrix, index = r * COLS + c:\\n", ROWS, COLS)
+	for r := 0; r < ROWS; r++ {
+		var line strings.Builder
+		line.WriteString("   ")
+		for c := 0; c < COLS; c++ {
+			fmt.Fprintf(&line, "%4d", flat[r*COLS+c])
+		}
+		fmt.Println(line.String())
+	}
+
+	fmt.Println()
+	fmt.Printf("%8s %6s %6s %8s\\n", "index", "row", "col", "value")
+	fmt.Println("   " + strings.Repeat("-", 29))
+	for _, i := range []int{0, 3, 4, 7, 11} {
+		r, c := i/COLS, i%COLS
+		fmt.Printf("%8d %6d %6d %8d\\n", i, r, c, flat[i])
+	}
+
+	fmt.Println()
+	fmt.Println("divide and remainder invert the multiply and add — that is all a 2D index is")
+}`,
+            },
+          ],
         },
       ],
     },

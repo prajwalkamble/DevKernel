@@ -684,6 +684,217 @@ public class Main {
 rotation is the same trick with one cut instead of many`,
           explanation:
             "The loop condition is `i <= a.length` rather than `<`, which is deliberate: the final word has no space after it, so the loop needs one extra iteration to flush it. That off-by-one *in the other direction* — running one past the end on purpose, guarded by the `i == a.length` check before the array access — is a small idiom worth recognising, because the alternative is duplicating the reversal call after the loop. Note that this version assumes single spaces; the harder variant that collapses runs of spaces is the read-and-write pointer from the previous lesson layered on top.",
+          alternates: [
+            {
+              lang: "python",
+              code: `def reverse(a, lo, hi):
+    while lo < hi:
+        a[lo], a[hi] = a[hi], a[lo]
+        lo += 1
+        hi -= 1
+
+
+def reverse_words(s):
+    a = list(s)
+    reverse(a, 0, len(a) - 1)
+    print('  after reversing everything : "' + "".join(a) + '"')
+    start = 0
+    for i in range(len(a) + 1):
+        if i == len(a) or a[i] == ' ':
+            reverse(a, start, i - 1)
+            start = i + 1
+    return "".join(a)
+
+
+s = "the sky is blue"
+print('input                      : "' + s + '"')
+out = reverse_words(s)
+print('  after reversing each word  : "' + out + '"')
+print()
+print("rotation is the same trick with one cut instead of many")`,
+            },
+            {
+              lang: "javascript",
+              code: `function reverse(a, lo, hi) {
+  while (lo < hi) {
+    const t = a[lo];
+    a[lo] = a[hi];
+    a[hi] = t;
+    lo++;
+    hi--;
+  }
+}
+
+function reverseWords(s) {
+  const a = [...s];
+  reverse(a, 0, a.length - 1);
+  console.log('  after reversing everything : "' + a.join("") + '"');
+  let start = 0;
+  for (let i = 0; i <= a.length; i++) {
+    if (i === a.length || a[i] === " ") {
+      reverse(a, start, i - 1);
+      start = i + 1;
+    }
+  }
+  return a.join("");
+}
+
+const s = "the sky is blue";
+console.log('input                      : "' + s + '"');
+const out = reverseWords(s);
+console.log('  after reversing each word  : "' + out + '"');
+console.log();
+console.log("rotation is the same trick with one cut instead of many");`,
+            },
+            {
+              lang: "typescript",
+              code: `function reverse(a: string[], lo: number, hi: number): void {
+  while (lo < hi) {
+    const t = a[lo];
+    a[lo] = a[hi];
+    a[hi] = t;
+    lo++;
+    hi--;
+  }
+}
+
+function reverseWords(s: string): string {
+  const a = [...s];
+  reverse(a, 0, a.length - 1);
+  console.log('  after reversing everything : "' + a.join("") + '"');
+  let start = 0;
+  for (let i = 0; i <= a.length; i++) {
+    if (i === a.length || a[i] === " ") {
+      reverse(a, start, i - 1);
+      start = i + 1;
+    }
+  }
+  return a.join("");
+}
+
+const s = "the sky is blue";
+console.log('input                      : "' + s + '"');
+const out = reverseWords(s);
+console.log('  after reversing each word  : "' + out + '"');
+console.log();
+console.log("rotation is the same trick with one cut instead of many");`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+
+static void reverse(std::string& a, int lo, int hi) {
+    while (lo < hi) {
+        char t = a[lo];
+        a[lo] = a[hi];
+        a[hi] = t;
+        lo++;
+        hi--;
+    }
+}
+
+static std::string reverse_words(std::string s) {
+    int n = static_cast<int>(s.size());
+    reverse(s, 0, n - 1);
+    std::cout << "  after reversing everything : \\"" << s << "\\"\\n";
+    int start = 0;
+    for (int i = 0; i <= n; i++) {
+        if (i == n || s[i] == ' ') {
+            reverse(s, start, i - 1);
+            start = i + 1;
+        }
+    }
+    return s;
+}
+
+int main() {
+    std::string s = "the sky is blue";
+    std::cout << "input                      : \\"" << s << "\\"\\n";
+    // The call has to finish before the label is streamed: \`<<\` evaluates its
+    // operands left to right, so writing them in one statement would put this
+    // line above the trace reverse_words prints itself.
+    std::string out = reverse_words(s);
+    std::cout << "  after reversing each word  : \\"" << out << "\\"\\n";
+    std::cout << '\\n';
+    std::cout << "rotation is the same trick with one cut instead of many\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `fn reverse(a: &mut [char], mut lo: usize, hi: isize) {
+    let mut hi = hi;
+    while (lo as isize) < hi {
+        a.swap(lo, hi as usize);
+        lo += 1;
+        hi -= 1;
+    }
+}
+
+fn reverse_words(s: &str) -> String {
+    // A Vec<char>, not the &str: a Rust string is UTF-8 bytes and cannot be
+    // indexed or swapped in place by character position.
+    let mut a: Vec<char> = s.chars().collect();
+    let n = a.len();
+    reverse(&mut a, 0, n as isize - 1);
+    println!("  after reversing everything : \\"{}\\"", a.iter().collect::<String>());
+    let mut start = 0usize;
+    for i in 0..=n {
+        if i == n || a[i] == ' ' {
+            reverse(&mut a, start, i as isize - 1);
+            start = i + 1;
+        }
+    }
+    a.into_iter().collect()
+}
+
+fn main() {
+    let s = "the sky is blue";
+    println!("input                      : \\"{}\\"", s);
+    let out = reverse_words(s);
+    println!("  after reversing each word  : \\"{}\\"", out);
+    println!();
+    println!("rotation is the same trick with one cut instead of many");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func reverse(a []byte, lo, hi int) {
+	for lo < hi {
+		a[lo], a[hi] = a[hi], a[lo]
+		lo++
+		hi--
+	}
+}
+
+func reverseWords(s string) string {
+	a := []byte(s)
+	reverse(a, 0, len(a)-1)
+	fmt.Printf("  after reversing everything : %q\\n", string(a))
+	start := 0
+	for i := 0; i <= len(a); i++ {
+		if i == len(a) || a[i] == ' ' {
+			reverse(a, start, i-1)
+			start = i + 1
+		}
+	}
+	return string(a)
+}
+
+func main() {
+	s := "the sky is blue"
+	fmt.Printf("input                      : %q\\n", s)
+	out := reverseWords(s)
+	fmt.Printf("  after reversing each word  : %q\\n", out)
+	fmt.Println()
+	fmt.Println("rotation is the same trick with one cut instead of many")
+}`,
+            },
+          ],
         },
       ],
     },

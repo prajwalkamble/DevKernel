@@ -770,6 +770,468 @@ swap-end  k=5  [4, 2, 2, 5, 1]  writes=3
   swap-end writes = 1`,
           explanation:
             "**Same k, different arrays** — both answers are correct for a problem that says order does not matter, and only one is correct for a problem that says it does. The second measurement is the reason to know the trick: 99,999 writes against 1, for the same result. Both loops are still O(n), because both still *read* every element; what changed is the number of writes, which is a constant factor and occasionally a large one. In the stable version the `a[write++] = a[read]` when `write == read` is a genuine write of an element onto itself, and guarding it with `if (write != read)` is a legitimate small saving.",
+          alternates: [
+            {
+              lang: "python",
+              code: `writes = 0
+
+
+def compact_stable(a, drop):
+    """Stable: survivors keep their relative order."""
+    global writes
+    write = 0
+    for read in range(len(a)):
+        if a[read] != drop:
+            a[write] = a[read]
+            write += 1
+            writes += 1
+    return write
+
+
+def compact_swap_end(a, drop):
+    """Unstable: pull a survivor in from the end instead of shifting."""
+    global writes
+    i, n = 0, len(a)
+    while i < n:
+        if a[i] == drop:
+            a[i] = a[n - 1]
+            writes += 1
+            n -= 1
+        else:
+            i += 1
+    return n
+
+
+base = [3, 2, 2, 3, 1, 3, 5, 4]
+
+a = base[:]
+writes = 0
+k1 = compact_stable(a, 3)
+print(f"stable    k={k1}  {a[:k1]}  writes={writes}")
+
+b = base[:]
+writes = 0
+k2 = compact_swap_end(b, 3)
+print(f"swap-end  k={k2}  {b[:k2]}  writes={writes}")
+
+# now a case where almost nothing is removed
+big = [1] * 100_000
+big[0] = 3
+
+c = big[:]
+writes = 0
+compact_stable(c, 3)
+stable_writes = writes
+
+d = big[:]
+writes = 0
+compact_swap_end(d, 3)
+swap_writes = writes
+
+print()
+print("100,000 elements, exactly one of them removed:")
+print(f"  stable   writes = {stable_writes:,}")
+print(f"  swap-end writes = {swap_writes:,}")`,
+            },
+            {
+              lang: "javascript",
+              code: `let writes = 0;
+
+/** Stable: survivors keep their relative order. */
+function compactStable(a, drop) {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (a[read] !== drop) {
+      a[write++] = a[read];
+      writes++;
+    }
+  }
+  return write;
+}
+
+/** Unstable: pull a survivor in from the end instead of shifting. */
+function compactSwapEnd(a, drop) {
+  let i = 0;
+  let n = a.length;
+  while (i < n) {
+    if (a[i] === drop) {
+      a[i] = a[n - 1];
+      writes++;
+      n--;
+    } else {
+      i++;
+    }
+  }
+  return n;
+}
+
+const show = (a) => \`[\${a.join(", ")}]\`;
+const group = (n) => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+
+const base = [3, 2, 2, 3, 1, 3, 5, 4];
+
+const a = base.slice();
+writes = 0;
+const k1 = compactStable(a, 3);
+console.log(\`stable    k=\${k1}  \${show(a.slice(0, k1))}  writes=\${writes}\`);
+
+const b = base.slice();
+writes = 0;
+const k2 = compactSwapEnd(b, 3);
+console.log(\`swap-end  k=\${k2}  \${show(b.slice(0, k2))}  writes=\${writes}\`);
+
+// now a case where almost nothing is removed
+const big = new Array(100000).fill(1);
+big[0] = 3;
+
+const c = big.slice();
+writes = 0;
+compactStable(c, 3);
+const stableWrites = writes;
+
+const d = big.slice();
+writes = 0;
+compactSwapEnd(d, 3);
+const swapWrites = writes;
+
+console.log();
+console.log("100,000 elements, exactly one of them removed:");
+console.log(\`  stable   writes = \${group(stableWrites)}\`);
+console.log(\`  swap-end writes = \${group(swapWrites)}\`);`,
+            },
+            {
+              lang: "typescript",
+              code: `let writes = 0;
+
+/** Stable: survivors keep their relative order. */
+function compactStable(a: number[], drop: number): number {
+  let write = 0;
+  for (let read = 0; read < a.length; read++) {
+    if (a[read] !== drop) {
+      a[write++] = a[read];
+      writes++;
+    }
+  }
+  return write;
+}
+
+/** Unstable: pull a survivor in from the end instead of shifting. */
+function compactSwapEnd(a: number[], drop: number): number {
+  let i = 0;
+  let n = a.length;
+  while (i < n) {
+    if (a[i] === drop) {
+      a[i] = a[n - 1];
+      writes++;
+      n--;
+    } else {
+      i++;
+    }
+  }
+  return n;
+}
+
+const show = (a: number[]): string => \`[\${a.join(", ")}]\`;
+const group = (n: number): string => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+
+const base = [3, 2, 2, 3, 1, 3, 5, 4];
+
+const a = base.slice();
+writes = 0;
+const k1 = compactStable(a, 3);
+console.log(\`stable    k=\${k1}  \${show(a.slice(0, k1))}  writes=\${writes}\`);
+
+const b = base.slice();
+writes = 0;
+const k2 = compactSwapEnd(b, 3);
+console.log(\`swap-end  k=\${k2}  \${show(b.slice(0, k2))}  writes=\${writes}\`);
+
+// now a case where almost nothing is removed
+const big = new Array(100000).fill(1);
+big[0] = 3;
+
+const c = big.slice();
+writes = 0;
+compactStable(c, 3);
+const stableWrites = writes;
+
+const d = big.slice();
+writes = 0;
+compactSwapEnd(d, 3);
+const swapWrites = writes;
+
+console.log();
+console.log("100,000 elements, exactly one of them removed:");
+console.log(\`  stable   writes = \${group(stableWrites)}\`);
+console.log(\`  swap-end writes = \${group(swapWrites)}\`);`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+#include <vector>
+
+static long long writes = 0;
+
+// Stable: survivors keep their relative order.
+static size_t compact_stable(std::vector<int>& a, int drop) {
+    size_t write = 0;
+    for (size_t read = 0; read < a.size(); ++read) {
+        if (a[read] != drop) {
+            a[write++] = a[read];
+            writes++;
+        }
+    }
+    return write;
+}
+
+// Unstable: pull a survivor in from the end instead of shifting.
+static size_t compact_swap_end(std::vector<int>& a, int drop) {
+    size_t i = 0, n = a.size();
+    while (i < n) {
+        if (a[i] == drop) {
+            a[i] = a[n - 1];
+            writes++;
+            n--;
+        } else {
+            i++;
+        }
+    }
+    return n;
+}
+
+static std::string show(const std::vector<int>& a, size_t k) {
+    std::string out = "[";
+    for (size_t i = 0; i < k; ++i) {
+        if (i) out += ", ";
+        out += std::to_string(a[i]);
+    }
+    return out + "]";
+}
+
+static std::string group(long long n) {
+    std::string s = std::to_string(n), out;
+    for (size_t i = 0; i < s.size(); ++i) {
+        if (i > 0 && (s.size() - i) % 3 == 0) out += ',';
+        out += s[i];
+    }
+    return out;
+}
+
+int main() {
+    const std::vector<int> base = {3, 2, 2, 3, 1, 3, 5, 4};
+
+    std::vector<int> a = base;
+    writes = 0;
+    size_t k1 = compact_stable(a, 3);
+    std::cout << "stable    k=" << k1 << "  " << show(a, k1) << "  writes=" << writes << '\\n';
+
+    std::vector<int> b = base;
+    writes = 0;
+    size_t k2 = compact_swap_end(b, 3);
+    std::cout << "swap-end  k=" << k2 << "  " << show(b, k2) << "  writes=" << writes << '\\n';
+
+    // now a case where almost nothing is removed
+    std::vector<int> big(100000, 1);
+    big[0] = 3;
+
+    std::vector<int> c = big;
+    writes = 0;
+    compact_stable(c, 3);
+    long long stable_writes = writes;
+
+    std::vector<int> d = big;
+    writes = 0;
+    compact_swap_end(d, 3);
+    long long swap_writes = writes;
+
+    std::cout << '\\n';
+    std::cout << "100,000 elements, exactly one of them removed:\\n";
+    std::cout << "  stable   writes = " << group(stable_writes) << '\\n';
+    std::cout << "  swap-end writes = " << group(swap_writes) << '\\n';
+}`,
+            },
+            {
+              lang: "rust",
+              code: `/// Stable: survivors keep their relative order.
+///
+/// The counter travels as an argument rather than living in a global, which is
+/// what the other languages use: a mutable static is \`unsafe\` to touch in Rust,
+/// and this is the same information passed explicitly.
+fn compact_stable(a: &mut [i32], drop: i32, writes: &mut i64) -> usize {
+    let mut write = 0;
+    for read in 0..a.len() {
+        if a[read] != drop {
+            a[write] = a[read];
+            write += 1;
+            *writes += 1;
+        }
+    }
+    write
+}
+
+/// Unstable: pull a survivor in from the end instead of shifting.
+fn compact_swap_end(a: &mut [i32], drop: i32, writes: &mut i64) -> usize {
+    let (mut i, mut n) = (0usize, a.len());
+    while i < n {
+        if a[i] == drop {
+            a[i] = a[n - 1];
+            *writes += 1;
+            n -= 1;
+        } else {
+            i += 1;
+        }
+    }
+    n
+}
+
+fn show(a: &[i32]) -> String {
+    let parts: Vec<String> = a.iter().map(|v| v.to_string()).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+fn group(n: i64) -> String {
+    let s = n.to_string();
+    let mut out = String::new();
+    for (i, c) in s.chars().enumerate() {
+        if i > 0 && (s.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
+fn main() {
+    let base = [3, 2, 2, 3, 1, 3, 5, 4];
+
+    let mut a = base;
+    let mut writes = 0i64;
+    let k1 = compact_stable(&mut a, 3, &mut writes);
+    println!("stable    k={}  {}  writes={}", k1, show(&a[..k1]), writes);
+
+    let mut b = base;
+    writes = 0;
+    let k2 = compact_swap_end(&mut b, 3, &mut writes);
+    println!("swap-end  k={}  {}  writes={}", k2, show(&b[..k2]), writes);
+
+    // now a case where almost nothing is removed
+    let mut big = vec![1i32; 100_000];
+    big[0] = 3;
+
+    let mut c = big.clone();
+    writes = 0;
+    compact_stable(&mut c, 3, &mut writes);
+    let stable_writes = writes;
+
+    let mut d = big.clone();
+    writes = 0;
+    compact_swap_end(&mut d, 3, &mut writes);
+    let swap_writes = writes;
+
+    println!();
+    println!("100,000 elements, exactly one of them removed:");
+    println!("  stable   writes = {}", group(stable_writes));
+    println!("  swap-end writes = {}", group(swap_writes));
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+var writes int64
+
+// compactStable is stable: survivors keep their relative order.
+func compactStable(a []int, drop int) int {
+	write := 0
+	for read := 0; read < len(a); read++ {
+		if a[read] != drop {
+			a[write] = a[read]
+			write++
+			writes++
+		}
+	}
+	return write
+}
+
+// compactSwapEnd is unstable: it pulls a survivor in from the end instead of shifting.
+func compactSwapEnd(a []int, drop int) int {
+	i, n := 0, len(a)
+	for i < n {
+		if a[i] == drop {
+			a[i] = a[n-1]
+			writes++
+			n--
+		} else {
+			i++
+		}
+	}
+	return n
+}
+
+func show(a []int) string {
+	parts := make([]string, len(a))
+	for i, v := range a {
+		parts[i] = strconv.Itoa(v)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+func group(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	var out strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			out.WriteByte(',')
+		}
+		out.WriteRune(c)
+	}
+	return out.String()
+}
+
+func main() {
+	base := []int{3, 2, 2, 3, 1, 3, 5, 4}
+
+	a := append([]int(nil), base...)
+	writes = 0
+	k1 := compactStable(a, 3)
+	fmt.Printf("stable    k=%d  %s  writes=%d\\n", k1, show(a[:k1]), writes)
+
+	b := append([]int(nil), base...)
+	writes = 0
+	k2 := compactSwapEnd(b, 3)
+	fmt.Printf("swap-end  k=%d  %s  writes=%d\\n", k2, show(b[:k2]), writes)
+
+	// now a case where almost nothing is removed
+	big := make([]int, 100000)
+	for i := range big {
+		big[i] = 1
+	}
+	big[0] = 3
+
+	c := append([]int(nil), big...)
+	writes = 0
+	compactStable(c, 3)
+	stableWrites := writes
+
+	d := append([]int(nil), big...)
+	writes = 0
+	compactSwapEnd(d, 3)
+	swapWrites := writes
+
+	fmt.Println()
+	fmt.Println("100,000 elements, exactly one of them removed:")
+	fmt.Printf("  stable   writes = %s\\n", group(stableWrites))
+	fmt.Printf("  swap-end writes = %s\\n", group(swapWrites))
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

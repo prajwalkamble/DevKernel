@@ -926,6 +926,235 @@ n = 4
 one rule: go straight until blocked, then turn right`,
           explanation:
             "Two details carry most of the weight. **The delta arrays are ordered so that a right turn is `+1 mod 4`** — that ordering is a choice you make once and then rely on, and getting it wrong produces a spiral that unwinds the wrong way. And `m[nr][nc] != 0` uses the array's own zero-initialisation as the visited marker, which works here because the values start at 1; when 0 is a legal value you need a real visited array, and that is precisely the situation you meet in the grid-traversal problems later. The bounds check must come *before* the array access, or the first step off the edge throws — `||` short-circuits, which is what makes that one line safe.",
+          alternates: [
+            {
+              lang: "python",
+              code: `# right, down, left, up — turning right is (d + 1) % 4
+DR = (0, 1, 0, -1)
+DC = (1, 0, -1, 0)
+
+
+def generate(n):
+    m = [[0] * n for _ in range(n)]
+    r = c = d = 0
+    for v in range(1, n * n + 1):
+        m[r][c] = v
+        nr, nc = r + DR[d], c + DC[d]
+        if nr < 0 or nr >= n or nc < 0 or nc >= n or m[nr][nc] != 0:
+            d = (d + 1) % 4                          # blocked: turn right
+            nr, nc = r + DR[d], c + DC[d]
+        r, c = nr, nc
+    return m
+
+
+for n in (1, 3, 4):
+    print(f"n = {n}")
+    for row in generate(n):
+        print("  " + "".join(f"{v:4d}" for v in row))
+
+print()
+print("one rule: go straight until blocked, then turn right")`,
+            },
+            {
+              lang: "javascript",
+              code: `// right, down, left, up — turning right is (d + 1) % 4
+const DR = [0, 1, 0, -1];
+const DC = [1, 0, -1, 0];
+
+function generate(n) {
+  const m = Array.from({ length: n }, () => new Array(n).fill(0));
+  let r = 0;
+  let c = 0;
+  let d = 0;
+  for (let v = 1; v <= n * n; v++) {
+    m[r][c] = v;
+    let nr = r + DR[d];
+    let nc = c + DC[d];
+    if (nr < 0 || nr >= n || nc < 0 || nc >= n || m[nr][nc] !== 0) {
+      d = (d + 1) % 4;                     // blocked: turn right
+      nr = r + DR[d];
+      nc = c + DC[d];
+    }
+    r = nr;
+    c = nc;
+  }
+  return m;
+}
+
+for (const n of [1, 3, 4]) {
+  console.log(\`n = \${n}\`);
+  for (const row of generate(n)) {
+    console.log("  " + row.map((v) => String(v).padStart(4)).join(""));
+  }
+}
+
+console.log();
+console.log("one rule: go straight until blocked, then turn right");`,
+            },
+            {
+              lang: "typescript",
+              code: `// right, down, left, up — turning right is (d + 1) % 4
+const DR = [0, 1, 0, -1];
+const DC = [1, 0, -1, 0];
+
+function generate(n: number): number[][] {
+  const m: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+  let r = 0;
+  let c = 0;
+  let d = 0;
+  for (let v = 1; v <= n * n; v++) {
+    m[r][c] = v;
+    let nr = r + DR[d];
+    let nc = c + DC[d];
+    if (nr < 0 || nr >= n || nc < 0 || nc >= n || m[nr][nc] !== 0) {
+      d = (d + 1) % 4;                     // blocked: turn right
+      nr = r + DR[d];
+      nc = c + DC[d];
+    }
+    r = nr;
+    c = nc;
+  }
+  return m;
+}
+
+for (const n of [1, 3, 4]) {
+  console.log(\`n = \${n}\`);
+  for (const row of generate(n)) {
+    console.log("  " + row.map((v: number) => String(v).padStart(4)).join(""));
+  }
+}
+
+console.log();
+console.log("one rule: go straight until blocked, then turn right");`,
+            },
+            {
+              lang: "cpp",
+              code: `#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <vector>
+
+// right, down, left, up — turning right is (d + 1) % 4
+static const int DR[] = {0, 1, 0, -1};
+static const int DC[] = {1, 0, -1, 0};
+
+static std::vector<std::vector<int>> generate(int n) {
+    std::vector<std::vector<int>> m(n, std::vector<int>(n, 0));
+    int r = 0, c = 0, d = 0;
+    for (int v = 1; v <= n * n; ++v) {
+        m[r][c] = v;
+        int nr = r + DR[d], nc = c + DC[d];
+        if (nr < 0 || nr >= n || nc < 0 || nc >= n || m[nr][nc] != 0) {
+            d = (d + 1) % 4;                     // blocked: turn right
+            nr = r + DR[d];
+            nc = c + DC[d];
+        }
+        r = nr;
+        c = nc;
+    }
+    return m;
+}
+
+int main() {
+    for (int n : {1, 3, 4}) {
+        std::cout << "n = " << n << '\\n';
+        for (const auto& row : generate(n)) {
+            std::ostringstream line;
+            line << "  ";
+            for (int v : row) line << std::setw(4) << v;
+            std::cout << line.str() << '\\n';
+        }
+    }
+    std::cout << '\\n';
+    std::cout << "one rule: go straight until blocked, then turn right\\n";
+}`,
+            },
+            {
+              lang: "rust",
+              code: `// right, down, left, up — turning right is (d + 1) % 4
+const DR: [i32; 4] = [0, 1, 0, -1];
+const DC: [i32; 4] = [1, 0, -1, 0];
+
+fn generate(n: i32) -> Vec<Vec<i32>> {
+    let mut m = vec![vec![0i32; n as usize]; n as usize];
+    let (mut r, mut c, mut d) = (0i32, 0i32, 0usize);
+    for v in 1..=n * n {
+        m[r as usize][c as usize] = v;
+        let (mut nr, mut nc) = (r + DR[d], c + DC[d]);
+        if nr < 0 || nr >= n || nc < 0 || nc >= n || m[nr as usize][nc as usize] != 0 {
+            d = (d + 1) % 4; // blocked: turn right
+            nr = r + DR[d];
+            nc = c + DC[d];
+        }
+        r = nr;
+        c = nc;
+    }
+    m
+}
+
+fn main() {
+    for n in [1, 3, 4] {
+        println!("n = {}", n);
+        for row in generate(n) {
+            let mut line = String::from("  ");
+            for v in row {
+                line.push_str(&format!("{:4}", v));
+            }
+            println!("{}", line);
+        }
+    }
+    println!();
+    println!("one rule: go straight until blocked, then turn right");
+}`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+// right, down, left, up — turning right is (d + 1) % 4
+var dr = [4]int{0, 1, 0, -1}
+var dc = [4]int{1, 0, -1, 0}
+
+func generate(n int) [][]int {
+	m := make([][]int, n)
+	for i := range m {
+		m[i] = make([]int, n)
+	}
+	r, c, d := 0, 0, 0
+	for v := 1; v <= n*n; v++ {
+		m[r][c] = v
+		nr, nc := r+dr[d], c+dc[d]
+		if nr < 0 || nr >= n || nc < 0 || nc >= n || m[nr][nc] != 0 {
+			d = (d + 1) % 4 // blocked: turn right
+			nr, nc = r+dr[d], c+dc[d]
+		}
+		r, c = nr, nc
+	}
+	return m
+}
+
+func main() {
+	for _, n := range []int{1, 3, 4} {
+		fmt.Printf("n = %d\\n", n)
+		for _, row := range generate(n) {
+			var line strings.Builder
+			line.WriteString("  ")
+			for _, v := range row {
+				fmt.Fprintf(&line, "%4d", v)
+			}
+			fmt.Println(line.String())
+		}
+	}
+	fmt.Println()
+	fmt.Println("one rule: go straight until blocked, then turn right")
+}`,
+            },
+          ],
         },
       ],
     },
