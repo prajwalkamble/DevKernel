@@ -24,6 +24,7 @@ import { sortingModule } from "./modules/21-sorting";
 import { linkedListsModule } from "./modules/22-linked-lists";
 import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
 import { treesModule } from "./modules/24-trees";
+import { heapsModule } from "./modules/25-heaps";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -124,25 +125,7 @@ export const dsaTrack: TrackDefinition = {
     stacksAndQueuesModule,
     recursionModule,
     treesModule,
-    createComingSoonModule({
-      id: "dsa-heaps",
-      slug: "heaps-and-priority-queues",
-      title: "Heaps & Priority Queues",
-      order: 25,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "The structure for \"the smallest thing so far\", and the top-K pattern that turns a sort into a linear scan.",
-      topics: [
-        "The heap property, and why an array is the right representation",
-        "Sift up, sift down, and building a heap in O(n)",
-        "Priority queues: the API, and the comparator that decides everything",
-        "Top-K, and why the heap must be a min-heap for the k largest",
-        "The two-heap pattern: the running median",
-        "K-way merge, and merging sorted streams",
-        "When bucket sort beats the heap outright",
-        "Scheduling and interval problems built on a heap",
-      ],
-    }),
+    heapsModule,
     createComingSoonModule({
       id: "dsa-graphs",
       slug: "graphs",
