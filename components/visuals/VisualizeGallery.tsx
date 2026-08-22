@@ -52,6 +52,11 @@ const ENTRIES: Entry[] = [
     spec: { id: "g-tree", kind: "tree-algorithm", algorithm: "inorder" },
   },
   {
+    id: "bits-and-math", group: "Algorithms", label: "Bits and number theory",
+    blurb: "A mask's eight bits under the five operations, XOR cancelling in pairs, the sieve crossing out, and Euclid halving. The bit pictures are of a single number rather than a collection, which is exactly the habit a bitmask asks you to build.",
+    spec: { id: "g-bits", kind: "bits-and-math", algorithm: "bitops" },
+  },
+  {
     id: "string-matching", group: "Algorithms", label: "String matching",
     blurb: "Naive, KMP and Rabin–Karp on the same text. The whole point of KMP is what happens after a mismatch, and you have to see it slide.",
     spec: { id: "g-string", kind: "string-matching", algorithm: "kmp" },

@@ -430,6 +430,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "euclid-visual",
+        kind: "bits-and-math",
+        algorithm: "euclid",
+        lockAlgorithm: true,
+        title: "Each step smaller, the divisors unchanged",
+      },
     },
     {
       id: "why-fast",

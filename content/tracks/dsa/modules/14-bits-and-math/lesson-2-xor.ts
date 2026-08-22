@@ -530,6 +530,13 @@ xor swap: 4 9`,
           ],
         },
       ],
+      visual: {
+        id: "xor-visual",
+        kind: "bits-and-math",
+        algorithm: "xor",
+        lockAlgorithm: true,
+        title: "Pairs flipping their bits back",
+      },
     },
     {
       id: "against-alternatives",

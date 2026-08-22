@@ -695,6 +695,13 @@ func main() {
           ],
         },
       ],
+      visual: {
+        id: "sieve-visual",
+        kind: "bits-and-math",
+        algorithm: "sieve",
+        lockAlgorithm: true,
+        title: "Crossing out, starting at p²",
+      },
     },
     {
       id: "complexity",

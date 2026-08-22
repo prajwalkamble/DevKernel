@@ -603,6 +603,13 @@ popcount  3`,
           ],
         },
       ],
+      visual: {
+        id: "bitops-visual",
+        kind: "bits-and-math",
+        algorithm: "bitops",
+        lockAlgorithm: true,
+        title: "One mask under all five operations",
+      },
     },
     {
       id: "in-java",

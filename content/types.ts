@@ -112,6 +112,7 @@ export type VisualKind =
   | "string-matching"
   | "pattern"
   | "tree-algorithm"
+  | "bits-and-math"
   /* Individual data structures. */
   | "stack"
   | "queue"
