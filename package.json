@@ -13,7 +13,8 @@
     "start": "next start",
     "lint": "eslint",
     "verify:code": "node scripts/verify-lesson-code.mjs",
-    "verify:frames": "tsx scripts/verify-visual-frames.ts",
+    "verify": "tsc --noEmit && eslint . && npm run verify:frames",
+  "verify:frames": "tsx scripts/verify-visual-frames.ts",
   "verify:visuals": "node scripts/verify-visual-playback.mjs"
   },
   "dependencies": {
