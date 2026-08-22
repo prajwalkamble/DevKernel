@@ -6,7 +6,7 @@ export const choosingYourLanguageLesson: Lesson = {
   moduleSlug: "your-solving-language",
   title: "Choosing One, and Stopping the Argument",
   summary:
-    "The grounds that actually decide between Java and Python for solving problems — and why the decision matters far less than making it and moving on.",
+    "The grounds that actually decide which language you solve problems in — and why the decision matters far less than making it and moving on.",
   estimatedMinutes: 20,
   status: "available",
   objectives: [
