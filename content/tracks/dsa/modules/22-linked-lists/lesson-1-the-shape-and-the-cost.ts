@@ -368,6 +368,11 @@ func main() {
         "**When you are building another structure.** Hash table chains, adjacency lists, free lists in allocators and the queue behind a scheduler are all linked lists wearing another name.",
         "Outside these, reach for a dynamic array. In interviews, however, the list is everywhere — because pointer manipulation is where sloppy reasoning becomes visible immediately, which is the honest reason this module exists.",
       ],
+      visual: {
+        id: "doubly-visual",
+        kind: "doubly-linked-list",
+        title: "The prev pointer that makes deletion O(1)",
+      },
     },
   ],
   interviewQuestions: [
