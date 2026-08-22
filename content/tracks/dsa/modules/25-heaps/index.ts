@@ -3,6 +3,11 @@ import type { ModuleDefinition } from "@/content/types";
 import { heapPropertyLesson } from "./lesson-1-the-heap-property";
 import { siftingLesson } from "./lesson-2-sifting-and-building";
 import { priorityQueueLesson } from "./lesson-3-the-priority-queue-api";
+import { topKLesson } from "./lesson-4-top-k";
+import { twoHeapsLesson } from "./lesson-5-two-heaps";
+import { kWayMergeLesson } from "./lesson-6-k-way-merge";
+import { bucketsLesson } from "./lesson-7-when-buckets-win";
+import { schedulingLesson } from "./lesson-8-scheduling-and-the-sheet";
 
 export const heapsModule: ModuleDefinition = {
   id: "dsa-heaps",
@@ -17,5 +22,10 @@ export const heapsModule: ModuleDefinition = {
     heapPropertyLesson,
     siftingLesson,
     priorityQueueLesson,
+    topKLesson,
+    twoHeapsLesson,
+    kWayMergeLesson,
+    bucketsLesson,
+    schedulingLesson,
   ],
 };
