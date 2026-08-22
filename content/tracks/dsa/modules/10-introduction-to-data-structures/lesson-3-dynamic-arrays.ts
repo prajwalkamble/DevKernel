@@ -92,6 +92,11 @@ copies per append: 1.31  -- a constant, which is what amortised O(1) means`,
             "The final ratio is the proof. A hundred thousand appends cost 131,071 copies — **1.31 copies per append, and that number does not grow with n.** A constant amount of work per operation on average is exactly what amortised O(1) means. The 1.5× factor does more copying but wastes less memory, which is the trade the two implementations weigh differently.",
         },
       ],
+      visual: {
+        id: "dynamic-array-visual",
+        kind: "dynamic-array",
+        title: "Doubling, and the copy that pays for it",
+      },
     },
     {
       id: "the-costs",

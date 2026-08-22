@@ -11,9 +11,9 @@ import { starterTemplateLesson } from "./lesson-8-the-starter-template";
 export const yourSolvingLanguageModule: ModuleDefinition = {
   id: "dsa-solving-language",
   slug: "your-solving-language",
-  title: "Your Solving Language: Java & Python Side by Side",
+  title: "Your Solving Language",
   description:
-    "Pick one language and stop fighting it. The same twelve operations in both, the places each one will quietly betray you, and the template you start every problem from.",
+    "Pick one language and stop fighting it. The same twelve operations in whichever you chose, the places it will quietly betray you — silent overflow, truncating division, a string built in a loop — and the template you start every problem from. The traps are language-specific; the list of things you must be able to do is not.",
   order: 2,
   status: "available",
   phase: "Module 0 · Programming Constructs",

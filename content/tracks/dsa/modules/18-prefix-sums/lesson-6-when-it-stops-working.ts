@@ -48,6 +48,11 @@ export const whenItStopsWorkingLesson: Lesson = {
         "**\"Now updates apply to a whole range too.\"** Segment tree with lazy propagation, or a difference array on top of a Fenwick tree.",
         "The useful move is to say out loud, at step one, that the prefix array assumes a static input — and to name what you would reach for if it were not. That answers step two before it is asked, and it is a cheap way to show you know the boundary of the technique rather than only the technique.",
       ],
+      visual: {
+        id: "fenwick-visual",
+        kind: "fenwick-tree",
+        title: "The Fenwick tree that answers step two",
+      },
       pitfalls: [
         {
           title: "Rebuilding the prefix array inside a query loop",

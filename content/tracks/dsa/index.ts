@@ -24,6 +24,7 @@ import { sortingModule } from "./modules/21-sorting";
 import { linkedListsModule } from "./modules/22-linked-lists";
 import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
 import { treesModule } from "./modules/24-trees";
+import { heapsModule } from "./modules/25-heaps";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -63,10 +64,10 @@ import { treesModule } from "./modules/24-trees";
  * for a standard one.
  *
  * Every problem on the sheet carries a brute-force solution as well as an
- * optimal one, in Java and in Python, because the path from one to the other is
- * the part that generalises. Every complexity claim in the track is measured
- * rather than asserted, and every solution is run against the same tests the
- * in-browser console grades you with.
+ * optimal one, in whichever language the reader has chosen, because the path
+ * from one to the other is the part that generalises. Every complexity claim in
+ * the track is measured rather than asserted, and every solution is run against
+ * the same tests the in-browser console grades you with.
  */
 export const dsaTrack: TrackDefinition = {
   id: "dsa",
@@ -75,7 +76,7 @@ export const dsaTrack: TrackDefinition = {
   shortTitle: "DSA",
   tagline: "Modules 0 and 1 — from your first for-loop to naming the pattern on sight",
   description:
-    "Roadmap Modules 0 and 1, end to end. Built for two people: the one who has never written a for-loop, and the one who has read about every algorithm and still freezes on a blank editor. Module 0 starts at what a program is and does not assume a language — skip it in an afternoon if you already code. Then the framework: an explicit, repeatable method for taking an unseen problem apart, which is the step most courses skip and the reason their graduates still stare at problems. Then Module 1, linear structures then non-linear ones, every structure introduced with the patterns it enables and the problems those patterns solve. Then the grind — recognition drills, company-wise sheets, interview technique. Every problem comes with the brute force as well as the optimal solution, in Java and Python, and you write your own in the browser and have it graded before you see either.",
+    "Roadmap Modules 0 and 1, end to end. Built for two people: the one who has never written a for-loop, and the one who has read about every algorithm and still freezes on a blank editor. Module 0 starts at what a program is and does not assume a language — skip it in an afternoon if you already code. Then the framework: an explicit, repeatable method for taking an unseen problem apart, which is the step most courses skip and the reason their graduates still stare at problems. Then Module 1, linear structures then non-linear ones, every structure introduced with the patterns it enables and the problems those patterns solve. Then the grind — recognition drills, company-wise sheets, interview technique. Every problem comes with the brute force as well as the optimal solution, and every example can be read in any of the languages the track supports, so the algorithm is what you are learning rather than a dialect. You write your own in the browser and have it graded before you see either.",
   order: 1,
   status: "available",
   accent: "dsa",
@@ -124,25 +125,7 @@ export const dsaTrack: TrackDefinition = {
     stacksAndQueuesModule,
     recursionModule,
     treesModule,
-    createComingSoonModule({
-      id: "dsa-heaps",
-      slug: "heaps-and-priority-queues",
-      title: "Heaps & Priority Queues",
-      order: 25,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "The structure for \"the smallest thing so far\", and the top-K pattern that turns a sort into a linear scan.",
-      topics: [
-        "The heap property, and why an array is the right representation",
-        "Sift up, sift down, and building a heap in O(n)",
-        "Priority queues: the API, and the comparator that decides everything",
-        "Top-K, and why the heap must be a min-heap for the k largest",
-        "The two-heap pattern: the running median",
-        "K-way merge, and merging sorted streams",
-        "When bucket sort beats the heap outright",
-        "Scheduling and interval problems built on a heap",
-      ],
-    }),
+    heapsModule,
     createComingSoonModule({
       id: "dsa-graphs",
       slug: "graphs",

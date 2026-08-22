@@ -103,8 +103,8 @@ true`,
       ],
       examples: [
         {
-          id: "java-plus",
-          title: "Java: mixing converts the number to text",
+          id: "plus-two-jobs",
+          title: "Adding a number to a piece of text, seven ways",
           lang: "java",
           code: `public class Main {
     public static void main(String[] args) {
@@ -122,24 +122,103 @@ total: 3
 sum: 12
 sum: 3`,
           explanation:
-            "The fourth line is the trap, and it catches everybody once. `+` groups left to right, so `\"sum: \" + 1` happens first and produces the text `sum: 1`; concatenating `2` onto that gives `sum: 12`. The brackets on the last line force the addition to happen first. If a printed number is ever mysteriously two numbers stuck together, this is why.",
-        },
-        {
-          id: "python-plus",
-          title: "Python: mixing is an error",
-          lang: "python",
-          code: `print(1 + 2)
+            "`\"total: \" + 3` is the whole example, and the seven answers are worth seeing in a row. Java and JavaScript convert the number to text and concatenate. Python refuses with a TypeError, which is the friendliest failure here because it names the line. Rust and Go refuse at compile time, so the program never exists. And C++ does something else entirely: `\"total: \"` is not a string object but a pointer to characters, so adding 3 moves the pointer three characters along and prints `al: ` — no error, no warning, a completely different answer. That is the single best argument in this module for reading a language's rules rather than assuming they match the last one you used. JavaScript earns its own footnote: `\"3\" - 1` is 2, because `-` has no string meaning to fall back on, so the string is coerced instead. One operator, two jobs, and a coin flip about which one you get.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `console.log(1 + 2);
+console.log("1" + "2");
+console.log("total: " + 3);
+
+console.log("sum: " + 1 + 2);
+console.log("sum: " + (1 + 2));
+console.log("3" - 1);`,
+              output: `3
+12
+total: 3
+sum: 12
+sum: 3
+2`,
+            },
+            {
+              lang: "typescript",
+              code: `console.log(1 + 2);
+console.log("1" + "2");
+console.log("total: " + 3);
+
+console.log("sum: " + 1 + 2);
+console.log("sum: " + (1 + 2));
+console.log("3" - 1);`,
+              output: `3
+12
+total: 3
+sum: 12
+sum: 3
+2`,
+            },
+            {
+              lang: "python",
+              code: `print(1 + 2)
 print("1" + "2")
 print("total: " + 3)`,
-          output: `3
+              output: `3
 12
 Traceback (most recent call last):
   File "main.py", line 3, in <module>
     print("total: " + 3)
           ~~~~~~~~~~^~~
 TypeError: can only concatenate str (not "int") to str`,
-          explanation:
-            "Python declines to guess. The fix is either `str(3)` to convert explicitly, or — far better — `print(\"total:\", 3)`, since `print` accepts several arguments and puts a space between them. An f-string, `print(f\"total: {3}\")`, is the third option and the one you will use most in practice.",
+            },
+            {
+              lang: "cpp",
+              code: `#include <iostream>
+#include <string>
+
+int main() {
+    std::cout << 1 + 2 << "\\n";
+    std::cout << std::string("1") + "2" << "\\n";
+    // "total: " is not a string object — it is a pointer to characters, and
+    // adding 3 to a pointer moves it three characters along.
+    std::cout << "total: " + 3 << "\\n";
+    std::cout << std::string("total: ") + std::to_string(3) << "\\n";
+}`,
+              output: `3
+12
+al: 
+total: 3`,
+            },
+            {
+              lang: "rust",
+              code: `fn main() {
+    println!("{}", 1 + 2);
+    println!("{}", String::from("1") + "2");
+    println!("{}", "total: ".to_string() + 3);
+}`,
+              output: `error[E0308]: mismatched types
+ --> main.rs:4:44
+  |
+4 |     println!("{}", "total: ".to_string() + 3);
+  |                                            ^ expected \`&str\`, found integer
+
+error: aborting due to 1 previous error
+
+For more information about this error, try \`rustc --explain E0308\`.`,
+            },
+            {
+              lang: "go",
+              code: `package main
+
+import "fmt"
+
+func main() {
+	fmt.Println(1 + 2)
+	fmt.Println("1" + "2")
+	fmt.Println("total: " + 3)
+}`,
+              output: `# command-line-arguments
+./main.go:8:14: invalid operation: "total: " + 3 (mismatched types untyped string and untyped int)`,
+            },
+          ],
         },
       ],
     },

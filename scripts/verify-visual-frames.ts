@@ -214,7 +214,31 @@ for (const track of tracks) {
   }
 }
 
+/* The language dropdown belongs to the DSA track and nowhere else.
+   A C++ course's examples are C++ because that is the subject; offering to
+   read one "in Python" would be incoherent. The JS/TS track shows its two
+   languages side by side rather than behind a picker. So an `alternates`
+   block outside `dsa` is a mistake, and this is where it gets caught. */
+let alternates = 0;
+for (const track of tracks) {
+  for (const mod of track.modules) {
+    for (const lesson of mod.lessons) {
+      for (const section of lesson.sections) {
+        for (const example of section.examples ?? []) {
+          if (!example.alternates?.length) continue;
+          alternates += 1;
+          if (track.slug !== "dsa") {
+            fail(`${track.slug}/${mod.slug}/${lesson.slug} \u203a ${example.id}`,
+              `carries translations, but the dropdown is for the DSA track only`);
+          }
+        }
+      }
+    }
+  }
+}
+
 console.log(`${checked} visualisations run, ${frameCount} frames checked, ${specs} lesson specs resolved.`);
+console.log(`${alternates} examples carry a language dropdown, all of them in the DSA track.`);
 if (problems.length) {
   console.error(`\n${problems.length} problem(s):`);
   for (const p of problems) console.error(`  ${p}`);

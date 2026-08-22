@@ -632,6 +632,13 @@ monotone function of its right edge, so 'shrink while valid' is invalid.`,
         "**A monotonic deque.** When the state is a window maximum or minimum, the removal is not O(1) and the plain window is not enough.",
         "**Binary search on the answer.** For \"longest window such that…\" where the condition is monotone in the *window length* rather than in its contents.",
       ],
+      visual: {
+        id: "kadane-visual",
+        kind: "pattern",
+        algorithm: "kadane",
+        lockAlgorithm: true,
+        title: "Kadane's: restart, or extend",
+      },
       pitfalls: [
         {
           title: "\"All values are positive\" is a constraint, not a coincidence",

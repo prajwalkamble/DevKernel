@@ -1,7 +1,9 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { EXAMPLE_LANGUAGE_LABEL, type ExampleLanguage } from "@/lib/exampleLanguage";
+import {
+  EXAMPLE_LANGUAGES, EXAMPLE_LANGUAGE_LABEL, type ExampleLanguage,
+} from "@/lib/exampleLanguage";
 import { useExampleLanguage } from "@/lib/useExampleLanguage";
 
 /**
@@ -32,7 +34,10 @@ export function ExampleLanguagePicker({
   const { language, setLanguage } = useExampleLanguage();
   const selectId = useId();
 
-  const available = (Object.keys(blocks) as ExampleLanguage[]).filter((l) => blocks[l]);
+  // Filtered from EXAMPLE_LANGUAGES, not read off `blocks`: the keys of an
+  // object come back in insertion order, which here is the order the
+  // translations happen to sit in the content file.
+  const available = EXAMPLE_LANGUAGES.filter((l) => blocks[l]);
   // Fall back to the primary when the global choice is a language this example
   // does not have. A reader who picked Rust should not be shown a blank panel
   // by an example that only exists in Python.
@@ -53,7 +58,6 @@ export function ExampleLanguagePicker({
           {available.map((option) => (
             <option key={option} value={option}>
               {EXAMPLE_LANGUAGE_LABEL[option]}
-              {option === primary ? "" : ""}
             </option>
           ))}
         </select>

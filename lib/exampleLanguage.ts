@@ -16,16 +16,25 @@ import type { CodeLanguage } from "@/content/types";
 const KEY = "devkernel:example-language";
 export const EXAMPLE_LANGUAGE_EVENT = "devkernel:example-language-change";
 
-/** The languages a lesson example may be offered in, in dropdown order. */
+/**
+ * The languages a lesson example may be offered in, in dropdown order.
+ *
+ * Ordered by the label a reader sees rather than by anything internal, so the
+ * dropdown reads alphabetically: Assembly, C++, Go, Java, JavaScript, Python,
+ * Rust, TypeScript. The picker filters this list rather than reading the keys
+ * off an object, because object key order is insertion order and would leave
+ * every dropdown sorted by whichever language a translation happened to be
+ * written in first.
+ */
 export const EXAMPLE_LANGUAGES = [
-  "python",
-  "javascript",
-  "typescript",
-  "java",
-  "cpp",
-  "rust",
-  "go",
   "asm",
+  "cpp",
+  "go",
+  "java",
+  "javascript",
+  "python",
+  "rust",
+  "typescript",
 ] as const satisfies readonly CodeLanguage[];
 
 export type ExampleLanguage = (typeof EXAMPLE_LANGUAGES)[number];
