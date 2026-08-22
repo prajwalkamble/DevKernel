@@ -471,7 +471,199 @@ the fix is a tiebreaker that is always comparable and never ties:
    equal priorities now come out in insertion order, which is usually
    what was wanted anyway — a priority queue is not otherwise stable.`,
           explanation:
-            "A tuple compares field by field, so a tie in the priority quietly promotes the *payload* to being the tiebreaker. When the payload is a string that is merely surprising. When it is an object with no ordering it is a `TypeError` \u2014 and one that appears only when two priorities actually collide, which is exactly the case a small test suite is least likely to contain. The monotonic counter fixes it for good: it is always comparable, it never ties, and it makes equal priorities come out in insertion order, which is almost always the behaviour that was silently assumed. This example stays in Python alone, because the failure it prints *is* the language: the same mistake in Java is a ClassCastException from `PriorityQueue`, and in C++, Rust and Go it does not compile at all. Deferring the error to the first collision is exactly what a dynamic language buys and costs you here.",
+            "A tuple compares field by field, so a tie in the priority quietly promotes the *payload* to being the tiebreaker. When the payload is a string that is merely surprising. When it is an object with no ordering it is a `TypeError` \u2014 and one that appears only when two priorities actually collide, which is exactly the case a small test suite is least likely to contain. The monotonic counter fixes it for good: it is always comparable, it never ties, and it makes equal priorities come out in insertion order, which is almost always the behaviour that was silently assumed. The three variants are worth reading against each other, because this is one of the few places where the languages fail *differently* rather than identically. Java has no tuple key, so the same mistake is a missing comparator and a `ClassCastException` on the second `add` — a heap of one never compares anything, so a single-element test passes. JavaScript does not raise at all: `<` coerces both objects to `[object Object]`, every task ties with every other, and the wrong order arrives with no line number attached, which is worse. C++, Rust and Go are absent because there the mistake does not compile, and a variant that will not run is not a translation.",
+          alternates: [
+            {
+              lang: "javascript",
+              code: `class Task {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+// A tuple key has no equivalent here: a JavaScript heap takes a comparator,
+// so this file compares the way the Python one implicitly does.
+const byPair = (x, y) => (x[0] !== y[0] ? x[0] < y[0] : x[1] < y[1]);
+
+function drain(items, less) {
+  const a = [...items];
+  a.sort((x, y) => (less(x, y) ? -1 : less(y, x) ? 1 : 0));
+  return a;
+}
+
+console.log("a tie in the first field falls through to the second:");
+const pairs = drain([[1, "beta"], [1, "alpha"], [2, "gamma"]], byPair);
+console.log("  ", pairs.map(([p, name]) => \`(\${p},\${name})\`).join(" "));
+console.log("   the names were compared. Nobody asked for that, and here it was harmless.");
+
+console.log();
+console.log("now the payload is an object with no ordering:");
+const a = new Task("beta");
+const b = new Task("alpha");
+console.log(\`   a < b is \${a < b}, a > b is \${a > b}, a === b is \${a === b}\`);
+console.log("   no exception. Relational operators coerce both objects to the string");
+console.log("   \\"[object Object]\\", which compares equal, so every task ties with every");
+console.log("   other and the order is whatever the algorithm happened to produce.");
+
+console.log();
+console.log("the fix is to say what the order is, rather than hoping there is one:");
+const tasks = [new Task("beta"), new Task("alpha"), new Task("gamma")];
+tasks.sort((x, y) => (x.name < y.name ? -1 : x.name > y.name ? 1 : 0));
+console.log("  ", tasks.map((t) => t.name).join(" "));
+console.log("   Python raises on the first tie and JavaScript never raises at all —");
+console.log("   which is worse, because a silent wrong order has no line number.");`,
+              output: `a tie in the first field falls through to the second:
+   (1,alpha) (1,beta) (2,gamma)
+   the names were compared. Nobody asked for that, and here it was harmless.
+
+now the payload is an object with no ordering:
+   a < b is false, a > b is false, a === b is false
+   no exception. Relational operators coerce both objects to the string
+   "[object Object]", which compares equal, so every task ties with every
+   other and the order is whatever the algorithm happened to produce.
+
+the fix is to say what the order is, rather than hoping there is one:
+   alpha beta gamma
+   Python raises on the first tie and JavaScript never raises at all —
+   which is worse, because a silent wrong order has no line number.`,
+            },
+            {
+              lang: "typescript",
+              code: `class Task {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+
+// A tuple key has no equivalent here: a JavaScript heap takes a comparator,
+// so this file compares the way the Python one implicitly does.
+const byPair = (x: [number, string], y: [number, string]): boolean =>
+  (x[0] !== y[0] ? x[0] < y[0] : x[1] < y[1]);
+
+function drain(items: [number, string][], less: (x: [number, string], y: [number, string]) => boolean): [number, string][] {
+  const a = [...items];
+  a.sort((x, y) => (less(x, y) ? -1 : less(y, x) ? 1 : 0));
+  return a;
+}
+
+console.log("a tie in the first field falls through to the second:");
+const pairs = drain([[1, "beta"], [1, "alpha"], [2, "gamma"]], byPair);
+console.log("  ", pairs.map(([p, name]) => \`(\${p},\${name})\`).join(" "));
+console.log("   the names were compared. Nobody asked for that, and here it was harmless.");
+
+console.log();
+console.log("now the payload is an object with no ordering:");
+const a = new Task("beta");
+const b = new Task("alpha");
+// TypeScript refuses \`a < b\` on two objects outright, so the comparison is
+// written through the coercion it would have performed.
+const as = String(a);
+const bs = String(b);
+console.log(\`   a < b is \${as < bs}, a > b is \${as > bs}, a === b is \${(a as object) === (b as object)}\`);
+console.log("   no exception. Relational operators coerce both objects to the string");
+console.log("   \\"[object Object]\\", which compares equal, so every task ties with every");
+console.log("   other and the order is whatever the algorithm happened to produce.");
+
+console.log();
+console.log("the fix is to say what the order is, rather than hoping there is one:");
+const tasks = [new Task("beta"), new Task("alpha"), new Task("gamma")];
+tasks.sort((x, y) => (x.name < y.name ? -1 : x.name > y.name ? 1 : 0));
+console.log("  ", tasks.map((t) => t.name).join(" "));
+console.log("   Python raises on the first tie and JavaScript never raises at all —");
+console.log("   which is worse, because a silent wrong order has no line number.");`,
+              output: `a tie in the first field falls through to the second:
+   (1,alpha) (1,beta) (2,gamma)
+   the names were compared. Nobody asked for that, and here it was harmless.
+
+now the payload is an object with no ordering:
+   a < b is false, a > b is false, a === b is false
+   no exception. Relational operators coerce both objects to the string
+   "[object Object]", which compares equal, so every task ties with every
+   other and the order is whatever the algorithm happened to produce.
+
+the fix is to say what the order is, rather than hoping there is one:
+   alpha beta gamma
+   Python raises on the first tie and JavaScript never raises at all —
+   which is worse, because a silent wrong order has no line number.`,
+            },
+            {
+              lang: "java",
+              code: `import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+
+public class Main {
+    static class Task {
+        final String name;
+        Task(String name) { this.name = name; }
+    }
+
+    record Pair(int priority, String name) {}
+
+    public static void main(String[] args) {
+        System.out.println("a tie in the first field falls through to the second:");
+        PriorityQueue<Pair> pairs = new PriorityQueue<>(
+                Comparator.comparingInt(Pair::priority).thenComparing(Pair::name));
+        for (Pair p : new Pair[]{new Pair(1, "beta"), new Pair(1, "alpha"), new Pair(2, "gamma")}) {
+            pairs.add(p);
+        }
+        StringBuilder shown = new StringBuilder();
+        while (!pairs.isEmpty()) {
+            Pair p = pairs.poll();
+            shown.append(shown.length() > 0 ? " " : "").append("(").append(p.priority())
+                 .append(",").append(p.name()).append(")");
+        }
+        System.out.println("   " + shown);
+        System.out.println("   the names were compared. Nobody asked for that, and here it was harmless.");
+
+        System.out.println();
+        System.out.println("now the payload is an object with no ordering:");
+        /* No comparator at all, so PriorityQueue falls back to the elements'
+           natural ordering — and Task has none. The cast is what fails. */
+        PriorityQueue<Task> tasks = new PriorityQueue<>();
+        try {
+            tasks.add(new Task("beta"));
+            tasks.add(new Task("alpha"));
+        } catch (ClassCastException e) {
+            /* Only the first clause is printed. The rest of the message names
+               the classloader, and that name has a hash of its address in it —
+               so the full text differs between runs. */
+            String message = e.getMessage();
+            int tail = message.indexOf(" (");
+            System.out.println("   ClassCastException: " + (tail < 0 ? message : message.substring(0, tail)));
+        }
+        System.out.println("   the crash arrives only on the second add, because a heap of one");
+        System.out.println("   never compares anything. A test with a single task would pass.");
+
+        System.out.println();
+        System.out.println("the fix is to say what the order is, rather than hoping there is one:");
+        PriorityQueue<Task> ordered = new PriorityQueue<>(Comparator.comparing(t -> t.name));
+        List<String> out = new ArrayList<>();
+        for (String name : new String[]{"beta", "alpha", "gamma"}) ordered.add(new Task(name));
+        while (!ordered.isEmpty()) out.add(ordered.poll().name);
+        System.out.println("   " + String.join(" ", out));
+        System.out.println("   Java makes the comparator a constructor argument, so the mistake is");
+        System.out.println("   forgetting to pass one — not, as in Python, writing a key that ties.");
+    }
+}`,
+              output: `a tie in the first field falls through to the second:
+   (1,alpha) (1,beta) (2,gamma)
+   the names were compared. Nobody asked for that, and here it was harmless.
+
+now the payload is an object with no ordering:
+   ClassCastException: class Main$Task cannot be cast to class java.lang.Comparable
+   the crash arrives only on the second add, because a heap of one
+   never compares anything. A test with a single task would pass.
+
+the fix is to say what the order is, rather than hoping there is one:
+   alpha beta gamma
+   Java makes the comparator a constructor argument, so the mistake is
+   forgetting to pass one — not, as in Python, writing a key that ties.`,
+            },
+          ],
         },
       ],
     },
