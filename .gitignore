@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Spelled out as well as covered by .env* above: this is the file that
+# holds the real PostHog key, and it must never be pushed.
+.env.local
+# ...except the reference copy, which lists the variables without values.
+!.env.example
 
 # vercel
 .vercel

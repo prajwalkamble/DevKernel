@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { ChevronDown, Loader2, Play, RotateCcw, Square, Trash2 } from "lucide-react";
 import clsx from "clsx";
+import { track } from "@/lib/analytics";
 import { useSandbox, type SandboxNotice } from "@/lib/useSandbox";
 import { containsJsx, transpileTypeScript } from "@/lib/transpile";
 import {
@@ -88,6 +89,7 @@ export function PlaygroundClient() {
   const handleRun = useCallback(async () => {
     setPane("output");
     const source = code[language];
+    track("playground run", { language });
 
     // Everything that is not JavaScript or TypeScript delivers its output
     // complete rather than streaming: Python from a CPython worker, and the

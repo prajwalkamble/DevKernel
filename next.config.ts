@@ -1,7 +1,37 @@
 import type { NextConfig } from "next";
 
+/**
+ * Where PostHog actually lives. Read here as well as in
+ * instrumentation-client.ts so the proxy and the SDK cannot disagree about
+ * which region the events are going to.
+ */
+const POSTHOG_HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
+
+/**
+ * Static assets — recorder.js, surveys.js, the toolbar — come off a sibling
+ * host rather than the ingest host.
+ */
+const POSTHOG_ASSET_HOST = POSTHOG_HOST.replace(
+  "://us.i.",
+  "://us-assets.i."
+).replace("://eu.i.", "://eu-assets.i.");
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Analytics requests go out same-origin, through /ingest, and are proxied to
+  // PostHog from the server. The audience for this site is developers, and
+  // *.posthog.com is on every blocklist worth the name, so measuring them
+  // directly would quietly under-count exactly the people the course is for.
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: `${POSTHOG_ASSET_HOST}/static/:path*`,
+      },
+      { source: "/ingest/:path*", destination: `${POSTHOG_HOST}/:path*` },
+    ];
+  },
+
 };
 
 export default nextConfig;

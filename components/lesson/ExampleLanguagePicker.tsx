@@ -4,6 +4,7 @@ import { useId, type ReactNode } from "react";
 import {
   EXAMPLE_LANGUAGES, EXAMPLE_LANGUAGE_LABEL, type ExampleLanguage,
 } from "@/lib/exampleLanguage";
+import { track } from "@/lib/analytics";
 import { useExampleLanguage } from "@/lib/useExampleLanguage";
 
 /**
@@ -52,7 +53,11 @@ export function ExampleLanguagePicker({
         <select
           id={selectId}
           value={active}
-          onChange={(e) => setLanguage(e.target.value as ExampleLanguage)}
+          onChange={(e) => {
+            const next = e.target.value as ExampleLanguage;
+            setLanguage(next);
+            track("example language changed", { from: active, to: next });
+          }}
           className="cursor-pointer rounded-md border border-border bg-surface px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-surface-hover focus:ring-2 focus:ring-accent focus:outline-none"
         >
           {available.map((option) => (
