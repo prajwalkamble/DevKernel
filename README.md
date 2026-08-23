@@ -4,7 +4,7 @@
 
 ![The DevKernel home page](docs/screenshots/home.png)
 
-<sub>Every screenshot in this README is split down the middle: light theme on the left, dark theme on the right.</sub>
+<sub>Every screenshot in this README is one page cut on a diagonal: light theme on the left, dark theme on the right.</sub>
 
 ---
 
