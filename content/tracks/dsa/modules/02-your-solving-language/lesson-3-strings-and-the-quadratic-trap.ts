@@ -153,13 +153,25 @@ def ms(fn, n):
     return (time.perf_counter() - start) * 1000
 
 
-for n in (20000, 40000, 80000):
+# Only a ratio is printed, and only at sizes where the quadratic term dominates.
+# A wall-clock number would be a different number on every machine, and an
+# absolute threshold like "under 40ms" is a claim about hardware rather than
+# about the algorithm.
+for n in (40000, 80000):
     plain_ms = ms(plain, n)
     aliased_ms = ms(aliased, n)
-    print(f"n={n:>6}  plain under 40ms: {str(plain_ms < 40):<5}  aliased at least 4x slower: {aliased_ms > plain_ms * 4}")`,
-          output: `n= 20000  plain under 40ms: True   aliased at least 4x slower: True
-n= 40000  plain under 40ms: True   aliased at least 4x slower: True
-n= 80000  plain under 40ms: True   aliased at least 4x slower: True`,
+    print(f"n={n:>6}  aliased at least 4x slower: {aliased_ms > plain_ms * 4}")
+
+print()
+print("One of these loops is linear and the other is quadratic. No amount of")
+print("faster hardware changes which is which, so the ratio is the part worth")
+print("printing and the milliseconds are the part that would not reproduce.")`,
+          output: `n= 40000  aliased at least 4x slower: True
+n= 80000  aliased at least 4x slower: True
+
+One of these loops is linear and the other is quadratic. No amount of
+faster hardware changes which is which, so the ratio is the part worth
+printing and the milliseconds are the part that would not reproduce.`,
           explanation:
             "The measured figures were 2.3, 4.8 and 9.2 ms for `plain` — cleanly linear — against 13, 65 and 288 ms for `aliased`, which quadruples on each doubling. The only difference between the two functions is a variable that is assigned and never read. That is how thin the ice is: an optimisation you cannot see, defeated by a line that does nothing.",
         },

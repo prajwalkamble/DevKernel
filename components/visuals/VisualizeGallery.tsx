@@ -144,7 +144,7 @@ export function VisualizeGallery() {
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Visualise
+          Visualize
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Every animation here is produced by running the real algorithm and recording
@@ -154,7 +154,7 @@ export function VisualizeGallery() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[13rem_1fr]">
-        <nav aria-label="Visualisations" className="space-y-4">
+        <nav aria-label="Visualizations" className="space-y-4">
           {groups.map((group) => (
             <div key={group}>
               <p className="mb-1.5 text-xs font-semibold tracking-wide text-muted uppercase">

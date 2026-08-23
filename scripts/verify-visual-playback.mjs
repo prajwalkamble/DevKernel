@@ -153,7 +153,7 @@ const PROBES = String.raw`
       .find((b) => b.textContent.trim().startsWith(label)) || null;
   };
   window.__navItems = () =>
-    [...document.querySelectorAll('nav[aria-label="Visualisations"] button')];
+    [...document.querySelectorAll('nav[aria-label="Visualizations"] button')];
   true;
 `;
 
@@ -200,7 +200,7 @@ try {
     for (let i = 0; i < 40; i++) {
       await sleep(500);
       try {
-        if (await evaluate(`!!document.querySelector('nav[aria-label="Visualisations"] button')`)) break;
+        if (await evaluate(`!!document.querySelector('nav[aria-label="Visualizations"] button')`)) break;
       } catch { /* navigating */ }
     }
     await evaluate(PROBES);

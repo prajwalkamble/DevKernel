@@ -3,6 +3,7 @@ import { Hexagon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getTrackStats, tracks } from "@/content/tracks";
 import { HeaderProgress } from "./HeaderProgress";
+import { HeaderNav } from "./HeaderNav";
 
 export function Header() {
   const totals = Object.fromEntries(
@@ -22,38 +23,7 @@ export function Header() {
           <span className="hidden sm:inline">DevKernel</span>
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-0.5 text-sm sm:gap-1">
-          <Link
-            href="/roadmap"
-            className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
-          >
-            Roadmap
-          </Link>
-          <Link
-            href="/curriculum"
-            className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
-          >
-            Tracks
-          </Link>
-          <Link
-            href="/practice"
-            className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
-          >
-            Problems
-          </Link>
-          <Link
-            href="/visualize"
-            className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
-          >
-            Visualise
-          </Link>
-          <Link
-            href="/playground"
-            className="rounded-md px-2 py-1.5 font-medium text-foreground/80 transition-colors hover:bg-surface-hover hover:text-foreground sm:px-3"
-          >
-            Playground
-          </Link>
-        </nav>
+        <HeaderNav />
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <HeaderProgress totals={totals} />

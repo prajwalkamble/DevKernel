@@ -21,7 +21,7 @@ export const countingBucketRadixLesson: Lesson = {
       body: [
         "Tally how many of each key there are, turn the tallies into running totals so each key knows where its block ends, then place elements into position. O(n + k) for keys in 0..k, and no comparison anywhere.",
         "The stability detail matters more than it looks. Walking the input **backwards** while decrementing the running count puts the last equal element at the end of its block, preserving input order. Forwards gives a correct sort with equal elements reversed — fine on bare integers, fatal inside radix sort.",
-        "It is worth writing once, because the running-total step is the same prefix-sum idea that appears throughout this track, and because the visualisation of it makes the placement step click in a way the code does not.",
+        "It is worth writing once, because the running-total step is the same prefix-sum idea that appears throughout this track, and because the visualization of it makes the placement step click in a way the code does not.",
       ],
       visual: {
         id: "radix-visual",
