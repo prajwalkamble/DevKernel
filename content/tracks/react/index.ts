@@ -2,6 +2,7 @@ import type { TrackDefinition } from "@/content/types";
 import { createComingSoonModule } from "@/content/comingSoon";
 import { reactFoundationsModule } from "./modules/01-foundations";
 import { reactJsxAndRenderingModule } from "./modules/02-jsx-and-rendering";
+import { reactComponentsAndPropsModule } from "./modules/03-components-and-props";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -32,24 +33,7 @@ export const reactTrack: TrackDefinition = {
   modules: [
     reactFoundationsModule,
     reactJsxAndRenderingModule,
-    createComingSoonModule({
-      id: "react-props",
-      slug: "components-and-props",
-      title: "Components & Props",
-      order: 3,
-      description:
-        "The unit React is built from: a function that takes props and returns UI. Everything about passing data in, including the parts that go wrong.",
-      topics: [
-        "What a component is, and the rules a function must follow to be one",
-        "Props: passing data down, destructuring, and default values",
-        "children, and why it is just another prop",
-        "Props are read-only — what one-way data flow buys you",
-        "Passing functions as props, and lifting state up",
-        "Render props and component composition against inheritance",
-        "Typing props with TypeScript, and ComponentProps",
-        "Splitting a page into components: a worked refactor",
-      ],
-    }),
+    reactComponentsAndPropsModule,
     createComingSoonModule({
       id: "react-state",
       slug: "state-and-events",

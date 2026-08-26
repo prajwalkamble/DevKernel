@@ -89,7 +89,11 @@ function read(node: ReactNode, path: string): ElNode | null {
  * Leaves take consecutive slots; every other node sits at the midpoint of its
  * own, which is what stops the edges crossing.
  */
-function layout(root: ElNode, roles: Map<string, Role>): TreeNode[] {
+function layout(
+  root: ElNode,
+  roles: Map<string, Role>,
+  badges?: Map<string, string>
+): TreeNode[] {
   const nodes: TreeNode[] = [];
   let slot = 0;
 
@@ -98,7 +102,7 @@ function layout(root: ElNode, roles: Map<string, Role>): TreeNode[] {
       const x = slot++;
       nodes.push({
         id: node.id, label: node.label, depth, x, parent,
-        role: roles.get(node.id), badge: node.key === null ? undefined : `key=${node.key}`,
+        role: roles.get(node.id), badge: captionOf(node, badges),
       });
       return x;
     }
@@ -106,13 +110,20 @@ function layout(root: ElNode, roles: Map<string, Role>): TreeNode[] {
     const x = (xs[0] + xs[xs.length - 1]) / 2;
     nodes.push({
       id: node.id, label: node.label, depth, x, parent,
-      role: roles.get(node.id), badge: node.key === null ? undefined : `key=${node.key}`,
+      role: roles.get(node.id), badge: captionOf(node, badges),
     });
     return x;
   };
 
   walk(root, 0);
   return nodes;
+}
+
+/** An explicit caption wins; otherwise a keyed node is captioned with its key. */
+function captionOf(node: ElNode, badges?: Map<string, string>): string | undefined {
+  const explicit = badges?.get(node.label);
+  if (explicit !== undefined) return explicit;
+  return node.key === null ? undefined : `key=${node.key}`;
 }
 
 /** Every node of a subtree, parent first — the order React renders in. */
@@ -443,6 +454,164 @@ function keysRun(byIndex: boolean): Visualisation {
   };
 }
 
+/* ------------------------------------------------- 6/7. one-way data flow -- */
+
+/* Short type names throughout: a node circle has room for about five
+   characters, and the caption underneath is carrying the values. */
+function Bar({ children }: { children?: ReactNode }) {
+  return <div>{children}</div>;
+}
+function Btn() {
+  return <button type="button" />;
+}
+function Out() {
+  return <output />;
+}
+function App({ children }: { children?: ReactNode }) {
+  return <div>{children}</div>;
+}
+
+const PANEL = (
+  <App>
+    <Bar>
+      <Btn />
+    </Bar>
+    <Out />
+  </App>
+);
+
+/**
+ * Props down, and what happens when a child wants to change something.
+ *
+ * The point the animation is built around is the one prose usually fudges:
+ * nothing travels *up* the tree. The handler is the parent's own function,
+ * handed down as a prop, and calling it runs the parent's code — which is why
+ * "data down, events up" is a description of the shape rather than of a
+ * mechanism.
+ */
+function propsDown(): Visualisation {
+  const root = read(PANEL, "")!;
+  const rec = new Recorder<TreeFrame>();
+  const roles = new Map<string, Role>();
+  const badges = new Map<string, string>();
+
+  const emit = (note: string) =>
+    rec.push({ kind: "tree", nodes: layout(root, roles, badges), note });
+
+  badges.set("App", "count = 0");
+  roles.set(root.id, "active");
+  emit("The state lives in App. It is the only place this value exists.");
+
+  const [bar, out] = root.children;
+  const btn = bar.children[0];
+
+  roles.set(root.id, "unchanged");
+  roles.set(bar.id, "active");
+  badges.set("Bar", "passes it on");
+  emit("App renders, and hands values down as props. Bar is given the callback to forward.");
+
+  roles.set(bar.id, "unchanged");
+  roles.set(btn.id, "active");
+  badges.set("Btn", "onClick");
+  emit("Btn receives a function as a prop. It cannot see count and cannot change it.");
+
+  roles.set(btn.id, "unchanged");
+  roles.set(out.id, "active");
+  badges.set("Out", "count = 0");
+  emit("Out receives the value itself, to display. Data has reached every node that needs it.");
+
+  roles.set(out.id, "unchanged");
+  roles.set(btn.id, "active");
+  emit("The user clicks Btn, so Btn calls the function it was given.");
+
+  roles.set(btn.id, "unchanged");
+  roles.set(root.id, "active");
+  emit("Nothing travelled up the tree. That function was App's all along, so calling it runs App's code.");
+
+  badges.set("App", "count = 1");
+  roles.set(root.id, "updated");
+  rec.bump("renders");
+  emit("App sets its state, so React re-renders App and everything beneath it.");
+
+  roles.set(bar.id, "updated");
+  roles.set(btn.id, "updated");
+  emit("The new props flow down exactly as before — there is no second mechanism for updates.");
+
+  badges.set("Out", "count = 1");
+  roles.set(out.id, "updated");
+  emit("Out is given the new value and displays it. One direction, one round trip.");
+
+  return {
+    frames: rec.frames,
+    summary:
+      "Data flows one way: down, as props. A child that wants something to change is given a function to call, and calling it runs the owner's code — nothing propagates back up the tree. That is what makes the state's owner the single place to look when a value is wrong.",
+  };
+}
+
+/* ------------------------------------------------------ 8. lifting state -- */
+
+function Pane() {
+  return <section />;
+}
+
+const SIBLINGS = (
+  <App>
+    <Pane key="left" />
+    <Pane key="right" />
+  </App>
+);
+
+/** Two siblings that each own a copy of the same state, and then do not. */
+function liftingState(): Visualisation {
+  const root = read(SIBLINGS, "")!;
+  const [left, right] = root.children;
+  const rec = new Recorder<TreeFrame>();
+  const roles = new Map<string, Role>();
+
+  /* Captioned by node id rather than by label here, since both siblings are
+     the same component and must show different values. */
+  const captions = new Map<string, string>();
+  const nodes = () =>
+    layout(root, roles).map((n) => ({ ...n, badge: captions.get(n.id) ?? n.badge }));
+  const emit = (note: string) => rec.push({ kind: "tree", nodes: nodes(), note });
+
+  captions.set(root.id, "no state");
+  captions.set(left.id, "own count = 0");
+  captions.set(right.id, "own count = 0");
+  emit("Each pane keeps its own count. Two useState calls, two separate pieces of state.");
+
+  captions.set(left.id, "own count = 1");
+  roles.set(left.id, "updated");
+  emit("The left pane increments. Nothing tells the right pane, because nothing connects them.");
+
+  emit("They are out of step, and the captions say so: 1 against 0. No code inside either pane can fix that.");
+
+  roles.clear();
+  captions.set(root.id, "count = 0");
+  captions.set(left.id, "reads a prop");
+  captions.set(right.id, "reads a prop");
+  roles.set(root.id, "active");
+  emit("Lift it: delete both useState calls and put one in the nearest common parent.");
+
+  roles.set(root.id, "unchanged");
+  roles.set(left.id, "active");
+  roles.set(right.id, "active");
+  emit("Both panes now receive the same value as a prop, and a function to request a change.");
+
+  captions.set(root.id, "count = 1");
+  roles.set(root.id, "updated");
+  roles.set(left.id, "updated");
+  roles.set(right.id, "updated");
+  rec.bump("renders");
+  emit("The left pane calls the function. One state changed, so both panes re-render together.");
+
+  return {
+    frames: rec.frames,
+    summary:
+      "When two components need the same value, neither can own it. Move it to their nearest common parent and pass it down — the value then exists once, so the two cannot disagree. The cost is that the parent re-renders, and with it everything beneath.",
+  };
+}
+
 /* ------------------------------------------------------------------ table -- */
 
 export const REACT_ALGOS = {
@@ -479,6 +648,14 @@ export const REACT_ALGOS = {
   "keys-stable": {
     label: "Keys: keyed by id",
     run: () => keysRun(false),
+  },
+  "props-down": {
+    label: "One-way data flow",
+    run: propsDown,
+  },
+  "lifting-state": {
+    label: "Lifting state up",
+    run: liftingState,
   },
 } as const;
 
