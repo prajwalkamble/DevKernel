@@ -284,6 +284,8 @@ const reactWork = path.join(ROOT, "node_modules", ".devkernel-verify");
  *   - An example that prints for itself and has no `App` renders nothing. Such
  *     an example is inspecting components rather than displaying them, and
  *     appending markup to its output would be noise.
+ *   - An example that calls `createRoot` renders nothing here either: it is
+ *     driving React on a real DOM and printing what it means to show.
  *
  * Requiring a lowercase letter in the name keeps `const MAX_ROWS = 10` from
  * being taken for a component, and the initialiser test keeps out any other
@@ -329,6 +331,11 @@ function reactRoot(code) {
  */
 function runReact(lang, code) {
   mkdirSync(reactWork, { recursive: true });
+  // An example that mounts its own root is driving React itself and prints
+  // whatever it means to show. Appending a static render of `App` on top of
+  // that would render the tree a second time and tack unrelated markup onto
+  // its output.
+  const drivesItself = /createRoot|hydrateRoot/.test(code);
   // The repo's own tsconfig excludes node_modules, so without this the loader
   // falls back to the *classic* transform and every example compiles to
   // `React.createElement`. That is not what the site ships or what the lessons
@@ -339,8 +346,13 @@ function runReact(lang, code) {
     tsconfig,
     JSON.stringify({ compilerOptions: { jsx: "react-jsx", target: "ES2022" } })
   );
+  // Without this the loader emits CommonJS, which has two consequences an
+  // example would trip over: no top-level `await`, and sloppy mode, so a write
+  // to a frozen props object fails silently instead of throwing the way it
+  // does in a real app. Modules are what React code is.
+  writeFileSync(path.join(reactWork, "package.json"), JSON.stringify({ type: "module" }));
   const file = path.join(reactWork, `example${reactSeq++}.${lang === "jsx" ? "jsx" : "tsx"}`);
-  const root = reactRoot(code);
+  const root = drivesItself ? null : reactRoot(code);
   // Everything this harness adds goes *after* the example, because ES module
   // imports are hoisted: the bindings exist before the first line runs either
   // way, and appending keeps every line number in a stack trace or a compiler

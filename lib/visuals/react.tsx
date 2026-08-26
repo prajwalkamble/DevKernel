@@ -612,6 +612,88 @@ function liftingState(): Visualisation {
   };
 }
 
+/* --------------------------------------------------------- 9/10. the queue -- */
+
+/**
+ * What the setter queues, and what processing the queue produces.
+ *
+ * The two runs differ by exactly what the two lessons differ by: whether each
+ * entry is a value computed from the render's `count`, or a function handed
+ * the value the queue has reached. Running both through the same loop is what
+ * makes "three calls, one increment" stop being a rule to memorise.
+ */
+function stateQueue(withUpdaters: boolean): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+  const start = 0;
+
+  /* The handler's `count` is a constant for the whole handler — which is the
+     entire reason the value form queues the same number three times. */
+  const entries = [0, 1, 2].map(() =>
+    withUpdaters
+      ? { label: "c => c + 1", apply: (current: number) => current + 1 }
+      : { label: `set ${start + 1}`, apply: () => start + 1 }
+  );
+
+  const emit = (
+    items: { id: string; label: string; role?: Role }[],
+    pins: Record<number, string>,
+    note: string
+  ) => rec.push({ kind: "sequence", items, pins, note });
+
+  emit([], {}, `count is ${start}. The handler runs, and the queue is empty.`);
+
+  const queued: { id: string; label: string; role?: Role }[] = [];
+  entries.forEach((entry, i) => {
+    queued.push({ id: `q${i}`, label: entry.label });
+    rec.bump("queued");
+    emit(
+      queued.map((q) => ({ ...q })),
+      {},
+      withUpdaters
+        ? `setCount(c => c + 1) queues a function. It has not run yet.`
+        : `setCount(count + 1) queues a value. count is still ${start}, so the value is ${start + 1}.`
+    );
+  });
+
+  emit(
+    queued.map((q) => ({ ...q })),
+    {},
+    "The handler finishes. React now processes the queue in order."
+  );
+
+  let current = start;
+  entries.forEach((entry, i) => {
+    const before = current;
+    current = entry.apply(current);
+    rec.bump("applied");
+    emit(
+      queued.map((q, j) => ({
+        ...q,
+        role: j < i ? "unchanged" : j === i ? "active" : undefined,
+      })),
+      { [i]: `${before} → ${current}` },
+      withUpdaters
+        ? `Entry ${i + 1} is given ${before} and returns ${current}.`
+        : `Entry ${i + 1} replaces the state with ${current}, whatever it was.`
+    );
+  });
+
+  emit(
+    queued.map((q) => ({ ...q, role: "unchanged" as Role })),
+    {},
+    withUpdaters
+      ? `Three entries, three increments: count is ${current}. One re-render.`
+      : `Three entries, all saying ${current}: count is ${current}. One re-render.`
+  );
+
+  return {
+    frames: rec.frames,
+    summary: withUpdaters
+      ? "An updater is handed the value the queue has reached, so each one builds on the last. Three of them increment by three — and it is still a single re-render, because batching and what each entry knows are different questions."
+      : "A value is computed from the render's own `count`, which does not change during the handler. Three calls therefore queue the same number three times, and applying them in order lands on that number once.",
+  };
+}
+
 /* ------------------------------------------------------------------ table -- */
 
 export const REACT_ALGOS = {
@@ -656,6 +738,14 @@ export const REACT_ALGOS = {
   "lifting-state": {
     label: "Lifting state up",
     run: liftingState,
+  },
+  "queue-values": {
+    label: "The update queue: values",
+    run: () => stateQueue(false),
+  },
+  "queue-updaters": {
+    label: "The update queue: updaters",
+    run: () => stateQueue(true),
   },
 } as const;
 

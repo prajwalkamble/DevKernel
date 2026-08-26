@@ -3,6 +3,7 @@ import { createComingSoonModule } from "@/content/comingSoon";
 import { reactFoundationsModule } from "./modules/01-foundations";
 import { reactJsxAndRenderingModule } from "./modules/02-jsx-and-rendering";
 import { reactComponentsAndPropsModule } from "./modules/03-components-and-props";
+import { reactStateAndEventsModule } from "./modules/04-state-and-events";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -34,24 +35,7 @@ export const reactTrack: TrackDefinition = {
     reactFoundationsModule,
     reactJsxAndRenderingModule,
     reactComponentsAndPropsModule,
-    createComingSoonModule({
-      id: "react-state",
-      slug: "state-and-events",
-      title: "State & Events",
-      order: 4,
-      description:
-        "useState properly: what a state variable really is, why updates are asynchronous, and the batching behaviour that catches everyone once.",
-      topics: [
-        "useState, and what React stores between renders",
-        "State updates are queued, not immediate",
-        "Functional updates, and when you must use them",
-        "State is a snapshot: why your value looks stale inside a callback",
-        "Batching, and what changed about it in React 18",
-        "Updating objects and arrays without mutating them",
-        "Event handling, synthetic events, and event delegation",
-        "Choosing state shape: derived values that should not be state at all",
-      ],
-    }),
+    reactStateAndEventsModule,
     createComingSoonModule({
       id: "react-hooks-core",
       slug: "core-hooks",
