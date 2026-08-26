@@ -4,6 +4,7 @@ import { reactFoundationsModule } from "./modules/01-foundations";
 import { reactJsxAndRenderingModule } from "./modules/02-jsx-and-rendering";
 import { reactComponentsAndPropsModule } from "./modules/03-components-and-props";
 import { reactStateAndEventsModule } from "./modules/04-state-and-events";
+import { reactCoreHooksModule } from "./modules/05-core-hooks";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -36,24 +37,7 @@ export const reactTrack: TrackDefinition = {
     reactJsxAndRenderingModule,
     reactComponentsAndPropsModule,
     reactStateAndEventsModule,
-    createComingSoonModule({
-      id: "react-hooks-core",
-      slug: "core-hooks",
-      title: "The Hooks You Use Every Day",
-      order: 5,
-      description:
-        "useState, useEffect, useRef and useContext — what each is for, what it is not for, and the rules that make them work at all.",
-      topics: [
-        "Why hooks exist, and what they replaced",
-        "The Rules of Hooks, and the linked list that makes them necessary",
-        "useEffect: what an effect is, and when it runs",
-        "The dependency array, and the lint rule you should never silence",
-        "Cleanup functions, and why effects run twice in Strict Mode",
-        "useRef for DOM access and for values that survive a render",
-        "useContext, and reading shared data without prop drilling",
-        "Choosing between state, ref and a plain variable",
-      ],
-    }),
+    reactCoreHooksModule,
     createComingSoonModule({
       id: "react-lists-forms",
       slug: "lists-keys-forms",

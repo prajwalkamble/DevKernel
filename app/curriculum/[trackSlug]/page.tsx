@@ -59,7 +59,7 @@ export default async function TrackPage({ params }: TrackPageProps) {
     <div className="mx-auto max-w-4xl px-5 py-10 sm:px-6">
       <Link
         href="/curriculum"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-foreground"
+        className="mb-6 -ml-1.5 inline-flex min-h-9 items-center gap-1 rounded-md px-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
         All tracks

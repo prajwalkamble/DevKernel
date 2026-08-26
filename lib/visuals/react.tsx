@@ -694,6 +694,74 @@ function stateQueue(withUpdaters: boolean): Visualisation {
   };
 }
 
+/* ------------------------------------------------------- 11. hook slots -- */
+
+/**
+ * How a hook call finds its stored value, and what a condition does to that.
+ *
+ * The list is the real mechanism — React matches calls to entries by order of
+ * execution and by nothing else — so the animation runs that matching rather
+ * than illustrating it. The third render skips a call, and every later call
+ * reads the slot next door.
+ */
+function hookSlots(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+  const stored = ["Ada", "Grace", "36"];
+  const names = ["name", "middle", "age"];
+
+  const emit = (
+    items: { id: string; label: string; role?: Role }[],
+    pins: Record<number, string>,
+    note: string
+  ) => rec.push({ kind: "sequence", items, pins, note });
+
+  const slots = (roles: Record<number, Role> = {}) =>
+    stored.map((value, i) => ({ id: `s${i}`, label: value, role: roles[i] }));
+
+  emit(slots(), {}, "One list per component instance. Three hook calls claimed three slots on the first render.");
+
+  /* A render that calls all three: each call takes the next slot, and every
+     name lines up with the value it stored. */
+  for (let call = 0; call < 3; call++) {
+    rec.bump("reads");
+    emit(
+      slots({ [call]: "active" }),
+      { [call]: names[call] },
+      `Call ${call + 1} reads slot ${call} and gets "${stored[call]}". Correct.`
+    );
+  }
+
+  emit(slots(), {}, "Next render, the middle call sits behind an `if` that is now false.");
+
+  /* The same walk with the middle call skipped: the cursor still advances one
+     slot per call, so the third call lands on the second slot. */
+  const skipped = [0, 1];
+  const askedFor = ["name", "age"];
+  skipped.forEach((slot, i) => {
+    const wrong = askedFor[i] !== names[slot];
+    rec.bump("reads");
+    emit(
+      slots({ [slot]: wrong ? "unmounted" : "active" }),
+      { [slot]: askedFor[i] },
+      wrong
+        ? `Call ${i + 1} is \`age\` and reads slot ${slot} — which holds "${stored[slot]}". It gets somebody else's state, and nothing throws.`
+        : `Call ${i + 1} is \`${askedFor[i]}\` and reads slot ${slot}. Still correct.`
+    );
+  });
+
+  emit(
+    slots({ 1: "unmounted", 2: "discarded" }),
+    {},
+    "Slot 2 was never read, and `age` is now \"Grace\". React only notices when the total count changes."
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "Hook state is an ordered list, and calls are matched to entries by order of execution — no name, no key. Skipping one call shifts every later call up a slot, so a hook silently returns a different hook's value. React can only detect a change in the number of calls, which is why the rule is absolute.",
+  };
+}
+
 /* ------------------------------------------------------------------ table -- */
 
 export const REACT_ALGOS = {
@@ -746,6 +814,10 @@ export const REACT_ALGOS = {
   "queue-updaters": {
     label: "The update queue: updaters",
     run: () => stateQueue(true),
+  },
+  "hook-slots": {
+    label: "Hook slots and call order",
+    run: hookSlots,
   },
 } as const;
 
