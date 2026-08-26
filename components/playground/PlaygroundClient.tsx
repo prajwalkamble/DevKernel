@@ -258,7 +258,7 @@ function PaneTab({
       type="button"
       onClick={onClick}
       className={clsx(
-        "rounded-md px-3 py-1 text-xs font-semibold transition-colors cursor-pointer",
+        "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer",
         active ? "bg-accent-soft text-accent" : "text-muted hover:text-foreground"
       )}
     >

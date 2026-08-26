@@ -89,7 +89,7 @@ export function ProblemWorkspace({
                 aria-controls={`panel-${id}`}
                 onClick={() => setTab(id)}
                 className={clsx(
-                  "cursor-pointer rounded-md px-3 py-1 text-xs font-semibold transition-colors",
+                  "cursor-pointer rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
                   tab === id
                     ? "bg-accent-soft text-accent"
                     : "text-muted hover:bg-surface-hover hover:text-foreground"
