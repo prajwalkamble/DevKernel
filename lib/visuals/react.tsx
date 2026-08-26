@@ -238,7 +238,7 @@ const BEFORE = (
   <div>
     <h1 />
     <ul>
-      <Row />
+      <Row key="a" />
     </ul>
   </div>
 );
@@ -247,8 +247,8 @@ const AFTER_SAME = (
   <div>
     <h1 />
     <ul>
-      <Row />
-      <Row />
+      <Row key="a" />
+      <Row key="b" />
     </ul>
   </div>
 );
@@ -257,7 +257,7 @@ const AFTER_TYPE_CHANGED = (
   <div>
     <h1 />
     <section>
-      <Row />
+      <Row key="a" />
     </section>
   </div>
 );
@@ -300,10 +300,13 @@ function diff(
   roles.set(after.id, "unchanged");
   emit(`<${after.label}> has the same type in both trees, so React keeps it and looks at its children.`);
 
-  const keyed = after.children.some((c) => c.key !== null)
+  const matchedByKey = after.children.some((c) => c.key !== null)
     || before.children.some((c) => c.key !== null);
+  if (after.children.length > 0 && matchedByKey) {
+    emit(`Its children carry keys, so React matches them by key rather than by position.`);
+  }
 
-  if (keyed) {
+  if (matchedByKey) {
     const previous = new Map(before.children.filter((c) => c.key).map((c) => [c.key!, c]));
     for (const child of after.children) {
       diff(child.key ? previous.get(child.key) : undefined, child, roles, torn, emit);
@@ -337,7 +340,7 @@ function reconcileRun(after: ReactNode, opening: string, summary: string): Visua
   emit(
     torn.length
       ? `Done. ${torn.length === 1 ? "One subtree was" : `${torn.length} subtrees were`} destroyed: ${torn.map((t) => `<${t}>`).join(", ")}. Everything else kept its DOM node and its state.`
-      : "Done. Every node was matched by type and position, so nothing was destroyed."
+      : "Done. Every node found a match of the same type, so nothing was destroyed — the existing DOM nodes and their state were kept and only the new position was mounted."
   );
 
   return { frames: rec.frames, summary };
