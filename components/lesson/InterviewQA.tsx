@@ -12,7 +12,7 @@ export function InterviewQA({ questions }: { questions: InterviewQuestion[] }) {
         >
           <summary className="flex cursor-pointer list-none items-start gap-2 px-4 py-3 text-sm font-medium text-foreground marker:content-none">
             <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-            <span className="flex-1">{qa.question}</span>
+            <span className="min-w-0 flex-1">{qa.question}</span>
             <span className="text-muted transition-transform group-open:rotate-90">›</span>
           </summary>
           <div className="border-t border-border px-4 py-3 pl-10 text-sm leading-relaxed text-foreground/80">

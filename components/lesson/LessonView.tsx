@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Clock, Construction, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Lesson } from "@/content/types";
 import { getAdjacentLessons, getTrackBySlug, lessonBudgetLabel, lessonHref } from "@/content/tracks";
+import { ProseInline } from "./Prose";
 import { SectionBlock } from "./SectionBlock";
 import { InterviewQA } from "./InterviewQA";
 import { MarkCompleteButton } from "./MarkCompleteButton";
@@ -39,8 +40,10 @@ export function LessonView({ lesson, trackSlug }: { lesson: Lesson; trackSlug: s
             <ul className="space-y-1 text-sm text-foreground/80">
               {lesson.objectives.map((obj, i) => (
                 <li key={i} className="flex gap-2">
-                  <span className="text-accent">•</span>
-                  {obj}
+                  <span className="shrink-0 text-accent">•</span>
+                  <span className="min-w-0">
+                    <ProseInline text={obj} />
+                  </span>
                 </li>
               ))}
             </ul>
@@ -62,8 +65,10 @@ export function LessonView({ lesson, trackSlug }: { lesson: Lesson; trackSlug: s
           <ul className="space-y-1.5 text-sm text-foreground/85">
             {lesson.takeaways.map((t, i) => (
               <li key={i} className="flex gap-2">
-                <span className="text-accent">✓</span>
-                {t}
+                <span className="shrink-0 text-accent">✓</span>
+                <span className="min-w-0">
+                  <ProseInline text={t} />
+                </span>
               </li>
             ))}
           </ul>
@@ -95,7 +100,7 @@ export function LessonView({ lesson, trackSlug }: { lesson: Lesson; trackSlug: s
         {previous ? (
           <Link
             href={lessonHref(trackSlug, previous.moduleSlug, previous.slug)}
-            className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm transition-colors hover:bg-surface-hover"
+            className="flex min-w-0 items-center gap-2 rounded-lg border border-border p-3 text-sm transition-colors hover:bg-surface-hover"
           >
             <ChevronLeft className="h-4 w-4 shrink-0 text-muted" />
             <span className="min-w-0">
@@ -109,7 +114,7 @@ export function LessonView({ lesson, trackSlug }: { lesson: Lesson; trackSlug: s
         {next && (
           <Link
             href={lessonHref(trackSlug, next.moduleSlug, next.slug)}
-            className="flex items-center justify-end gap-2 rounded-lg border border-border p-3 text-right text-sm transition-colors hover:bg-surface-hover"
+            className="flex min-w-0 items-center justify-end gap-2 rounded-lg border border-border p-3 text-right text-sm transition-colors hover:bg-surface-hover"
           >
             <span className="min-w-0">
               <span className="block text-xs text-muted">Next</span>
