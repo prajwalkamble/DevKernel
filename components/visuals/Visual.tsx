@@ -76,6 +76,7 @@ export function Visual({ spec }: { spec: VisualSpec }) {
     case "pattern": return <FamilyVisual spec={spec} {...FAMILIES.pattern} />;
     case "tree-algorithm": return <FamilyVisual spec={spec} {...FAMILIES["tree-algorithm"]} />;
     case "bits-and-math": return <FamilyVisual spec={spec} {...FAMILIES["bits-and-math"]} />;
+    case "react-rendering": return <FamilyVisual spec={spec} {...FAMILIES["react-rendering"]} />;
     default: return <StructureVisual spec={spec} kind={spec.kind} />;
   }
 }

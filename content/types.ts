@@ -113,6 +113,9 @@ export type VisualKind =
   | "pattern"
   | "tree-algorithm"
   | "bits-and-math"
+  /* React's rendering model: element trees, the render/commit split,
+     reconciliation, and what a key does to a list. */
+  | "react-rendering"
   /* Individual data structures. */
   | "stack"
   | "queue"

@@ -22,6 +22,7 @@ import { STRING_ALGOS } from "./strings";
 import { PATTERN_ALGOS } from "./patterns";
 import { TREE_ALGOS } from "./trees";
 import { NUMBER_ALGOS } from "./numbers";
+import { REACT_ALGOS } from "./react";
 import {
   bstDemo, hashTableDemo, heapDemo, linkedListDemo, queueDemo, stackDemo, trieDemo,
 } from "./structures";
@@ -56,6 +57,7 @@ export const FAMILIES = {
   pattern: { table: PATTERN_ALGOS, fallback: "twopointers" },
   "tree-algorithm": { table: TREE_ALGOS, fallback: "inorder" },
   "bits-and-math": { table: NUMBER_ALGOS, fallback: "bitops" },
+  "react-rendering": { table: REACT_ALGOS, fallback: "element-tree" },
 } as const;
 
 export type FamilyKind = keyof typeof FAMILIES;

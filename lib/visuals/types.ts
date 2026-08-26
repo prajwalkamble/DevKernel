@@ -24,7 +24,16 @@ export type Role =
   | "active"
   | "window"
   | "discarded"
-  | "found";
+  | "found"
+  /* The React track's roles. Reconciliation has its own vocabulary — a node is
+     kept, updated in place, moved, created or destroyed — and borrowing
+     "swapping" or "in final place" for those would put the wrong word in the
+     legend under the animation. */
+  | "mounted"
+  | "updated"
+  | "unchanged"
+  | "unmounted"
+  | "moved";
 
 export interface ArrayFrame {
   kind: "array";
@@ -50,6 +59,14 @@ export interface TreeNode {
   parent?: string;
   /** Trie nodes that terminate a word are drawn differently. */
   terminal?: boolean;
+  /**
+   * A short caption under the node.
+   *
+   * A React element tree needs to show each child's `key` beside it, since the
+   * whole of reconciliation turns on those; the node circle itself only has
+   * room for the element's type.
+   */
+  badge?: string;
 }
 
 export interface TreeFrame {

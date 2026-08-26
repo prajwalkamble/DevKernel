@@ -201,7 +201,7 @@ export function TreeCanvas({ frame }: { frame: TreeFrame }) {
   const maxX = Math.max(...frame.nodes.map((n) => n.x));
   const maxDepth = Math.max(...frame.nodes.map((n) => n.depth));
   const colWidth = 54;
-  const rowHeight = 62;
+  const rowHeight = 68;
   const width = (maxX + 1) * colWidth;
   const height = (maxDepth + 1) * rowHeight;
   const at = (n: { x: number; depth: number }) => ({
@@ -240,6 +240,14 @@ export function TreeCanvas({ frame }: { frame: TreeFrame }) {
                 node.role && "fill-white dark:fill-black")}>
               {node.label}
             </text>
+            {/* The caption sits outside the circle, so it keeps the foreground
+                colour even when the node itself is filled by its role. */}
+            {node.badge && (
+              <text x={x} y={y + 27} textAnchor="middle"
+                className="fill-muted font-mono text-[9px]">
+                {node.badge}
+              </text>
+            )}
           </g>
         );
       })}
