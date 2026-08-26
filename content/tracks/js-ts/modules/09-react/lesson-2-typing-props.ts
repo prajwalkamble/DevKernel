@@ -203,6 +203,7 @@ function Alert(props: AlertProps) {
 
 // Passing retry to the info variant:
 const bad = <Alert variant="info" message="hi" retry={() => {}} />;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `c.tsx(14,48): error TS2322: Type '{ variant: "info"; message: string; retry: () => void; }' is not assignable to type 'IntrinsicAttributes & AlertProps'.
   Property 'retry' does not exist on type 'IntrinsicAttributes & { variant: "info"; message: string; }'.`,
           explanation:
@@ -237,6 +238,7 @@ function Card(props: CardProps) {
 }
 
 const bad = <Card title="x" subtitle="y" />;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `c.tsx(19,30): error TS2322: Type '{ title: string; subtitle: string; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
   Property 'subtitle' does not exist on type 'IntrinsicAttributes & CardProps'.`,
           explanation:
