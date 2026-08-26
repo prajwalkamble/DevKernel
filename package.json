@@ -14,8 +14,8 @@
     "lint": "eslint",
     "verify:code": "node scripts/verify-lesson-code.mjs",
     "verify": "next typegen && tsc --noEmit && eslint . && npm run verify:frames",
-  "verify:frames": "tsx scripts/verify-visual-frames.ts",
-  "verify:visuals": "node scripts/verify-visual-playback.mjs"
+    "verify:frames": "tsx scripts/verify-visual-frames.ts",
+    "verify:visuals": "node scripts/verify-visual-playback.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -31,11 +31,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "jsdom": "^26.1.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5",

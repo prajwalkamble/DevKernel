@@ -28,6 +28,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const ROOT = process.cwd();
 
@@ -308,12 +309,23 @@ function reactRoot(code) {
 /**
  * Renders a React example to the HTML the page claims it produces.
  *
- * `renderToStaticMarkup` is the right level for this track: it is React's own
- * renderer, so `className` becoming `class`, and a `0` appearing where `&&`
- * short-circuited, are the real behaviours rather than a re-implementation of
- * them. It renders once, which covers JSX, props, composition, lists and keys.
- * It does not run effects and does not re-render, so a lesson about updates
- * prints from the example itself instead.
+ * Two modes, chosen by what the example reaches for.
+ *
+ * By default it is rendered once with `renderToStaticMarkup`. That is React's
+ * own renderer, so `className` becoming `class`, and a `0` appearing where
+ * `&&` short-circuited, are real behaviours rather than a re-implementation of
+ * them — and it covers JSX, props, composition, lists and keys, which is most
+ * of the track.
+ *
+ * An example that mentions the DOM, `react-dom/client` or `act` gets a real
+ * one, from jsdom, loaded through node's `--import` so it is installed before
+ * the example is evaluated. Such an example drives React itself: mount, click,
+ * set state, print what changed. That is the only way to show a *re-render*,
+ * which is the whole subject of several modules, and the reason the state
+ * lessons can demonstrate rather than assert.
+ *
+ * The DOM roughly doubles the time an example takes, hence loading it only for
+ * the ones that say they want it.
  */
 function runReact(lang, code) {
   mkdirSync(reactWork, { recursive: true });
@@ -346,12 +358,18 @@ function runReact(lang, code) {
     .filter(Boolean)
     .join("\n");
   writeFileSync(file, `${code}\n${harness}\n`);
+  // `--tsconfig` cannot be used alongside `--import`: tsx forwards the latter
+  // to node, and node then rejects the former as an unknown flag. The
+  // environment variable is the same setting by another route.
+  const needsDom = /react-dom\/client|\bdocument\b|\bwindow\b|\bact\s*\(/.test(code);
+  const domEnv = pathToFileURL(path.join(ROOT, "scripts", "react-dom-env.mjs")).href;
   const result = spawnSync(
     path.join(ROOT, "node_modules", ".bin", "tsx"),
-    ["--tsconfig", tsconfig, file],
+    needsDom ? ["--import", domEnv, file] : [file],
     {
       encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
       cwd: ROOT,
+      env: { ...process.env, TSX_TSCONFIG_PATH: tsconfig },
     }
   );
   return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
