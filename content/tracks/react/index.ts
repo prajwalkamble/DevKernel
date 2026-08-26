@@ -1,6 +1,7 @@
 import type { TrackDefinition } from "@/content/types";
 import { createComingSoonModule } from "@/content/comingSoon";
 import { reactFoundationsModule } from "./modules/01-foundations";
+import { reactJsxAndRenderingModule } from "./modules/02-jsx-and-rendering";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -30,24 +31,7 @@ export const reactTrack: TrackDefinition = {
   runnable: true,
   modules: [
     reactFoundationsModule,
-    createComingSoonModule({
-      id: "react-jsx",
-      slug: "jsx-and-rendering",
-      title: "JSX & Rendering in Depth",
-      order: 2,
-      description:
-        "What JSX actually compiles to, how React turns a tree of elements into DOM, and why the render/commit split explains most of React's surprising behaviour.",
-      topics: [
-        "JSX as syntax sugar: what the compiler emits, and the automatic runtime",
-        "Elements against components, and why an element is a plain object",
-        "Expressions in JSX: conditionals, &&, ternaries and the falsy-render trap",
-        "Attributes against props: className, htmlFor, style and the DOM naming rules",
-        "Fragments, and rendering several children without a wrapper",
-        "The render phase and the commit phase, and what runs in each",
-        "The virtual DOM and reconciliation, explained without the marketing",
-        "Rendering lists, and what a key actually does",
-      ],
-    }),
+    reactJsxAndRenderingModule,
     createComingSoonModule({
       id: "react-props",
       slug: "components-and-props",
