@@ -13,9 +13,17 @@ const dom = new JSDOM('<!doctype html><html><body></body></html>', {
   pretendToBeVisual: true,
 });
 
+/*
+ * `FormData` matters more than it looks. Node has its own global from undici,
+ * and it throws `Argument 1 could not be converted` when handed a jsdom form —
+ * so the form lessons need jsdom's, and it has to overwrite rather than fill a
+ * gap. The same reasoning covers any other name Node happens to define.
+ */
 for (const name of ["window", "document", "Node", "Element", "HTMLElement", "Event",
   "MouseEvent", "KeyboardEvent", "CustomEvent", "getComputedStyle", "requestAnimationFrame",
-  "cancelAnimationFrame", "DocumentFragment", "HTMLInputElement"]) {
+  "cancelAnimationFrame", "DocumentFragment", "HTMLInputElement", "HTMLFormElement",
+  "HTMLSelectElement", "HTMLTextAreaElement", "HTMLButtonElement", "HTMLOptionElement",
+  "FormData", "SubmitEvent", "InputEvent", "FocusEvent", "File", "Blob", "DataTransfer"]) {
   if (dom.window[name] !== undefined) {
     Object.defineProperty(globalThis, name, {
       value: dom.window[name], writable: true, configurable: true,

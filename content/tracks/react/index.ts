@@ -5,6 +5,7 @@ import { reactJsxAndRenderingModule } from "./modules/02-jsx-and-rendering";
 import { reactComponentsAndPropsModule } from "./modules/03-components-and-props";
 import { reactStateAndEventsModule } from "./modules/04-state-and-events";
 import { reactCoreHooksModule } from "./modules/05-core-hooks";
+import { reactListsKeysFormsModule } from "./modules/06-lists-keys-forms";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -38,24 +39,7 @@ export const reactTrack: TrackDefinition = {
     reactComponentsAndPropsModule,
     reactStateAndEventsModule,
     reactCoreHooksModule,
-    createComingSoonModule({
-      id: "react-lists-forms",
-      slug: "lists-keys-forms",
-      title: "Lists, Keys & Forms",
-      order: 6,
-      description:
-        "Rendering collections correctly, and the controlled-input model that makes React forms behave differently from HTML ones.",
-      topics: [
-        "Rendering arrays, and choosing a key that is actually stable",
-        "The index-as-key bug, demonstrated rather than asserted",
-        "Controlled against uncontrolled inputs",
-        "Text inputs, checkboxes, radios, selects and textareas",
-        "Form submission, preventDefault, and the platform form APIs",
-        "Validation, error state, and showing errors at the right moment",
-        "Resetting a component with a key, instead of an effect",
-        "When to reach for a form library, and what it buys you",
-      ],
-    }),
+    reactListsKeysFormsModule,
     createComingSoonModule({
       id: "react-effects",
       slug: "effects-and-data",
