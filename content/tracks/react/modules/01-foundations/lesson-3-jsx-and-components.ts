@@ -159,7 +159,7 @@ function Truthy() {
       heading: "Writing a component",
       body: [
         "Two rules make a function a component, and both are enforced.",
-        "**It must return JSX** (or `null`). Returning `undefined` is an error.",
+        "**It must return something renderable.** JSX, `null`, a string, a number, an array of elements — or nothing at all. A function with no `return` used to be an error; since React 18 it renders as nothing, exactly like `null`. Returning `null` still says \"I have decided to show nothing\" more clearly than falling off the end of a function does.",
         "**Its name must start with a capital letter.** This is not a style preference — it is how the compiler distinguishes the two cases. `<button />` compiles to `jsx(\"button\", …)`, passing a *string*, which means a DOM element. `<Button />` compiles to `jsx(Button, …)`, passing the *function itself*. A lowercase component name is silently treated as an unknown HTML tag, and the resulting error message rarely points at the real cause.",
       ],
       examples: [
