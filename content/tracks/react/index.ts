@@ -7,6 +7,7 @@ import { reactStateAndEventsModule } from "./modules/04-state-and-events";
 import { reactCoreHooksModule } from "./modules/05-core-hooks";
 import { reactListsKeysFormsModule } from "./modules/06-lists-keys-forms";
 import { reactEffectsAndDataModule } from "./modules/07-effects-and-data";
+import { reactContextAndStateModule } from "./modules/08-context-and-state";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -42,24 +43,7 @@ export const reactTrack: TrackDefinition = {
     reactCoreHooksModule,
     reactListsKeysFormsModule,
     reactEffectsAndDataModule,
-    createComingSoonModule({
-      id: "react-context",
-      slug: "context-and-state-architecture",
-      title: "Composition, Context & State Architecture",
-      order: 8,
-      description:
-        "Where state should live in a real application, and the tools for sharing it without turning every component into a re-render trigger.",
-      topics: [
-        "Prop drilling, and when it is genuinely fine",
-        "Context: creating, providing and consuming",
-        "Why context is not a state manager, and what it costs on update",
-        "useReducer, and state that changes in more than one way",
-        "Combining reducer and context into a small store",
-        "Splitting contexts to limit re-renders",
-        "Choosing between local state, lifted state, context and a store",
-        "Zustand, Redux Toolkit and Jotai, and when each earns its place",
-      ],
-    }),
+    reactContextAndStateModule,
     createComingSoonModule({
       id: "react-performance",
       slug: "rendering-and-performance",

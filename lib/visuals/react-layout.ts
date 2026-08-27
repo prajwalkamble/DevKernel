@@ -443,6 +443,82 @@ function colocate(): Visualisation {
   };
 }
 
+/* --------------------------------------------------- 5. where state lives -- */
+
+/**
+ * One feature's state, placed a file at a time.
+ *
+ * The tree is built from paths like every other listing here, so the claim
+ * being made — that each kind of state has one obvious home and nothing needs
+ * a top-level `store/` — is visible as a shape rather than asserted in prose.
+ */
+const STATE_FILES: { path: string; note: string; when: string }[] = [
+  {
+    path: "features/cart/CartPage.tsx",
+    note: "useState for what only it needs",
+    when: "Start at the leaf. Whether a row is expanded, what is typed in a field, whether a menu is open — that is useState in the component, and most state never leaves here.",
+  },
+  {
+    path: "features/cart/cartReducer.ts",
+    note: "(state, action) => state",
+    when: "When the transitions get rules — merge quantities, refuse a duplicate, clear on checkout — they move into a reducer. It is a plain function, so it sits in its own file and is tested by calling it.",
+  },
+  {
+    path: "features/cart/CartProvider.tsx",
+    note: "useReducer + two providers",
+    when: "The provider is the only place the reducer is wired to React. It creates the state and publishes it — as two contexts, so a component that only dispatches does not re-render when the value changes.",
+  },
+  {
+    path: "features/cart/useCart.ts",
+    note: "the hook components import",
+    when: "One hook per context, each throwing when there is no provider above it. Components import these and never import the context objects — which is what lets the internals change without touching a caller.",
+  },
+  {
+    path: "features/cart/index.ts",
+    note: "the feature's front door",
+    when: "The barrel exports the provider and the hooks, and nothing else. cartReducer and the context objects stay internal.",
+  },
+  {
+    path: "app/providers.tsx",
+    note: "where the providers are nested",
+    when: "One file that nests every provider the app has. Without it, App.tsx accumulates a staircase of providers and every new feature deepens it.",
+  },
+  {
+    path: "shared/stores/session.ts",
+    note: "a store, no provider needed",
+    when: "State that is genuinely global and read by unrelated features — the signed-in user, the theme — is a store rather than a context. It needs no provider, so it does not appear in the tree at all.",
+  },
+];
+
+function stateLayout(): Visualisation {
+  const rec = new Recorder<FileTreeFrame>();
+  const placed: SrcFile[] = [];
+
+  const emit = (note: string) =>
+    rec.push({ kind: "filetree", root: "src/", entries: rollUp(listing(placed)), note });
+
+  placed.push({ path: "features/cart/CartPage.tsx", note: STATE_FILES[0].note, role: "created" });
+  emit(STATE_FILES[0].when);
+
+  for (const step of STATE_FILES.slice(1)) {
+    for (const file of placed) file.role = undefined;
+    placed.push({ path: step.path, note: step.note, role: "created" });
+    rec.bump("files");
+    emit(step.when);
+  }
+
+  for (const file of placed) file.role = undefined;
+  emit(
+    "Seven files, and no top-level store/ directory. Each kind of state sits with the feature that owns it, and only the two genuinely app-wide things live outside."
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "State architecture is mostly a filing question. Component state stays in the component; a reducer becomes a plain function in its own file; the provider is the single place that wires it to React; and hooks are what the rest of the feature imports, so the context objects never leave the folder. A top-level store/ directory is the thing to avoid — it pulls every feature's state into one place that every feature then depends on.",
+  };
+}
+
 /* ------------------------------------------------------------------- table -- */
 
 export const REACT_LAYOUT_ALGOS = {
@@ -461,6 +537,10 @@ export const REACT_LAYOUT_ALGOS = {
   colocate: {
     label: "Colocating one component",
     run: colocate,
+  },
+  "state-layout": {
+    label: "Where a feature's state lives",
+    run: stateLayout,
   },
 } as const;
 
