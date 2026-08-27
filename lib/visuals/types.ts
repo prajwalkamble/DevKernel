@@ -33,7 +33,13 @@ export type Role =
   | "updated"
   | "unchanged"
   | "unmounted"
-  | "moved";
+  | "moved"
+  /* Project layout has its own two. A file that did not exist before is
+     "created", not "mounted" — mounting is something React does to a component,
+     and a legend that said so under a directory listing would be teaching the
+     wrong word at the moment the reader is looking for the right one. */
+  | "created"
+  | "deleted";
 
 export interface ArrayFrame {
   kind: "array";
@@ -155,6 +161,42 @@ export interface MatrixFrame {
   stats?: Record<string, number>;
 }
 
+/**
+ * One row of a project tree: a file or a directory, at some indent depth.
+ *
+ * Deliberately flat rather than nested, for the same reason `TreeNode` carries
+ * its own `depth` and `x`: a frame has to be a complete, self-describing
+ * snapshot, and a renderer that had to walk a nested structure to work out
+ * indentation would be recomputing layout on every frame.
+ */
+export interface FileEntry {
+  id: string;
+  /** The base name. Directories carry their trailing slash in the name. */
+  name: string;
+  depth: number;
+  kind: "dir" | "file";
+  role?: Role;
+  /** What this file is for, shown to the right of the name. */
+  note?: string;
+}
+
+/**
+ * A directory listing, which is what a folder-structure question is really
+ * about.
+ *
+ * Drawn as an indented list rather than as a `TreeFrame`, because a project
+ * layout is read the way `tree` prints it — every row is a path, and the
+ * interesting comparison is between two *listings*, not between two graphs.
+ */
+export interface FileTreeFrame {
+  kind: "filetree";
+  entries: FileEntry[];
+  /** The directory everything below is relative to, e.g. `my-app/`. */
+  root?: string;
+  note: string;
+  stats?: Record<string, number>;
+}
+
 export type Frame =
   | ArrayFrame
   | TreeFrame
@@ -162,7 +204,8 @@ export type Frame =
   | HeapFrame
   | BucketFrame
   | GraphFrame
-  | MatrixFrame;
+  | MatrixFrame
+  | FileTreeFrame;
 
 /** Key for `MatrixFrame.roles`. */
 export function cellKey(row: number, col: number): string {

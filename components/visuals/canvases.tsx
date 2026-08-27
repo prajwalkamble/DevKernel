@@ -4,6 +4,7 @@ import clsx from "clsx";
 import type {
   ArrayFrame,
   BucketFrame,
+  FileTreeFrame,
   GraphFrame,
   HeapFrame,
   MatrixFrame,
@@ -458,6 +459,96 @@ export function MatrixCanvas({ frame }: { frame: MatrixFrame }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- file tree -- */
+
+/**
+ * A project layout, drawn the way `tree` prints one.
+ *
+ * The connectors are computed here rather than shipped in the frame: whether a
+ * row is the last child at its depth is a fact about the *listing*, so deriving
+ * it keeps a generator from having to restate the shape it already described by
+ * ordering the entries.
+ */
+function connectors(entries: { depth: number }[]): string[] {
+  const last = entries.map((entry, i) => {
+    for (let j = i + 1; j < entries.length; j++) {
+      if (entries[j].depth < entry.depth) break;
+      if (entries[j].depth === entry.depth) return false;
+    }
+    return true;
+  });
+
+  return entries.map((entry, i) => {
+    if (entry.depth === 0) return "";
+    let prefix = "";
+    // One column per ancestor level: a pipe when that ancestor has more
+    // siblings below this row, blank when it was the last of its own.
+    for (let depth = 1; depth < entry.depth; depth++) {
+      let open = false;
+      for (let j = i + 1; j < entries.length; j++) {
+        if (entries[j].depth < depth) break;
+        if (entries[j].depth === depth) { open = true; break; }
+      }
+      prefix += open ? "│   " : "    ";
+    }
+    return prefix + (last[i] ? "└── " : "├── ");
+  });
+}
+
+export function FileTreeCanvas({ frame }: { frame: FileTreeFrame }) {
+  if (frame.entries.length === 0) return <EmptyState />;
+  const rails = connectors(frame.entries);
+
+  return (
+    <div className="overflow-x-auto py-1" role="img" aria-label={frame.note}>
+      <div className="min-w-max font-mono text-xs leading-6">
+        {frame.root && (
+          <div className="font-medium text-muted">{frame.root}</div>
+        )}
+        {frame.entries.map((entry, i) => (
+          <div
+            key={entry.id}
+            className={clsx(
+              "flex items-baseline gap-1.5 rounded px-1 transition-colors",
+              entry.role && `bg-surface-hover ring-1 ${ROLE_RING[entry.role]}`
+            )}
+          >
+            {/* A dot rather than a filled row: a project listing is mostly
+                text, and flooding a full-width row with a role colour makes
+                the names harder to read than the highlight is worth. */}
+            <span
+              aria-hidden
+              className={clsx(
+                "h-1.5 w-1.5 shrink-0 self-center rounded-full",
+                entry.role ? ROLE_FILL[entry.role] : "bg-transparent"
+              )}
+            />
+            <span className="whitespace-pre">
+              <span className="text-border">{rails[i]}</span>
+              <span
+                className={clsx(
+                  entry.role
+                    ? `${ROLE_TEXT[entry.role]} font-semibold`
+                    : entry.kind === "dir"
+                      ? "font-medium text-foreground"
+                      : "text-muted"
+                )}
+              >
+                {entry.name}
+              </span>
+            </span>
+            {entry.note && (
+              <span className="ml-auto whitespace-nowrap pl-6 text-[11px] text-muted">
+                {entry.note}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

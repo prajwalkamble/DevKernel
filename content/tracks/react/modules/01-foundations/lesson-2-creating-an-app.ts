@@ -38,7 +38,7 @@ npm create vite@latest my-app -- --template react-ts
 cd my-app
 npm install
 npm run dev`,
-          output: `  VITE v7.1.0  ready in 214 ms
+          output: `  VITE v8.2.2  ready in 959 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
@@ -58,28 +58,60 @@ npm run dev`,
       id: "the-files",
       heading: "What every file is for",
       body: [
-        "A fresh project has about a dozen files and none of them are mysterious. Knowing what each one does is worth five minutes now and saves an hour later.",
+        "A fresh project is eighteen files and none of them are mysterious. Knowing what each one does is worth five minutes now and saves an hour later.",
+        "Step through the listing below. The shape to hold on to is that **everything at the root is configuration and everything in `src/` is your code** — and that the generator has deliberately not invented a folder structure for you.",
       ],
+      visual: {
+        id: "vite-scaffold-visual",
+        kind: "react-structure",
+        algorithm: "scaffold",
+        lockAlgorithm: true,
+        title: "Every file create-vite writes, and why",
+      },
       examples: [
         {
           id: "project-tree",
           title: "The generated project",
           lang: "bash",
           code: `my-app/
-├── index.html          <- the real HTML page; the app mounts into it
-├── package.json        <- dependencies and the npm scripts
-├── vite.config.ts      <- build configuration (usually one plugin, nothing more)
-├── tsconfig.json       <- TypeScript settings
-├── public/             <- files served as-is, never processed
-│   └── vite.svg
+├── .gitignore           <- node_modules, dist, editor noise
+├── .oxlintrc.json       <- lint rules; rules-of-hooks is set to error
+├── README.md            <- the four commands, nothing more
+├── index.html           <- the real HTML page; the app mounts into it
+├── package.json         <- dependencies and the npm scripts
+├── tsconfig.json        <- empty; it only references the other two
+├── tsconfig.app.json    <- TypeScript settings for src/
+├── tsconfig.node.json   <- TypeScript settings for vite.config.ts
+├── vite.config.ts       <- build configuration (one plugin, nothing more)
+├── public/              <- served as-is, never processed
+│   ├── favicon.svg
+│   └── icons.svg
 └── src/
-    ├── main.tsx        <- the entry point: this is where React starts
-    ├── App.tsx         <- the root component
-    ├── App.css         <- styles for App
-    ├── index.css       <- global styles
-    └── assets/         <- images imported by code, and processed`,
+    ├── main.tsx         <- the entry point: this is where React starts
+    ├── App.tsx          <- the root component
+    ├── App.css          <- styles for App
+    ├── index.css        <- global styles
+    └── assets/          <- images imported by code, and processed
+        ├── hero.png
+        ├── react.svg
+        └── vite.svg`,
           explanation:
-            "The distinction between `public/` and `src/assets/` catches people out. A file in `public/` is copied to the output untouched and referenced by URL (`/vite.svg`). A file in `src/assets/` is *imported by your code*, which lets the build hash it, inline it if small, and fail loudly if it is missing.",
+            "The distinction between `public/` and `src/assets/` catches people out. A file in `public/` is copied to the output untouched and referenced by URL (`/favicon.svg`); if you misspell it you get a 404 at runtime. A file in `src/assets/` is *imported by your code*, which lets the build hash it, inline it if small, and fail the build if it is missing. Prefer `src/assets/` for exactly that reason.",
+        },
+        {
+          id: "three-tsconfigs",
+          title: "Why there are three tsconfig files",
+          lang: "json",
+          code: `// tsconfig.json — compiles nothing; it points at the other two.
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}`,
+          explanation:
+            "A React project has **two different environments in one directory**. The code in `src/` runs in a browser and needs DOM types and `\"jsx\": \"react-jsx\"`. `vite.config.ts` runs in Node, before a browser is involved, and needs neither. One config cannot describe both without lying about one of them, so the scaffold splits them and leaves the root file as a pointer. `npm run build` runs `tsc -b`, which builds both projects. If a type error ever appears in a file you did not think was being checked, this is why.",
         },
         {
           id: "index-html",
@@ -89,19 +121,23 @@ npm run dev`,
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>my-app</title>
   </head>
   <body>
-    <!-- React renders everything inside this one element. -->
     <div id="root"></div>
-
-    <!-- Note: a module script pointing at TypeScript source, not a bundle. -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>`,
           explanation:
-            "This is the whole page a visitor's browser receives. **Everything you build lives inside that one empty div**, put there by JavaScript after the page loads — which is exactly what client-side rendering means, and exactly what Server Components and Next.js later change.",
+            "This is the whole page a visitor's browser receives. **Everything you build lives inside that one empty div**, put there by JavaScript after the page loads — which is exactly what client-side rendering means, and exactly what Server Components and Next.js later change. Note the script tag: a module script pointing at TypeScript source, not at a bundle. The dev server compiles it on request.",
+        },
+      ],
+      pitfalls: [
+        {
+          title: "`create-vite` gives you no folder structure, and that is deliberate",
+          body: "There is no `components/`, no `hooks/`, no `routes/`. Every tutorial invents one in its first five minutes and they all invent a different one. The generator refuses to guess because the right structure depends on what you are building — module 3 covers the two layouts worth knowing and when each stops working.",
         },
       ],
     },
@@ -116,16 +152,16 @@ npm run dev`,
           id: "main-tsx",
           title: "src/main.tsx",
           lang: "tsx",
-          code: `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.tsx";
+          code: `import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-  </StrictMode>
-);`,
+  </StrictMode>,
+)`,
           explanation:
             "`createRoot` takes a real DOM node and returns a React root — the boundary between the DOM React controls and the DOM it must not touch. `render` gives that root a tree to display. The `!` is TypeScript's non-null assertion: `getElementById` might return null, and here we are asserting it does not because the div is right there in index.html.",
         },
@@ -194,23 +230,33 @@ function ChatFixed() {
           title: "The four scripts you get",
           lang: "bash",
           code: `npm run dev        # dev server with hot module replacement
-npm run build      # type-check, then produce dist/
+npm run build      # tsc -b, then produce dist/
 npm run preview    # serve dist/ locally, as production would
-npm run lint       # ESLint, including the React hooks rules`,
-          output: `vite v7.1.0 building for production...
-✓ 34 modules transformed.
-dist/index.html                   0.46 kB │ gzip:  0.30 kB
-dist/assets/index-D1x9k2Qs.css    1.39 kB │ gzip:  0.71 kB
-dist/assets/index-B7hK3mNp.js   188.44 kB │ gzip: 59.32 kB
-✓ built in 612ms`,
+npm run lint       # oxlint, with the rules-of-hooks rule set to error`,
+          output: `> my-app@0.0.0 build
+> tsc -b && vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 20 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.45 kB │ gzip:  0.29 kB
+dist/assets/react-CHdo91hT.svg    4.12 kB │ gzip:  2.06 kB
+dist/assets/vite-BF8QNONU.svg     8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png    13.05 kB
+dist/assets/index-D64VDMd1.css    4.10 kB │ gzip:  1.47 kB
+dist/assets/index-CP6jzYRJ.js   193.28 kB │ gzip: 60.63 kB
+
+✓ built in 483ms`,
           explanation:
-            "Sizes are illustrative. The number worth internalising is the last one: an empty React application is around 60 KB gzipped before you write a line of your own. That is the entry fee, and it is the main argument the smaller alternatives make against React.",
+            "Two things to read out of that. The hashes in the filenames are content hashes, which is what lets a CDN cache them forever — change the file and the name changes with it. And the number worth internalising is the last one: **an empty React application is around 60 KB gzipped before you write a line of your own**. That is the entry fee, and it is the main argument the smaller alternatives make against React. Note also which linter ran: newer scaffolds ship `oxlint` rather than ESLint. The rule you actually care about, `rules-of-hooks`, is on either way — module 5 explains why it is not optional.",
         },
       ],
       pitfalls: [
         {
           title: "`npm run build` type-checks; `npm run dev` does not",
-          body: "Vite strips TypeScript types without checking them, because checking is slow and the dev server prioritises speed. That means a type error can sit in your code all afternoon and only surface when you build. Keep your editor's TypeScript service running, and do not let `npm run build` be the first thing that ever type-checks your work.",
+          body: "Vite strips TypeScript types without checking them, because checking is slow and the dev server prioritises speed. The check is the `tsc -b` half of the build script, and it is the only place it happens. That means a type error can sit in your code all afternoon and only surface when you build. Keep your editor's TypeScript service running, and do not let `npm run build` be the first thing that ever type-checks your work.",
         },
       ],
     },
@@ -235,7 +281,9 @@ dist/assets/index-B7hK3mNp.js   188.44 kB │ gzip: 59.32 kB
   takeaways: [
     "Create React App is deprecated — use Vite for learning and client-rendered apps, or Next.js for products",
     "`index.html` contains one empty div; everything you build is inserted into it by JavaScript, which is what client-side rendering means",
-    "`public/` is copied verbatim and referenced by URL; `src/assets/` is imported by code and processed by the build",
+    "`public/` is copied verbatim and referenced by URL, so a typo is a runtime 404; `src/assets/` is imported by code, so a typo is a build error",
+    "There are three tsconfig files because `src/` runs in a browser and `vite.config.ts` runs in Node — the root one compiles nothing and only references the other two",
+    "The scaffold deliberately invents no folder structure; that decision is yours, and module 3 covers it",
     "`createRoot(node).render(tree)` is the seam between the page and React",
     "StrictMode is development-only and doubles renders and effects on purpose — the doubled log is a symptom of missing cleanup, not a bug to silence",
     "The dev server offers hot module replacement, which preserves state across edits; the production build is a separate output you should test before shipping",

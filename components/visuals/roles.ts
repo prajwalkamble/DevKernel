@@ -22,6 +22,8 @@ export const ROLE_FILL: Record<Role, string> = {
   unchanged: "bg-surface",
   unmounted: "bg-rose-500 dark:bg-rose-400",
   moved: "bg-violet-500 dark:bg-violet-400",
+  created: "bg-teal-500 dark:bg-teal-400",
+  deleted: "bg-orange-500 dark:bg-orange-400",
 };
 
 export const ROLE_TEXT: Record<Role, string> = {
@@ -38,6 +40,8 @@ export const ROLE_TEXT: Record<Role, string> = {
   unchanged: "text-muted",
   unmounted: "text-rose-700 dark:text-rose-300",
   moved: "text-violet-700 dark:text-violet-300",
+  created: "text-teal-700 dark:text-teal-300",
+  deleted: "text-orange-700 dark:text-orange-300",
 };
 
 export const ROLE_RING: Record<Role, string> = {
@@ -54,6 +58,8 @@ export const ROLE_RING: Record<Role, string> = {
   unchanged: "ring-border",
   unmounted: "ring-rose-500",
   moved: "ring-violet-500",
+  created: "ring-teal-500",
+  deleted: "ring-orange-500",
 };
 
 /** The legend shown under a player, filtered to the roles a run actually uses. */
@@ -71,6 +77,8 @@ export const ROLE_LABEL: Record<Role, string> = {
   unchanged: "reused untouched",
   unmounted: "unmounted",
   moved: "moved",
+  created: "created",
+  deleted: "deleted",
 };
 
 /**
@@ -95,6 +103,8 @@ export const ROLE_SVG_FILL: Record<Role, string> = {
   unchanged: "fill-surface",
   unmounted: "fill-rose-500 dark:fill-rose-400",
   moved: "fill-violet-500 dark:fill-violet-400",
+  created: "fill-teal-500 dark:fill-teal-400",
+  deleted: "fill-orange-500 dark:fill-orange-400",
 };
 
 /** Edge strokes, written out for the same reason `ROLE_SVG_FILL` is. */
@@ -112,4 +122,6 @@ export const ROLE_STROKE: Record<Role, string> = {
   unchanged: "stroke-border",
   unmounted: "stroke-rose-500 dark:stroke-rose-400",
   moved: "stroke-violet-500 dark:stroke-violet-400",
+  created: "stroke-teal-500 dark:stroke-teal-400",
+  deleted: "stroke-orange-500 dark:stroke-orange-400",
 };

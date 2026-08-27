@@ -181,6 +181,7 @@ function App() {
         "Each piece has a name, so a stack trace and the DevTools tree now say `LineRow` instead of pointing at line 47 of `App`.",
         "The seams match the reasons to change: a designer altering the header does not open the file that computes the total.",
         "And `App` reads as the shape of the page. That is the real benefit, and it is why splitting by *meaning* beats splitting by length — a component that is short because a chunk was moved out arbitrarily is no easier to understand than the long one was.",
+        "One thing this refactor deliberately did not decide: which *files* those three components live in. Splitting a component and placing the file are separate questions, and the next lesson answers the second one — including the point at which a flat `components/` folder stops working.",
       ],
     },
   ],

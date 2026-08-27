@@ -6,6 +6,7 @@ import { reactComponentsAndPropsModule } from "./modules/03-components-and-props
 import { reactStateAndEventsModule } from "./modules/04-state-and-events";
 import { reactCoreHooksModule } from "./modules/05-core-hooks";
 import { reactListsKeysFormsModule } from "./modules/06-lists-keys-forms";
+import { reactEffectsAndDataModule } from "./modules/07-effects-and-data";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -40,24 +41,7 @@ export const reactTrack: TrackDefinition = {
     reactStateAndEventsModule,
     reactCoreHooksModule,
     reactListsKeysFormsModule,
-    createComingSoonModule({
-      id: "react-effects",
-      slug: "effects-and-data",
-      title: "Effects, Lifecycle & Data Fetching",
-      order: 7,
-      description:
-        "The module that fixes most React bugs: when you actually need an effect, when you do not, and how to fetch data without race conditions.",
-      topics: [
-        "You might not need an effect: the cases that should be plain logic",
-        "Synchronising with an external system, which is what effects are for",
-        "Fetching in an effect, and the race condition nobody sees in development",
-        "Cleanup, AbortController, and cancelling in flight",
-        "Loading, error and empty states as first-class UI",
-        "Subscriptions, timers, and event listeners done properly",
-        "useLayoutEffect, and the one case where it is the right answer",
-        "Why a data-fetching library exists, and what it removes",
-      ],
-    }),
+    reactEffectsAndDataModule,
     createComingSoonModule({
       id: "react-context",
       slug: "context-and-state-architecture",

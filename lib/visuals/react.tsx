@@ -762,7 +762,731 @@ function hookSlots(): Visualisation {
   };
 }
 
+/* ------------------------------------------------------- 12. effect timing -- */
+
+/**
+ * Where an effect runs relative to the paint, and what a cleanup interleaves
+ * with.
+ *
+ * The pipeline below is a table walked by a loop, and every frame is one entry
+ * of it — so the order shown is the order written down once, in one place,
+ * rather than restated per frame. The two things worth taking away are both
+ * positional: `useLayoutEffect` sits before the paint and `useEffect` after
+ * it, and on an update the *previous* effect's cleanup runs before the next
+ * effect, not at the end.
+ */
+interface Stage {
+  label: string;
+  /** What the user can see once this stage is done. */
+  screen: string;
+  note: string;
+}
+
+function effectPipeline(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+
+  const mount: Stage[] = [
+    { label: "render", screen: "blank", note: "Render. React calls the component, which returns elements. Nothing is on screen, and this may be discarded and redone." },
+    { label: "commit", screen: "blank", note: "Commit. React applies the tree to the DOM. The nodes exist now — but the browser has not drawn them yet." },
+    { label: "layout effect", screen: "blank", note: "useLayoutEffect runs, synchronously, before the browser paints. It can measure the DOM and set state, and the user will never see the intermediate frame." },
+    { label: "paint", screen: "first paint", note: "The browser paints. This is the first moment anything is visible — and every millisecond spent above delayed it." },
+    { label: "effect", screen: "first paint", note: "useEffect runs, after the paint. That is the whole difference: it cannot block what the user sees, so it is the right place for anything that is not measuring layout." },
+  ];
+
+  const update: Stage[] = [
+    { label: "render", screen: "old value", note: "Something changed, so React renders again. The screen still shows the previous value." },
+    { label: "commit", screen: "new value", note: "Commit. The DOM is updated." },
+    { label: "cleanup", screen: "new value", note: "Cleanup for the *previous* effect runs first — with the previous render's variables, not the new ones. This is why a cleanup closes the connection it opened, never the one about to be opened." },
+    { label: "paint", screen: "new value", note: "The browser paints the update." },
+    { label: "effect", screen: "new value", note: "Only now does the new effect run. Cleanup-then-effect, in that order, every time a dependency changes." },
+  ];
+
+  const emit = (
+    stages: Stage[], upTo: number, phase: string
+  ) => rec.push({
+    kind: "sequence",
+    items: stages.map((stage, i) => ({
+      id: `${phase}-${i}`,
+      label: stage.label,
+      role: i === upTo ? "active" : i < upTo ? "unchanged" : undefined,
+    })),
+    pins: upTo >= 0 ? { [upTo]: `screen: ${stages[upTo].screen}` } : {},
+    note: upTo < 0
+      ? phase === "mount"
+        ? "Mounting a component. Five stages, and the two you write code in are the last two."
+        : "The same component, after a dependency changed. One stage is inserted, and it is inserted early."
+      : stages[upTo].note,
+  });
+
+  emit(mount, -1, "mount");
+  mount.forEach((_, i) => { rec.bump("stages"); emit(mount, i, "mount"); });
+  emit(update, -1, "update");
+  update.forEach((_, i) => { rec.bump("stages"); emit(update, i, "update"); });
+
+  return {
+    frames: rec.frames,
+    summary:
+      "An effect runs after the browser paints, which is what makes it safe for work that is not urgent and wrong for work the user must not see an intermediate state of — that is useLayoutEffect, which runs before the paint and blocks it. On an update, cleanup runs before the next effect and closes over the previous render's values, so it always releases the thing that render acquired.",
+  };
+}
+
+/* --------------------------------------------------------- 13. fetch races -- */
+
+/**
+ * The race condition every search box has, run rather than described.
+ *
+ * There is a real event queue here: requests are given a start time and a
+ * latency, events are sorted by when they happen, and the loop applies them in
+ * that order. The out-of-order result is therefore a *consequence* of a slow
+ * first request, not an assertion — set the first latency below the second and
+ * the bug disappears from the animation on its own.
+ */
+interface Flight {
+  id: string;
+  query: string;
+  start: number;
+  latency: number;
+  ignored: boolean;
+}
+
+function fetchRace(withCleanup: boolean): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+
+  /* Typed quickly, so the second request starts before the first finishes —
+     and the first is the slow one, which is what makes it land last. */
+  const flights: Flight[] = [
+    { id: "f0", query: "ad", start: 0, latency: 300, ignored: false },
+    { id: "f1", query: "ada", start: 60, latency: 40, ignored: false },
+  ];
+
+  type Event = { at: number; kind: "start" | "resolve"; flight: Flight };
+  const events: Event[] = [];
+  for (const flight of flights) {
+    events.push({ at: flight.start, kind: "start", flight });
+    events.push({ at: flight.start + flight.latency, kind: "resolve", flight });
+  }
+  events.sort((a, b) => a.at - b.at || (a.kind === "start" ? -1 : 1));
+
+  let screen = "—";
+  const status = new Map<Flight, Role | undefined>();
+
+  const emit = (note: string) =>
+    rec.push({
+      kind: "sequence",
+      items: flights.map((flight) => ({
+        id: flight.id,
+        label: `"${flight.query}" (${flight.latency}ms)`,
+        role: status.get(flight),
+      })),
+      pins: { 0: `showing: ${screen}` },
+      note,
+    });
+
+  emit(
+    withCleanup
+      ? "The same two keystrokes, with one line added to the effect: a flag the cleanup sets."
+      : "Two keystrokes, 60ms apart. Each one runs the effect, which starts a fetch. The first request is the slow one."
+  );
+
+  for (const event of events) {
+    if (event.kind === "start") {
+      if (withCleanup) {
+        // The cleanup for the previous effect runs before the next effect. It
+        // closes over *that* render's flag, which is what makes this work.
+        for (const other of flights) {
+          if (other !== event.flight && status.get(other) === "active") {
+            other.ignored = true;
+            status.set(other, "discarded");
+          }
+        }
+      }
+      status.set(event.flight, "active");
+      rec.bump("requests");
+      emit(
+        withCleanup && flights.some((f) => f.ignored && f !== event.flight)
+          ? `t=${event.at}ms: the effect re-runs for "${event.flight.query}". Cleanup fires first and sets the previous render's flag, so that request is now marked to be ignored — it is still in flight, nobody has cancelled anything.`
+          : event.flight === flights[0]
+            ? `t=${event.at}ms: the effect runs for "${event.flight.query}" and starts a request. Nothing has come back yet.`
+            : `t=${event.at}ms: the effect runs for "${event.flight.query}" and starts a second request. The first one is still in flight, and nothing has cancelled it.`
+      );
+      continue;
+    }
+
+    rec.bump("responses");
+    if (event.flight.ignored) {
+      status.set(event.flight, "discarded");
+      emit(
+        `t=${event.at}ms: "${event.flight.query}" comes back — and its flag is set, so the response is dropped without touching state. Showing: ${screen}.`
+      );
+      continue;
+    }
+    screen = `"${event.flight.query}"`;
+    status.set(event.flight, "found");
+    emit(
+      `t=${event.at}ms: "${event.flight.query}" comes back and calls setResults. Showing: ${screen}.`
+    );
+  }
+
+  emit(
+    withCleanup
+      ? `Final: ${screen}. The last query typed is the one displayed, which is the only thing the user can reason about.`
+      : `Final: ${screen} — the *older* query, because it was slower. The user typed "ada" and is looking at results for "ad", with no error and nothing in the console.`
+  );
+
+  return {
+    frames: rec.frames,
+    summary: withCleanup
+      ? "The fix is four lines and no library: a local flag, set true by the cleanup, checked before the state update. Cleanup runs before the next effect and closes over its own render's flag, so every superseded request is marked stale at the moment it is superseded. Nothing is cancelled — the response is simply ignored."
+      : "Two requests in flight, and the response order is not the request order. Whichever resolves last wins, so a slow early query overwrites a fast later one and the screen shows results for something the user has stopped typing. It almost never reproduces in development, where localhost answers in a millisecond.",
+  };
+}
+
+/* ----------------------------------------------------- 14. context updates -- */
+
+function Provider({ children }: { children?: ReactNode }) {
+  return <div>{children}</div>;
+}
+function Toolbar({ children }: { children?: ReactNode }) {
+  return <div>{children}</div>;
+}
+function Themed() {
+  return <button type="button" />;
+}
+function Plain() {
+  return <span />;
+}
+function Side() {
+  return <aside />;
+}
+
+const CONTEXT_TREE = (
+  <App>
+    <Provider>
+      <Toolbar>
+        <Themed />
+        <Plain />
+      </Toolbar>
+      <Side />
+    </Provider>
+  </App>
+);
+
+/**
+ * What a context update actually re-renders.
+ *
+ * Two rules run here, and they are genuinely different rules — which is the
+ * whole reason context surprises people. A parent that re-renders re-renders
+ * its children, unless a child is memoised and its props are unchanged. A
+ * component that *reads* a changed context re-renders regardless, because the
+ * value did not reach it through props and no memo boundary can see it.
+ */
+function contextUpdate(): Visualisation {
+  const root = read(CONTEXT_TREE, "")!;
+  const rec = new Recorder<TreeFrame>();
+  const roles = new Map<string, Role>();
+  const captions = new Map<string, string>();
+
+  const nodes = () =>
+    layout(root, roles).map((n) => ({ ...n, badge: captions.get(n.id) ?? n.badge }));
+  const emit = (note: string) => rec.push({ kind: "tree", nodes: nodes(), note });
+
+  const byLabel = (label: string) => descendants(root).find((n) => n.label === label)!;
+  const provider = byLabel("Provider");
+  const themed = byLabel("Themed");
+  const plain = byLabel("Plain");
+  const side = byLabel("Side");
+
+  /* Which components read the context, and which sit behind a memo boundary
+     with unchanged props. The walk below consults these rather than naming
+     nodes, so the two rules stay separable. */
+  const reads = new Set([themed.id, side.id]);
+  const memoised = new Set([plain.id]);
+
+  captions.set(provider.id, "theme = light");
+  captions.set(themed.id, "reads it");
+  captions.set(side.id, "reads it");
+  captions.set(plain.id, "memo, no context");
+  emit("One provider, three components beneath it. Two read the theme; the third is memoised and reads nothing.");
+
+  roles.set(provider.id, "active");
+  captions.set(provider.id, "theme = dark");
+  emit("The provider's state changes, so the value it provides changes with it.");
+
+  roles.set(provider.id, "updated");
+  rec.bump("renders");
+  emit("The provider re-renders. Everything below it is now re-rendered by the ordinary rule, unless something stops it.");
+
+  for (const node of descendants(root)) {
+    if (node.id === root.id || node.id === provider.id) continue;
+    const isMemo = memoised.has(node.id);
+    const readsContext = reads.has(node.id);
+    if (isMemo && !readsContext) {
+      roles.set(node.id, "unchanged");
+      emit(`<${node.label}> is memoised and its props did not change, so React skips it — and everything beneath it.`);
+      continue;
+    }
+    roles.set(node.id, "updated");
+    rec.bump("renders");
+    emit(
+      readsContext
+        ? `<${node.label}> reads the context, so it re-renders. A memo boundary would not have saved it: the value arrived without passing through props, so there was nothing for memo to compare.`
+        : `<${node.label}> re-renders because its parent did. It never mentions the theme.`
+    );
+  }
+
+  emit(
+    `${rec.stats.renders} components re-rendered for one value change — and the memoised one that ignores the context did not.`
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "A context update travels by two different routes. Everything under the provider re-renders because the provider re-rendered, which memo can stop. Every component that reads the changed context re-renders because it read it, which memo cannot stop — the value never passed through props, so there is nothing to compare. That second rule is why splitting one context into two is the fix when a large tree re-renders for a value most of it ignores.",
+  };
+}
+
+/* -------------------------------------------------------- 15. the reducer -- */
+
+/**
+ * A reducer, actually run.
+ *
+ * `cartReducer` below is an ordinary function and the animation is its return
+ * values: each frame is one `reducer(state, action)` call, and the totals in
+ * the notes are computed, not typed. An action the reducer does not handle
+ * would visibly leave the state alone.
+ */
+interface CartState {
+  items: { sku: string; qty: number }[];
+}
+type CartAction =
+  | { type: "add"; sku: string }
+  | { type: "remove"; sku: string }
+  | { type: "clear" };
+
+function cartReducer(state: CartState, action: CartAction): CartState {
+  switch (action.type) {
+    case "add": {
+      const existing = state.items.find((item) => item.sku === action.sku);
+      return existing
+        ? { items: state.items.map((item) => item.sku === action.sku ? { ...item, qty: item.qty + 1 } : item) }
+        : { items: [...state.items, { sku: action.sku, qty: 1 }] };
+    }
+    case "remove":
+      return { items: state.items.filter((item) => item.sku !== action.sku) };
+    case "clear":
+      return { items: [] };
+  }
+}
+
+function reducerRun(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+  const actions: CartAction[] = [
+    { type: "add", sku: "pen" },
+    { type: "add", sku: "ink" },
+    { type: "add", sku: "pen" },
+    { type: "remove", sku: "ink" },
+    { type: "clear" },
+  ];
+
+  let state: CartState = { items: [] };
+
+  const describe = (value: CartState) =>
+    value.items.length === 0 ? "empty" : value.items.map((i) => `${i.sku}×${i.qty}`).join(", ");
+
+  const emit = (upTo: number, note: string) =>
+    rec.push({
+      kind: "sequence",
+      items: actions.map((action, i) => ({
+        id: `a${i}`,
+        label: "sku" in action ? `${action.type} ${action.sku}` : action.type,
+        role: i === upTo ? "active" : i < upTo ? "unchanged" : undefined,
+      })),
+      pins: { 0: `state: ${describe(state)}` },
+      note,
+    });
+
+  emit(-1, "Five actions, one function. Every one of them is a description of what happened, not an instruction about what to set.");
+
+  actions.forEach((action, i) => {
+    const before = describe(state);
+    state = cartReducer(state, action);
+    rec.bump("dispatches");
+    emit(
+      i,
+      `dispatch(${JSON.stringify(action)}) — reducer(${before}) returns ${describe(state)}. ${
+        action.type === "add" && before.includes(action.sku)
+          ? "The item was already there, so the quantity went up rather than a duplicate appearing. That decision lives in the reducer, not in the component."
+          : "The component that dispatched this knows nothing about how it was applied."
+      }`
+    );
+  });
+
+  emit(
+    actions.length - 1,
+    `Five dispatches, one place where the rules live. Every transition above is a pure function call — which is exactly why a reducer can be tested without rendering anything.`
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "A reducer moves the how out of the components and into one function. A component dispatches a description of what happened — \"add pen\" — and the reducer decides whether that means appending an item or incrementing a quantity. Every transition is `(state, action) => state`, a pure function you can test by calling it, and the component never holds a rule.",
+  };
+}
+
+/* ---------------------------------------------------- 16/17. re-rendering -- */
+
+function Panel({ children }: { children?: ReactNode }) {
+  return <div>{children}</div>;
+}
+function Chart() {
+  return <svg />;
+}
+function Legend() {
+  return <ul />;
+}
+
+const DASHBOARD = (
+  <App>
+    <Bar>
+      <Btn />
+    </Bar>
+    <Panel>
+      <Chart />
+      <Legend />
+    </Panel>
+  </App>
+);
+
+/**
+ * Why a component re-rendered, and what a memo boundary does about it.
+ *
+ * One walk, driven by two flags per node: whether it is memoised, and whether
+ * its props are `Object.is`-equal to last render's. The three runs differ only
+ * in those flags — which is the point being taught, since "I wrapped it in
+ * memo and it still re-renders" is almost always the second flag rather than
+ * the first.
+ */
+function rerender(mode: "none" | "memo" | "defeated"): Visualisation {
+  const root = read(DASHBOARD, "")!;
+  const rec = new Recorder<TreeFrame>();
+  const roles = new Map<string, Role>();
+  const captions = new Map<string, string>();
+
+  const all = descendants(root);
+  const panel = all.find((n) => n.label === "Panel")!;
+
+  const nodes = () =>
+    layout(root, roles).map((n) => ({ ...n, badge: captions.get(n.id) ?? n.badge }));
+  const emit = (note: string) => rec.push({ kind: "tree", nodes: nodes(), note });
+
+  captions.set(root.id, "count = 0");
+  if (mode !== "none") {
+    captions.set(panel.id, mode === "memo" ? "memo, data=DATA" : "memo, data={…}");
+  }
+  emit(
+    mode === "none"
+      ? "A dashboard. The state lives at the top; the chart below it is the expensive part."
+      : mode === "memo"
+        ? "The same tree with Panel wrapped in memo, and its data prop hoisted to a constant outside the component."
+        : "The same memo, but data is an object literal written inside App's body: data={{ series }}."
+  );
+
+  captions.set(root.id, "count = 1");
+  roles.set(root.id, "updated");
+  rec.bump("rendered");
+  emit("App's state changes, so App re-renders. That part is never in question.");
+
+  for (const node of all) {
+    if (node.id === root.id) continue;
+    const memoised = mode !== "none" && node.id === panel.id;
+    const propsEqual = mode === "memo";
+
+    if (memoised && propsEqual) {
+      roles.set(node.id, "unchanged");
+      for (const child of descendants(node).slice(1)) roles.set(child.id, "unchanged");
+      rec.bump("skipped", 1 + descendants(node).slice(1).length);
+      emit(
+        `<${node.label}> is memoised and Object.is(prevProps.data, nextProps.data) is true, so React skips it — and skipping a component skips everything inside it.`
+      );
+      // Its subtree was decided by that one comparison; do not walk into it.
+      for (const child of descendants(node).slice(1)) roles.set(child.id, "unchanged");
+      continue;
+    }
+    if (roles.get(node.id) === "unchanged") continue;
+
+    if (memoised) {
+      roles.set(node.id, "updated");
+      rec.bump("rendered");
+      emit(
+        `<${node.label}> is memoised, and React still renders it. App's body ran again, so the object literal is a new object: Object.is(prev, next) is false. memo compared honestly and the answer was "different".`
+      );
+      continue;
+    }
+    roles.set(node.id, "updated");
+    rec.bump("rendered");
+    emit(`<${node.label}> re-renders because its parent did. React did not compare its props and did not ask whether its state changed — by default there is no comparison at all.`);
+  }
+
+  const rendered = rec.stats.rendered ?? 0;
+  emit(
+    mode === "memo"
+      ? `${rendered} rendered, ${rec.stats.skipped ?? 0} skipped. One comparison at the boundary decided the whole subtree.`
+      : `${rendered} components rendered for one state change${mode === "defeated" ? " — including the memoised one, which is the version of this bug people actually hit." : "."}`
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      mode === "none"
+        ? "The default rule has no exceptions worth remembering: when a component re-renders, everything below it re-renders, whether or not its props changed and whether or not it has state. That is usually fine — rendering a handful of small components costs less than the code you would write to avoid it. It stops being fine when something down there is expensive."
+        : mode === "memo"
+          ? "memo puts a gate on the branch: React compares each prop with Object.is and, if all are equal, skips the component and everything inside it. One comparison, an entire subtree spared — which is why the boundary matters more than the number of memo calls."
+          : "This is the memo that does nothing. App's body runs on every render, so `data={{ series }}` builds a new object every time and Object.is is false every time. memo is working exactly as documented; the prop is genuinely a different value. Fix the identity — hoist it, or useMemo it — or the memo is pure overhead.",
+  };
+}
+
+/* ------------------------------------------------- 18. Object.is, per prop -- */
+
+/**
+ * memo's comparison, run one prop at a time.
+ *
+ * The values below are the actual values compared, and the verdicts come from
+ * calling `Object.is` on them — including the pair of `{}` literals, which are
+ * two distinct objects here for the same reason they are two distinct objects
+ * in a component body.
+ */
+function propComparison(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+
+  const previous = { label: "Total", count: 3, rows: [1, 2], style: { bold: true }, onPick: () => {} };
+  /* Built separately, exactly as a second render would build them. The
+     primitives come out equal; the object and array do not, and no amount of
+     matching content changes that. */
+  const next = { label: "Total", count: 3, rows: [1, 2], style: { bold: true }, onPick: () => {} };
+
+  const names = ["label", "count", "rows", "style", "onPick"] as const;
+  const shown: Record<(typeof names)[number], string> = {
+    label: '"Total"',
+    count: "3",
+    rows: "[1, 2]",
+    style: "{ bold: true }",
+    onPick: "() => {}",
+  };
+
+  const verdicts = new Map<string, Role>();
+  const emit = (note: string) =>
+    rec.push({
+      kind: "sequence",
+      items: names.map((name) => ({
+        id: name,
+        label: `${name}=${shown[name]}`,
+        role: verdicts.get(name),
+      })),
+      pins: {},
+      note,
+    });
+
+  emit("Five props, written identically in both renders. memo compares them one at a time with Object.is.");
+
+  let equal = 0;
+  for (const name of names) {
+    const same = Object.is(previous[name], next[name]);
+    verdicts.set(name, same ? "unchanged" : "updated");
+    if (same) equal += 1;
+    rec.bump("compared");
+    emit(
+      same
+        ? `Object.is(prev.${name}, next.${name}) → true. A primitive with the same value *is* the same value; there is no second copy of the number 3.`
+        : `Object.is(prev.${name}, next.${name}) → false. Both sides look identical and both sides are freshly built, so they are two different ${name === "onPick" ? "functions" : "objects"} that happen to have the same contents.`
+    );
+  }
+
+  emit(
+    `${equal} of ${names.length} equal, so memo re-renders. One unequal prop is enough — and the three that fail are the three you write without thinking: an array literal, an object literal and an arrow function.`
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "memo's comparison is shallow and uses Object.is, which asks whether two values are the same value — not whether they look alike. Primitives with equal contents are the same value. Objects, arrays and functions built during render never are, however identical they look, which is why a memoised component with an inline prop re-renders every single time.",
+  };
+}
+
+/* ------------------------------------------------- 19. custom hook slots -- */
+
+/**
+ * What a custom hook is, demonstrated by a hook dispatcher small enough to
+ * read.
+ *
+ * `useSlot` below is a real, if tiny, implementation of the mechanism module 5
+ * described: a per-instance list and a cursor that advances on every call. The
+ * point the animation makes falls straight out of it — `useCounter` has no
+ * storage of its own, so calling it simply performs its inner `useSlot` calls
+ * against whichever instance is currently rendering. Two components calling
+ * the same hook therefore get two separate lists without anything special
+ * happening, which is the thing "hooks are not shared state" is trying to say.
+ */
+interface HookInstance {
+  name: string;
+  slots: { label: string; value: string }[];
+  cursor: number;
+}
+
+function customHookSlots(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+  const instances: HookInstance[] = [];
+  let current: HookInstance;
+  let live: (note: string) => void = () => {};
+
+  /* The whole dispatcher. A call takes the slot at the cursor, creating it on
+     first render, and moves the cursor on. Nothing here knows or cares which
+     function made the call. */
+  function useSlot(label: string, initial: string): string {
+    const index = current.cursor++;
+    if (current.slots.length <= index) {
+      current.slots.push({ label, value: initial });
+      live(`${current.name}: useState("${initial}") claims slot ${index}. The call site was ${label}.`);
+    }
+    return current.slots[index].value;
+  }
+
+  /* An ordinary function that happens to call hooks. There is no registration
+     step and no React API involved — this is the entire definition of a
+     custom hook. */
+  function useCounter(tag: string) {
+    const count = useSlot(`useCounter (${tag})`, "0");
+    const status = useSlot(`useCounter (${tag})`, "idle");
+    return { count, status };
+  }
+
+  /* The lint rule that guards the rules of hooks cannot tell this dispatcher
+     apart from the real one, and it is right not to try: `render` calls two
+     `use*` functions and is not a component. The names are the whole point of
+     the demonstration, so the rule is turned off for the three lines rather
+     than the names being disguised. */
+  /* eslint-disable react-hooks/rules-of-hooks */
+  function render(name: string) {
+    const instance: HookInstance = { name, slots: [], cursor: 0 };
+    instances.push(instance);
+    current = instance;
+    useSlot(`${name} directly`, name === "Cart" ? "open" : "closed");
+    useCounter(name);
+  }
+  /* eslint-enable react-hooks/rules-of-hooks */
+
+  const emit = (note: string, activeInstance?: HookInstance, activeSlot?: number) =>
+    rec.push({
+      kind: "sequence",
+      items: instances.flatMap((instance) =>
+        instance.slots.map((slot, i) => ({
+          id: `${instance.name}-${i}`,
+          label: slot.value,
+          role: instance === activeInstance && i === activeSlot ? ("active" as Role) : undefined,
+        }))
+      ),
+      pins: Object.fromEntries(
+        instances.flatMap((instance, order) =>
+          instance.slots.map((slot, i) => [
+            instances.slice(0, order).reduce((sum, prev) => sum + prev.slots.length, 0) + i,
+            `${instance.name}[${i}]`,
+          ])
+        )
+      ),
+      note,
+    });
+
+  live = (note) => {
+    const instance = current;
+    emit(note, instance, instance.slots.length - 1);
+  };
+
+  emit("Two components. Each calls useState once directly and then calls useCounter, a custom hook that calls useState twice more.");
+  render("Cart");
+  emit("Cart is done: three slots, in call order. Two of them were claimed by code inside useCounter, and the list has no idea.");
+  render("Header");
+  emit("Header renders and gets its own list. Nothing was shared — useCounter has no storage; it only makes calls against whichever component is rendering.");
+
+  emit(
+    `${instances.length} components, ${instances.reduce((n, i) => n + i.slots.length, 0)} slots, and no mechanism beyond "the next call takes the next slot". A custom hook is a function that calls hooks — there is nothing else to it.`
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "A custom hook has no state of its own. Calling one is exactly as if you had pasted its body into the caller, so its hook calls claim slots in the *caller's* list — which is why two components using the same hook get two independent copies, why the rules of hooks apply unchanged inside it, and why the only thing that makes it a hook is the name beginning with `use`.",
+  };
+}
+
+/* ------------------------------------------------- 20. an external store -- */
+
+/**
+ * Subscribing to something that is not React state.
+ *
+ * The store below is a real one — a value, a set of listeners, and a `set` that
+ * calls them — and the components really do subscribe to it. The frames are
+ * emitted from inside `subscribe`, `set` and `getSnapshot`, so the order shown
+ * is the order those functions actually run in.
+ */
+function externalStore(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+
+  const listeners = new Set<() => void>();
+  let value = "online";
+  const subscribers: { name: string; sees: string }[] = [];
+
+  const emit = (note: string, active?: string, role: Role = "active") =>
+    rec.push({
+      kind: "sequence",
+      items: [
+        { id: "store", label: `store: ${value}`, role: active === "store" ? role : undefined },
+        ...subscribers.map((sub) => ({
+          id: sub.name,
+          label: `${sub.name}: ${sub.sees}`,
+          role: active === sub.name ? role : undefined,
+        })),
+      ],
+      pins: { 0: `${listeners.size} listener${listeners.size === 1 ? "" : "s"}` },
+      note,
+    });
+
+  const getSnapshot = () => value;
+  const subscribe = (onChange: () => void) => {
+    listeners.add(onChange);
+    return () => listeners.delete(onChange);
+  };
+  const set = (next: string) => {
+    value = next;
+    for (const listener of listeners) listener();
+  };
+
+  emit("A store outside React: one value and a set of listeners. React has never heard of it.");
+
+  for (const name of ["Banner", "SaveButton"]) {
+    const sub = { name, sees: "—" };
+    subscribers.push(sub);
+    subscribe(() => {
+      sub.sees = getSnapshot();
+      rec.bump("re-renders");
+      emit(`The store called ${name}'s listener, so React re-renders it. It reads getSnapshot() again and sees "${sub.sees}".`, name, "updated");
+    });
+    sub.sees = getSnapshot();
+    emit(`${name} mounts. useSyncExternalStore calls subscribe to register a listener, then getSnapshot to read the current value: "${sub.sees}".`, name);
+  }
+
+  emit("Two components, two listeners, one value. Neither component holds a copy of it in state.");
+
+  set("offline");
+  emit("Both are showing the same value, because both read it from the same place at the same moment. That is the guarantee useSyncExternalStore exists to provide.", "store", "updated");
+
+  return {
+    frames: rec.frames,
+    summary:
+      "useSyncExternalStore takes two functions: subscribe, which registers a listener and returns the unsubscriber, and getSnapshot, which reads the current value. React re-renders when the listener fires and reads the value fresh each time. The reason this exists rather than a useEffect-plus-useState copy is tearing: a copy in state can be one render behind, so two components can display different values for the same store during a concurrent render, and reading through a snapshot cannot.",
+  };
+}
+
 /* ------------------------------------------------------------------ table -- */
+
 
 export const REACT_ALGOS = {
   "element-tree": {
@@ -818,6 +1542,50 @@ export const REACT_ALGOS = {
   "hook-slots": {
     label: "Hook slots and call order",
     run: hookSlots,
+  },
+  "effect-timing": {
+    label: "Effect timing: render, paint, effect",
+    run: effectPipeline,
+  },
+  "fetch-race": {
+    label: "Fetching: the race condition",
+    run: () => fetchRace(false),
+  },
+  "fetch-race-fixed": {
+    label: "Fetching: cleanup fixes it",
+    run: () => fetchRace(true),
+  },
+  "context-update": {
+    label: "What a context update re-renders",
+    run: contextUpdate,
+  },
+  "reducer-dispatch": {
+    label: "A reducer, action by action",
+    run: reducerRun,
+  },
+  "rerender-cascade": {
+    label: "Re-rendering: the default cascade",
+    run: () => rerender("none"),
+  },
+  "memo-boundary": {
+    label: "Re-rendering: memo cuts the branch",
+    run: () => rerender("memo"),
+  },
+  "memo-defeated": {
+    label: "Re-rendering: the memo that does nothing",
+    run: () => rerender("defeated"),
+  },
+  "prop-comparison": {
+    label: "Object.is, one prop at a time",
+    run: propComparison,
+  },
+  "custom-hook-slots": {
+    label: "A custom hook has no state of its own",
+    run: customHookSlots,
+  },
+  "external-store": {
+    label: "Subscribing to an external store",
+    run: externalStore,
   },
 } as const;
 

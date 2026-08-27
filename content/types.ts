@@ -116,6 +116,9 @@ export type VisualKind =
   /* React's rendering model: element trees, the render/commit split,
      reconciliation, and what a key does to a list. */
   | "react-rendering"
+  /* Where the files go: the generated scaffold, and the two ways a src/
+     directory is organised once there is more than a screenful of it. */
+  | "react-structure"
   /* Individual data structures. */
   | "stack"
   | "queue"

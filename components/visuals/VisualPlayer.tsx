@@ -220,10 +220,18 @@ function collectRoles(frames: Frame[]): Role[] {
     } else if (frame.kind === "graph") {
       for (const node of frame.nodes) if (node.role) seen.add(node.role);
       for (const edge of frame.edges) if (edge.role) seen.add(edge.role);
+    } else if (frame.kind === "filetree") {
+      for (const entry of frame.entries) if (entry.role) seen.add(entry.role);
     } else {
       for (const role of Object.values(frame.roles)) seen.add(role);
     }
   }
-  const order: Role[] = ["compare", "swap", "pivot", "active", "window", "discarded", "sorted", "found"];
+  /* The React tracks' roles are listed after the algorithm ones rather than
+     mixed in, because no run uses both vocabularies and keeping them apart
+     means a legend reads as one sentence rather than as two interleaved. */
+  const order: Role[] = [
+    "compare", "swap", "pivot", "active", "window", "discarded", "sorted", "found",
+    "mounted", "updated", "unchanged", "moved", "unmounted", "created", "deleted",
+  ];
   return order.filter((r) => seen.has(r));
 }

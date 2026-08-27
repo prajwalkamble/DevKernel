@@ -33,7 +33,7 @@ import {
 
 const ROLES: Role[] = [
   "compare", "swap", "pivot", "sorted", "active", "window", "discarded", "found",
-  "mounted", "updated", "unchanged", "unmounted", "moved",
+  "mounted", "updated", "unchanged", "unmounted", "moved", "created", "deleted",
 ];
 
 const problems: string[] = [];
@@ -60,7 +60,7 @@ function checkIndexMap(
 function checkRoles(where: string, roles: Record<number | string, Role> | undefined) {
   if (!roles) return;
   for (const [key, role] of Object.entries(roles)) {
-    if (!ROLES.includes(role)) fail(where, `role "${role}" at ${key} is not one of the eight`);
+    if (!ROLES.includes(role)) fail(where, `role "${role}" at ${key} is not a known role`);
   }
 }
 
@@ -129,6 +129,29 @@ function checkFrame(where: string, frame: Frame, index: number) {
           fail(at, `edge ${edge.from}->${edge.to} names a node that is not in the frame`);
         }
         if (edge.role && !ROLES.includes(edge.role)) fail(at, `edge ${edge.from}->${edge.to} has role "${edge.role}"`);
+      }
+      break;
+    }
+    case "filetree": {
+      const ids = new Set<string>();
+      let previous = -1;
+      for (const entry of frame.entries) {
+        if (ids.has(entry.id)) fail(at, `two entries share the id "${entry.id}"`);
+        ids.add(entry.id);
+        if (!Number.isInteger(entry.depth) || entry.depth < 0) {
+          fail(at, `entry "${entry.id}" has depth ${entry.depth}`);
+        }
+        // A row may only ever indent by one from the row above it; anything
+        // deeper means a directory row was never emitted, and the connectors
+        // the canvas derives would attach the entry to the wrong parent.
+        if (entry.depth > previous + 1) {
+          fail(at, `entry "${entry.id}" is at depth ${entry.depth} under a row at depth ${previous}`);
+        }
+        if (!entry.name) fail(at, `entry "${entry.id}" has no name`);
+        if (entry.role && !ROLES.includes(entry.role)) {
+          fail(at, `entry "${entry.id}" has role "${entry.role}"`);
+        }
+        previous = entry.depth;
       }
       break;
     }
