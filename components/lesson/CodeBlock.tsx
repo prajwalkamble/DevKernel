@@ -15,6 +15,7 @@ const LANG_LABEL: Record<CodeLanguage, string> = {
   python: "Python",
   bash: "Terminal",
   xml: "XML",
+  html: "HTML",
   yaml: "YAML",
   properties: "Properties",
   sql: "SQL",
@@ -38,6 +39,7 @@ const LANG_BADGE_CLASS: Record<CodeLanguage, string> = {
   // the same page, so they stay neutral rather than competing for a colour.
   bash: "bg-surface-hover text-muted",
   xml: "bg-surface-hover text-muted",
+  html: "bg-surface-hover text-muted",
   yaml: "bg-surface-hover text-muted",
   properties: "bg-surface-hover text-muted",
   sql: "bg-surface-hover text-muted",

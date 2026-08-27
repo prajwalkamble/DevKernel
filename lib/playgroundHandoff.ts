@@ -50,6 +50,7 @@ const HANDOFF_TARGET: Record<CodeLanguage, PlaygroundLanguage | null> = {
   python: "python",
   bash: null,
   xml: null,
+  html: null,
   yaml: null,
   properties: null,
   sql: null,

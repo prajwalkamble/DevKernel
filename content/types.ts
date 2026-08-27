@@ -19,6 +19,10 @@ export type CodeLanguage =
      half the files and payloads around it, and a build file shown as plain
      text is a build file nobody reads. */
   | "xml"
+  /* Markup, for the rendering-model lessons: a page's real HTML is the whole
+     subject there, and showing it as plain text would hide the one thing the
+     reader is being asked to look at. */
+  | "html"
   | "yaml"
   | "properties"
   | "sql"

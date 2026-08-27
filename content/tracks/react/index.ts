@@ -11,6 +11,7 @@ import { reactContextAndStateModule } from "./modules/08-context-and-state";
 import { reactRenderingAndPerformanceModule } from "./modules/09-rendering-and-performance";
 import { reactAdvancedHooksModule } from "./modules/10-advanced-hooks";
 import { reactConcurrentModule } from "./modules/11-concurrent-react";
+import { reactRenderingModelsModule } from "./modules/12-rendering-models";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -50,24 +51,7 @@ export const reactTrack: TrackDefinition = {
     reactRenderingAndPerformanceModule,
     reactAdvancedHooksModule,
     reactConcurrentModule,
-    createComingSoonModule({
-      id: "react-rendering-models",
-      slug: "client-and-server-rendering",
-      title: "Client, Server & Hydration",
-      order: 12,
-      description:
-        "The whole rendering picture in one place: what CSR, SSR, SSG and Server Components each mean, what hydration is, and which problem each one solves.",
-      topics: [
-        "Client-side rendering: the empty div, and what it costs",
-        "Server-side rendering, and the HTML that arrives already filled in",
-        "Hydration: attaching React to server-rendered HTML",
-        "Hydration mismatches, and the four things that cause them",
-        "Static generation and when the HTML can be built ahead of time",
-        "React Server Components: what runs where, and what never ships",
-        "The 'use client' boundary, and what may cross it",
-        "Choosing a rendering strategy per screen rather than per app",
-      ],
-    }),
+    reactRenderingModelsModule,
     createComingSoonModule({
       id: "react-testing",
       slug: "testing-typescript-tooling",
