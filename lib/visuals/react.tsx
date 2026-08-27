@@ -39,10 +39,23 @@ interface ElNode {
   children: ElNode[];
 }
 
+/**
+ * The name to draw inside a node circle.
+ *
+ * `displayName` first, and every component in this file sets one — because
+ * `Function.prototype.name` is whatever the minifier decided, and these
+ * animations key captions and lookups off the name. In a development build
+ * `type.name` is the source name and everything works; in a production build
+ * it is `a`, and a visualisation quietly loses its captions or, worse, a
+ * lookup by name returns undefined. A string literal survives minification.
+ */
 function typeName(element: ReactElement): string {
   const type = element.type;
   if (typeof type === "string") return type;
-  if (typeof type === "function") return type.name || "fn";
+  if (typeof type === "function") {
+    const named = type as { displayName?: string; name?: string };
+    return named.displayName || named.name || "fn";
+  }
   return "?";
 }
 
@@ -154,6 +167,7 @@ function postorder(node: ElNode, out: ElNode[] = []): ElNode[] {
 function Row({ children }: { children?: ReactNode }) {
   return <li>{children}</li>;
 }
+Row.displayName = "Row";
 
 const PAGE = (
   <div>
@@ -461,15 +475,19 @@ function keysRun(byIndex: boolean): Visualisation {
 function Bar({ children }: { children?: ReactNode }) {
   return <div>{children}</div>;
 }
+Bar.displayName = "Bar";
 function Btn() {
   return <button type="button" />;
 }
+Btn.displayName = "Btn";
 function Out() {
   return <output />;
 }
+Out.displayName = "Out";
 function App({ children }: { children?: ReactNode }) {
   return <div>{children}</div>;
 }
+App.displayName = "App";
 
 const PANEL = (
   <App>
@@ -553,6 +571,7 @@ function propsDown(): Visualisation {
 function Pane() {
   return <section />;
 }
+Pane.displayName = "Pane";
 
 const SIBLINGS = (
   <App>
@@ -946,18 +965,23 @@ function fetchRace(withCleanup: boolean): Visualisation {
 function Provider({ children }: { children?: ReactNode }) {
   return <div>{children}</div>;
 }
+Provider.displayName = "Provider";
 function Toolbar({ children }: { children?: ReactNode }) {
   return <div>{children}</div>;
 }
+Toolbar.displayName = "Toolbar";
 function Themed() {
   return <button type="button" />;
 }
+Themed.displayName = "Themed";
 function Plain() {
   return <span />;
 }
+Plain.displayName = "Plain";
 function Side() {
   return <aside />;
 }
+Side.displayName = "Side";
 
 const CONTEXT_TREE = (
   <App>
@@ -990,7 +1014,14 @@ function contextUpdate(): Visualisation {
     layout(root, roles).map((n) => ({ ...n, badge: captions.get(n.id) ?? n.badge }));
   const emit = (note: string) => rec.push({ kind: "tree", nodes: nodes(), note });
 
-  const byLabel = (label: string) => descendants(root).find((n) => n.label === label)!;
+  /* Throws rather than returning undefined, so a component that lost its
+     displayName fails here — with a name in the message — instead of two
+     lines later on `undefined.id`. */
+  const byLabel = (label: string) => {
+    const node = descendants(root).find((n) => n.label === label);
+    if (!node) throw new Error(`no <${label}> in the context tree — is its displayName set?`);
+    return node;
+  };
   const provider = byLabel("Provider");
   const themed = byLabel("Themed");
   const plain = byLabel("Plain");
@@ -1138,12 +1169,15 @@ function reducerRun(): Visualisation {
 function Panel({ children }: { children?: ReactNode }) {
   return <div>{children}</div>;
 }
+Panel.displayName = "Panel";
 function Chart() {
   return <svg />;
 }
+Chart.displayName = "Chart";
 function Legend() {
   return <ul />;
 }
+Legend.displayName = "Legend";
 
 const DASHBOARD = (
   <App>

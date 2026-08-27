@@ -519,6 +519,71 @@ function stateLayout(): Visualisation {
   };
 }
 
+/* -------------------------------------------------- 6. where hooks belong -- */
+
+/**
+ * A hook moving outward as it acquires callers.
+ *
+ * Each frame moves one file and rebuilds the listing from the paths, so the
+ * folder a hook leaves collapses on its own when it was the only thing in it —
+ * which is the point being made. A hook does not start in `shared/hooks/`; it
+ * arrives there, and only after a second feature imports it.
+ */
+function hooksLayout(): Visualisation {
+  const rec = new Recorder<FileTreeFrame>();
+
+  /* Fixed context, so the eye can track the one file that moves. */
+  const fixed: SrcFile[] = [
+    { path: "features/cart/CartPage.tsx" },
+    { path: "features/cart/CartLine.tsx" },
+    { path: "features/checkout/AddressForm.tsx" },
+  ];
+
+  /* The moving file replaces any fixed entry at the same path rather than
+     joining it — step 1 annotates CartLine.tsx, it does not add a second one. */
+  const emit = (moving: SrcFile | null, note: string) =>
+    rec.push({
+      kind: "filetree",
+      root: "src/",
+      entries: rollUp(
+        listing(
+          moving
+            ? [...fixed.filter((f) => f.path !== moving.path), moving]
+            : fixed
+        )
+      ),
+      note,
+    });
+
+  emit(null, "Three components. A piece of logic inside CartLine is about to become a hook.");
+
+  emit(
+    { path: "features/cart/CartLine.tsx", note: "the hook is a function in this file", role: "active" },
+    "Step 1: extract it, and leave it in the file. A hook used once belongs next to its only caller — it does not need a file, and giving it one is ceremony."
+  );
+
+  emit(
+    { path: "features/cart/useLineTotal.ts", note: "used by two files in this feature", role: "created" },
+    "Step 2: CartPage needs it too. Two callers inside one feature, so it becomes a file in that feature's folder — still nowhere anyone outside can reach."
+  );
+
+  emit(
+    { path: "shared/hooks/useMoneyTotal.ts", note: "used by two features", role: "moved" },
+    "Step 3: checkout needs it. Now — and only now — it moves to shared/hooks/, and it gets a name that does not mention the cart, because it no longer belongs to one."
+  );
+
+  emit(
+    { path: "shared/hooks/useMoneyTotal.ts", note: "one home, two importers", role: undefined },
+    "Three steps, one rule: a hook moves outward when it gains a caller, never in anticipation of one. Going the other way — starting in shared/hooks/ — is how that folder becomes a junk drawer of single-caller hooks."
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "A custom hook's home is decided by how many things call it, and it moves one step at a time: inline in the file that uses it, then a file in the feature when a second component wants it, then the shared layer when a second feature does. The rename at the last step matters — a hook that keeps a feature's vocabulary in its name has not really been shared.",
+  };
+}
+
 /* ------------------------------------------------------------------- table -- */
 
 export const REACT_LAYOUT_ALGOS = {
@@ -541,6 +606,10 @@ export const REACT_LAYOUT_ALGOS = {
   "state-layout": {
     label: "Where a feature's state lives",
     run: stateLayout,
+  },
+  "hooks-layout": {
+    label: "Where a custom hook belongs",
+    run: hooksLayout,
   },
 } as const;
 

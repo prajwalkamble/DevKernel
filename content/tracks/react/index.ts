@@ -9,6 +9,7 @@ import { reactListsKeysFormsModule } from "./modules/06-lists-keys-forms";
 import { reactEffectsAndDataModule } from "./modules/07-effects-and-data";
 import { reactContextAndStateModule } from "./modules/08-context-and-state";
 import { reactRenderingAndPerformanceModule } from "./modules/09-rendering-and-performance";
+import { reactAdvancedHooksModule } from "./modules/10-advanced-hooks";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -30,7 +31,7 @@ export const reactTrack: TrackDefinition = {
   description:
     "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, and the interview questions.",
   order: 4,
-  status: "coming-soon",
+  status: "available",
   accent: "react",
   mode: "learn",
   lessonMinutes: [25, 40],
@@ -46,24 +47,7 @@ export const reactTrack: TrackDefinition = {
     reactEffectsAndDataModule,
     reactContextAndStateModule,
     reactRenderingAndPerformanceModule,
-    createComingSoonModule({
-      id: "react-advanced-hooks",
-      slug: "advanced-and-custom-hooks",
-      title: "Advanced Hooks & Custom Hooks",
-      order: 10,
-      description:
-        "The remaining built-in hooks, and how to extract your own so that logic is reusable without a wrapper component.",
-      topics: [
-        "Writing a custom hook, and the rules it inherits",
-        "useId, and stable ids across server and client",
-        "useImperativeHandle and forwardRef — and ref as a prop in React 19",
-        "useSyncExternalStore, and subscribing to something outside React",
-        "useDebugValue and the DevTools story for custom hooks",
-        "Composing hooks, and keeping their return shape usable",
-        "A library of small hooks you will actually reuse",
-        "Testing a custom hook in isolation",
-      ],
-    }),
+    reactAdvancedHooksModule,
     createComingSoonModule({
       id: "react-concurrent",
       slug: "concurrent-react",
