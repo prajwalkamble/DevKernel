@@ -584,6 +584,127 @@ function hooksLayout(): Visualisation {
   };
 }
 
+/* ------------------------------------------------- 7. where tests live -- */
+
+/**
+ * The two answers to "where do the test files go", run over one feature.
+ *
+ * Same rule as everywhere else here: the second layout is derived by moving
+ * paths, so `__tests__/` appears because files were put into it and the
+ * feature folder thins out because they left. Nothing is drawn twice.
+ */
+const TESTED_FEATURE: SrcFile[] = [
+  { path: "src/features/cart/Cart.tsx" },
+  { path: "src/features/cart/CartLine.tsx" },
+  { path: "src/features/cart/useCart.ts" },
+  { path: "src/features/cart/total.ts", note: "pure, and the easiest thing to test" },
+];
+
+/** Where a file's test goes under each convention. */
+function testPath(path: string, separate: boolean): string {
+  const parts = path.split("/");
+  const name = parts.pop()!;
+  const base = name.replace(/\.(tsx|ts)$/, "");
+  const extension = name.endsWith(".tsx") ? "test.tsx" : "test.ts";
+  return separate
+    ? [...parts, "__tests__", `${base}.${extension}`].join("/")
+    : [...parts, `${base}.${extension}`].join("/");
+}
+
+function testLayout(): Visualisation {
+  const rec = new Recorder<FileTreeFrame>();
+
+  const emit = (files: SrcFile[], note: string) =>
+    rec.push({ kind: "filetree", root: "my-app/", entries: rollUp(listing(files)), note });
+
+  emit(TESTED_FEATURE, "A feature with four files and no tests yet. The question is where the tests for these go.");
+
+  /* Colocated: each test beside the thing it tests. */
+  const beside: SrcFile[] = [...TESTED_FEATURE];
+  for (const file of TESTED_FEATURE) {
+    beside.push({ path: testPath(file.path, false), role: "created" });
+    rec.bump("test files");
+    emit(
+      beside.map((f) => ({ ...f, role: f.path === testPath(file.path, false) ? "created" : undefined })),
+      `The test for ${file.path.split("/").pop()} sits beside it. Sorted alphabetically, the pair is adjacent — so a reader opening the folder sees at a glance which files have tests and which do not.`
+    );
+  }
+
+  emit(beside.map((f) => ({ ...f, role: undefined })), "Colocated. Moving the feature moves its tests; deleting it deletes them; and an untested file is visible as a gap rather than as an absence somewhere else in the tree.");
+
+  /* Separate: the same tests, in a __tests__ folder. */
+  const separate: SrcFile[] = [
+    ...TESTED_FEATURE,
+    ...TESTED_FEATURE.map((f) => ({ path: testPath(f.path, true), role: "moved" as Role })),
+  ];
+  emit(separate, "The other convention: a __tests__ folder per feature. The source folder is shorter, which is the argument for it.");
+  emit(
+    separate.map((f) => ({ ...f, role: undefined })),
+    "And the cost is in the same picture: the four tests are now two rows away from the four files they test, and a file with no test no longer looks any different from one that has one."
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "Colocating a test beside its subject is the arrangement the rest of this track argues for, and for the same reason: everything that changes together lives together, so moving or deleting a feature is one operation and an untested file is a visible gap. A __tests__ folder buys a shorter source listing and pays for it by separating each test from its subject. What matters more than the choice is that a project makes one — a codebase with both conventions has tests nobody can find.",
+  };
+}
+
+/* ------------------------------------------------ 8. what a build emits -- */
+
+/**
+ * The `dist/` of a real `vite build`, including a lazily-imported route.
+ *
+ * These are the actual file names and byte counts from that build, hashes and
+ * all, for the same reason `SCAFFOLD` above is real: a remembered build output
+ * is exactly the sort of thing that is subtly wrong, and the hashes are the
+ * part a reader is being asked to notice.
+ */
+const DIST: SrcFile[] = [
+  { path: "dist/index.html", note: "0.45 kB — the shell, rewritten to point at the hashed files" },
+  { path: "dist/favicon.svg", note: "copied from public/, unhashed" },
+  { path: "dist/icons.svg", note: "copied from public/, unhashed" },
+  { path: "dist/assets/index-CP7Zf5UC.js", note: "191.83 kB — the app and React" },
+  { path: "dist/assets/index-DGNrK5qb.css", note: "1.78 kB — every stylesheet, extracted" },
+  { path: "dist/assets/Heavy-BbkHBMkS.js", note: "0.13 kB — behind a lazy() import" },
+];
+
+function buildOutput(): Visualisation {
+  const rec = new Recorder<FileTreeFrame>();
+
+  const emit = (files: SrcFile[], note: string) =>
+    rec.push({ kind: "filetree", root: "my-app/", entries: rollUp(listing(files)), note });
+
+  const shown: SrcFile[] = [];
+  emit(shown, "`vite build` on the scaffold from module 1, with one route behind React.lazy. Here is everything it writes.");
+
+  const notes = [
+    "The HTML is the file you have been editing, with the script tag rewritten to point at the hashed bundle and a stylesheet link added.",
+    "Anything in public/ is copied through untouched — same name, no hash. That is why a favicon can be referenced by a fixed path and why nothing in public/ is ever bundled.",
+    "The second public/ file, for the same reason.",
+    "The bundle: your components, your dependencies and React itself, in one file. The hash is content-derived, so it changes only when the contents do — which is what lets this be cached forever.",
+    "Every stylesheet you imported, extracted into one file rather than injected by JavaScript. It has its own hash, so a CSS-only change does not invalidate the bundle.",
+    "And the payoff of the lazy import: a separate chunk, downloaded only when that route is opened. Nothing in the build config asked for this — the dynamic import is what created the boundary.",
+  ];
+
+  DIST.forEach((file, i) => {
+    shown.push(file);
+    rec.bump("files emitted");
+    emit(
+      shown.map((f, j) => ({ ...f, role: j === i ? "created" : undefined })),
+      notes[i]
+    );
+  });
+
+  emit(shown, "Six files, three of them hashed. Serve the hashed ones with a one-year cache header and index.html with none, and a deploy invalidates exactly what changed.");
+
+  return {
+    frames: rec.frames,
+    summary:
+      "A production build emits a rewritten index.html, one JavaScript chunk per entry and per dynamic import, one extracted stylesheet, and a straight copy of everything in public/. The content hashes are the whole caching strategy: a file whose contents did not change keeps its name and stays cached, and index.html — the only unhashed entry point — is the one file that must not be. The lazily-imported route becoming its own chunk was not configured; the dynamic import is what created it.",
+  };
+}
+
 /* ------------------------------------------------------------------- table -- */
 
 export const REACT_LAYOUT_ALGOS = {
@@ -610,6 +731,14 @@ export const REACT_LAYOUT_ALGOS = {
   "hooks-layout": {
     label: "Where a custom hook belongs",
     run: hooksLayout,
+  },
+  "test-layout": {
+    label: "Where the test files go",
+    run: testLayout,
+  },
+  "build-output": {
+    label: "What a production build emits",
+    run: buildOutput,
   },
 } as const;
 

@@ -12,6 +12,7 @@ import { reactRenderingAndPerformanceModule } from "./modules/09-rendering-and-p
 import { reactAdvancedHooksModule } from "./modules/10-advanced-hooks";
 import { reactConcurrentModule } from "./modules/11-concurrent-react";
 import { reactRenderingModelsModule } from "./modules/12-rendering-models";
+import { reactTestingAndToolingModule } from "./modules/13-testing-and-tooling";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -52,24 +53,7 @@ export const reactTrack: TrackDefinition = {
     reactAdvancedHooksModule,
     reactConcurrentModule,
     reactRenderingModelsModule,
-    createComingSoonModule({
-      id: "react-testing",
-      slug: "testing-typescript-tooling",
-      title: "Testing, TypeScript & Tooling",
-      order: 13,
-      description:
-        "Making a React codebase maintainable: types that catch real mistakes, tests that survive a refactor, and the build tooling underneath.",
-      topics: [
-        "Typing components, props, children, events and refs",
-        "Generic components, and typing a custom hook's return",
-        "Testing Library: querying the way a user would",
-        "Testing interaction, async UI, and forms",
-        "Mocking network requests with MSW instead of stubbing fetch",
-        "Component testing against end-to-end testing with Playwright",
-        "Vite, bundling, and what a modern React build actually does",
-        "ESLint, the hooks plugin, and the rules worth enforcing",
-      ],
-    }),
+    reactTestingAndToolingModule,
     createComingSoonModule({
       id: "react-mastery",
       slug: "patterns-and-mastery",
