@@ -23,7 +23,10 @@ for (const name of ["window", "document", "Node", "Element", "HTMLElement", "Eve
   "MouseEvent", "KeyboardEvent", "CustomEvent", "getComputedStyle", "requestAnimationFrame",
   "cancelAnimationFrame", "DocumentFragment", "HTMLInputElement", "HTMLFormElement",
   "HTMLSelectElement", "HTMLTextAreaElement", "HTMLButtonElement", "HTMLOptionElement",
-  "FormData", "SubmitEvent", "InputEvent", "FocusEvent", "File", "Blob", "DataTransfer"]) {
+  "FormData", "SubmitEvent", "InputEvent", "FocusEvent", "File", "Blob", "DataTransfer",
+  /* Observers, so a lesson can *count* what React writes to the DOM rather
+     than asserting that a re-render is not a DOM write. */
+  "MutationObserver", "IntersectionObserver", "ResizeObserver"]) {
   if (dom.window[name] !== undefined) {
     Object.defineProperty(globalThis, name, {
       value: dom.window[name], writable: true, configurable: true,

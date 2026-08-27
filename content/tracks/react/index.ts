@@ -8,6 +8,7 @@ import { reactCoreHooksModule } from "./modules/05-core-hooks";
 import { reactListsKeysFormsModule } from "./modules/06-lists-keys-forms";
 import { reactEffectsAndDataModule } from "./modules/07-effects-and-data";
 import { reactContextAndStateModule } from "./modules/08-context-and-state";
+import { reactRenderingAndPerformanceModule } from "./modules/09-rendering-and-performance";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -44,24 +45,7 @@ export const reactTrack: TrackDefinition = {
     reactListsKeysFormsModule,
     reactEffectsAndDataModule,
     reactContextAndStateModule,
-    createComingSoonModule({
-      id: "react-performance",
-      slug: "rendering-and-performance",
-      title: "Rendering Behaviour & Performance",
-      order: 9,
-      description:
-        "Why a component re-rendered, how to find out, and the small set of fixes that actually work — plus the React Compiler, which changes the calculus.",
-      topics: [
-        "What causes a re-render, and what does not",
-        "Re-rendering is not the problem; expensive rendering is",
-        "React.memo, and the prop identity problem it runs into",
-        "useMemo and useCallback: what they cost and when they pay",
-        "Referential equality, and why your dependency array keeps firing",
-        "The React Compiler, and what it memoises for you",
-        "Profiling with React DevTools, and reading a flame graph",
-        "Virtualising long lists, and code splitting with lazy and Suspense",
-      ],
-    }),
+    reactRenderingAndPerformanceModule,
     createComingSoonModule({
       id: "react-advanced-hooks",
       slug: "advanced-and-custom-hooks",
