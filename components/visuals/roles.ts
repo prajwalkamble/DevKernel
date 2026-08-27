@@ -24,6 +24,10 @@ export const ROLE_FILL: Record<Role, string> = {
   moved: "bg-violet-500 dark:bg-violet-400",
   created: "bg-teal-500 dark:bg-teal-400",
   deleted: "bg-orange-500 dark:bg-orange-400",
+  suspended: "bg-indigo-500 dark:bg-indigo-400",
+  stale: "bg-slate-400 dark:bg-slate-500",
+  server: "bg-cyan-600 dark:bg-cyan-400",
+  client: "bg-fuchsia-500 dark:bg-fuchsia-400",
 };
 
 export const ROLE_TEXT: Record<Role, string> = {
@@ -42,6 +46,10 @@ export const ROLE_TEXT: Record<Role, string> = {
   moved: "text-violet-700 dark:text-violet-300",
   created: "text-teal-700 dark:text-teal-300",
   deleted: "text-orange-700 dark:text-orange-300",
+  suspended: "text-indigo-700 dark:text-indigo-300",
+  stale: "text-slate-600 dark:text-slate-300",
+  server: "text-cyan-700 dark:text-cyan-300",
+  client: "text-fuchsia-700 dark:text-fuchsia-300",
 };
 
 export const ROLE_RING: Record<Role, string> = {
@@ -60,6 +68,10 @@ export const ROLE_RING: Record<Role, string> = {
   moved: "ring-violet-500",
   created: "ring-teal-500",
   deleted: "ring-orange-500",
+  suspended: "ring-indigo-500",
+  stale: "ring-slate-400",
+  server: "ring-cyan-600",
+  client: "ring-fuchsia-500",
 };
 
 /** The legend shown under a player, filtered to the roles a run actually uses. */
@@ -79,6 +91,10 @@ export const ROLE_LABEL: Record<Role, string> = {
   moved: "moved",
   created: "created",
   deleted: "deleted",
+  suspended: "suspended",
+  stale: "stale — the previous value",
+  server: "runs on the server",
+  client: "runs in the browser",
 };
 
 /**
@@ -105,6 +121,10 @@ export const ROLE_SVG_FILL: Record<Role, string> = {
   moved: "fill-violet-500 dark:fill-violet-400",
   created: "fill-teal-500 dark:fill-teal-400",
   deleted: "fill-orange-500 dark:fill-orange-400",
+  suspended: "fill-indigo-500 dark:fill-indigo-400",
+  stale: "fill-slate-400 dark:fill-slate-500",
+  server: "fill-cyan-600 dark:fill-cyan-400",
+  client: "fill-fuchsia-500 dark:fill-fuchsia-400",
 };
 
 /** Edge strokes, written out for the same reason `ROLE_SVG_FILL` is. */
@@ -124,4 +144,8 @@ export const ROLE_STROKE: Record<Role, string> = {
   moved: "stroke-violet-500 dark:stroke-violet-400",
   created: "stroke-teal-500 dark:stroke-teal-400",
   deleted: "stroke-orange-500 dark:stroke-orange-400",
+  suspended: "stroke-indigo-500 dark:stroke-indigo-400",
+  stale: "stroke-slate-400 dark:stroke-slate-500",
+  server: "stroke-cyan-600 dark:stroke-cyan-400",
+  client: "stroke-fuchsia-500 dark:stroke-fuchsia-400",
 };

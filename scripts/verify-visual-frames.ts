@@ -34,6 +34,7 @@ import {
 const ROLES: Role[] = [
   "compare", "swap", "pivot", "sorted", "active", "window", "discarded", "found",
   "mounted", "updated", "unchanged", "unmounted", "moved", "created", "deleted",
+  "suspended", "stale", "server", "client",
 ];
 
 const problems: string[] = [];

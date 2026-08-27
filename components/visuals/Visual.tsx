@@ -80,6 +80,10 @@ export function Visual({ spec }: { spec: VisualSpec }) {
     case "bits-and-math": return <FamilyVisual spec={spec} {...FAMILIES["bits-and-math"]} />;
     case "react-rendering": return <FamilyVisual spec={spec} {...FAMILIES["react-rendering"]} />;
     case "react-structure": return <FamilyVisual spec={spec} {...FAMILIES["react-structure"]} />;
+    case "react-concurrent": return <FamilyVisual spec={spec} {...FAMILIES["react-concurrent"]} />;
+    case "react-server": return <FamilyVisual spec={spec} {...FAMILIES["react-server"]} />;
+    case "react-tooling": return <FamilyVisual spec={spec} {...FAMILIES["react-tooling"]} />;
+    case "react-patterns": return <FamilyVisual spec={spec} {...FAMILIES["react-patterns"]} />;
     default: return <StructureVisual spec={spec} kind={spec.kind} />;
   }
 }

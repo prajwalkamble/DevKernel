@@ -24,6 +24,10 @@ import { TREE_ALGOS } from "./trees";
 import { NUMBER_ALGOS } from "./numbers";
 import { REACT_ALGOS } from "./react";
 import { REACT_LAYOUT_ALGOS } from "./react-layout";
+import { REACT_CONCURRENT_ALGOS } from "./react-concurrent";
+import { REACT_SERVER_ALGOS } from "./react-server";
+import { REACT_TOOLING_ALGOS } from "./react-tooling";
+import { REACT_PATTERN_ALGOS } from "./react-patterns";
 import {
   bstDemo, hashTableDemo, heapDemo, linkedListDemo, queueDemo, stackDemo, trieDemo,
 } from "./structures";
@@ -60,6 +64,10 @@ export const FAMILIES = {
   "bits-and-math": { table: NUMBER_ALGOS, fallback: "bitops" },
   "react-rendering": { table: REACT_ALGOS, fallback: "element-tree" },
   "react-structure": { table: REACT_LAYOUT_ALGOS, fallback: "scaffold" },
+  "react-concurrent": { table: REACT_CONCURRENT_ALGOS, fallback: "interruptible-render" },
+  "react-server": { table: REACT_SERVER_ALGOS, fallback: "ssr-timeline" },
+  "react-tooling": { table: REACT_TOOLING_ALGOS, fallback: "query-priority" },
+  "react-patterns": { table: REACT_PATTERN_ALGOS, fallback: "compound" },
 } as const;
 
 export type FamilyKind = keyof typeof FAMILIES;

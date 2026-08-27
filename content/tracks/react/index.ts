@@ -10,6 +10,7 @@ import { reactEffectsAndDataModule } from "./modules/07-effects-and-data";
 import { reactContextAndStateModule } from "./modules/08-context-and-state";
 import { reactRenderingAndPerformanceModule } from "./modules/09-rendering-and-performance";
 import { reactAdvancedHooksModule } from "./modules/10-advanced-hooks";
+import { reactConcurrentModule } from "./modules/11-concurrent-react";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -48,24 +49,7 @@ export const reactTrack: TrackDefinition = {
     reactContextAndStateModule,
     reactRenderingAndPerformanceModule,
     reactAdvancedHooksModule,
-    createComingSoonModule({
-      id: "react-concurrent",
-      slug: "concurrent-react",
-      title: "Concurrent React, Suspense & Transitions",
-      order: 11,
-      description:
-        "The rendering model React 18 introduced: interruptible rendering, and the APIs that let you tell React what is urgent.",
-      topics: [
-        "What concurrent rendering actually changed",
-        "Suspense: declaring a loading boundary rather than a loading flag",
-        "startTransition and useTransition, and marking work as non-urgent",
-        "useDeferredValue, and keeping an input responsive",
-        "Error boundaries, and pairing them with Suspense",
-        "Streaming, and rendering a page in pieces",
-        "The `use` hook, and reading a promise during render",
-        "Strict Mode, double invocation, and what it is protecting you from",
-      ],
-    }),
+    reactConcurrentModule,
     createComingSoonModule({
       id: "react-rendering-models",
       slug: "client-and-server-rendering",

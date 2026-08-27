@@ -119,6 +119,16 @@ export type VisualKind =
   /* Where the files go: the generated scaffold, and the two ways a src/
      directory is organised once there is more than a screenful of it. */
   | "react-structure"
+  /* The concurrent renderer: interruptible work, Suspense, transitions,
+     deferred values, error boundaries and Strict Mode's doubling. */
+  | "react-concurrent"
+  /* Where the rendering happens: client, server, hydration, and the Server
+     Component boundary. */
+  | "react-server"
+  /* The tools around the code: what a query ladder picks, what a build emits. */
+  | "react-tooling"
+  /* Composition patterns: compound components, portals, and focus order. */
+  | "react-patterns"
   /* Individual data structures. */
   | "stack"
   | "queue"

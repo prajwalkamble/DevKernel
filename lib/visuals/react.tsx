@@ -30,8 +30,15 @@ import {
 
 /* ------------------------------------------------ reading an element tree -- */
 
+/*
+ * The four helpers below are exported because the concurrent, server-rendering
+ * and pattern visualisations in the sibling files walk the same real element
+ * trees. A second copy of `read` would be a second definition of what an
+ * element tree *is*, and the two would drift; one definition, imported, cannot.
+ */
+
 /** One node of the element tree, flattened out of React's own objects. */
-interface ElNode {
+export interface ElNode {
   id: string;
   /** The element's type, short enough to sit inside a node circle. */
   label: string;
@@ -49,7 +56,7 @@ interface ElNode {
  * it is `a`, and a visualisation quietly loses its captions or, worse, a
  * lookup by name returns undefined. A string literal survives minification.
  */
-function typeName(element: ReactElement): string {
+export function typeName(element: ReactElement): string {
   const type = element.type;
   if (typeof type === "string") return type;
   if (typeof type === "function") {
@@ -67,7 +74,7 @@ function typeName(element: ReactElement): string {
  * `Children.toArray`, which rewrites keys, and keys are the entire subject of
  * two of these visualisations.
  */
-function flatten(node: ReactNode, out: ReactNode[] = []): ReactNode[] {
+export function flatten(node: ReactNode, out: ReactNode[] = []): ReactNode[] {
   if (Array.isArray(node)) {
     for (const child of node) flatten(child, out);
     return out;
@@ -78,7 +85,7 @@ function flatten(node: ReactNode, out: ReactNode[] = []): ReactNode[] {
 }
 
 /** Builds the node tree, ignoring text children — the shape is the subject. */
-function read(node: ReactNode, path: string): ElNode | null {
+export function read(node: ReactNode, path: string): ElNode | null {
   if (typeof node !== "object" || node === null) return null;
   const element = node as ReactElement;
   const key = element.key === null ? null : String(element.key);
@@ -102,7 +109,7 @@ function read(node: ReactNode, path: string): ElNode | null {
  * Leaves take consecutive slots; every other node sits at the midpoint of its
  * own, which is what stops the edges crossing.
  */
-function layout(
+export function layout(
   root: ElNode,
   roles: Map<string, Role>,
   badges?: Map<string, string>
@@ -140,7 +147,7 @@ function captionOf(node: ElNode, badges?: Map<string, string>): string | undefin
 }
 
 /** Every node of a subtree, parent first — the order React renders in. */
-function descendants(node: ElNode, out: ElNode[] = []): ElNode[] {
+export function descendants(node: ElNode, out: ElNode[] = []): ElNode[] {
   out.push(node);
   for (const child of node.children) descendants(child, out);
   return out;

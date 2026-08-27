@@ -39,7 +39,17 @@ export type Role =
      and a legend that said so under a directory listing would be teaching the
      wrong word at the moment the reader is looking for the right one. */
   | "created"
-  | "deleted";
+  | "deleted"
+  /* Concurrent rendering needs two more. A boundary showing its fallback is
+     "suspended", not "discarded" — the work was not thrown away, it is waiting
+     — and a value the screen is still showing while a newer one renders is
+     "stale", which is the word `useDeferredValue` is documented in. */
+  | "suspended"
+  | "stale"
+  /* And the rendering-model module needs the one distinction the whole of it
+     turns on: which side of the network a component ran on. */
+  | "server"
+  | "client";
 
 export interface ArrayFrame {
   kind: "array";

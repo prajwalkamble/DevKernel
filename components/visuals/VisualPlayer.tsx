@@ -232,6 +232,7 @@ function collectRoles(frames: Frame[]): Role[] {
   const order: Role[] = [
     "compare", "swap", "pivot", "active", "window", "discarded", "sorted", "found",
     "mounted", "updated", "unchanged", "moved", "unmounted", "created", "deleted",
+    "suspended", "stale", "server", "client",
   ];
   return order.filter((r) => seen.has(r));
 }
