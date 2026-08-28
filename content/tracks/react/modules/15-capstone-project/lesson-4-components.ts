@@ -6,535 +6,327 @@ export const capstoneComponentsLesson: Lesson = {
   moduleSlug: "capstone-project",
   title: "Tracer: Components, Screens & Tests",
   summary:
-    "The last step — eight components with their props types, the issue list and issue detail screens, and the tests. Props typed so the compiler enforces the cases a component must handle, route files that only wire, and a suite that fakes the network rather than the modules. Ends with five ways to take the project further.",
-  estimatedMinutes: 28,
+    "Step five. The four states in one component, the list and its filters, the report form that runs the same schema the server runs, and tests that fake the network rather than the modules — including the one where scoping a query to the list was the difference between a passing test and a passing bug.",
+  estimatedMinutes: 30,
   objectives: [
-    "Type props so the compiler enforces the states a component must handle",
-    "Resolve lookups in the parent instead of fetching per row",
-    "Write route components that wire hooks to components and nothing else",
-    "Test through the network rather than through mocked modules",
-    "Say what you would build next, and what each extension would break",
+    "Render four states from one component, and know why the empty one takes a prop",
+    "Type a component's props so an impossible combination does not compile",
+    "Run one schema on both sides of the wire and merge both sets of errors",
+    "Write tests that fake the network and would survive replacing the data layer",
+    "Scope a query so a passing test is not hiding a wrong one",
   ],
   sections: [
     {
-      id: "props",
-      heading: "Props that make the compiler do the checking",
+      id: "four-states",
+      heading: "The four states, once",
       body: [
-        "Eight components, and the props types are where most of the design lives. Two patterns are worth naming.",
-        "**`Record<Status, string>` instead of a lookup with a fallback.** Add a status to the shared tuple and `StatusBadge` stops compiling until it has a label. A `?? \"Unknown\"` would have compiled and shipped a badge saying Unknown.",
-        "**Resolve data in the parent, pass values down.** `IssueRow` receives an `assignee`, not an `assigneeId`. It has no hooks and no data access, so it renders in a test with a literal object and no provider — and forty rows on screen fire zero requests between them.",
+        "FR-13 makes the four states a numbered requirement because the empty one is forgotten otherwise. Writing them in each screen means writing them differently in each screen, so they live in one component — with one deliberate exception.",
       ],
       examples: [
         {
-          id: "badge",
-          title: "src/components/StatusBadge.tsx",
-          lang: "tsx",
-          code: `import type { Status } from "@tracer/shared";
-
-const LABEL: Record<Status, string> = {
-  open: "Open",
-  in_progress: "In progress",
-  done: "Done",
-};
-
-export interface StatusBadgeProps {
-  status: Status;
-}
-
-export function StatusBadge({ status }: StatusBadgeProps) {
-  return <span className={\`badge badge--\${status}\`}>{LABEL[status]}</span>;
-}`,
-          explanation:
-            "Twelve lines, and the `Record<Status, string>` annotation is the whole point of them. It is the cheapest exhaustiveness check in TypeScript, and it converts \"someone added a status and forgot the UI\" from a bug report into a build failure.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "row",
-          title: "src/features/issues/components/IssueRow.tsx",
-          lang: "tsx",
-          code: `import { Link } from "react-router";
-import type { Issue, User } from "@tracer/shared";
-import { PriorityBadge } from "../../../components/PriorityBadge";
-import { StatusBadge } from "../../../components/StatusBadge";
-
-export interface IssueRowProps {
-  issue: Issue;
-  /** Resolved by the parent, so one row never fires its own request. */
-  assignee: User | undefined;
-  projectKey: string;
-}
-
-/* Presentational: props in, markup out, no hooks and no data access. That is
-   what makes it renderable in a test with a literal object and no provider. */
-export function IssueRow({ issue, assignee, projectKey }: IssueRowProps) {
-  return (
-    <li className="issue-row">
-      <Link to={\`/issues/\${issue.id}\`}>
-        <span className="issue-row__key">
-          {projectKey}-{issue.number}
-        </span>
-        <span className="issue-row__title">{issue.title}</span>
-      </Link>
-      <StatusBadge status={issue.status} />
-      <PriorityBadge priority={issue.priority} />
-      <span className="issue-row__assignee">{assignee?.name ?? "Unassigned"}</span>
-    </li>
-  );
-}`,
-          explanation:
-            "`assignee: User | undefined` rather than `assignee?: User` is a deliberate choice: the property is required, so every call site has to think about the unassigned case rather than silently omitting it. The `?? \"Unassigned\"` is then a decision the component owns, and it is the one place in the app where a missing assignee turns into words.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "boundary",
-          title: "src/components/QueryBoundary.tsx — NFR-10's four states",
+          id: "async-boundary",
+          title: "web/src/components/AsyncBoundary.tsx",
           lang: "tsx",
           code: `import type { ReactNode } from "react";
-import type { UseQueryResult } from "@tanstack/react-query";
 
-export interface QueryBoundaryProps<T> {
-  query: UseQueryResult<T>;
-  /** Rendered when the request succeeded but returned nothing to show. */
-  empty?: ReactNode;
-  isEmpty?: (data: T) => boolean;
-  children: (data: T) => ReactNode;
+/* FR-13. Four states, in one place, because the empty state is the one that
+   gets forgotten and a numbered requirement is easier to keep than a habit.
+   \`isEmpty\` is passed in rather than inferred: only the caller knows whether
+   an empty array means "no bugs yet" or "no bugs match this filter", and those
+   need different words. */
+export interface AsyncBoundaryProps {
+  isPending: boolean;
+  error: Error | null;
+  isEmpty: boolean;
+  onRetry: () => void;
+  empty: ReactNode;
+  children: ReactNode;
 }
 
-export function QueryBoundary<T>({ query, empty, isEmpty, children }: QueryBoundaryProps<T>) {
-  if (query.isPending) return <p role="status">Loading…</p>;
+export function AsyncBoundary({
+  isPending,
+  error,
+  isEmpty,
+  onRetry,
+  empty,
+  children,
+}: AsyncBoundaryProps) {
+  if (isPending) return <p role="status">Loading…</p>;
 
-  if (query.isError) {
+  if (error) {
     return (
       <div role="alert">
-        <p>{query.error.message}</p>
-        <button type="button" onClick={() => void query.refetch()}>
+        <p>{error.message}</p>
+        <button type="button" onClick={onRetry}>
           Try again
         </button>
       </div>
     );
   }
 
-  if (isEmpty?.(query.data) && empty) return <>{empty}</>;
-
-  return <>{children(query.data)}</>;
+  if (isEmpty) return <>{empty}</>;
+  return <>{children}</>;
 }`,
           explanation:
-            "Every screen has these four states, and writing them out per screen is how the empty one gets forgotten. The generic parameter is what makes it worth having: `children` receives `T`, not `unknown`, so the call site keeps full type information inside the render prop. And after the `isPending` and `isError` guards, `query.data` is narrowed to `T` — the four states are the compiler's, not a convention.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "filters-component",
-          title: "src/features/issues/components/IssueFilters.tsx — FR-2, 3, 4",
-          lang: "tsx",
-          code: `import { useEffect, useState } from "react";
-import { STATUSES, type IssueQuery, type Status, type User } from "@tracer/shared";
-import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
-
-export interface IssueFiltersProps {
-  filters: IssueQuery;
-  users: User[];
-  onChange: (next: Partial<IssueQuery>) => void;
-}
-
-export function IssueFilters({ filters, users, onChange }: IssueFiltersProps) {
-  /* The text box is controlled locally so typing stays instant, and only the
-     debounced value is pushed up into the URL and the query key. The two
-     selects are not debounced: a click is already one event. */
-  const [text, setText] = useState(filters.q ?? "");
-  const debouncedText = useDebouncedValue(text, 300);
-
-  useEffect(() => {
-    onChange({ q: debouncedText || undefined });
-  }, [debouncedText, onChange]);
-
-  return (
-    <div className="filters">
-      <label>
-        Search
-        <input
-          type="search"
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          placeholder="Filter by title"
-        />
-      </label>
-
-      <label>
-        Status
-        <select
-          value={filters.status ?? ""}
-          onChange={(event) =>
-            onChange({ status: (event.target.value || undefined) as Status | undefined })
-          }
-        >
-          <option value="">All</option>
-          {STATUSES.map((status) => (
-            <option key={status} value={status}>{status}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Assignee
-        <select
-          value={filters.assigneeId ?? ""}
-          onChange={(event) => onChange({ assigneeId: event.target.value || undefined })}
-        >
-          <option value="">Anyone</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>{user.name}</option>
-          ))}
-        </select>
-      </label>
-    </div>
-  );
-}`,
-          explanation:
-            "Two speeds in one component, and that is the design. The text box keeps its own state so typing is never gated on a round trip; the debounced value is the only thing that reaches the URL. The selects are not debounced because a click is already a single deliberate event — debouncing them would just add 300ms of nothing. Every control is wrapped in a `<label>`, which is NFR-7's cheapest half.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "form",
-          title: "src/features/issues/components/NewIssueForm.tsx — FR-6, NFR-3",
-          lang: "tsx",
-          code: `import { useState, type FormEvent } from "react";
-import { PRIORITIES, createIssueSchema, type Priority } from "@tracer/shared";
-import { ApiRequestError } from "../../../lib/api";
-import { useCreateIssue } from "../hooks/useCreateIssue";
-
-export interface NewIssueFormProps {
-  projectId: string;
-  onCreated?: (issueId: string) => void;
-}
-
-export function NewIssueForm({ projectId, onCreated }: NewIssueFormProps) {
-  const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState<Priority>("medium");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const create = useCreateIssue(projectId);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    /* Validate with the same schema the server uses, so the common mistakes
-       never become a round trip. This is a convenience, not a security
-       boundary — the server validates again, and its answer wins. */
-    const parsed = createIssueSchema.safeParse({ title, priority });
-    if (!parsed.success) {
-      setErrors(Object.fromEntries(parsed.error.issues.map((i) => [i.path.join("."), i.message])));
-      return;
-    }
-
-    setErrors({});
-    create.mutate(parsed.data, {
-      onSuccess: (issue) => {
-        setTitle("");
-        setPriority("medium");
-        onCreated?.(issue.id);
-      },
-      onError: (error) => {
-        if (error instanceof ApiRequestError) setErrors(error.fieldErrors);
-      },
-    });
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="new-issue">
-      <label>
-        Title
-        <input
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          aria-invalid={Boolean(errors.title)}
-          aria-describedby={errors.title ? "new-issue-title-error" : undefined}
-        />
-      </label>
-      {errors.title && (
-        <p id="new-issue-title-error" role="alert">{errors.title}</p>
-      )}
-
-      <label>
-        Priority
-        <select value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
-          {PRIORITIES.map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </select>
-      </label>
-
-      <button type="submit" disabled={create.isPending}>
-        {create.isPending ? "Creating…" : "Create issue"}
-      </button>
-    </form>
-  );
-}`,
-          explanation:
-            "`errors` is one state object keyed the same way the server's `fieldErrors` is, so client-side and server-side failures render through identical code — the only difference is where the object came from. `aria-invalid` and `aria-describedby` are NFR-7: they are what connect the message to the input for a screen reader, and they are also, conveniently, what a test queries by.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "The exception is `isEmpty`, and it is worth defending. The component could compute emptiness itself by inspecting `children`, and that would be shorter and wrong: \"no bugs match these filters\" and \"no bugs reported yet\" are different sentences, and only the caller knows which one applies because only the caller knows whether a filter is set. Pushing the *decision* out while keeping the *layout* in is the split that makes a shared component worth having. The `role=\"status\"` and `role=\"alert\"` are NFR-7: a screen reader announces both without the user having to go looking.",
+          requires: "tsc and a React renderer (this component only declares markup)",
         },
       ],
       pitfalls: [
         {
-          title: "The client's validation is a convenience, never a boundary",
-          body: "`createIssueSchema` runs in the browser to save a round trip on the obvious mistakes. It is not security: one `curl` skips it entirely. That is why the identical schema runs on the server, and why the server's answer is the one that wins when they disagree. A project that validates only on the client has no validation.",
+          title: "`isPending` is not `isLoading` and neither is `isFetching`",
+          body: "In TanStack Query v5, `isPending` means there is no data yet — the honest \"show a spinner\" condition. `isFetching` is true for every request including background refetches, so rendering a spinner on it makes the page flash every time a filter changes, which is exactly what NFR-8 forbids. The bug is invisible on a fast connection and obvious on a slow one, which is the worst combination for catching it in review.",
         },
       ],
     },
     {
-      id: "screens",
-      heading: "The screens: wiring, and nothing else",
+      id: "list",
+      heading: "The list screen",
       body: [
-        "A route component's job is to call the hooks and hand the results to the components. If a route file contains business logic, it belongs in a hook; if it contains markup beyond layout, it belongs in a component.",
-        "The one computation the list page does is derived state, done the way module 4 argued for: a `Map` built during render, never stored.",
+        "The list is where the URL state, the query, the four states and the two different empty messages all meet. It is deliberately thin: it owns no data of its own, and every value it renders comes from a hook.",
       ],
       examples: [
         {
-          id: "list-page",
-          title: "src/routes/IssueListPage.tsx",
+          id: "bug-list",
+          title: "web/src/features/bugs/BugList.tsx",
           lang: "tsx",
-          code: `import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router";
-import type { Issue } from "@tracer/shared";
-import { QueryBoundary } from "../components/QueryBoundary";
-import { IssueFilters } from "../features/issues/components/IssueFilters";
-import { IssueRow } from "../features/issues/components/IssueRow";
-import { NewIssueForm } from "../features/issues/components/NewIssueForm";
-import { useIssueFilters } from "../features/issues/hooks/useIssueFilters";
-import { useIssues } from "../features/issues/hooks/useIssues";
-import { useUsers } from "../hooks/useUsers";
+          code: `export interface BugListProps {
+  projectId: string;
+  projectKey: string;
+}
 
-export function IssueListPage() {
-  const { projectId = "p_web" } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
-
-  const [filters, setFilters] = useIssueFilters();
-  const issues = useIssues(projectId, filters);
+export function BugList({ projectId, projectKey }: BugListProps) {
+  const { filters, setFilter } = useBugFilters();
+  const bugs = useBugs(projectId, filters);
   const users = useUsers();
 
-  /* Derived, never stored. Module 4's rule: a Map built from the user list is
-     a render-time computation, and storing it would mean keeping it in sync
-     with a list that can refetch at any moment. */
-  const usersById = useMemo(
-    () => new Map((users.data ?? []).map((user) => [user.id, user])),
-    [users.data],
-  );
+  const byId = new Map((users.data ?? []).map((user) => [user.id, user]));
+  const hasFilter = Object.values(filters).some(Boolean);
 
   return (
-    <main>
-      <h1>Issues</h1>
+    <section>
+      <h1>Bugs</h1>
+      <BugFilters filters={filters} users={users.data ?? []} onChange={setFilter} />
 
-      <NewIssueForm projectId={projectId} onCreated={(id) => void navigate(\`/issues/\${id}\`)} />
-
-      <IssueFilters filters={filters} users={users.data ?? []} onChange={setFilters} />
-
-      <QueryBoundary<Issue[]>
-        query={issues}
-        isEmpty={(data) => data.length === 0}
-        empty={<p>No issues match these filters.</p>}
+      <AsyncBoundary
+        isPending={bugs.isPending}
+        error={bugs.error}
+        isEmpty={(bugs.data ?? []).length === 0}
+        onRetry={() => void bugs.refetch()}
+        empty={
+          hasFilter ? (
+            <p>No bugs match these filters.</p>
+          ) : (
+            <p>No bugs reported yet. That is either very good news or very bad news.</p>
+          )
+        }
       >
-        {(data) => (
-          <ul className="issue-list">
-            {data.map((issue) => (
-              <IssueRow
-                key={issue.id}
-                issue={issue}
-                assignee={issue.assigneeId ? usersById.get(issue.assigneeId) : undefined}
-                projectKey="WEB"
-              />
-            ))}
-          </ul>
-        )}
-      </QueryBoundary>
-    </main>
+        <ul>
+          {(bugs.data ?? []).map((bug) => (
+            <BugRow
+              key={bug.id}
+              bug={bug}
+              projectKey={projectKey}
+              assignee={bug.assigneeId ? byId.get(bug.assigneeId) : undefined}
+            />
+          ))}
+        </ul>
+      </AsyncBoundary>
+    </section>
   );
 }`,
           explanation:
-            "The `Map` is the fix for the N+1 that a naive version has: without it, each row would need to find its own assignee, and the obvious way to do that is a hook in the row — forty rows, forty subscriptions. Building the lookup once in the parent turns it into one pass. `key={issue.id}`, never the index, because this list is filtered and reordered on every FR-2 through FR-4 interaction.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "`hasFilter` is the whole reason `isEmpty` is a prop rather than a computation. The user map is rebuilt on every render, which is fine and deliberate: it is three entries, and `useMemo` here would cost more in reading time than it saves in execution. That is a judgement about *this* data, not a general rule — the same code over four thousand users is a different decision, and the way to know is to measure rather than to memoise reflexively.",
+          requires: "tsc and a React renderer (imports elided; see the repository)",
         },
-        {
-          id: "main",
-          title: "src/main.tsx — every provider, in order",
-          lang: "tsx",
-          code: `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router";
-import { App } from "./App";
-import "./index.css";
-
-/* Created once, outside the component. Inside it, a re-render would build a
-   new client and throw the entire cache away. */
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30_000,
-      retry: 1,
-      refetchOnWindowFocus: false,
+      ],
     },
-  },
-});
+    {
+      id: "form",
+      heading: "The report form",
+      body: [
+        "NFR-3 says the client validates as a convenience and the server validates because it must. The form is where that stops being a slogan: it runs the *same* schema the server runs, and it merges the server's field errors over its own.",
+      ],
+      examples: [
+        {
+          id: "new-bug-form",
+          title: "web/src/features/bugs/NewBugForm.tsx — the validation half",
+          lang: "tsx",
+          code: `export function NewBugForm({ projectId, reporterId, onCreated }: NewBugFormProps) {
+  const [form, setForm] = useState(empty);
+  const [clientErrors, setClientErrors] = useState<Record<string, string[]>>({});
+  const create = useCreateBug(projectId);
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>,
-);`,
+  /* NFR-3. The client's check saves a round trip; the server's exists because
+     this one can be bypassed with a single curl. Both run the same schema. */
+  const serverErrors = create.error instanceof ApiFailure ? create.error.fieldErrors : undefined;
+  const errors = { ...clientErrors, ...serverErrors };
+  const field = (name: string) => errors[name]?.[0];
+
+  return (
+    <form
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        const parsed = CreateBug.safeParse({ ...form, reporterId });
+        if (!parsed.success) {
+          const next: Record<string, string[]> = {};
+          for (const issue of parsed.error.issues) {
+            (next[issue.path.join(".")] ??= []).push(issue.message);
+          }
+          setClientErrors(next);
+          return;
+        }
+        setClientErrors({});
+        create.mutate(parsed.data, {
+          onSuccess: (bug) => {
+            setForm(empty);
+            onCreated?.(bug.id);
+          },
+        });
+      }}
+    >
+      {/* one of six fields; the rest follow the same shape */}
+      <label>
+        Steps to reproduce
+        <textarea
+          value={form.stepsToReproduce}
+          aria-invalid={Boolean(field("stepsToReproduce"))}
+          onChange={(event) => setForm({ ...form, stepsToReproduce: event.target.value })}
+        />
+      </label>
+      {field("stepsToReproduce") && <p role="alert">{field("stepsToReproduce")}</p>}
+    </form>
+  );
+}`,
           explanation:
-            "This file is the list from this module's reading lesson — the set of things any component may assume exists. The three defaults are opinions worth stating: 30 seconds of staleness means navigating back to a screen does not refetch, one retry covers a flaky connection without turning a real 500 into a four-second wait, and refetch-on-focus is off because in this app it surprises more than it helps.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "The spread order in `{ ...clientErrors, ...serverErrors }` is a decision, not a formatting accident: the server's opinion wins, because the server is the one that refused. The messages the reader sees are the strings written back in the shared schema, so \"Say what you did, in enough detail to repeat it\" appears in the form without the form knowing what the rule was. `noValidate` turns off the browser's own bubbles, which cannot be styled, are not announced consistently, and would fire before this code ever runs.",
+          requires: "tsc and a React renderer (imports and four fields elided)",
+        },
+      ],
+      pitfalls: [
+        {
+          title: "`aria-invalid` and a visible message are both needed",
+          body: "A red border tells sighted users; `aria-invalid` tells everyone else, and a message with `role=\"alert\"` is what actually says *what is wrong*. Any one of the three alone leaves somebody unable to fix the form. This is NFR-7 in its most ordinary form: not an exotic widget, just a field that failed.",
         },
       ],
     },
     {
       id: "tests",
-      heading: "Testing through the network",
-      visual: {
-        id: "tracer-queries-visual",
-        kind: "react-tooling",
-        algorithm: "query-priority",
-        title: "Which query a test should reach for",
-      },
+      heading: "Tests that fake the network",
       body: [
-        "NFR-9: fake the network, not the modules. MSW intercepts at the request layer, so `useIssues`, `listIssues`, `request` and `fetch` all run for real and only the wire is replaced. A test that mocks `useIssues` instead proves that the component renders whatever a mock returns, which is not a fact about the app.",
-        "Two fixtures make every later test cheap, and both are worth writing before the first test rather than after the third.",
+        "NFR-9 says the tests fake the network, not the modules. Nothing in a Tracer test knows the app uses `fetch`, or TanStack Query, or Zod — so replacing any of those does not rewrite the suite. MSW is what makes that possible: it intercepts at the network layer and answers with real HTTP responses.",
       ],
       examples: [
         {
-          id: "render-with-providers",
-          title: "src/test/renderWithProviders.tsx",
+          id: "list-test",
+          title: "web/src/features/bugs/BugList.test.tsx",
           lang: "tsx",
-          code: `import type { ReactElement, ReactNode } from "react";
-import { render } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router";
+          code: `describe("BugList", () => {
+  it("lists the bugs with their key, severity and assignee", async () => {
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
 
-export function renderWithProviders(ui: ReactElement, { route = "/" } = {}) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    const list = await screen.findByRole("list");
+    /* Scoped to the list on purpose: "Ada Lovelace" also appears in the
+       assignee <select>, and getAllByText(...)[0] would have been the bug. */
+    expect(within(list).getByText("WEB-1")).toBeInTheDocument();
+    expect(within(list).getByText("blocker")).toBeInTheDocument();
+    expect(within(list).getByText("Unassigned")).toBeInTheDocument();
+    expect(within(list).getByText("Ada Lovelace")).toBeInTheDocument();
   });
 
-  function Providers({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
-      </QueryClientProvider>
-    );
-  }
+  it("sends the status filter to the server rather than filtering locally", async () => {
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+    await screen.findByRole("list");
 
-  return { queryClient, ...render(ui, { wrapper: Providers }) };
-}`,
+    await userEvent.selectOptions(screen.getByLabelText("Status"), "open");
+
+    const list = await screen.findByRole("list");
+    expect(within(list).getByText("WEB-1")).toBeInTheDocument();
+    expect(within(list).queryByText("WEB-2")).not.toBeInTheDocument();
+  });
+
+  it("distinguishes an empty result from an empty project", async () => {
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+    await screen.findByRole("list");
+
+    await userEvent.selectOptions(screen.getByLabelText("Status"), "closed");
+
+    expect(await screen.findByText("No bugs match these filters.")).toBeInTheDocument();
+  });
+
+  it("offers a retry when the request fails", async () => {
+    server.use(
+      http.get(\`\${API}/projects/:projectId/bugs\`, () =>
+        HttpResponse.json({ error: "Database is asleep" }, { status: 500 }),
+      ),
+    );
+
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+
+    const alert = await screen.findByRole("alert");
+    expect(within(alert).getByText("Database is asleep")).toBeInTheDocument();
+    expect(within(alert).getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  });
+});`,
           explanation:
-            "A fresh `QueryClient` per test is the load-bearing detail: a shared one leaks cached data between tests and makes them pass or fail depending on the order they ran in. Retries are off so a deliberately failing request fails once, immediately, rather than after the default backoff. `initialEntries` is what lets a test start at `/?status=done` and exercise FR-5.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "The second test is the one that earns its keep. It asserts on what came *back*, which can only be right if the component put `status=open` in the query string — because the MSW handler applies the filter itself rather than ignoring it. A handler that returned the same array whatever the query would let this test pass while the component sent nothing, which is the most common way a network-level fake becomes decorative.",
+          requires:
+            "vitest with Testing Library and MSW (this is the source; its run appears below)",
         },
         {
-          id: "list-test",
-          title: "src/routes/IssueListPage.test.tsx",
-          lang: "tsx",
-          code: `import { afterAll, afterEach, beforeAll, expect, test } from "vitest";
-import { screen, within } from "@testing-library/react";
-import { setupServer } from "msw/node";
-import { handlers } from "../test/handlers";
-import { renderWithProviders } from "../test/renderWithProviders";
-import { IssueListPage } from "./IssueListPage";
+          id: "test-run",
+          title: "The suite",
+          lang: "bash",
+          code: `npm test --workspace web`,
+          output: ` RUN  v3.2.7
 
-const server = setupServer(...handlers);
+ ✓ src/features/triage/TriageQueue.test.tsx (3 tests) 454ms
+ ✓ src/features/bugs/BugList.test.tsx (4 tests) 609ms
 
-beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-
-test("renders the issues returned by the API", async () => {
-  renderWithProviders(<IssueListPage />);
-
-  expect(screen.getByRole("status")).toHaveTextContent("Loading…");
-
-  /* Queried by the text a person reads, and awaited rather than timed. */
-  expect(await screen.findByText("Filter chips lose state on reload")).toBeInTheDocument();
-
-  /* Scoped to the list, because "Ada Lovelace" is also an <option> in the
-     assignee filter — an ambiguity a page-wide getByText would hit. */
-  const list = within(screen.getByRole("list"));
-  expect(list.getByText("WEB-1")).toBeInTheDocument();
-  expect(list.getByText("Ada Lovelace")).toBeInTheDocument();
-});
-
-test("shows the empty state when nothing matches", async () => {
-  renderWithProviders(<IssueListPage />, { route: "/?status=done" });
-
-  expect(await screen.findByText("No issues match these filters.")).toBeInTheDocument();
-});`,
-          output: ` ✓ src/routes/IssueListPage.test.tsx (2 tests)
-
- Test Files  1 passed (1)
-      Tests  2 passed (2)`,
+ Test Files  2 passed (2)
+      Tests  7 passed (7)`,
           explanation:
-            "`onUnhandledRequest: \"error\"` is the setting that makes this suite honest: a request the handlers do not cover fails the test rather than silently returning nothing, so adding an endpoint to a screen and forgetting it in the fixtures is caught here. The second test starts at `/?status=done` and asserts the empty state — which means it exercises FR-5, FR-2 and NFR-10's fourth state in three lines.",
-          requires: "vitest with Testing Library and MSW (this is its reporter output)",
+            "Seven tests is not many, and that is the intended shape rather than an unfinished job. Each one covers a decision that could plausibly be got wrong — filtering on the server, distinguishing two empty states, showing a failure with a way out, and the three in the triage suite. Tests that assert a component renders the props it was given cost maintenance and catch nothing.",
+          requires: "vitest with Testing Library and MSW (npm's own lines trimmed)",
         },
       ],
       pitfalls: [
         {
-          title: "`within` is not fussiness",
-          body: "The first version of this test used a page-wide `getByText(\"Ada Lovelace\")` and failed — because the name is also an `<option>` in the assignee filter. That failure is the test doing its job: the ambiguity is real, and a screen reader user tabbing through hits both. Scoping to the list is the fix; adding `getAllByText(...)[0]` would have been the bug.",
+          title: "`getAllByText(...)[0]` is how a test starts lying",
+          body: "The first assertion above failed on the first attempt because \"Ada Lovelace\" matched twice — once as an assignee in a row, once as an `<option>` in the filter. The tempting repair is `getAllByText(\"Ada Lovelace\")[0]`, which passes immediately and now asserts nothing about *where* the name is: reorder the DOM and it still passes, delete the row and it still passes. Scoping with `within(list)` fixes the ambiguity by saying what you meant.",
         },
-      ],
-    },
-    {
-      id: "next",
-      heading: "Where to take it",
-      body: [
-        "The project as specified is finished and every requirement is checkable. Five extensions, in the order that teaches the most per hour:",
-        "**Optimistic comment posting.** The one remaining mutation that *can* be optimistic — you have the body, and a temporary id is acceptable for a list that is append-only. Compare what it takes with `useUpdateIssue`.",
-        "**Pagination or infinite scroll.** `useInfiniteQuery`, a cursor on `created_at`, and the discovery that offset pagination is wrong the moment rows are inserted while you page.",
-        "**Authentication.** A session, a `currentUser`, and `authorId` stops being a prop the client picks. Notice that none of the four tables change.",
-        "**A real-time update.** A WebSocket or polling that writes into the query cache. This is where centralised query keys stop being tidiness and start being the only way the feature is possible.",
-        "**Move it to a server-rendered framework.** Module 12's material, applied: which of these components would carry `\"use client\"`, and which of these hooks would stop existing.",
-        "Each one is a weekend, each one breaks something you thought was settled, and that is the point.",
+        {
+          title: "A fresh QueryClient per test, with retries off",
+          body: "A shared client leaks one test's cache into the next, so tests pass in one order and fail in another — the exact thing NFR-9 forbids. Retries are worse: a test that deliberately returns a 500 waits for the retry schedule before failing, turning a fast assertion into a three-second one and a suite into something nobody runs.",
+        },
       ],
     },
   ],
   interviewQuestions: [
     {
-      question: "Why fake the network rather than mock the hook?",
+      question: "Why does `AsyncBoundary` take `isEmpty` as a prop instead of working it out?",
       answer:
-        "Because mocking useIssues proves the component renders whatever a mock returns, which is not a fact about the application. Intercepting at the request layer with MSW means the hook, the api function, the fetch wrapper and the response parsing all run for real, so a broken query key, a wrong URL or a schema mismatch is caught. It also means the test survives refactoring — moving logic between the hook and the api layer does not touch it, because it was never coupled to either.",
+        "Because emptiness has two meanings and the component cannot tell them apart. An empty list with no filters set means the project has no bugs, and the right message invites the user to file one; an empty list with filters set means the filters excluded everything, and the right message invites them to relax the filters. Only the caller knows which. Passing the boolean and the message keeps the decision where the knowledge is, and keeps the layout — loading, error, retry — in one place.",
     },
     {
-      question: "Where does state live in this app, and why in three places?",
+      question: "What does MSW give you that mocking the fetch module does not?",
       answer:
-        "Server data lives in the query cache, because it is a cached copy of something someone else owns and it needs invalidation, deduplication and cancellation. The filters live in the URL, because they are where you are rather than what you have — that is what makes the view shareable and reload-survivable. Local UI state — the uncommitted text in the search box, the form fields before submission — lives in useState, because nothing outside the component needs it. The mistake is putting all three in one place: server data in useState loses caching, and form keystrokes in the URL create twenty history entries.",
+        "Independence from how the request is made. A `vi.mock` of the fetch wrapper asserts that a particular function was called with particular arguments, so the test breaks when you rename it, and passes when the URL is wrong as long as the call shape is right. MSW intercepts the actual request, so the test exercises the real URL, the real query string, the real status code and the real JSON — and would still pass if you replaced TanStack Query, or fetch, entirely. It also lets a test assert on the query string by *behaviour*, since the handler can apply the filter.",
     },
     {
-      question: "Why does IssueRow take an assignee rather than an assigneeId?",
+      question: "Your test found two elements with the same text. Why is `getAllByText(...)[0]` the wrong fix?",
       answer:
-        "So that a row never fetches. If the row took an id it would have to resolve the name itself, and the natural way to do that is a hook — which is forty subscriptions for forty rows, and forty requests if the hook is not cached. The parent builds one Map from the user list it already has and passes the resolved value down, which is one pass. It also makes the row purely presentational: props in, markup out, no hooks and no providers, so a test can render it with a literal object.",
-    },
-    {
-      question: "What is the QueryBoundary generic parameter for?",
-      answer:
-        "It keeps the type through the render prop. Without it children would receive unknown and every call site would have to cast the data back to what it already knew it was. With it, the guards for isPending and isError narrow query.data to T, so the four states are enforced by the compiler rather than by convention — and the empty state, which is the one that gets forgotten when each screen writes its own, has a declared place to go.",
+        "Because it makes the test pass without making it correct. The ambiguity was real information — the name appears in a row and in a filter option — and indexing throws it away, leaving an assertion that is satisfied by whichever element happens to be first in the DOM. It will keep passing if the row disappears entirely. Scoping the query with `within(list)` states which one you meant, so the test fails when the thing you cared about breaks.",
     },
   ],
   takeaways: [
-    "`Record<Status, string>` over a fallback: the compiler catches the forgotten case",
-    "`assignee: User | undefined` rather than `assignee?: User`, so every call site thinks about it",
-    "Resolve lookups in the parent; a row that fetches is forty requests",
-    "One `QueryBoundary` so the empty state cannot be forgotten",
-    "Two speeds in one filter bar: debounce the text, not the selects",
-    "Key client-side and server-side validation errors the same way, and one render path handles both",
-    "`aria-invalid` and `aria-describedby` connect the message to the input — and are what a test queries by",
-    "A route file wires hooks to components; logic belongs in a hook, markup in a component",
-    "Derive the lookup Map with `useMemo`, never store it",
-    "A fresh `QueryClient` per test, or test order decides the results",
-    "`onUnhandledRequest: \"error\"` makes a forgotten fixture fail the test instead of passing quietly",
-    "Fake the network, not the modules — everything below the wire should run",
+    "Put the layout of the four states in one component and the choice of empty message in the caller",
+    "`isPending` for \"no data yet\"; rendering a spinner on `isFetching` flashes the page on every refetch",
+    "Run the shared schema on the client too, and let the server's field errors win the merge",
+    "Fake the network, not the modules — and make the fake apply the filters, or it proves nothing",
+    "Scope an ambiguous query instead of indexing it; the ambiguity was telling you something",
+    "A fresh query client per test, retries off, or the suite becomes order-dependent and slow",
   ],
   status: "available",
 };
