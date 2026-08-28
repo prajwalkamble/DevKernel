@@ -669,7 +669,7 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>,
 );`,
           explanation:
-            "This file is the list from module 14's reading lesson — the set of things any component may assume exists. The three defaults are opinions worth stating: 30 seconds of staleness means navigating back to a screen does not refetch, one retry covers a flaky connection without turning a real 500 into a four-second wait, and refetch-on-focus is off because in this app it surprises more than it helps.",
+            "This file is the list from this module's reading lesson — the set of things any component may assume exists. The three defaults are opinions worth stating: 30 seconds of staleness means navigating back to a screen does not refetch, one retry covers a flaky connection without turning a real 500 into a four-second wait, and refetch-on-focus is off because in this app it surprises more than it helps.",
           requires: "the capstone project (this file is type-checked, not run)",
         },
       ],

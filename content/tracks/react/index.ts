@@ -23,7 +23,9 @@ import { reactPatternsAndMasteryModule } from "./modules/14-patterns-and-mastery
  * for the four you use daily and one for the rest — because "learning hooks"
  * is where most people stall. Rendering (client, server, hydration and Server
  * Components) is module 12, once there is enough vocabulary for it to mean
- * something.
+ * something. The last three lessons are one project rather than more
+ * material: everything above, applied at once, with the requirements written
+ * down before any of it is built.
  */
 export const reactTrack: TrackDefinition = {
   id: "react",
@@ -32,12 +34,12 @@ export const reactTrack: TrackDefinition = {
   shortTitle: "React",
   tagline: "Components, props and hooks, all the way to concurrent rendering",
   description:
-    "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, and the interview questions.",
+    "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, and a capstone project built end to end — a small issue tracker with a React front end, a real HTTP API and a real database.",
   order: 4,
   status: "available",
   accent: "react",
   mode: "learn",
-  lessonMinutes: [25, 40],
+  lessonMinutes: [20, 45],
   interviewPrep: true,
   runnable: true,
   modules: [
