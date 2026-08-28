@@ -78,6 +78,12 @@ d's type is the function itself: true`,
     {
       id: "the-remount-trap",
       heading: "The conditional wrapper that remounts everything",
+      visual: {
+        id: "reconcile-type-change-visual",
+        kind: "react-rendering",
+        algorithm: "reconcile-type-change",
+        title: "A changed type at one position, and everything under it",
+      },
       body: [
         "The rule about differing types has a consequence that bites in real code, and the visual above is the shape of it: something at the top of the tree changes type, and a whole subtree that looks untouched is destroyed and rebuilt.",
         "The classic version is a wrapper that only sometimes exists. `{isModal ? <Dialog><Form /></Dialog> : <Form />}` puts `Form` at depth 1 in one branch and depth 0 in the other, so toggling `isModal` unmounts the form and mounts a new one — losing everything the user typed, every scroll position, and every piece of local state inside it.",
