@@ -30,7 +30,10 @@ function renderInline(text: string, keyPrefix = ""): ReactNode[] {
       return (
         <code
           key={key}
-          className="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.85em] text-accent"
+          /* `break-words` rather than `break-all`: a long identifier with no
+             natural break point has to break somewhere on a narrow screen, but
+             short code should still stay in one piece. */
+          className="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.85em] break-words text-accent"
         >
           {token.slice(1, -1)}
         </code>

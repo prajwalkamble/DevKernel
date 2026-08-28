@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAllLessonRefs, getLesson, getTrackBySlug } from "@/content/tracks";
-import { LessonShell } from "@/components/layout/LessonShell";
 import { LessonView } from "@/components/lesson/LessonView";
 
 interface LessonPageProps {
@@ -38,9 +37,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
     notFound();
   }
 
-  return (
-    <LessonShell>
-      <LessonView lesson={lesson} trackSlug={trackSlug} />
-    </LessonShell>
-  );
+  /* The shell is in `app/learn/[trackSlug]/layout.tsx`, so the sidebar keeps
+     its scroll position and its expanded modules across a lesson change. */
+  return <LessonView lesson={lesson} trackSlug={trackSlug} />;
 }

@@ -48,6 +48,13 @@ true`,
             "Three things fall out of this. The element's `type` is the string `\"span\"` for a DOM tag — it would be the *function itself* for a component. Everything you pass, including the children, ends up in `props`. And because it is a plain object, you can store an element in a variable, put it in an array, or return it from a function, which is exactly what components do.",
         },
       ],
+      visual: {
+        id: "element-tree-visual",
+        kind: "react-rendering",
+        algorithm: "element-tree",
+        title: "A tree of JSX becoming a tree of objects",
+        lockAlgorithm: true,
+      },
       pitfalls: [
         {
           title: "You no longer need `import React` for JSX",
@@ -152,7 +159,7 @@ function Truthy() {
       heading: "Writing a component",
       body: [
         "Two rules make a function a component, and both are enforced.",
-        "**It must return JSX** (or `null`). Returning `undefined` is an error.",
+        "**It must return something renderable.** JSX, `null`, a string, a number, an array of elements — or nothing at all. A function with no `return` used to be an error; since React 18 it renders as nothing, exactly like `null`. Returning `null` still says \"I have decided to show nothing\" more clearly than falling off the end of a function does.",
         "**Its name must start with a capital letter.** This is not a style preference — it is how the compiler distinguishes the two cases. `<button />` compiles to `jsx(\"button\", …)`, passing a *string*, which means a DOM element. `<Button />` compiles to `jsx(Button, …)`, passing the *function itself*. A lowercase component name is silently treated as an unknown HTML tag, and the resulting error message rarely points at the real cause.",
       ],
       examples: [

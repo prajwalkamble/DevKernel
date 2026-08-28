@@ -94,6 +94,7 @@ export function Greeting({ name, count, onDismiss }: GreetingProps) {
           lang: "tsx",
           code: `// In a .tsx file:
 const identity = <T>(value: T): T => value;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `b.tsx(2,19): error TS17008: JSX element 'T' has no corresponding closing tag.
 b.tsx(2,36): error TS1382: Unexpected token. Did you mean \`{'>'}\` or \`&gt;\`?
 b.tsx(3,1): error TS1005: '</' expected.`,
@@ -160,6 +161,7 @@ const r1 = useRef<HTMLInputElement>();
 
 // (createContext has always required one, and it is the same error.)
 const Ctx = createContext<{ theme: string }>();`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `a.tsx(4,20): error TS2339: Property 'children' does not exist on type '{}'.
 a.tsx(7,15): error TS2503: Cannot find namespace 'JSX'.
 a.tsx(17,12): error TS2554: Expected 1 arguments, but got 0.

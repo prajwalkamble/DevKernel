@@ -12,9 +12,10 @@
  *   node scripts/verify-lesson-code.mjs dsa                   # one track
  *   node scripts/verify-lesson-code.mjs dsa the-framework     # one module
  *
- * An example is checked when it declares `lang` as java or python *and* has an
- * `output`. Examples with no `output` are illustrations rather than promises and
- * are skipped; so are the other languages, which have no toolchain here.
+ * An example is checked when it declares a `lang` this runner has a toolchain
+ * for *and* has an `output`. Examples with no `output` are illustrations rather
+ * than promises and are skipped; so are the other languages, which have no
+ * toolchain here.
  *
  * Not every example is a whole program — a lesson showing one method body is
  * still run before its output is written down, just inside a harness that is not
@@ -27,19 +28,10 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const ROOT = process.cwd();
-/**
- * Languages checked for a lesson's *primary* example.
- *
- * Deliberately still three. Turning the full set on here also starts checking
- * the C++ and Rust tracks, whose examples are written against particular build
- * invocations this runner does not reproduce — `-Wall` for the warning
- * lessons, `g++ -E` for the preprocessor one, a deliberate non-zero exit for
- * another, and a few that print timings and so can never match. Those examples
- * are not wrong; this runner is simply not how they are meant to be built, and
- * making it so is its own piece of work.
- */
+
 /**
  * How long one example may take.
  *
@@ -50,7 +42,23 @@ const ROOT = process.cwd();
  */
 const RUN_TIMEOUT_MS = 300000;
 
-const RUNNABLE = new Set(["java", "python", "go"]);
+/**
+ * Languages checked for a lesson's *primary* example.
+ *
+ * Still deliberately short. Turning the full set on here also starts checking
+ * the C++ and Rust tracks, whose examples are written against particular build
+ * invocations this runner does not reproduce — `-Wall` for the warning
+ * lessons, `g++ -E` for the preprocessor one, a deliberate non-zero exit for
+ * another, and a few that print timings and so can never match. Those examples
+ * are not wrong; this runner is simply not how they are meant to be built, and
+ * making it so is its own piece of work.
+ *
+ * `tsx` and `jsx` are here because the React track's promise is the same as
+ * every other track's: the markup printed under an example is what React
+ * really produces for that tree, not what it was remembered to produce. See
+ * `runReact`.
+ */
+const RUNNABLE = new Set(["java", "python", "go", "tsx", "jsx"]);
 
 /**
  * Languages checked for a *translation*.
@@ -72,6 +80,7 @@ const work = mkdtempSync(path.join(tmpdir(), "devkernel-run-"));
 function cleanup() {
   rmSync(build, { recursive: true, force: true });
   rmSync(work, { recursive: true, force: true });
+  rmSync(reactWork, { recursive: true, force: true });
 }
 
 /**
@@ -248,6 +257,136 @@ function runTypeScript(code) {
   return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
 }
 
+let reactSeq = 0;
+
+/**
+ * Where React examples run.
+ *
+ * Unlike every other language here, this one cannot use the system temp
+ * directory. `import React from "react"` resolves by walking up from the file,
+ * and esbuild finds the `"jsx": "react-jsx"` setting by walking up for a
+ * tsconfig — so a file in /tmp gets `Cannot find module 'react'` and no JSX
+ * transform. It therefore lives under the repo, inside `node_modules`, which
+ * git, tsconfig and eslint already ignore; nothing else has to learn about it.
+ */
+const reactWork = path.join(ROOT, "node_modules", ".devkernel-verify");
+
+/**
+ * Finds the component an example means to show, if it means to show one.
+ *
+ * The contract, which module 1 already followed and the rest of the track
+ * keeps:
+ *
+ *   - An example that declares `App` renders `App`. That is the root, however
+ *     many other components it defines and whatever else it prints.
+ *   - Otherwise, an example that prints nothing of its own renders its last
+ *     top-level component — the shape of every "here is a component" example.
+ *   - An example that prints for itself and has no `App` renders nothing. Such
+ *     an example is inspecting components rather than displaying them, and
+ *     appending markup to its output would be noise.
+ *   - An example that calls `createRoot` renders nothing here either: it is
+ *     driving React on a real DOM and printing what it means to show.
+ *
+ * Requiring a lowercase letter in the name keeps `const MAX_ROWS = 10` from
+ * being taken for a component, and the initialiser test keeps out any other
+ * capitalised constant that is not a function.
+ */
+function reactRoot(code) {
+  const found = [];
+  const patterns = [
+    /^(?:export\s+)?(?:default\s+)?function\s+([A-Z][A-Za-z0-9]*)/gm,
+    /^(?:export\s+)?const\s+([A-Z][A-Za-z0-9]*)\s*(?::[^=]+)?=\s*(?:function\b|(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*(?::[^=]+)?=>)/gm,
+  ];
+  for (const pattern of patterns) {
+    for (const match of code.matchAll(pattern)) {
+      if (/[a-z]/.test(match[1])) found.push({ name: match[1], at: match.index });
+    }
+  }
+  if (found.length === 0) return null;
+  if (found.some((c) => c.name === "App")) return "App";
+  if (/\bconsole\.\w+\(/.test(code)) return null;
+  return found.sort((a, b) => a.at - b.at).at(-1).name;
+}
+
+/**
+ * Renders a React example to the HTML the page claims it produces.
+ *
+ * Two modes, chosen by what the example reaches for.
+ *
+ * By default it is rendered once with `renderToStaticMarkup`. That is React's
+ * own renderer, so `className` becoming `class`, and a `0` appearing where
+ * `&&` short-circuited, are real behaviours rather than a re-implementation of
+ * them — and it covers JSX, props, composition, lists and keys, which is most
+ * of the track.
+ *
+ * An example that mentions the DOM, `react-dom/client` or `act` gets a real
+ * one, from jsdom, loaded through node's `--import` so it is installed before
+ * the example is evaluated. Such an example drives React itself: mount, click,
+ * set state, print what changed. That is the only way to show a *re-render*,
+ * which is the whole subject of several modules, and the reason the state
+ * lessons can demonstrate rather than assert.
+ *
+ * The DOM roughly doubles the time an example takes, hence loading it only for
+ * the ones that say they want it.
+ */
+function runReact(lang, code) {
+  mkdirSync(reactWork, { recursive: true });
+  // An example that mounts its own root is driving React itself and prints
+  // whatever it means to show. Appending a static render of `App` on top of
+  // that would render the tree a second time and tack unrelated markup onto
+  // its output.
+  const drivesItself = /createRoot|hydrateRoot/.test(code);
+  // The repo's own tsconfig excludes node_modules, so without this the loader
+  // falls back to the *classic* transform and every example compiles to
+  // `React.createElement`. That is not what the site ships or what the lessons
+  // describe, and it hides the automatic runtime's behaviour — `key` being
+  // lifted out of props, `jsx` against `jsxs`. Pin it instead.
+  const tsconfig = path.join(reactWork, "tsconfig.json");
+  writeFileSync(
+    tsconfig,
+    JSON.stringify({ compilerOptions: { jsx: "react-jsx", target: "ES2022" } })
+  );
+  // Without this the loader emits CommonJS, which has two consequences an
+  // example would trip over: no top-level `await`, and sloppy mode, so a write
+  // to a frozen props object fails silently instead of throwing the way it
+  // does in a real app. Modules are what React code is.
+  writeFileSync(path.join(reactWork, "package.json"), JSON.stringify({ type: "module" }));
+  const file = path.join(reactWork, `example${reactSeq++}.${lang === "jsx" ? "jsx" : "tsx"}`);
+  const root = drivesItself ? null : reactRoot(code);
+  // Everything this harness adds goes *after* the example, because ES module
+  // imports are hoisted: the bindings exist before the first line runs either
+  // way, and appending keeps every line number in a stack trace or a compiler
+  // diagnostic equal to the line the learner is reading on the page.
+  //
+  // `React` is only wanted by examples that name it — `React.createElement`, a
+  // type, a memo call — since the automatic runtime compiles JSX without it.
+  // An example that imports React itself already has the binding, and a second
+  // one would be a redeclaration.
+  const harness = [
+    /^\s*import\s+React\b/m.test(code) ? null : 'import React from "react";',
+    root ? 'import { renderToStaticMarkup as __markup } from "react-dom/server";' : null,
+    root ? `console.log(__markup(<${root} />));` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  writeFileSync(file, `${code}\n${harness}\n`);
+  // `--tsconfig` cannot be used alongside `--import`: tsx forwards the latter
+  // to node, and node then rejects the former as an unknown flag. The
+  // environment variable is the same setting by another route.
+  const needsDom = /react-dom\/client|\bdocument\b|\bwindow\b|\bact\s*\(/.test(code);
+  const domEnv = pathToFileURL(path.join(ROOT, "scripts", "react-dom-env.mjs")).href;
+  const result = spawnSync(
+    path.join(ROOT, "node_modules", ".bin", "tsx"),
+    needsDom ? ["--import", domEnv, file] : [file],
+    {
+      encoding: "utf8", timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024,
+      cwd: ROOT,
+      env: { ...process.env, TSX_TSCONFIG_PATH: tsconfig },
+    }
+  );
+  return { text: (result.stdout ?? "") + (result.stderr ?? ""), status: result.status };
+}
+
 let asmSeq = 0;
 
 /**
@@ -290,6 +429,8 @@ function runIn(lang, code) {
     case "javascript": return runNode(code);
     case "typescript": return runTypeScript(code);
     case "asm": return runAsm(code);
+    case "tsx": return runReact("tsx", code);
+    case "jsx": return runReact("jsx", code);
     default: throw new Error(`no runner for ${lang}`);
   }
 }
@@ -315,6 +456,10 @@ function normalise(text) {
     // diagnostic quotes the filename a learner would see.
     .replace(/(^|[^\w/])\.?\/*(?:cpp\d+\/)?main\.cpp/g, "$1main.cpp")
     .replace(/(^|[^\w/])\.?\/*(?:rust\d+\/)?main\.rs/g, "$1main.rs")
+    // React examples run inside node_modules (see `reactWork`), which is not a
+    // path any learner would recognise. They read as a component file.
+    .replaceAll(reactWork, "")
+    .replace(/(^|[^\w/])\.?\/*example\d+\.(tsx|jsx)/g, "$1App.$2")
     .split("\n")
     .map((line) => line.replace(/\s+$/, ""))
     .join("\n")

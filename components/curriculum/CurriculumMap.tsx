@@ -81,7 +81,10 @@ export function CurriculumMap({ track }: { track: Track }) {
                 const done =
                   lesson.status === "available" && isComplete(track.slug, mod.slug, lesson.slug);
                 return (
-                  <li key={lesson.slug}>
+                  // `min-w-0` so the grid column may shrink below the row's
+                  // intrinsic width; without it the truncating title never gets
+                  // the chance to truncate and the page scrolls sideways.
+                  <li key={lesson.slug} className="min-w-0">
                     <Link
                       href={lessonHref(track.slug, mod.slug, lesson.slug)}
                       className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm transition-colors hover:border-border hover:bg-surface-hover"

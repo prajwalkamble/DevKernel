@@ -130,6 +130,12 @@ export const firstAppLesson: Lesson = {
     {
       id: "where-state-lives",
       heading: "Where should state live?",
+      visual: {
+        id: "first-app-lifting",
+        kind: "react-rendering",
+        algorithm: "lifting-state",
+        title: "Where the shared state has to live",
+      },
       body: [
         "This is the design decision React asks you to make constantly, and there is one rule that answers it: **state belongs in the closest common ancestor of every component that needs it.**",
         "Put it lower and a sibling cannot see it. Put it higher and every render of that ancestor re-renders a larger subtree than necessary, and the component becomes a junk drawer.",

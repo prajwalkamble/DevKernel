@@ -55,6 +55,7 @@ const good = <List items={users} getKey={(u) => u.id} renderItem={(u) => u.name}
 
 // And a typo inside a callback is a compile error, not a blank cell.
 const bad = <List items={users} getKey={(u) => u.id} renderItem={(u) => u.nmae} />;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `e.tsx(18,75): error TS2339: Property 'nmae' does not exist on type 'User'.`,
           explanation:
             "Nothing at the call site mentions `User` — inference flows from `items` into both callbacks. `readonly T[]` on the prop is a small kindness: it accepts both a mutable array and a `readonly` one, and it documents that the component will not modify what it is given.",
@@ -87,6 +88,7 @@ function Keyed<T extends { id: string }>({ items }: KeyedProps<T>) {
 // <Keyed items={products} />  fine
 
 const bad = <Keyed items={[{ name: "x" }]} />;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `e.tsx(25,31): error TS2353: Object literal may only specify known properties, and 'name' does not exist in type '{ id: string; }'.`,
           explanation:
             "Useful constraints, in rough order of how often they appear: `T extends { id: string }` for anything keyed, `T extends string` for a union of literal values, `K extends keyof T` for a prop naming a field of another prop, and `T extends ElementType` for the polymorphic case below.",
@@ -202,6 +204,7 @@ const b1 = <Box as="a" href="/x">link</Box>;
 
 // as="button" does not.
 const b2 = <Box as="button" href="/x">nope</Box>;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `e.tsx(35,29): error TS2322: Type '{ children: string; as: "button"; href: string; }' is not assignable to type 'IntrinsicAttributes & { as?: "button" | undefined; children?: ReactNode; } & Omit<Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "ref">, "as" | "children">'.
   Property 'href' does not exist on type 'IntrinsicAttributes & { as?: "button" | undefined; children?: ReactNode; } & Omit<Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "ref">, "as" | "children">'.`,
           explanation:

@@ -41,6 +41,7 @@ setCount("nope");
 // The null trap: inferred as \`null\`, and stuck there.
 const [profile, setProfile] = useState(null);
 setProfile({ id: 1 });`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `a.tsx(11,10): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SetStateAction<number>'.
 a.tsx(14,11): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '(prevState: null) => null'.`,
           explanation:
@@ -236,6 +237,7 @@ function Counter() {
 
   return <div>{state.count}</div>;
 }`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `c.tsx(33,29): error TS2353: Object literal may only specify known properties, and 'by' does not exist in type '{ type: "reset"; }'.
 c.tsx(34,12): error TS2345: Argument of type '{ type: "inc"; }' is not assignable to parameter of type 'Action'.
   Property 'by' is missing in type '{ type: "inc"; }' but required in type '{ type: "inc"; by: number; }'.`,

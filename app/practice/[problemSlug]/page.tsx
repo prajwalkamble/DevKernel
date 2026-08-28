@@ -62,7 +62,9 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
     <div className="flex items-center gap-3 px-3 py-2 sm:px-4">
       <Link
         href="/practice"
-        className="flex shrink-0 items-center gap-1 text-sm text-muted transition-colors hover:text-foreground"
+        /* Below sm the label is hidden and only the chevron remains, so the
+           link needs a box of its own or it is a 16px target. */
+        className="-ml-1.5 flex min-h-9 shrink-0 items-center gap-1 rounded-md px-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-foreground sm:ml-0 sm:min-h-0 sm:px-0 sm:hover:bg-transparent"
       >
         <ChevronLeft className="h-4 w-4" />
         <span className="hidden sm:inline">All problems</span>

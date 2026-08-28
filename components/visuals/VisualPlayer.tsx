@@ -143,12 +143,12 @@ export function VisualPlayer({
 
         <button type="button" onClick={() => step(-1)} disabled={clamped === 0}
           aria-label="Previous step"
-          className="cursor-pointer rounded-md p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-foreground disabled:cursor-default disabled:opacity-40">
+          className="cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-surface-hover hover:text-foreground disabled:cursor-default disabled:opacity-40">
           <ChevronLeft className="h-4 w-4" />
         </button>
         <button type="button" onClick={() => step(1)} disabled={clamped >= last}
           aria-label="Next step"
-          className="cursor-pointer rounded-md p-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-foreground disabled:cursor-default disabled:opacity-40">
+          className="cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-surface-hover hover:text-foreground disabled:cursor-default disabled:opacity-40">
           <ChevronRight className="h-4 w-4" />
         </button>
 
@@ -159,7 +159,10 @@ export function VisualPlayer({
           value={clamped}
           onChange={(e) => { setPlaying(false); setIndex(Number(e.target.value)); }}
           aria-label="Step through the visualization"
-          className="h-1 min-w-0 flex-1 cursor-pointer accent-accent"
+          /* The track is drawn by the browser and stays thin; the height here
+             is hit area. At h-1 the whole control was four pixels tall, which
+             is not something a finger can find. */
+          className="h-6 min-w-0 flex-1 cursor-pointer accent-accent"
         />
 
         <span className="shrink-0 font-mono text-xs text-muted">
@@ -173,7 +176,7 @@ export function VisualPlayer({
               type="button"
               onClick={() => setSpeed(i)}
               className={clsx(
-                "cursor-pointer rounded px-1.5 py-0.5 text-xs font-medium transition-colors",
+                "cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors",
                 i === speed ? "bg-accent-soft text-accent" : "text-muted hover:text-foreground"
               )}
             >
@@ -223,10 +226,19 @@ function collectRoles(frames: Frame[]): Role[] {
     } else if (frame.kind === "graph") {
       for (const node of frame.nodes) if (node.role) seen.add(node.role);
       for (const edge of frame.edges) if (edge.role) seen.add(edge.role);
+    } else if (frame.kind === "filetree") {
+      for (const entry of frame.entries) if (entry.role) seen.add(entry.role);
     } else {
       for (const role of Object.values(frame.roles)) seen.add(role);
     }
   }
-  const order: Role[] = ["compare", "swap", "pivot", "active", "window", "discarded", "sorted", "found"];
+  /* The React tracks' roles are listed after the algorithm ones rather than
+     mixed in, because no run uses both vocabularies and keeping them apart
+     means a legend reads as one sentence rather than as two interleaved. */
+  const order: Role[] = [
+    "compare", "swap", "pivot", "active", "window", "discarded", "sorted", "found",
+    "mounted", "updated", "unchanged", "moved", "unmounted", "created", "deleted",
+    "suspended", "stale", "server", "client",
+  ];
   return order.filter((r) => seen.has(r));
 }

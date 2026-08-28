@@ -19,6 +19,10 @@ export type CodeLanguage =
      half the files and payloads around it, and a build file shown as plain
      text is a build file nobody reads. */
   | "xml"
+  /* Markup, for the rendering-model lessons: a page's real HTML is the whole
+     subject there, and showing it as plain text would hide the one thing the
+     reader is being asked to look at. */
+  | "html"
   | "yaml"
   | "properties"
   | "sql"
@@ -113,6 +117,43 @@ export type VisualKind =
   | "pattern"
   | "tree-algorithm"
   | "bits-and-math"
+  /* React's rendering model: element trees, the render/commit split,
+     reconciliation, and what a key does to a list. */
+  | "react-rendering"
+  /* Where the files go: the generated scaffold, and the two ways a src/
+     directory is organised once there is more than a screenful of it. */
+  | "react-structure"
+  /* The concurrent renderer: interruptible work, Suspense, transitions,
+     deferred values, error boundaries and Strict Mode's doubling. */
+  | "react-concurrent"
+  /* Where the rendering happens: client, server, hydration, and the Server
+     Component boundary. */
+  | "react-server"
+  /* The tools around the code: what a query ladder picks, what a build emits. */
+  | "react-tooling"
+  /* Composition patterns: compound components, portals, and focus order. */
+  | "react-patterns"
+  /* The state mechanics: snapshots, batching, identity comparison, derived
+     state, dependency arrays, refs, controlled inputs and keyed resets. */
+  | "react-state"
+  /* The query cache: how a key is matched by an invalidation, and how one
+     entry lives from first fetch to garbage collection. */
+  | "react-data"
+  /* Performance arithmetic: renders against DOM writes, what a memo costs,
+     the cache the compiler emits, windowing, and reading a flame graph. */
+  | "react-perf"
+  /* The element model: what a JSX tag evaluates to, what survives child
+     flattening, prop precedence, and fragments against wrappers. */
+  | "react-jsx"
+  /* State architecture: how far a prop travels, where state has to live, and
+     what a subscription model costs. */
+  | "react-arch"
+  /* Forms: which prop holds a value, what a submit collects, when an error
+     may appear, and how many states a set of booleans can express. */
+  | "react-forms"
+  /* One-off mechanisms: prop-to-attribute mapping, a debounce on a clock,
+     and how a mocked request handler is chosen. */
+  | "react-misc"
   /* Individual data structures. */
   | "stack"
   | "queue"

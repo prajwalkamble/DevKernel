@@ -12,7 +12,8 @@ import {
 } from "@/lib/visuals/resolve";
 import { VisualPlayer } from "./VisualPlayer";
 import {
-  ArrayCanvas, BucketCanvas, GraphCanvas, HeapCanvas, MatrixCanvas, SequenceCanvas, TreeCanvas,
+  ArrayCanvas, BucketCanvas, FileTreeCanvas, GraphCanvas, HeapCanvas, MatrixCanvas, SequenceCanvas,
+  TreeCanvas,
 } from "./canvases";
 
 function draw(frame: Frame) {
@@ -24,6 +25,7 @@ function draw(frame: Frame) {
     case "buckets": return <BucketCanvas frame={frame} />;
     case "graph": return <GraphCanvas frame={frame} />;
     case "matrix": return <MatrixCanvas frame={frame} />;
+    case "filetree": return <FileTreeCanvas frame={frame} />;
   }
 }
 
@@ -76,6 +78,19 @@ export function Visual({ spec }: { spec: VisualSpec }) {
     case "pattern": return <FamilyVisual spec={spec} {...FAMILIES.pattern} />;
     case "tree-algorithm": return <FamilyVisual spec={spec} {...FAMILIES["tree-algorithm"]} />;
     case "bits-and-math": return <FamilyVisual spec={spec} {...FAMILIES["bits-and-math"]} />;
+    case "react-rendering": return <FamilyVisual spec={spec} {...FAMILIES["react-rendering"]} />;
+    case "react-structure": return <FamilyVisual spec={spec} {...FAMILIES["react-structure"]} />;
+    case "react-concurrent": return <FamilyVisual spec={spec} {...FAMILIES["react-concurrent"]} />;
+    case "react-server": return <FamilyVisual spec={spec} {...FAMILIES["react-server"]} />;
+    case "react-tooling": return <FamilyVisual spec={spec} {...FAMILIES["react-tooling"]} />;
+    case "react-patterns": return <FamilyVisual spec={spec} {...FAMILIES["react-patterns"]} />;
+    case "react-state": return <FamilyVisual spec={spec} {...FAMILIES["react-state"]} />;
+    case "react-data": return <FamilyVisual spec={spec} {...FAMILIES["react-data"]} />;
+    case "react-perf": return <FamilyVisual spec={spec} {...FAMILIES["react-perf"]} />;
+    case "react-jsx": return <FamilyVisual spec={spec} {...FAMILIES["react-jsx"]} />;
+    case "react-arch": return <FamilyVisual spec={spec} {...FAMILIES["react-arch"]} />;
+    case "react-forms": return <FamilyVisual spec={spec} {...FAMILIES["react-forms"]} />;
+    case "react-misc": return <FamilyVisual spec={spec} {...FAMILIES["react-misc"]} />;
     default: return <StructureVisual spec={spec} kind={spec.kind} />;
   }
 }

@@ -62,6 +62,7 @@ function Unsafe() {
   const theme = useContext(ThemeContext);
   return <div>{theme.mode}</div>;
 }`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `d.tsx(18,16): error TS18048: 't' is possibly 'undefined'.`,
           explanation:
             "The error is on the *unsafe* version, and that is the design working: the only way to avoid it is the guard hook, so the guard becomes the path of least resistance. **Do not export the context itself** — export only the provider and the hook, and the wrong usage becomes unavailable rather than merely discouraged.",
@@ -100,6 +101,7 @@ const renders = useRef(0);          // number, inferred
 useEffect(() => {
   inputRef.current.focus();
 }, []);`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `d.tsx(26,5): error TS18047: 'inputRef.current' is possibly 'null'.`,
           explanation:
             "That null is real, not pedantry: the effect runs after mount so `current` is set, but the same ref is `null` during the first render and again after unmount. Narrow it — `inputRef.current?.focus()` for a fire-and-forget call, or an `if (!inputRef.current) return;` guard when several statements depend on it.",
@@ -167,6 +169,7 @@ const [isOpen, toggle] = useToggle();
 //     ^? boolean        ^? () => void
 
 const wrong: string = isOpen;`,
+          requires: "tsc over the whole lesson's examples in one file, which is how these diagnostics got their line numbers",
           output: `d.tsx(38,9): error TS2322: Type 'boolean' is not assignable to type 'string'.`,
           explanation:
             "That error is the proof it worked: `isOpen` is genuinely `boolean`, not a union. Without `as const` the same line would report `boolean | (() => void)` instead — and calling `toggle()` would fail with \"Not all constituents of type 'boolean | (() => void)' are callable\", which is the signature of this bug.",
