@@ -42,14 +42,33 @@ export function SidebarNav() {
     }
   }
 
-  /* On first mount only, bring the current lesson into view. Arriving at
-     module 14 of a 15-module track otherwise opens the sidebar at the top
-     with the active lesson far below the fold. Mount-only is deliberate:
-     running it on every navigation would fight the scroll position this
-     component now exists to keep. */
+  /* On first mount only, bring the current lesson into view. Arriving at the
+     capstone module otherwise opens the sidebar at the top with the active
+     lesson below the fold. Mount-only is deliberate: running it on every
+     navigation would fight the scroll position this component exists to keep.
+
+     Deliberately not `scrollIntoView`. That method scrolls *every* scrollable
+     ancestor, the document included, so it nudged the whole page down by a
+     pixel on load — measurably, which is how this was found. Setting the
+     scroll container's own `scrollTop` touches exactly one element and cannot
+     move the window. */
   const activeLink = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
-    activeLink.current?.scrollIntoView({ block: "nearest" });
+    const link = activeLink.current;
+    /* Null while the mobile drawer is closed — its contents are not laid out,
+       so there is nothing to scroll to and every measurement would be zero. */
+    if (!link?.offsetParent) return;
+
+    let box = link.parentElement;
+    while (box && box !== document.body && box.scrollHeight <= box.clientHeight) {
+      box = box.parentElement;
+    }
+    if (!box || box === document.body) return;
+
+    const item = link.getBoundingClientRect();
+    const frame = box.getBoundingClientRect();
+    if (item.top < frame.top) box.scrollTop -= frame.top - item.top;
+    else if (item.bottom > frame.bottom) box.scrollTop += item.bottom - frame.bottom;
   }, []);
 
   function toggleModule(slug: string) {
