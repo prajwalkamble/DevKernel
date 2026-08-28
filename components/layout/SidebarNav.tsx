@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Check, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { defaultTrack, getFirstLesson, getTrackBySlug, lessonHref, tracks } from "@/content/tracks";
 import { TRACK_BADGE_CLASS } from "@/lib/trackTheme";
@@ -23,6 +23,34 @@ export function SidebarNav() {
   const [openModules, setOpenModules] = useState<Set<string>>(
     () => new Set([currentModuleSlug ?? track.modules[0].slug])
   );
+
+  /* This component no longer remounts between lessons — the shell is a layout
+     — which is what preserves the reader's scroll and their expanded modules.
+     The one thing that used to come free with remounting was the current
+     module being open, so it is done explicitly: when the route moves into a
+     different module, that module is added to the open set without closing
+     anything the reader opened themselves.
+
+     Adjusted during render rather than in an effect, which is the documented
+     way to react to a changed input: it runs before the children below and
+     costs no second commit. */
+  const [seenModule, setSeenModule] = useState(currentModuleSlug);
+  if (currentModuleSlug !== seenModule) {
+    setSeenModule(currentModuleSlug);
+    if (currentModuleSlug) {
+      setOpenModules((prev) => (prev.has(currentModuleSlug) ? prev : new Set(prev).add(currentModuleSlug)));
+    }
+  }
+
+  /* On first mount only, bring the current lesson into view. Arriving at
+     module 14 of a 15-module track otherwise opens the sidebar at the top
+     with the active lesson far below the fold. Mount-only is deliberate:
+     running it on every navigation would fight the scroll position this
+     component now exists to keep. */
+  const activeLink = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    activeLink.current?.scrollIntoView({ block: "nearest" });
+  }, []);
 
   function toggleModule(slug: string) {
     setOpenModules((prev) => {
@@ -110,6 +138,7 @@ export function SidebarNav() {
                     return (
                       <li key={lesson.slug}>
                         <Link
+                          ref={active ? activeLink : undefined}
                           href={lessonHref(track.slug, mod.slug, lesson.slug)}
                           className={clsx(
                             "flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
