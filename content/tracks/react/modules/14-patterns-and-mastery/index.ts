@@ -15,7 +15,7 @@ export const reactPatternsAndMasteryModule: ModuleDefinition = {
   slug: "patterns-and-mastery",
   title: "Patterns, Ecosystem & the Capstone Project",
   description:
-    "The consolidation pass: the patterns that show up in every large codebase, the ecosystem decisions worth having an opinion about, and then a complete project — a small issue tracker in React, TypeScript, a real HTTP API and a real database — specified, structured and written out in full.",
+    "The consolidation pass: the patterns that show up in every large codebase, the ecosystem decisions worth having an opinion about, and then a complete project — Tracer, a bug and task tracker in the shape of a small GitHub Issues or Jira — specified, structured and written out in full, with React and TypeScript in the browser over an HTTP API and a database you also build.",
   order: 14,
   status: "available",
   lessons: [

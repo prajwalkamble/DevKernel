@@ -4,9 +4,9 @@ export const capstoneBackendLesson: Lesson = {
   id: "react-capstone-backend",
   slug: "capstone-structure-types-and-backend",
   moduleSlug: "patterns-and-mastery",
-  title: "The Capstone: Folder Structure, Shared Types & the Backend",
+  title: "Capstone — Issue Tracker: Folder Structure, Types & the Backend",
   summary:
-    "Steps one to three of the build. The complete folder map for all three packages, the Zod schemas that both sides import, the database schema those schemas generate, and the eight routes — each one written out and each one verified against a running server.",
+    "Steps one to three of building Tracer, the issue tracker specified in the previous lesson. The complete folder map for all three packages, the Zod schemas that both sides import, the database schema those schemas generate, and the eight routes — each one written out and each one verified against a running server.",
   estimatedMinutes: 42,
   objectives: [
     "Lay out a three-package workspace and say what belongs in each",

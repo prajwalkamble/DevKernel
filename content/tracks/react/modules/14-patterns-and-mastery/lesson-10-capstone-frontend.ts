@@ -4,9 +4,9 @@ export const capstoneFrontendLesson: Lesson = {
   id: "react-capstone-frontend",
   slug: "capstone-the-react-app",
   moduleSlug: "patterns-and-mastery",
-  title: "The Capstone: The React App, Component by Component",
+  title: "Capstone — Issue Tracker: The React App, Component by Component",
   summary:
-    "The rest of the build, in TypeScript: the fetch layer, the query-key table, six hooks, eight components with their props types, both screens, and the tests — with the reasoning for each, and the one place the app is optimistic and the one place it deliberately is not.",
+    "The rest of Tracer, in TypeScript: the fetch layer, the query-key table, six hooks, eight components with their props types, the issue list and issue detail screens, and the tests — with the reasoning for each, and the one place the app is optimistic and the one place it deliberately is not.",
   estimatedMinutes: 46,
   objectives: [
     "Build a typed fetch layer that parses rather than casts",

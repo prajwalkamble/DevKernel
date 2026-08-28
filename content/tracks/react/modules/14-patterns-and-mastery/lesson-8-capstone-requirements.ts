@@ -4,11 +4,12 @@ export const capstoneRequirementsLesson: Lesson = {
   id: "react-capstone-requirements",
   slug: "capstone-requirements-and-architecture",
   moduleSlug: "patterns-and-mastery",
-  title: "The Capstone: Requirements & Architecture",
+  title: "Capstone — Issue Tracker: Requirements & Architecture",
   summary:
-    "The project this track has been building toward — a small issue tracker with a React and TypeScript front end, a real HTTP API and a real database — specified the way a project actually gets specified: numbered functional requirements, numbered non-functional ones, a data model, an API surface, and a stack chosen on stated grounds.",
+    "You are building Tracer: a bug and task tracker for one small team — the shape of GitHub Issues, Jira or Linear, cut down to what a team of four actually uses. React and TypeScript in the browser, a real HTTP API, a real database. This lesson specifies it the way a project actually gets specified: numbered functional requirements, numbered non-functional ones, a data model, an API surface, and a stack chosen on stated grounds.",
   estimatedMinutes: 34,
   objectives: [
+    "Know exactly what you are building: a small issue tracker, feature by feature",
     "Read a specification precise enough to build from without guessing",
     "Tell a functional requirement from a non-functional one, and why the split matters",
     "Derive a data model from requirements rather than from imagination",
@@ -20,7 +21,8 @@ export const capstoneRequirementsLesson: Lesson = {
       id: "the-brief",
       heading: "What you are building",
       body: [
-        "**Tracer** — an issue tracker for one small team. A project has issues; an issue has a status, a priority, an assignee and comments. You can list issues, filter them, open one, change its status and comment on it.",
+        "**Tracer** — a bug and task tracker for one small team. If you have used GitHub Issues, Jira, Linear or Trello, you already know the product: a project holds issues, an issue has a title, a status, a priority, an assignee and a thread of comments, and the day-to-day is listing them, filtering them, opening one, moving it along and leaving a note.",
+        "You will build the core of that. A list screen with three filters and a search box, a create form, a detail screen, a status control and comments — backed by an HTTP API you also write, over a database you also design.",
         "That is deliberately unglamorous, and it is deliberately not a todo list. A todo list has one entity and no relationships, so it never forces a decision. Tracer has four tables, two of them related to a third, a filter that has to run in SQL rather than in JavaScript, one mutation that should be optimistic and one that should not, and a piece of state — the filters — that belongs in the URL rather than in a component. Every one of those is a decision from an earlier module, arriving in a place where getting it wrong has a visible cost.",
         "The whole thing is roughly nine hundred lines across three packages. It is a weekend, not a quarter. The point is not size; it is that every line has a reason you can state.",
         "Two rules for the build, and they are the ones that make it worth doing at all. **Write the requirement number in the commit message**, so you can tell at the end what you built and what you drifted into. And **do not start the UI first** — the schema comes first, then the API, then the screens, because that is the direction the types flow.",

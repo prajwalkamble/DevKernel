@@ -34,7 +34,7 @@ export const reactTrack: TrackDefinition = {
   shortTitle: "React",
   tagline: "Components, props and hooks, all the way to concurrent rendering",
   description:
-    "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, and a capstone project built end to end — a small issue tracker with a React front end, a real HTTP API and a real database.",
+    "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, and a capstone project built end to end — Tracer, a bug and task tracker in the shape of a small GitHub Issues or Jira, with a React front end over an HTTP API and a database you also build.",
   order: 4,
   status: "available",
   accent: "react",
