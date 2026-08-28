@@ -28,6 +28,12 @@ export const virtualisationAndSplittingLesson: Lesson = {
     {
       id: "windowing",
       heading: "Windowing",
+      visual: {
+        id: "virtual-window-visual",
+        kind: "react-perf",
+        algorithm: "virtual-window",
+        title: "Ten thousand rows, twenty-six elements",
+      },
       body: [
         "The observation is that a screen shows about twenty rows, so rendering ten thousand puts 9,980 of them where nobody can see them.",
         "Windowing renders only the visible slice, plus a small overscan, and uses one tall spacer element so the scrollbar still reflects the full list.",

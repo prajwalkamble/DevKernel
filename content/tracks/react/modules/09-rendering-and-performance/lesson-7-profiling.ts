@@ -29,6 +29,12 @@ export const profilingLesson: Lesson = {
     {
       id: "flame-graph",
       heading: "Reading the flame graph",
+      visual: {
+        id: "flame-graph-visual",
+        kind: "react-perf",
+        algorithm: "flame-graph",
+        title: "actualDuration against baseDuration, in one commit",
+      },
       body: [
         "Install the React Developer Tools extension, open the **Profiler** tab, press record, do the slow thing, stop.",
         "You get one bar per **commit** — one for each time React applied changes to the DOM. Click a commit and you get its flame graph.",

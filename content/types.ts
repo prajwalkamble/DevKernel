@@ -139,6 +139,9 @@ export type VisualKind =
   /* The query cache: how a key is matched by an invalidation, and how one
      entry lives from first fetch to garbage collection. */
   | "react-data"
+  /* Performance arithmetic: renders against DOM writes, what a memo costs,
+     the cache the compiler emits, windowing, and reading a flame graph. */
+  | "react-perf"
   /* Individual data structures. */
   | "stack"
   | "queue"

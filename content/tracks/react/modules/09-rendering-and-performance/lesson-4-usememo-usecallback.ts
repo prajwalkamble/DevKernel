@@ -28,6 +28,12 @@ export const useMemoUseCallbackLesson: Lesson = {
     {
       id: "counted",
       heading: "The cost, counted",
+      visual: {
+        id: "memo-cache-visual",
+        kind: "react-perf",
+        algorithm: "memo-cache",
+        title: "One useMemo, six renders, two kinds of dependency",
+      },
       body: [
         "Timings vary by machine; operation counts do not. This is what one `useMemo` does over a hundred renders, with a stable dependency and then with an unstable one.",
       ],

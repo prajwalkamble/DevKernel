@@ -28,6 +28,12 @@ export const reactCompilerLesson: Lesson = {
     {
       id: "what-it-emits",
       heading: "What it actually emits",
+      visual: {
+        id: "compiler-cache-visual",
+        kind: "react-perf",
+        algorithm: "compiler-cache",
+        title: "The seven-slot cache, render by render",
+      },
       body: [
         "This is the compiler's real output for a four-line component. Reading it once removes most of the mystery.",
       ],
