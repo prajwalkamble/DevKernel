@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from "lucide-react";
+import { track } from "@/lib/analytics";
 import type { Frame, Role } from "@/lib/visuals/types";
 import { ROLE_FILL, ROLE_LABEL } from "./roles";
 
@@ -124,6 +125,11 @@ export function VisualPlayer({
         <button
           type="button"
           onClick={() => {
+            // Only the transition into playing: pausing is not a play, and
+            // neither is the tick that arrives at the last frame.
+            if (atEnd || !playing) {
+              track("visualization played", { title: title ?? "untitled", frames: frames.length });
+            }
             if (atEnd) { setIndex(0); setPlaying(true); }
             else setPlaying((p) => !p);
           }}

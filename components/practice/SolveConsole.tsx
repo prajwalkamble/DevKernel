@@ -18,6 +18,7 @@ import {
   PRACTICE_LANGUAGE_ORDER,
 } from "@/lib/judge/languages";
 import type { PracticeLanguage } from "@/lib/judge/types";
+import { track } from "@/lib/analytics";
 import { useJudge } from "@/lib/judge/useJudge";
 import { useSolvedProblems } from "@/lib/usePracticeProgress";
 import { SolveResults } from "./SolveResults";
@@ -121,6 +122,23 @@ export function SolveConsole({
   const handleRun = useCallback(() => {
     void run(language, code);
   }, [run, language, code]);
+
+  // Reported from the outcome, not from the Run button: the verdict is the
+  // interesting half, and it does not exist yet when the button is pressed.
+  // `reset()` sets the outcome back to null between runs, so each finished run
+  // is one event.
+  useEffect(() => {
+    if (!outcome) return;
+    track("practice run", {
+      problem: slug,
+      language,
+      status: outcome.status,
+      durationMs: outcome.durationMs,
+    });
+    // `language` is deliberately absent: it is read at report time, and adding
+    // it would re-fire the event when someone switches language after a run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outcome, slug]);
 
   const handleCopyJava = useCallback(async () => {
     await navigator.clipboard.writeText(buildJavaHarness(judge, title, code));

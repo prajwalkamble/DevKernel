@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { track } from "@/lib/analytics";
 import { useProgress } from "@/lib/useProgress";
 
 export function MarkCompleteButton({
@@ -18,7 +19,18 @@ export function MarkCompleteButton({
   return (
     <button
       type="button"
-      onClick={() => toggle(trackSlug, moduleSlug, lessonSlug, !complete)}
+      onClick={() => {
+        toggle(trackSlug, moduleSlug, lessonSlug, !complete);
+        // Only the completion, not the undo. "How far into a track do people
+        // get" is the question; un-ticking a lesson is noise against it.
+        if (!complete) {
+          track("lesson completed", {
+            track: trackSlug,
+            module: moduleSlug,
+            lesson: lessonSlug,
+          });
+        }
+      }}
       className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
         complete
           ? "border-success/30 bg-success/10 text-success"
