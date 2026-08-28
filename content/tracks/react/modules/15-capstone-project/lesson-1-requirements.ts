@@ -2,9 +2,9 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneRequirementsLesson: Lesson = {
   id: "react-capstone-requirements",
-  slug: "capstone-requirements-and-architecture",
-  moduleSlug: "patterns-and-mastery",
-  title: "Capstone — Issue Tracker: Requirements & Architecture",
+  slug: "tracer-requirements-and-architecture",
+  moduleSlug: "capstone-project",
+  title: "Tracer: Requirements & Architecture",
   summary:
     "You are building Tracer: a bug and task tracker for one small team — the shape of GitHub Issues, Jira or Linear, cut down to what a team of four actually uses. React and TypeScript in the browser, a real HTTP API, a real database. This lesson specifies it the way a project actually gets specified: numbered functional requirements, numbered non-functional ones, a data model, an API surface, and a stack chosen on stated grounds.",
   estimatedMinutes: 34,
@@ -201,7 +201,7 @@ curl -s -X POST "$API/projects/p_web/issues" \\
         "**5. The list screen** — FR-1, then 2, 3, 4, 5, 10.",
         "**6. The detail screen** — FR-7, 8, 9.",
         "**7. The tests.** Last, and only for the list screen, which is the one with the most branches.",
-        "The next two lessons are steps 1 through 4 and steps 5 through 7 respectively, with the actual code.",
+        "The three lessons that follow are steps 1 to 3, step 4, and steps 5 to 7 — with the actual code.",
       ],
     },
   ],

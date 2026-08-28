@@ -6,16 +6,13 @@ import { accessibilityLesson } from "./lesson-4-accessibility";
 import { portalsAndAnimationLesson } from "./lesson-5-portals-and-animation";
 import { readingAndReviewingLesson } from "./lesson-6-reading-and-reviewing";
 import { walkthroughLesson } from "./lesson-7-walkthrough";
-import { capstoneRequirementsLesson } from "./lesson-8-capstone-requirements";
-import { capstoneBackendLesson } from "./lesson-9-capstone-backend";
-import { capstoneFrontendLesson } from "./lesson-10-capstone-frontend";
 
 export const reactPatternsAndMasteryModule: ModuleDefinition = {
   id: "react-mastery",
   slug: "patterns-and-mastery",
-  title: "Patterns, Ecosystem & the Capstone Project",
+  title: "Patterns, Ecosystem & Judgement",
   description:
-    "The consolidation pass: the patterns that show up in every large codebase, the ecosystem decisions worth having an opinion about, and then a complete project — Tracer, a bug and task tracker in the shape of a small GitHub Issues or Jira — specified, structured and written out in full, with React and TypeScript in the browser over an HTTP API and a database you also build.",
+    "The consolidation pass: the composition patterns that show up in every large codebase, how to design a component API other people enjoy using, accessibility as a set of decisions rather than a checklist, how to get oriented in code you have never seen, and one component designed end to end.",
   order: 14,
   status: "available",
   lessons: [
@@ -26,8 +23,5 @@ export const reactPatternsAndMasteryModule: ModuleDefinition = {
     portalsAndAnimationLesson,
     readingAndReviewingLesson,
     walkthroughLesson,
-    capstoneRequirementsLesson,
-    capstoneBackendLesson,
-    capstoneFrontendLesson,
   ],
 };

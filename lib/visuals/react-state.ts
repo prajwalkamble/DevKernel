@@ -632,6 +632,214 @@ function resetByKey(): Visualisation {
   };
 }
 
+
+/* -------------------------------------- 9. what a ref hands the parent -- */
+
+/**
+ * The surface a parent can reach through a ref, enumerated from the object
+ * the ref is actually holding.
+ *
+ * Every list below is `Object.keys` of a real object, and every "can the
+ * parent call this" verdict is a real property access on it — so the claim
+ * that `useImperativeHandle` narrows the surface is a thing this run
+ * measures rather than a thing the caption asserts. The DOM node is a
+ * representative sample of what an `<input>` exposes, not the whole of it;
+ * the real one has hundreds of members, which is the point being made.
+ */
+function refSurface(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+
+  /* A stand-in for the node, with a spread of what an element really offers:
+     things you might legitimately want, and things you emphatically do not
+     want a parent reaching for. */
+  const node = {
+    focus: () => {},
+    blur: () => {},
+    select: () => {},
+    scrollIntoView: () => {},
+    value: "",
+    style: {},
+    className: "",
+    addEventListener: () => {},
+    replaceWith: () => {},
+    remove: () => {},
+  };
+
+  /* The two things this component actually promises to do. Built from the
+     node, so the handle is genuinely a narrowing of it. */
+  const handle = {
+    focus: () => node.focus(),
+    clear: () => {
+      node.value = "";
+    },
+  };
+
+  /* The parent tries these four regardless of what it was handed. */
+  const probes = ["focus", "clear", "style", "remove"] as const;
+
+  const surfaceOf = (current: object | null): string[] =>
+    current === null ? [] : Object.keys(current);
+
+  const emit = (
+    current: object | null,
+    label: string,
+    highlight: (key: string) => Role | undefined,
+    note: string,
+  ) => {
+    const keys = surfaceOf(current);
+    rec.push({
+      kind: "sequence",
+      items: [
+        { id: "ref", label, role: current === null ? "discarded" : "active" },
+        ...keys.map((key) => ({ id: `k-${key}`, label: key, role: highlight(key) })),
+      ],
+      pins: { 0: `${keys.length} reachable` },
+      note,
+    });
+  };
+
+  const probe = (current: Record<string, unknown> | null, note: string) =>
+    rec.push({
+      kind: "sequence",
+      items: probes.map((key) => {
+        const value = current === null ? undefined : current[key];
+        return {
+          id: `p-${key}`,
+          label: `ref.current.${key} → ${value === undefined ? "undefined" : typeof value}`,
+          role: value === undefined ? "discarded" : "found",
+        };
+      }),
+      note,
+    });
+
+  emit(null, "ref.current = null", () => undefined, "Before the child mounts, the ref holds null. Every call through it has to be guarded — which is why `ref.current?.focus()` is the idiom and not a stylistic choice.");
+
+  /* --- the ref forwarded straight to the DOM node --- */
+  rec.bump("refs attached");
+  emit(node, "ref.current = <input>", () => "found", "The ref is passed straight to the `<input>`. On commit React writes the node into it, and the parent can now reach everything on that node. This sample shows ten members; a real `HTMLInputElement` has several hundred.");
+
+  emit(
+    node,
+    "ref.current = <input>",
+    (key) => (["focus", "select", "scrollIntoView"].includes(key) ? "found" : "discarded"),
+    "Three of these are things a parent might legitimately want. The rest are not a contract you meant to offer — and `remove` and `replaceWith` let a parent delete the element your component is rendering.",
+  );
+
+  probe(node, "The parent probes four members. All four resolve, because it is holding the node itself: whatever the DOM offers, the parent has.");
+
+  /* --- useImperativeHandle --- */
+  rec.bump("refs attached");
+  emit(handle, "ref.current = { … }", () => "found", "Now with `useImperativeHandle(ref, () => ({ focus, clear }), [])`. React writes the returned object into the ref *instead* of the node, so this is the whole surface.");
+
+  probe(handle, "The same four probes. `focus` and `clear` are functions; `style` and `remove` are undefined, because the object the ref holds simply does not have them. The narrowing is not a convention — the members are gone.");
+
+  emit(
+    handle,
+    "ref.current = { … }",
+    (key) => (key === "clear" ? "mounted" : "found"),
+    "And `clear` is the member that could not have existed on the node at all: it sets the child's React state. A parent reaching into the DOM could have written to `input.value`, and React would have overwritten it on the next render.",
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "A ref forwarded to a DOM node hands the parent the whole node — every method, every property, including the ones that let it restyle or delete the element your component is rendering. That is an enormous public API you did not design and now have to preserve. `useImperativeHandle` replaces what the ref receives with an object you wrote, so the surface is exactly the members you listed and the rest are genuinely absent rather than merely discouraged. It also lets a handle expose things a node never could — `clear` here sets React state, which a parent writing to `input.value` could not have done without being overwritten on the next render.",
+  };
+}
+
+/* ------------------------------------------ 10. the ref callback's life -- */
+
+/**
+ * When React calls a ref callback, and what React 19 changed about detach.
+ *
+ * The two runs share one loop over the same attach/detach sequence; the only
+ * difference is whether the callback returned a cleanup. What each version
+ * receives on detach is therefore produced by the mechanism — the React 18
+ * column gets `null` because nothing returned a teardown for React to call.
+ */
+function refCallback(): Visualisation {
+  const rec = new Recorder<SequenceFrame>();
+
+  /* The observers a callback ref sets up, tracked for real so a leak is a
+     number this run reports rather than a warning it prints. */
+  let live = 0;
+  let cleanupsRun = 0;
+
+  interface Attachment {
+    node: string;
+    cleanup: (() => void) | null;
+  }
+  let attached: Attachment | null = null;
+
+  const emit = (stage: string, roles: Record<number, Role>, note: string) =>
+    rec.push({
+      kind: "sequence",
+      items: [
+        { id: "stage", label: stage, role: roles[0] },
+        { id: "node", label: attached ? `node: ${attached.node}` : "node: none", role: roles[1] },
+        { id: "live", label: `live observers: ${live}`, role: roles[2] },
+      ],
+      note,
+    });
+
+  /* The React 19 form: the callback returns its teardown. */
+  const attach = (node: string) => {
+    live++;
+    rec.bump("observers created");
+    attached = {
+      node,
+      cleanup: () => {
+        live--;
+        cleanupsRun++;
+        rec.bump("cleanups run");
+      },
+    };
+  };
+
+  const detach = () => {
+    attached?.cleanup?.();
+    attached = null;
+  };
+
+  emit("before mount", { 2: "unchanged" }, "A callback ref: `ref={(node) => { … }}`. Nothing is attached and nothing is observing.");
+
+  attach("<div#a>");
+  emit("commit → React calls ref(node)", { 0: "active", 1: "mounted", 2: "updated" }, "On commit React calls the function with the node. The callback starts an IntersectionObserver on it — one live observer — and returns a function that will stop it.");
+
+  emit("returned cleanup is stored", { 1: "unchanged", 2: "unchanged" }, "React 19 keeps that returned function, exactly the way it keeps an effect's. This is the part that is new: before 19, returning anything from a ref callback did nothing.");
+
+  detach();
+  emit("the element unmounts", { 0: "active", 1: "discarded", 2: "found" }, `React calls the stored cleanup. The observer is stopped — ${live} live, ${cleanupsRun} cleanup run — and, because a cleanup exists, React does *not* call the callback again with null.`);
+
+  /* The same sequence written the React 18 way: no cleanup returned, so the
+     teardown has to live in a null branch. Skipping that branch leaks, and
+     the counter shows it. */
+  live = 0;
+  cleanupsRun = 0;
+  attached = null;
+
+  emit("before mount (the old form)", { 2: "unchanged" }, "The same ref written the pre-19 way: the callback does its setup and returns nothing.");
+
+  live++;
+  rec.bump("observers created");
+  attached = { node: "<div#a>", cleanup: null };
+  emit("commit → React calls ref(node)", { 0: "active", 1: "mounted", 2: "updated" }, "Attach is identical — one live observer.");
+
+  /* Nothing was returned, so there is nothing for React to call. It falls
+     back to invoking the callback with null, and the teardown only happens
+     if the author wrote that branch. */
+  attached = null;
+  emit("the element unmounts → ref(null)", { 0: "active", 1: "discarded", 2: "discarded" }, `With no cleanup to call, React invokes the callback again with null. The teardown now depends entirely on somebody having written \`if (node === null)\` — and here nobody did, so ${live} observer is still running on a node that has left the document.`);
+
+  emit("leaked", { 2: "discarded" }, "That is the bug the change removes. A ref callback that returns its teardown cannot forget it, for the same reason an effect that returns its teardown cannot: the cleanup is the return value, not a branch you have to remember to write.");
+
+  return {
+    frames: rec.frames,
+    summary:
+      "React calls a ref callback with the node on attach. In React 19 the callback may return a cleanup function, which React stores and calls on detach — and when it does, it stops passing `null` altogether. That makes a callback ref the right tool for anything set up per node: an observer, a listener, a third-party widget. The old form put the teardown in an `if (node === null)` branch, which is a branch you can forget, and forgetting it leaks something attached to an element that has left the document. Returning the cleanup makes that impossible in the same way an effect's return value does.",
+  };
+}
+
 /* ------------------------------------------------------------- table -- */
 
 export const REACT_STATE_ALGOS = {
@@ -666,6 +874,14 @@ export const REACT_STATE_ALGOS = {
   "reset-by-key": {
     label: "Resetting state with a key",
     run: resetByKey,
+  },
+  "ref-surface": {
+    label: "What a ref hands the parent",
+    run: refSurface,
+  },
+  "ref-callback": {
+    label: "A ref callback, attach to cleanup",
+    run: refCallback,
   },
 } as const;
 

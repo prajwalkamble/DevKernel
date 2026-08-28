@@ -13,6 +13,7 @@ import { reactConcurrentModule } from "./modules/11-concurrent-react";
 import { reactRenderingModelsModule } from "./modules/12-rendering-models";
 import { reactTestingAndToolingModule } from "./modules/13-testing-and-tooling";
 import { reactPatternsAndMasteryModule } from "./modules/14-patterns-and-mastery";
+import { reactCapstoneModule } from "./modules/15-capstone-project";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -23,9 +24,9 @@ import { reactPatternsAndMasteryModule } from "./modules/14-patterns-and-mastery
  * for the four you use daily and one for the rest — because "learning hooks"
  * is where most people stall. Rendering (client, server, hydration and Server
  * Components) is module 12, once there is enough vocabulary for it to mean
- * something. The last three lessons are one project rather than more
- * material: everything above, applied at once, with the requirements written
- * down before any of it is built.
+ * something. Module 15 is one project rather than more material:
+ * everything above, applied at once, with the requirements written down
+ * before any of it is built.
  */
 export const reactTrack: TrackDefinition = {
   id: "react",
@@ -34,7 +35,7 @@ export const reactTrack: TrackDefinition = {
   shortTitle: "React",
   tagline: "Components, props and hooks, all the way to concurrent rendering",
   description:
-    "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, and a capstone project built end to end — Tracer, a bug and task tracker in the shape of a small GitHub Issues or Jira, with a React front end over an HTTP API and a database you also build.",
+    "React from the first component to the parts most people never learn properly. You start by creating an app and rendering JSX, meet props and state, then work through every hook — what each one is for, the rules they obey, and the bugs you get when you break them. From there: forms, effects and data fetching, context and state architecture, the rendering behaviour behind every performance problem, then concurrent React, Suspense, and the difference between client rendering, server rendering, hydration and Server Components. Ends with testing, TypeScript, the patterns real codebases use, then a capstone module: Tracer, a bug and task tracker in the shape of a small GitHub Issues or Jira, specified with numbered requirements and built end to end — a React front end over an HTTP API and a database you also write.",
   order: 4,
   status: "available",
   accent: "react",
@@ -57,5 +58,6 @@ export const reactTrack: TrackDefinition = {
     reactRenderingModelsModule,
     reactTestingAndToolingModule,
     reactPatternsAndMasteryModule,
+    reactCapstoneModule,
   ],
 };

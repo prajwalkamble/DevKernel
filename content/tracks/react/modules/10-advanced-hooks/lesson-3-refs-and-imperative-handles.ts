@@ -98,6 +98,12 @@ act(() => { container.querySelector<HTMLButtonElement>("#probe")!.click(); });`,
     {
       id: "imperative-handle",
       heading: "useImperativeHandle",
+      visual: {
+        id: "ref-surface-visual",
+        kind: "react-state",
+        algorithm: "ref-surface",
+        title: "What the parent can reach, with and without a handle",
+      },
       body: [
         "`useImperativeHandle(ref, createHandle, deps)` replaces whatever the ref would have received with the object `createHandle` returns.",
         "The reason to use it is **narrowing**. A DOM node is an enormous, permanent, public API: hand one out and a caller can read layout, set styles, change the value, attach listeners, and remove it from the document — and any of those becomes something you have to preserve. A handle with two methods is a contract you can keep.",
@@ -159,6 +165,12 @@ function Room() {
     {
       id: "ref-cleanup",
       heading: "Ref callbacks can clean up now",
+      visual: {
+        id: "ref-callback-visual",
+        kind: "react-state",
+        algorithm: "ref-callback",
+        title: "A ref callback, attach to cleanup",
+      },
       body: [
         "A ref can be a function instead of a ref object. React calls it with the node on attach and, historically, with `null` on detach — which meant every ref callback had a `if (node === null)` branch.",
         "**In React 19 a ref callback may return a cleanup function**, exactly like an effect. React calls it on detach and stops passing `null`.",
