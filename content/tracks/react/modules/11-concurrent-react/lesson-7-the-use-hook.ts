@@ -114,23 +114,20 @@ function Bad() {
 
 const container = document.createElement("div");
 document.body.appendChild(container);
+const root = createRoot(container);
 await act(async () => {
-  createRoot(container).render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
+  root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
-/* Wait for the commit rather than for a fixed time: how many attempts the
-   retry loop takes is itself a race, so any single sleep is either wasteful
-   or, on a slow machine, too short — and a promise settling after the last
-   act() is what produces "not wrapped in act(...)". */
-while (container.innerHTML.includes("…")) {
-  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 5)); });
-}
-console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
-console.log(\`the screen says: \${container.innerHTML}\`);`,
+await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+/* Stop the retry loop before reading anything. Nothing else stops it: each
+   attempt creates the next promise, so the component can suspend for as long
+   as you let it run. */
+await act(async () => { root.unmount(); });
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
           output: `use() was handed a different promise each render
-the screen says: <b>done</b>
 A component was suspended by an uncached promise. Creating promises inside a Client Component or hook is not yet supported, except via a Suspense-compatible library or framework.`,
           explanation:
-            "React's warning goes to standard error, so where it lands relative to the other two lines depends on how your terminal interleaves the two streams. Note that the component *worked* — the screen says `done`. That is what makes this bug survive review: with a real `fetch` it works too, having issued several requests, and it shows up only as an unexplained load on the network tab. The warning is the one signal you get.",
+            "React's warning goes to standard error, so where it lands relative to the other line depends on how your terminal interleaves the two streams. What the example does *not* print is whether the screen ever reached `done`, and that omission is the finding: the loop terminates only if some attempt happens to commit before its promise resolves, which is a race. On a fast machine it usually wins within a few attempts and the component looks like it works — that is what lets this bug survive review, because with a real `fetch` it also \"works\", having issued several requests, and shows up only as unexplained load on the network tab. On a slower or busier machine the same code can suspend indefinitely. A render that may or may not terminate depending on the host is not a working component, and the warning is the one signal you get.",
         },
       ],
       pitfalls: [
@@ -225,7 +222,7 @@ function Comments({ from }: { from: Promise<Comment[]> }) {
     "It may be called conditionally because it stores nothing in the hook list",
     "It must still be called during a render, never in a handler or a timeout",
     "A suspended component re-renders from scratch, so a promise made in the render is a new one each retry",
-    "React 19 warns about an uncached promise — and the screen still works, which is what hides the bug",
+    "React 19 warns about an uncached promise — and the screen usually still works, which is what hides the bug",
     "`useMemo` cannot fix it; the cache has to live outside the tree",
     "The natural shape is a Server Component starting the promise and a Client Component reading it",
   ],
