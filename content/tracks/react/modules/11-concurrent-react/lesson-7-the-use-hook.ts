@@ -117,7 +117,13 @@ document.body.appendChild(container);
 await act(async () => {
   createRoot(container).render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
-await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+/* Wait for the commit rather than for a fixed time: how many attempts the
+   retry loop takes is itself a race, so any single sleep is either wasteful
+   or, on a slow machine, too short — and a promise settling after the last
+   act() is what produces "not wrapped in act(...)". */
+while (container.innerHTML.includes("…")) {
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 5)); });
+}
 console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
 console.log(\`the screen says: \${container.innerHTML}\`);`,
           output: `use() was handed a different promise each render
