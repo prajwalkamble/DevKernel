@@ -705,6 +705,212 @@ function buildOutput(): Visualisation {
   };
 }
 
+
+/* ------------------------------------------ 9. the capstone's workspaces -- */
+
+/**
+ * Tracer's three packages, and the reason there are three.
+ *
+ * Read off the real project: the paths below are `find`'s output on the
+ * working repository the capstone lessons are written from, not a sketch of
+ * one. The shared package is the load-bearing idea — it is what makes one Zod
+ * schema validate the request on the server and the form in the browser — so
+ * it is introduced last, after the duplication it removes is visible.
+ */
+const CAPSTONE_SHARED: SrcFile[] = [
+  { path: "shared/package.json", note: '"@tracer/shared", linked by npm workspaces' },
+  { path: "shared/tsconfig.json", note: "extends the root base config" },
+  { path: "shared/src/index.ts", note: "one re-export line" },
+  { path: "shared/src/issue.ts", note: "every schema and every type" },
+];
+
+const CAPSTONE_SERVER: SrcFile[] = [
+  { path: "server/package.json", note: "hono, drizzle-orm, @libsql/client" },
+  { path: "server/tsconfig.json" },
+  { path: "server/drizzle.config.ts", note: "tells drizzle-kit where the schema is" },
+  { path: "server/src/index.ts", note: "the Hono app, CORS, one error handler" },
+  { path: "server/src/db/schema.ts", note: "four tables, two indexes" },
+  { path: "server/src/db/index.ts", note: "one client, one exported db" },
+  { path: "server/src/db/seed.ts", note: "fixed ids, fixed timestamps" },
+  { path: "server/src/routes/issues.ts", note: "six endpoints" },
+  { path: "server/src/routes/projects.ts", note: "two endpoints" },
+];
+
+const CAPSTONE_WEB: SrcFile[] = [
+  { path: "web/package.json", note: "react, @tanstack/react-query, react-router" },
+  { path: "web/index.html" },
+  { path: "web/vite.config.ts" },
+  { path: "web/vitest.config.ts", note: "jsdom, and one setup file" },
+  { path: "web/src/main.tsx", note: "every provider, in order" },
+  { path: "web/src/App.tsx", note: "the routes, and nothing else" },
+];
+
+function capstoneWorkspace(): Visualisation {
+  const rec = new Recorder<FileTreeFrame>();
+
+  const emit = (files: SrcFile[], note: string) =>
+    rec.push({ kind: "filetree", root: "tracer/", entries: rollUp(listing(files)), note });
+
+  const root: SrcFile[] = [
+    { path: "package.json", note: '"workspaces": ["shared", "server", "web"]' },
+    { path: "tsconfig.base.json", note: "the strict settings, once" },
+  ];
+
+  emit(
+    root.map((f) => ({ ...f, role: "created" as Role })),
+    "Two files at the root, and they are the whole build system. The workspaces field is what makes `npm install` link the packages to each other; the base tsconfig is what stops three packages disagreeing about what strict means."
+  );
+
+  const withServer = [...root, ...CAPSTONE_SERVER.map((f) => ({ ...f, role: "created" as Role }))];
+  rec.bump("packages");
+  emit(
+    withServer,
+    "The server. Nine files: an entry point, a database folder and a routes folder. Notice what is not here — no controllers, no services, no repositories layer. Those are answers to a problem this app does not have yet."
+  );
+
+  const withWeb = [
+    ...root,
+    ...CAPSTONE_SERVER,
+    ...CAPSTONE_WEB.map((f) => ({ ...f, role: "created" as Role })),
+  ];
+  rec.bump("packages");
+  emit(
+    withWeb,
+    "The browser app. At this point both packages independently define what an issue is, what a status may be, and which fields a create request needs — three facts written twice, which is three chances to change one and not the other."
+  );
+
+  const all = [
+    ...root,
+    ...CAPSTONE_SERVER,
+    ...CAPSTONE_WEB,
+    ...CAPSTONE_SHARED.map((f) => ({ ...f, role: "created" as Role })),
+  ];
+  rec.bump("packages");
+  emit(
+    all,
+    "So a third package, which both of the others import. It contains no runtime behaviour at all — only Zod schemas and the types inferred from them."
+  );
+
+  emit(
+    [
+      ...root,
+      ...CAPSTONE_SERVER.map((f) =>
+        f.path.includes("routes/") || f.path.includes("db/schema")
+          ? { ...f, role: "active" as Role }
+          : f
+      ),
+      ...CAPSTONE_WEB,
+      ...CAPSTONE_SHARED.map((f) =>
+        f.path.endsWith("issue.ts") ? { ...f, role: "found" as Role } : f
+      ),
+    ],
+    "One file is now the single definition of a status: the route validates against it, the database CHECK constraint is generated from it, and the form in the browser validates against it before sending. Add \"blocked\" to that tuple and all three learn it in the same commit."
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "Three packages, and the third one is the point. A server and a client that each define what an issue is will drift — not immediately, and not visibly, but on the day someone adds a field to one and not the other. Putting the schemas in a package both import turns that class of bug into a compile error. The shared package holds no behaviour, which is what keeps it importable from both a Node process and a browser bundle.",
+  };
+}
+
+/* ------------------------------------------- 10. the capstone's src tree -- */
+
+/**
+ * `web/src`, built in the order the lessons build it.
+ *
+ * Again the real paths, and again the structure is derived from them — the
+ * `features/issues/` folder appears because files were put into it, so the
+ * claim that a feature's pieces sit together is a thing the picture can
+ * fail to show rather than a thing the caption asserts.
+ */
+const WEB_KERNEL: SrcFile[] = [
+  { path: "lib/api.ts", note: "the only fetch in the app" },
+  { path: "lib/queryKeys.ts", note: "every cache key, in one object" },
+];
+
+const WEB_FEATURE: SrcFile[] = [
+  { path: "features/issues/api.ts", note: "one function per endpoint" },
+  { path: "features/issues/hooks/useIssues.ts", note: "the list, filtered" },
+  { path: "features/issues/hooks/useIssue.ts", note: "one issue, and its comments" },
+  { path: "features/issues/hooks/useCreateIssue.ts", note: "not optimistic — the server owns the id" },
+  { path: "features/issues/hooks/useUpdateIssue.ts", note: "optimistic — we already hold the value" },
+  { path: "features/issues/hooks/useIssueFilters.ts", note: "filters live in the URL" },
+  { path: "features/issues/components/IssueRow.tsx", note: "props in, markup out" },
+  { path: "features/issues/components/IssueFilters.tsx", note: "debounced text, immediate selects" },
+  { path: "features/issues/components/NewIssueForm.tsx", note: "validates with the shared schema" },
+  { path: "features/issues/components/StatusSelect.tsx", note: "the one optimistic control" },
+  { path: "features/issues/components/CommentList.tsx", note: "presentational" },
+];
+
+const WEB_SHELL: SrcFile[] = [
+  { path: "components/StatusBadge.tsx", note: "Record<Status, string> — no fallback" },
+  { path: "components/PriorityBadge.tsx" },
+  { path: "components/QueryBoundary.tsx", note: "loading, error, empty, success" },
+  { path: "hooks/useDebouncedValue.ts", note: "shared: two features would use it" },
+  { path: "hooks/useUsers.ts", note: "shared: both routes need the names" },
+  { path: "routes/IssueListPage.tsx", note: "wires hooks to components" },
+  { path: "routes/IssueDetailPage.tsx" },
+  { path: "App.tsx", note: "four routes" },
+  { path: "main.tsx", note: "QueryClient, Router, StrictMode" },
+];
+
+const WEB_TESTS: SrcFile[] = [
+  { path: "test/setup.ts", note: "jest-dom matchers" },
+  { path: "test/renderWithProviders.tsx", note: "a fresh QueryClient per test" },
+  { path: "test/handlers.ts", note: "MSW — fakes the network, not the modules" },
+  { path: "routes/IssueListPage.test.tsx", note: "beside the thing it tests" },
+];
+
+function capstoneWeb(): Visualisation {
+  const rec = new Recorder<FileTreeFrame>();
+
+  const emit = (files: SrcFile[], note: string) =>
+    rec.push({ kind: "filetree", root: "web/src/", entries: rollUp(listing(files)), note });
+
+  const shown: SrcFile[] = [];
+
+  const add = (batch: SrcFile[], note: string) => {
+    const marked = batch.map((f) => ({ ...f, role: "created" as Role }));
+    shown.push(...batch);
+    rec.bump("files");
+    emit([...shown.filter((f) => !batch.includes(f)), ...marked], note);
+  };
+
+  add(
+    WEB_KERNEL,
+    "Two files first, and neither of them renders anything. lib/api.ts is the only place in the app that calls fetch; lib/queryKeys.ts is the only place a cache key is written. Both exist so that there is one answer to a question, not eleven."
+  );
+
+  add(
+    WEB_FEATURE,
+    "Then the feature. Everything about an issue — its endpoints, its hooks, its components — is inside features/issues/, so the answer to \"where is the issue code\" is one folder rather than a tour of three."
+  );
+
+  add(
+    WEB_SHELL,
+    "Then what is genuinely shared. A badge used by both routes, a boundary used by every query, and two hooks with callers in more than one feature. Nothing arrives here in anticipation of a second caller; it arrives when the second caller does."
+  );
+
+  add(
+    WEB_TESTS,
+    "And the tests. The page test sits beside the page; the three files it needs to exist — matchers, providers, network handlers — sit in test/, because every future test will want the same three."
+  );
+
+  emit(
+    shown.map((f) =>
+      f.path.startsWith("features/") ? { ...f, role: "active" as Role } : { ...f, role: undefined }
+    ),
+    "The shape to check against: deleting the highlighted folder deletes the entire issues feature and breaks exactly two imports — the two routes. That is the test of whether a feature folder is really a feature folder."
+  );
+
+  return {
+    frames: rec.frames,
+    summary:
+      "Four layers, added in dependency order. The bottom one holds the two singletons — one fetch, one key table — that everything else is built on. The feature folder holds everything specific to issues, which is most of the app. The shared layer holds only what earned its way there by having a second caller. The test layer holds the three fixtures every test needs plus the tests themselves, colocated. The arrangement is checkable rather than aesthetic: if deleting the feature folder breaks more than the routes that render it, the boundary is not where the folder claims it is.",
+  };
+}
+
 /* ------------------------------------------------------------------- table -- */
 
 export const REACT_LAYOUT_ALGOS = {
@@ -739,6 +945,14 @@ export const REACT_LAYOUT_ALGOS = {
   "build-output": {
     label: "What a production build emits",
     run: buildOutput,
+  },
+  "capstone-workspace": {
+    label: "The capstone's three packages",
+    run: capstoneWorkspace,
+  },
+  "capstone-web": {
+    label: "The capstone's src tree, layer by layer",
+    run: capstoneWeb,
   },
 } as const;
 

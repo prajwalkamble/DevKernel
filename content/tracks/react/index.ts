@@ -1,5 +1,4 @@
 import type { TrackDefinition } from "@/content/types";
-import { createComingSoonModule } from "@/content/comingSoon";
 import { reactFoundationsModule } from "./modules/01-foundations";
 import { reactJsxAndRenderingModule } from "./modules/02-jsx-and-rendering";
 import { reactComponentsAndPropsModule } from "./modules/03-components-and-props";
@@ -13,6 +12,7 @@ import { reactAdvancedHooksModule } from "./modules/10-advanced-hooks";
 import { reactConcurrentModule } from "./modules/11-concurrent-react";
 import { reactRenderingModelsModule } from "./modules/12-rendering-models";
 import { reactTestingAndToolingModule } from "./modules/13-testing-and-tooling";
+import { reactPatternsAndMasteryModule } from "./modules/14-patterns-and-mastery";
 
 /**
  * React from nothing to mastery, on React 19.
@@ -54,23 +54,6 @@ export const reactTrack: TrackDefinition = {
     reactConcurrentModule,
     reactRenderingModelsModule,
     reactTestingAndToolingModule,
-    createComingSoonModule({
-      id: "react-mastery",
-      slug: "patterns-and-mastery",
-      title: "Patterns, Ecosystem & Interview Mastery",
-      order: 14,
-      description:
-        "The consolidation pass: the patterns that show up in every large codebase, the ecosystem decisions worth having an opinion about, and the questions interviews use to separate familiarity from understanding.",
-      topics: [
-        "Compound components, slots, and headless component design",
-        "Container/presentational, and what replaced it",
-        "Designing a component API other people enjoy using",
-        "Accessibility in React: focus, roles, labels and keyboard support",
-        "Animation, portals, and escaping the component tree",
-        "Reading unfamiliar React and reviewing it well",
-        "The classic interview questions, answered properly",
-        "A component-design walkthrough, end to end",
-      ],
-    }),
+    reactPatternsAndMasteryModule,
   ],
 };
