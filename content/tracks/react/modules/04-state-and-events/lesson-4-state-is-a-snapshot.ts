@@ -19,6 +19,12 @@ export const stateIsASnapshotLesson: Lesson = {
     {
       id: "each-render-its-own",
       heading: "Each render has its own everything",
+      visual: {
+        id: "state-snapshot-visual",
+        kind: "react-state",
+        algorithm: "snapshot",
+        title: "Two renders, two sets of variables",
+      },
       body: [
         "A component function runs once per render. Each run creates its own `const` for every state variable, its own props object, and its own copies of every function defined in the body.",
         "Those functions capture the variables of the render that created them — ordinary JavaScript closures, with no React involvement. A handler defined during the render where `count` was 3 will see `3` forever, however many renders happen afterwards.",

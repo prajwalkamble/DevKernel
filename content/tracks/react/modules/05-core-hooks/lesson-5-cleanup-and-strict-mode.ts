@@ -30,6 +30,12 @@ export const cleanupAndStrictModeLesson: Lesson = {
     {
       id: "strict-mode",
       heading: "The double mount",
+      visual: {
+        id: "strict-double-mount-visual",
+        kind: "react-concurrent",
+        algorithm: "strict-on",
+        title: "The double mount, and what it is checking",
+      },
       body: [
         "In development, inside `<StrictMode>`, React mounts each component, runs its effects, **immediately runs their cleanups, and runs the effects again**. It also calls the component function twice per render.",
         "This is not a bug and it does not happen in production. It is a test of one property: that setting an effect up, tearing it down and setting it up again leaves you where you started.",

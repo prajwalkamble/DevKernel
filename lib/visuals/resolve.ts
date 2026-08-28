@@ -28,6 +28,7 @@ import { REACT_CONCURRENT_ALGOS } from "./react-concurrent";
 import { REACT_SERVER_ALGOS } from "./react-server";
 import { REACT_TOOLING_ALGOS } from "./react-tooling";
 import { REACT_PATTERN_ALGOS } from "./react-patterns";
+import { REACT_STATE_ALGOS } from "./react-state";
 import {
   bstDemo, hashTableDemo, heapDemo, linkedListDemo, queueDemo, stackDemo, trieDemo,
 } from "./structures";
@@ -68,6 +69,7 @@ export const FAMILIES = {
   "react-server": { table: REACT_SERVER_ALGOS, fallback: "ssr-timeline" },
   "react-tooling": { table: REACT_TOOLING_ALGOS, fallback: "query-priority" },
   "react-patterns": { table: REACT_PATTERN_ALGOS, fallback: "compound" },
+  "react-state": { table: REACT_STATE_ALGOS, fallback: "snapshot" },
 } as const;
 
 export type FamilyKind = keyof typeof FAMILIES;

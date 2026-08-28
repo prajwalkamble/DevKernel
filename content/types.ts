@@ -133,6 +133,9 @@ export type VisualKind =
   | "react-tooling"
   /* Composition patterns: compound components, portals, and focus order. */
   | "react-patterns"
+  /* The state mechanics: snapshots, batching, identity comparison, derived
+     state, dependency arrays, refs, controlled inputs and keyed resets. */
+  | "react-state"
   /* Individual data structures. */
   | "stack"
   | "queue"

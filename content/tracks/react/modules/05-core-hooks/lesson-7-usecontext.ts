@@ -79,6 +79,12 @@ function App() {
     {
       id: "re-renders",
       heading: "What re-renders when the value changes",
+      visual: {
+        id: "context-consumers-visual",
+        kind: "react-rendering",
+        algorithm: "context-update",
+        title: "What a changed context value re-renders",
+      },
       body: [
         "**Every component that reads the context, wherever it is in the subtree.** That is the part context does well: a consumer twenty levels down updates without anything in between being involved.",
         "**And that is all it does.** Context does not make updates cheaper or more targeted than props — it makes them *reach further*. A consumer cannot subscribe to one field of the value; it re-renders when the value changes, whatever changed in it.",

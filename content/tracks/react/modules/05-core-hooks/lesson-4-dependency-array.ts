@@ -76,6 +76,12 @@ re-render, nothing changed:
     {
       id: "by-reference",
       heading: "Compared by reference, not by value",
+      visual: {
+        id: "deps-identity-visual",
+        kind: "react-state",
+        algorithm: "deps-compare",
+        title: "Object.is, one dependency at a time",
+      },
       body: [
         "React compares each dependency with the previous render's using `Object.is`. For a string, a number or a boolean that is a value comparison and behaves as you expect. For an object, an array or a function it is a **reference** comparison.",
         "A component body creates fresh objects, arrays and functions on every render. So `[{ id }]`, `[options]` where `options` is built in the body, and `[handleChange]` where the handler is defined in the body are all *guaranteed* to differ every render — the effect runs every time, and if it sets state, forever.",

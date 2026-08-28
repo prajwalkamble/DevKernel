@@ -84,6 +84,7 @@ export function Visual({ spec }: { spec: VisualSpec }) {
     case "react-server": return <FamilyVisual spec={spec} {...FAMILIES["react-server"]} />;
     case "react-tooling": return <FamilyVisual spec={spec} {...FAMILIES["react-tooling"]} />;
     case "react-patterns": return <FamilyVisual spec={spec} {...FAMILIES["react-patterns"]} />;
+    case "react-state": return <FamilyVisual spec={spec} {...FAMILIES["react-state"]} />;
     default: return <StructureVisual spec={spec} kind={spec.kind} />;
   }
 }

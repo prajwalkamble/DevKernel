@@ -19,6 +19,12 @@ export const stateShapeLesson: Lesson = {
     {
       id: "derived",
       heading: "Do not store what you can calculate",
+      visual: {
+        id: "derived-state-visual",
+        kind: "react-state",
+        algorithm: "derived-state",
+        title: "Storing the filtered list, against computing it",
+      },
       body: [
         "This is the highest-value rule in the module, and the one most often broken. If a value can be worked out from props and other state, work it out during render. Do not put it in state.",
         "A total from a list of items, a filtered view of an array, whether a form is valid, the full name from a first and last name, whether anything is selected — all of these are derived. Storing them creates a second source of truth that has to be kept in step with the first, and the code that keeps them in step is where the bug will be.",

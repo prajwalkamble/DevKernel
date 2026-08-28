@@ -28,6 +28,12 @@ export const useEffectLesson: Lesson = {
     {
       id: "when",
       heading: "Exactly when it runs",
+      visual: {
+        id: "useeffect-timing-visual",
+        kind: "react-rendering",
+        algorithm: "effect-timing",
+        title: "Render, paint, then the effect",
+      },
       body: [
         "Module 2 established the two phases. Effects live at the end of the second one.",
         "React renders, commits the changes to the DOM, and **lets the browser paint**. Only then does it run passive effects — the ones from `useEffect`. That delay is deliberate: an effect must not block the user from seeing the update.",
