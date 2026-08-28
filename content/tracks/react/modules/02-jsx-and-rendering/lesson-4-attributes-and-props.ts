@@ -19,6 +19,12 @@ export const attributesAndPropsLesson: Lesson = {
     {
       id: "one-rule",
       heading: "The rule that decides whether any of this matters",
+      visual: {
+        id: "attribute-mapping-visual",
+        kind: "react-misc",
+        algorithm: "attribute-mapping",
+        title: "Eleven props, and where each one goes",
+      },
       body: [
         "There is exactly one question: **is the tag a DOM element or a component?**",
         "For a DOM element — lowercase, so the compiler passed a string — React has to turn your props into real HTML, and the naming rules in this lesson apply. For a component, props are handed to your function untouched. `<Widget className=\"x\" htmlFor=\"y\" whateverYouLike={1} />` passes three ordinary values; nothing is translated, nothing is validated, nothing is dropped.",

@@ -191,6 +191,12 @@ function AlsoFixed({ userId }: { userId: string }) {
     {
       id: "still-wrong",
       heading: "What this still gets wrong",
+      visual: {
+        id: "fetch-in-effect-visual",
+        kind: "react-rendering",
+        algorithm: "fetch-race",
+        title: "Why the naive version is still wrong",
+      },
       body: [
         "The version above handles loading, errors, both fetch quirks and refetching, and it is the version most codebases ship. It is still wrong in five ways, and the rest of this module is those five.",
         "**It races.** Two requests in flight, and the response order is not the request order. The next lesson.",

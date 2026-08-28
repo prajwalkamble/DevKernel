@@ -83,6 +83,12 @@ function reducer(state: State, action: Action): State {
     {
       id: "the-contract",
       heading: "The accessibility contract",
+      visual: {
+        id: "walkthrough-focus-visual",
+        kind: "react-patterns",
+        algorithm: "focus-order",
+        title: "The order the keyboard moves in",
+      },
       body: [
         "This is the part that separates a component people can use from a `<div>` that filters an array, and it is worth writing down **before** implementing, because it is a specification rather than a preference.",
         "**Roles.** The input is `role=\"combobox\"`; the popup is `role=\"listbox\"`; each option is `role=\"option\"`.",

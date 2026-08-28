@@ -19,6 +19,12 @@ export const designingAnApiLesson: Lesson = {
     {
       id: "controlled",
       heading: "Controlled, uncontrolled, or both",
+      visual: {
+        id: "api-controlled-visual",
+        kind: "react-state",
+        algorithm: "controlled-input",
+        title: "Who owns the value",
+      },
       body: [
         "The first real decision, and the one people get wrong by only picking one.",
         "**Uncontrolled** — the component owns the value. `<Toggle defaultOn />`. Pleasant to use, and useless the moment the parent needs to reset it, read it, or drive it from a URL.",

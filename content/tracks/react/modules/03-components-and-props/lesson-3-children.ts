@@ -69,6 +69,12 @@ same output? true`,
     {
       id: "several-slots",
       heading: "When one slot is not enough",
+      visual: {
+        id: "named-slots-visual",
+        kind: "react-patterns",
+        algorithm: "compound",
+        title: "Several children, several slots",
+      },
       body: [
         "A dialog usually needs a header, a body and a footer. There is only one `children`, so the second and third slots are ordinary props that happen to hold elements.",
         "Nothing about this is a special feature — module 2's lesson on elements established that an element is a value, so it may be passed as any prop. Naming the slots is clearer than trying to inspect `children` and split it up, and it survives a caller who wraps something in a `<div>`.",

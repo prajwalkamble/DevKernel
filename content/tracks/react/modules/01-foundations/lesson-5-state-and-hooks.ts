@@ -93,6 +93,12 @@ function Counter() {
     {
       id: "snapshot",
       heading: "State updates are queued, and a render sees a snapshot",
+      visual: {
+        id: "first-state-snapshot",
+        kind: "react-state",
+        algorithm: "snapshot",
+        title: "Each render has its own variables",
+      },
       body: [
         "This is the single most confusing thing about React state, and it explains a whole family of bugs.",
         "**`setCount(1)` does not change `count`.** It schedules an update and asks React to render again. The `count` variable in the currently-running function is a `const` belonging to *this* render, and it will hold its value until the function ends. Reading it immediately after setting it gives you the old value — not because of a delay, but because it is a different variable from the one the next render will see.",

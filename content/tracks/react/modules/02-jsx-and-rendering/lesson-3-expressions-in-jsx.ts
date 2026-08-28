@@ -28,6 +28,12 @@ export const expressionsInJsxLesson: Lesson = {
     {
       id: "what-renders",
       heading: "What React draws, and what it ignores",
+      visual: {
+        id: "what-renders-visual",
+        kind: "react-jsx",
+        algorithm: "children-flatten",
+        title: "Nine values, and what each one renders as",
+      },
       body: [
         "There is a short list of values React deliberately renders as nothing, and it is worth knowing exactly rather than approximately — the difference between `0` and `false` is behind one of the most common visual bugs in React.",
         "**Rendered as nothing:** `null`, `undefined`, `false`, `true`, and the empty string. **Rendered:** every other string, every number including `0`, and BigInts. **Flattened and rendered:** arrays, at any depth, with the ignorable values dropped along the way. **Thrown on:** plain objects.",

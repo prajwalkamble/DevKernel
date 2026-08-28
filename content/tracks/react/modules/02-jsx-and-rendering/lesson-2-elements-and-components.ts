@@ -19,6 +19,12 @@ export const elementsAndComponentsLesson: Lesson = {
     {
       id: "three-things",
       heading: "Three things with confusingly similar names",
+      visual: {
+        id: "elements-tree-visual",
+        kind: "react-rendering",
+        algorithm: "element-tree",
+        title: "JSX in, element tree out",
+      },
       body: [
         "A **component** is the function you wrote. It exists once, whatever happens on screen.",
         "An **element** is a description of one appearance of that component: the object `{ type: Greeting, props: { name: \"Ada\" } }`. Two `<Greeting />` in a tree are two elements.",

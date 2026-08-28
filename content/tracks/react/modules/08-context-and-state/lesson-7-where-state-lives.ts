@@ -52,6 +52,12 @@ export const whereStateLivesLesson: Lesson = {
     {
       id: "nearest-ancestor",
       heading: "Lift to the nearest common ancestor — and no further",
+      visual: {
+        id: "state-location-visual",
+        kind: "react-arch",
+        algorithm: "state-location",
+        title: "The lowest common ancestor, computed",
+      },
       body: [
         "\"Lifting state up\" gets taught as a direction. It is a *destination*: the nearest common ancestor of the components that actually need the value.",
         "The failure is lifting past it. State goes up to fix one problem, the tree gets refactored, and nobody moves it back — so a value used by two sibling leaves lives at the root, drilled through six components or published to the whole application through a context.",

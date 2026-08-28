@@ -28,6 +28,12 @@ export const validationLesson: Lesson = {
     {
       id: "when-to-show",
       heading: "When to show it",
+      visual: {
+        id: "validation-timing-visual",
+        kind: "react-forms",
+        algorithm: "validation-timing",
+        title: "Invalid, and allowed to say so",
+      },
       body: [
         "An error that is correct from the first render is still wrong to display. An empty required field is invalid the moment the form appears, and telling somebody they have made a mistake before they have typed anything is hostile.",
         "What decides visibility is not validity but **what the user has done**, and that genuinely is state:",

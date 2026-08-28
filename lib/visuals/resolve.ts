@@ -31,6 +31,10 @@ import { REACT_PATTERN_ALGOS } from "./react-patterns";
 import { REACT_STATE_ALGOS } from "./react-state";
 import { REACT_DATA_ALGOS } from "./react-data";
 import { REACT_PERF_ALGOS } from "./react-perf";
+import { REACT_JSX_ALGOS } from "./react-jsx";
+import { REACT_ARCH_ALGOS } from "./react-arch";
+import { REACT_FORM_ALGOS } from "./react-forms";
+import { REACT_MISC_ALGOS } from "./react-misc";
 import {
   bstDemo, hashTableDemo, heapDemo, linkedListDemo, queueDemo, stackDemo, trieDemo,
 } from "./structures";
@@ -74,6 +78,10 @@ export const FAMILIES = {
   "react-state": { table: REACT_STATE_ALGOS, fallback: "snapshot" },
   "react-data": { table: REACT_DATA_ALGOS, fallback: "key-matching" },
   "react-perf": { table: REACT_PERF_ALGOS, fallback: "render-vs-dom" },
+  "react-jsx": { table: REACT_JSX_ALGOS, fallback: "element-object" },
+  "react-arch": { table: REACT_ARCH_ALGOS, fallback: "state-location" },
+  "react-forms": { table: REACT_FORM_ALGOS, fallback: "input-ownership" },
+  "react-misc": { table: REACT_MISC_ALGOS, fallback: "attribute-mapping" },
 } as const;
 
 export type FamilyKind = keyof typeof FAMILIES;

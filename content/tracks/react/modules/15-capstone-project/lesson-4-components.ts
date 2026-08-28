@@ -394,6 +394,12 @@ createRoot(document.getElementById("root")!).render(
     {
       id: "tests",
       heading: "Testing through the network",
+      visual: {
+        id: "tracer-queries-visual",
+        kind: "react-tooling",
+        algorithm: "query-priority",
+        title: "Which query a test should reach for",
+      },
       body: [
         "NFR-9: fake the network, not the modules. MSW intercepts at the request layer, so `useIssues`, `listIssues`, `request` and `fetch` all run for real and only the wire is replaced. A test that mocks `useIssues` instead proves that the component renders whatever a mock returns, which is not a fact about the app.",
         "Two fixtures make every later test cheap, and both are worth writing before the first test rather than after the third.",

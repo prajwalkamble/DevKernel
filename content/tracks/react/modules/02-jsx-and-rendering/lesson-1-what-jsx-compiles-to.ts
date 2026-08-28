@@ -58,6 +58,12 @@ const comp = <Widget size={3}>body</Widget>;
     {
       id: "runtime-shape",
       heading: "What the call returns",
+      visual: {
+        id: "jsx-element-object",
+        kind: "react-jsx",
+        algorithm: "element-object",
+        title: "The object a JSX tag returns",
+      },
       body: [
         "The return value is a **React element**: a frozen plain object. Four fields matter, and one of them is a defence mechanism rather than data.",
         "`type` is the string or the function. `props` holds everything you passed, including `children`. `key` sits *beside* props, not in them. And `$$typeof` is a **symbol** — its presence is how React knows an object came from a real `jsx()` call.",

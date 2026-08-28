@@ -28,6 +28,12 @@ export const youMightNotNeedAnEffectLesson: Lesson = {
     {
       id: "derived",
       heading: "Deriving a value from other values",
+      visual: {
+        id: "derived-not-effect-visual",
+        kind: "react-state",
+        algorithm: "derived-state",
+        title: "Storing it against computing it",
+      },
       body: [
         "The most common unnecessary effect in every codebase: some state, and an effect that keeps it in step with props or other state.",
         "Run it and watch what the component actually does.",

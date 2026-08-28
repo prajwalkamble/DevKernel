@@ -19,6 +19,12 @@ export const choosingARenderingStrategyLesson: Lesson = {
     {
       id: "four",
       heading: "The four, in one table",
+      visual: {
+        id: "strategy-timelines-visual",
+        kind: "react-server",
+        algorithm: "csr-timeline",
+        title: "The four strategies, side by side",
+      },
       body: [
         "Everything in this module is one of four answers to *who renders the HTML, and when*.",
       ],

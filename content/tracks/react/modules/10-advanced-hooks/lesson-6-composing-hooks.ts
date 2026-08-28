@@ -19,6 +19,12 @@ export const composingHooksLesson: Lesson = {
     {
       id: "composition",
       heading: "Hooks compose because they are functions",
+      visual: {
+        id: "hook-composition-visual",
+        kind: "react-rendering",
+        algorithm: "custom-hook-slots",
+        title: "A custom hook owns no state of its own",
+      },
       body: [
         "A custom hook may call any hook, including your own. There is no depth limit and no ceremony — `useSearchResults` calls `useDebounced`, which calls `useState` and `useEffect`, and the slots all land in the same component's list.",
         "The thing to watch is not depth; it is **whether each layer has a name that means something**. A chain of three well-named hooks reads like a sentence. A chain of three hooks named after the screen they were extracted from reads like a call stack.",

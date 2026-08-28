@@ -19,6 +19,12 @@ export const fragmentsLesson: Lesson = {
     {
       id: "one-root",
       heading: "Why only one root",
+      visual: {
+        id: "fragment-vs-div",
+        kind: "react-jsx",
+        algorithm: "fragment-vs-wrapper",
+        title: "A wrapper div against a fragment",
+      },
       body: [
         "A component returns one value, because it is a function and functions return one value. There is no React rule here at all — `return <p /> <p />;` is not valid JavaScript, and never gets as far as React.",
         "So when you need two siblings, you need one thing that contains them. A `<div>` works and adds a node to the DOM. A **fragment** works and adds nothing.",

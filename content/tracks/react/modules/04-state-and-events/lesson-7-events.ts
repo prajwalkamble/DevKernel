@@ -19,6 +19,12 @@ export const eventsLesson: Lesson = {
     {
       id: "delegation",
       heading: "Where the listener actually is",
+      visual: {
+        id: "event-delegation-visual",
+        kind: "react-tooling",
+        algorithm: "click-events",
+        title: "One listener, and the path an event takes",
+      },
       body: [
         "Writing `onClick` on a hundred buttons does not create a hundred listeners. React attaches a small number of listeners to the **root container** — the element passed to `createRoot` — and works out which of your handlers to run from the event's target.",
         "This is event delegation, and React does it for the obvious reason: attaching and detaching a real listener every time a component mounts or unmounts would be far more expensive than one listener per event type at the top.",

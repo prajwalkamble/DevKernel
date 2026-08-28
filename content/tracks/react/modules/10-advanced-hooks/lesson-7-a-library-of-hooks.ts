@@ -109,6 +109,12 @@ clamped at min:  open=true n=0 previous=1 atMin=true atMax=false`,
     {
       id: "debounced",
       heading: "Debouncing, both ways",
+      visual: {
+        id: "debounce-visual",
+        kind: "react-misc",
+        algorithm: "debounce-timer",
+        title: "Four keystrokes, and what survives",
+      },
       body: [
         "Two different hooks that people conflate. **Debouncing a value** waits for it to settle and gives you the settled one; **debouncing a callback** delays the call. The first is what a search box wants, because it composes with everything downstream.",
       ],

@@ -142,6 +142,18 @@ export type VisualKind =
   /* Performance arithmetic: renders against DOM writes, what a memo costs,
      the cache the compiler emits, windowing, and reading a flame graph. */
   | "react-perf"
+  /* The element model: what a JSX tag evaluates to, what survives child
+     flattening, prop precedence, and fragments against wrappers. */
+  | "react-jsx"
+  /* State architecture: how far a prop travels, where state has to live, and
+     what a subscription model costs. */
+  | "react-arch"
+  /* Forms: which prop holds a value, what a submit collects, when an error
+     may appear, and how many states a set of booleans can express. */
+  | "react-forms"
+  /* One-off mechanisms: prop-to-attribute mapping, a debounce on a clock,
+     and how a mocked request handler is chosen. */
+  | "react-misc"
   /* Individual data structures. */
   | "stack"
   | "queue"
