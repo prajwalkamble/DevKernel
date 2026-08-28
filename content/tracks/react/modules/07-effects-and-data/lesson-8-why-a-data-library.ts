@@ -100,6 +100,12 @@ the page re-mounts (a route change and back):
     {
       id: "the-six",
       heading: "The six problems a cache solves",
+      visual: {
+        id: "query-cache-lifecycle-visual",
+        kind: "react-data",
+        algorithm: "cache-lifecycle",
+        title: "One cache entry, from first fetch to garbage collection",
+      },
       body: [
         "A data library is, underneath, **one cache outside the component tree, keyed by request**. Every feature below is a consequence of that one structural change.",
         "**Deduplication.** Two components asking for the same key at the same time make one request. The second gets the in-flight promise.",

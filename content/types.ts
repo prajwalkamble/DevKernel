@@ -136,6 +136,9 @@ export type VisualKind =
   /* The state mechanics: snapshots, batching, identity comparison, derived
      state, dependency arrays, refs, controlled inputs and keyed resets. */
   | "react-state"
+  /* The query cache: how a key is matched by an invalidation, and how one
+     entry lives from first fetch to garbage collection. */
+  | "react-data"
   /* Individual data structures. */
   | "stack"
   | "queue"

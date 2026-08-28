@@ -19,6 +19,12 @@ export const capstoneDataLayerLesson: Lesson = {
     {
       id: "fetch-layer",
       heading: "One place that fetches",
+      visual: {
+        id: "query-key-matching-visual",
+        kind: "react-data",
+        algorithm: "key-matching",
+        title: "One invalidateQueries, and every entry it reaches",
+      },
       body: [
         "Everything above this file works with typed values and thrown errors. The only code in the app that knows about status codes, JSON parsing and the base URL is here — which is what makes the whole data layer testable by swapping one network handler rather than by mocking modules.",
         "The `schema` parameter is NFR-1 made mandatory. There is no way to call `request` without saying what shape you expect, so there is no way to accidentally cast.",
