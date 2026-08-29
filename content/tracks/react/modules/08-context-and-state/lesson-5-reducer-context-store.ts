@@ -202,7 +202,7 @@ try {
       examples: [
         {
           id: "providers-file",
-          title: "app/providers.tsx — the staircase, in one place",
+          title: "app/providers.jsx — the staircase, in one place",
           lang: "jsx",
           code: `/* Without this file, App.tsx grows a provider staircase and every new
    feature makes it one level deeper. With it, App.tsx has one wrapper and
@@ -230,6 +230,7 @@ export default function App() {
           alternates: [
             {
               lang: "tsx",
+              title: "app/providers.tsx — the staircase, in one place",
               code: `/* Without this file, App.tsx grows a provider staircase and every new
    feature makes it one level deeper. With it, App.tsx has one wrapper and
    the nesting order is documented in the file whose job that is. */

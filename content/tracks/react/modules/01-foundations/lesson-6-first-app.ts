@@ -307,7 +307,7 @@ function TodoApp() {
       examples: [
         {
           id: "complete-app",
-          title: "src/App.tsx — a working todo application",
+          title: "src/App.jsx — a working todo application",
           lang: "jsx",
           code: `import { useState } from "react";
 
@@ -416,6 +416,7 @@ export default function App() {
           alternates: [
             {
               lang: "tsx",
+              title: "src/App.tsx — a working todo application",
               code: `import { useState } from "react";
 
 interface Todo {

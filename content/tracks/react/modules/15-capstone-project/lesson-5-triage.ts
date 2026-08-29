@@ -69,7 +69,10 @@ bugRoutes.get("/projects/:projectId/triage", async (c) => {
               lang: "typescript",
               title: "server/src/routes/bugs.ts — the ranking",
               requires: "tsc (imports elided; see the repository for the full file)",
-              code: `/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
+              code: `/* Identical to bugs.js apart from the name — the SQL template and the
+   handler signature are both typed by the libraries they come from. */
+
+/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
    trivial happens to be right by luck, and would stop being right the moment
    anyone adds "critical". Rank it explicitly instead. */
 const severityOrder = sql\`CASE \${bugs.severity}
@@ -315,7 +318,10 @@ it("puts the bug back when the server rejects the decision", async () => {
             {
               lang: "tsx",
               title: "web/src/features/triage/TriageQueue.test.tsx",
-              code: `it("removes a bug from the queue as soon as it is confirmed", async () => {
+              code: `/* Identical to TriageQueue.test.jsx apart from the name, for the same
+   reason: the test declares nothing that a type could describe. */
+
+it("removes a bug from the queue as soon as it is confirmed", async () => {
   /* The fake keeps state, because the real server does. Without this the
      refetch that follows the mutation hands the bug straight back and the
      test would be asserting against a server that forgot what it was told. */

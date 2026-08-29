@@ -274,7 +274,10 @@ await new Promise<void>((resolve) => setTimeout(resolve, 500));`,
           alternates: [
             {
               lang: "tsx",
-              code: `test("counts down", async () => {
+              code: `/* Nothing here to annotate. vitest's timer helpers and userEvent.setup
+   are typed already, and the test declares no values of its own. */
+
+test("counts down", async () => {
   vi.useFakeTimers();
   /* userEvent schedules its own work on timers, so it must be told to use
      vitest's advance function rather than the real clock. */

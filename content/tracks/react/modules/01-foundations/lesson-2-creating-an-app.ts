@@ -59,7 +59,7 @@ npm run dev`,
       heading: "What every file is for",
       body: [
         "A fresh project is eighteen files and none of them are mysterious. Knowing what each one does is worth five minutes now and saves an hour later.",
-        "Step through the listing below. The shape to hold on to is that **everything at the root is configuration and everything in `src/` is your code** — and that the generator has deliberately not invented a folder structure for you.",
+        "Read the listing below. The shape to hold on to is that **everything at the root is configuration and everything in `src/` is your code** — and that the generator has deliberately not invented a folder structure for you.",
       ],
       examples: [
         {

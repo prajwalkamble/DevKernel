@@ -162,10 +162,10 @@ await drive("controlled, wired |", <Parent />);`,
           title: "The same component, before and after",
           lang: "jsx",
           code: `/* ✗ Four booleans, sixteen combinations, three of them legal. */
-<Button isPrimary isLarge isLoading isFullWidth />
+const before = <Button isPrimary isLarge isLoading isFullWidth />;
 
 /* ✓ Two unions and two booleans that really are booleans. */
-<Button variant="primary" size="lg" loading fullWidth />
+const after = <Button variant="primary" size="lg" loading fullWidth />;
 
 /* Without a compiler the union lives in the default and the docs:
      function Button({ variant = "secondary", size = "md", loading, fullWidth })
@@ -177,10 +177,10 @@ await drive("controlled, wired |", <Parent />);`,
             {
               lang: "tsx",
               code: `/* ✗ Four booleans, sixteen combinations, three of them legal. */
-<Button isPrimary isLarge isLoading isFullWidth />
+const before = <Button isPrimary isLarge isLoading isFullWidth />;
 
 /* ✓ Two unions and two booleans that really are booleans. */
-<Button variant="primary" size="lg" loading fullWidth />
+const after = <Button variant="primary" size="lg" loading fullWidth />;
 
 /* And the type now describes exactly what exists. */
 interface ButtonProps {

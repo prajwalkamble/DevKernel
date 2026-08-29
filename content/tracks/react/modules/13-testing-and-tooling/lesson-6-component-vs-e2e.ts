@@ -55,8 +55,11 @@ await expect(page.getByRole("status")).toHaveText("Signed in");`,
             "`getByRole` and `getByLabel` are the same idea in both, because Playwright adopted Testing Library's philosophy wholesale. What differs is what is underneath: the first renders one component into jsdom with a fake submit handler; the second navigates a real browser to a real route with a real server behind it. The learning cost of the second tool is close to zero; the running cost is not.",
           alternates: [
             {
-              lang: "typescript",
-              code: `/* Testing Library — jsdom, one component, milliseconds. */
+              lang: "tsx",
+              code: `/* Nothing here to annotate either. Both tools infer everything: the
+   locators return typed handles and the assertions take them. */
+
+/* Testing Library — jsdom, one component, milliseconds. */
 render(<LoginForm onSubmit={fakeSubmit} />);
 await user.type(screen.getByLabelText("Email address"), "ada@example.com");
 await user.click(screen.getByRole("button", { name: "Sign in" }));

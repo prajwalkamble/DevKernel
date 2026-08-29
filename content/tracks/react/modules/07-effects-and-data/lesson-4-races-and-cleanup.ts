@@ -22,7 +22,7 @@ export const racesAndCleanupLesson: Lesson = {
       body: [
         "A search box. Every keystroke changes a piece of state, the effect depends on it, so every keystroke starts a request.",
         "Nothing in that sentence is wrong. The problem is the assumption hiding under it: that responses come back in the order the requests went out. They do not, and nothing makes them.",
-        "Step the animation. The first request is the slow one — a longer query prefix that the server has to work harder on, a cold cache, a request that got unlucky — and it lands after the second.",
+        "Follow the two requests. The first is the slow one — a longer query prefix that the server has to work harder on, a cold cache, a request that got unlucky — and it lands after the second.",
       ],
       examples: [
         {

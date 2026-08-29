@@ -78,7 +78,7 @@ export const projectStructureLesson: Lesson = {
       id: "by-feature",
       heading: "Grouping by feature",
       body: [
-        "The same fifteen files, with the folders named after what the code is *about* rather than what kind of file it is. Watch the animation: as each file moves, the folder it left shrinks, and `components/`, `hooks/`, `api/` and `types/` disappear at the moment their last file goes.",
+        "The same fifteen files, with the folders named after what the code is *about* rather than what kind of file it is. Nothing is added or removed in the move — every file simply changes address — and `components/`, `hooks/`, `api/` and `types/` disappear on their own, at the moment their last file leaves.",
         "The rule for the shared layer is the part people get wrong, so state it precisely: **a file moves to `shared/` when it acquires a second caller, and not before.** Not when it looks reusable, not when it is generic, not when somebody might want it later. `Button` is in `shared/` because two features import it. `CartLine` is not, because only the cart does.",
         "Inside `shared/`, the by-kind folders come back — `shared/components/`, `shared/hooks/`, `shared/utils/`. That is not an inconsistency. In the shared layer there is no feature to group by, so \"what kind of thing is this?\" is genuinely the right question again.",
       ],
@@ -170,7 +170,7 @@ export const projectStructureLesson: Lesson = {
       examples: [
         {
           id: "barrel-file",
-          title: "features/cart/index.ts",
+          title: "features/cart/index.js",
           lang: "javascript",
           code: `// The feature's public surface. Everything not listed here is internal,
 // and that is enforced by convention rather than by the compiler.
@@ -185,6 +185,7 @@ export { useCart } from "./useCart";
           alternates: [
             {
               lang: "typescript",
+              title: "features/cart/index.ts",
               code: `// The feature's public surface. Everything not listed here is internal.
 export { CartTotal } from "./CartTotal";
 export { CartLine } from "./CartLine";
@@ -263,7 +264,7 @@ tsconfig.app.json(25,5): error TS5101: Option 'baseUrl' is deprecated and will s
           code: `// From src/features/cart/CartTotal.jsx:
 
 // Fragile. Correct today; wrong the moment this file moves one level.
-import { Button } from "../../shared/components/Button";
+// import { Button } from "../../shared/components/Button";
 
 // Stable. Says where the module lives, not where you are standing.
 import { Button } from "@/shared/components/Button";
@@ -280,7 +281,7 @@ import { CartLine } from "./CartLine";`,
               code: `// From src/features/cart/CartTotal.tsx:
 
 // Fragile. Correct today; wrong the moment this file moves one level.
-import { Button } from "../../shared/components/Button";
+// import { Button } from "../../shared/components/Button";
 
 // Stable. Says where the module lives, not where you are standing.
 import { Button } from "@/shared/components/Button";
