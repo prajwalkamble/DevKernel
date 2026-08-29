@@ -75,6 +75,47 @@ console.log("filled: ", container.querySelector("#v").textContent);`,
 filled:  {"name":"Ada","email":"ada@example.com","subscribed":true}`,
           explanation:
             "Each click produced a whole new object with one field different. Note the updater form — `setForm(prev => …)` rather than `setForm({ ...form, … })`. Both work here, but the updater is correct even when several updates are queued together, and it costs nothing extra to write.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+type Form = { name: string; email: string; subscribed: boolean };
+
+function Form() {
+  const [form, setForm] = useState<Form>({ name: "", email: "", subscribed: false });
+
+  // One handler, keyed by the input's name. The two type parameters are what
+  // make it safe: \`value\` must match the field it is being written to, so
+  // update("subscribed", "yes") is an error rather than a corrupt object.
+  function update<K extends keyof Form>(field: K, value: Form[K]) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  return (
+    <>
+      <span id="v">{JSON.stringify(form)}</span>
+      <button id="n" onClick={() => update("name", "Ada")}>name</button>
+      <button id="e" onClick={() => update("email", "ada@example.com")}>email</button>
+      <button id="s" onClick={() => update("subscribed", true)}>sub</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Form />); });
+console.log("initial:", container.querySelector("#v")!.textContent);
+
+act(() => { container.querySelector<HTMLButtonElement>("#n")!.click(); });
+act(() => { container.querySelector<HTMLButtonElement>("#e")!.click(); });
+act(() => { container.querySelector<HTMLButtonElement>("#s")!.click(); });
+console.log("filled: ", container.querySelector("#v")!.textContent);`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -141,6 +182,50 @@ drop b:  alpha*,gamma
 sort:    alpha*,gamma`,
           explanation:
             "`toSorted` is the one worth noticing. `prev.sort(...)` would have sorted the array React is holding, in place, and returned the same reference — so React would have seen no change and skipped the render, leaving the screen in the old order while the data was sorted. `toSorted` returns a new array and the render happens.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+type Item = { id: string; label: string; done: boolean };
+
+function List() {
+  const [items, setItems] = useState<Item[]>([
+    { id: "b", label: "beta", done: false },
+    { id: "a", label: "alpha", done: false },
+  ]);
+
+  return (
+    <>
+      <span id="v">{items.map((i) => \`\${i.label}\${i.done ? "*" : ""}\`).join(",")}</span>
+      <button id="add" onClick={() => setItems((prev) => [...prev, { id: "c", label: "gamma", done: false }])}>add</button>
+      <button id="tick" onClick={() => setItems((prev) => prev.map((i) => i.id === "a" ? { ...i, done: true } : i))}>tick</button>
+      <button id="drop" onClick={() => setItems((prev) => prev.filter((i) => i.id !== "b"))}>drop</button>
+      {/* \`toSorted\` returns a new array; typing the state \`readonly Item[]\`
+          would turn the mutating \`sort\` into a compile error. */}
+      <button id="sort" onClick={() => setItems((prev) => prev.toSorted((x, y) => x.label.localeCompare(y.label)))}>sort</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+const show = (label: string) => console.log(label, container.querySelector("#v")!.textContent);
+
+act(() => { root.render(<List />); });
+show("initial:");
+act(() => { container.querySelector<HTMLButtonElement>("#add")!.click(); });
+show("add:    ");
+act(() => { container.querySelector<HTMLButtonElement>("#tick")!.click(); });
+show("tick a: ");
+act(() => { container.querySelector<HTMLButtonElement>("#drop")!.click(); });
+show("drop b: ");
+act(() => { container.querySelector<HTMLButtonElement>("#sort")!.click(); });
+show("sort:   ");`,
+            },
+          ],
         },
       ],
     },

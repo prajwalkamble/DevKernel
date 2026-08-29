@@ -63,6 +63,44 @@ console.log("clicked a twice:", container.textContent);`,
 clicked a twice: a:2b:0`,
           explanation:
             "The same function produced both buttons, and clicking one moved only its own number. That is what \"state belongs to the instance\" means in practice — and it is why a component with state can be rendered anywhere, any number of times, without the instances knowing about each other.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Counter({ name }: { name: string }) {
+  const [count, setCount] = useState(0);
+  return (
+    <button id={name} onClick={() => setCount(count + 1)}>
+      {name}:{count}
+    </button>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Counter name="a" />
+      <Counter name="b" />
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<App />); });
+console.log("mounted: ", container.textContent);
+
+// \`querySelector\` returns \`Element | null\`, and \`click\` is on HTMLElement —
+// so the type argument and the \`!\` are both doing work here.
+act(() => { container.querySelector<HTMLButtonElement>("#a")!.click(); });
+act(() => { container.querySelector<HTMLButtonElement>("#a")!.click(); });
+console.log("clicked a twice:", container.textContent);`,
+            },
+          ],
         },
       ],
     },
@@ -120,6 +158,39 @@ re-rendered from=99: prop=99 state=10
 with a new key:      prop=99 state=99`,
           explanation:
             "The middle line is the whole lesson: the prop is 99 and the state is still 10. React rendered the same component at the same position, so it kept the instance, and a kept instance already has a stored value — the `from` argument was never consulted again. The third line changes the `key`, which makes it a *different* instance, so React mounted a fresh one and the initial value applied. That is the supported way to reset state when a prop changes, and it is one line rather than an effect that watches `from`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Seeded({ from }: { from: number }) {
+  // Seeded once. Later values of \`from\` never reach it — and nothing in the
+  // type says so, which is exactly why this surprises people.
+  const [value, setValue] = useState(from);
+  return (
+    <button id="b" onClick={() => setValue(value + 1)}>
+      prop={from} state={value}
+    </button>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Seeded from={10} />); });
+console.log("mounted:            ", container.textContent);
+
+// The prop changes; the state does not.
+act(() => { root.render(<Seeded from={99} />); });
+console.log("re-rendered from=99:", container.textContent);
+
+// Unless the identity changes, which makes it a different instance.
+act(() => { root.render(<Seeded key="second" from={99} />); });
+console.log("with a new key:     ", container.textContent);`,
+            },
+          ],
         },
       ],
     },
@@ -172,6 +243,43 @@ eager calls:    3
 lazy calls:     1`,
           explanation:
             "Three renders, three calls to the eager initialiser and one to the lazy one. Two of the three eager calls did work whose result React discarded immediately. With `useState(0)` that is irrelevant; with `useState(JSON.parse(localStorage.getItem(\"draft\")))` it is a parse on every keystroke.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let eagerCalls = 0;
+let lazyCalls = 0;
+
+function expensive(which: "eager" | "lazy") {
+  if (which === "eager") eagerCalls++; else lazyCalls++;
+  return 0;
+}
+
+function Both() {
+  // Called on every render; the result is used only on the first. Both lines
+  // type-check identically — \`useState<number>\` either way — so the cost is
+  // invisible to the compiler.
+  const [a, setA] = useState(expensive("eager"));
+  // Called only on the first render.
+  const [b] = useState(() => expensive("lazy"));
+  return <button id="b" onClick={() => setA(a + 1)}>{a}{b}</button>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Both />); });
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+
+console.log("renders:        3");
+console.log("eager calls:   ", eagerCalls);
+console.log("lazy calls:    ", lazyCalls);`,
+            },
+          ],
         },
       ],
       pitfalls: [
