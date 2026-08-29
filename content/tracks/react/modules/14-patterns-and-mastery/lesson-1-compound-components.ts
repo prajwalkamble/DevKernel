@@ -34,13 +34,6 @@ export const compoundComponentsLesson: Lesson = {
         "The parent owns the state and provides it. The children consume it. The caller writes ordinary JSX in between.",
         "The mechanism is module 8's context, doing precisely what it is for: the pieces do not know how deep they are, because the lookup goes up the tree rather than along a list.",
       ],
-      visual: {
-        id: "compound-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "A piece finding its parent's state",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "tabs",

@@ -69,12 +69,6 @@ third render, middle gone: {"name":"Ada","age":"Grace"}`,
             "Read the third line. `age` is `\"Grace\"`. Skipping one call shifted every later call up by one slot, so the third hook read the second hook's value. Nothing threw — the model has no way to know a call is missing, and neither does React. That is exactly the failure the rule prevents, and it is why it is a rule rather than a suggestion.",
         },
       ],
-      visual: {
-        id: "hook-slots-visual",
-        kind: "react-rendering",
-        algorithm: "hook-slots",
-        title: "Hook calls matched to slots, and what a condition does",
-      },
     },
     {
       id: "what-react-does",

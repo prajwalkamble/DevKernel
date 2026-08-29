@@ -24,13 +24,6 @@ export const useClientBoundaryLesson: Lesson = {
         "That is the sentence people get wrong, and it costs whole megabytes. A component with no directive is not \"a Server Component\"; it is a component that runs on **whichever side it was rendered from**. Put it under a client boundary and it is a client component, permanently, with all its imports.",
         "So the mental picture is not a per-file label. It is a line drawn across the tree, with the server above it and the browser below.",
       ],
-      visual: {
-        id: "client-boundary-visual",
-        kind: "react-server",
-        algorithm: "server-components",
-        title: "Where the boundary falls",
-        lockAlgorithm: true,
-      },
       pitfalls: [
         {
           title: "One directive at the top of a shared file pulls everything down with it",
@@ -46,13 +39,6 @@ export const useClientBoundaryLesson: Lesson = {
         "Strings, numbers, booleans, `null`, `undefined`, plain objects and arrays of those. Dates, Maps, Sets, typed arrays, and promises — React's format handles more than JSON does. And JSX, which is the interesting case in the next section.",
         "Not functions. Not class instances. Not symbols other than registered ones.",
       ],
-      visual: {
-        id: "crossing-visual",
-        kind: "react-server",
-        algorithm: "client-boundary",
-        title: "Six props at the boundary",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "the-error",

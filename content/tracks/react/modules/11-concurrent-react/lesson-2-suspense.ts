@@ -85,13 +85,6 @@ export const suspenseLesson: Lesson = {
         "You almost never write the throw. `use(promise)` does it, and so does every data library that supports Suspense. But knowing that it *is* a throw explains three things at once: why the boundary has to be an ancestor, why the component's local state does not survive it, and why an error boundary and a Suspense boundary are the same shape of thing.",
         "React then shows that boundary's `fallback`, keeps everything outside the boundary untouched, and retries the children when the promise settles.",
       ],
-      visual: {
-        id: "suspense-boundary-visual",
-        kind: "react-concurrent",
-        algorithm: "suspense-boundary",
-        title: "Which boundary catches",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "suspense-basic",

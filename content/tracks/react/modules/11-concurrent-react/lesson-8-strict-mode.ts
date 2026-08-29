@@ -60,12 +60,6 @@ createRoot(document.getElementById("root")!).render(
         "**Effects.** These are not doubled but *remounted*: setup, cleanup, setup — in that order, in one mount.",
         "And what is not: event handlers, `useEffect` cleanups on unmount, refs, and anything in a production build. It is all stripped from the production bundle, so the doubling costs your users nothing.",
       ],
-      visual: {
-        id: "strict-off-visual",
-        kind: "react-concurrent",
-        algorithm: "strict-off",
-        title: "Mounting without Strict Mode",
-      },
     },
     {
       id: "the-double-render",
@@ -75,12 +69,6 @@ createRoot(document.getElementById("root")!).render(
         "Calling the function twice is a cheap test for it. If it is pure, the second call is invisible: same output, no observable difference. If it is not, you get a visible wrong answer *on every mount*, in development, instead of an occasional wrong answer in production.",
         "Watch the cart in this one.",
       ],
-      visual: {
-        id: "strict-on-visual",
-        kind: "react-concurrent",
-        algorithm: "strict-on",
-        title: "The same mount, inside Strict Mode",
-      },
       examples: [
         {
           id: "the-log",

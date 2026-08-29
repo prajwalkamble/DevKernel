@@ -25,12 +25,6 @@ export const whatConcurrentRenderingChangedLesson: Lesson = {
         "React 18 made the render loop able to **stop between components**, hand the thread back, and pick up where it left off — or throw away what it had and start again. That is the whole of it. Everything else in this module is a consequence.",
         "The word for that is *interruptible*, and it buys one thing: React can now find out that something more urgent happened while it was busy, and act on it.",
       ],
-      visual: {
-        id: "blocking-visual",
-        kind: "react-concurrent",
-        algorithm: "blocking-render",
-        title: "One render, one task",
-      },
     },
     {
       id: "interruptible",
@@ -40,12 +34,6 @@ export const whatConcurrentRenderingChangedLesson: Lesson = {
         "The trade is explicit: the interruptible run does **more** total work, because the abandoned units are rendered twice. It is slower by any measure of throughput. It also answers the keyboard in a few milliseconds instead of tens, and a user cannot perceive throughput.",
         "This is why concurrent rendering is not a performance feature and why enabling it will not make a slow app fast. It is a **responsiveness** feature, and the currency it pays in is wasted renders.",
       ],
-      visual: {
-        id: "interruptible-visual",
-        kind: "react-concurrent",
-        algorithm: "interruptible-render",
-        title: "The same render, with yielding",
-      },
       pitfalls: [
         {
           title: "A render can now run and never be committed",

@@ -103,12 +103,6 @@ function App() {
     {
       id: "forwarding",
       heading: "Forwarding the rest, without leaking your own",
-      visual: {
-        id: "spread-precedence",
-        kind: "react-jsx",
-        algorithm: "props-spread-order",
-        title: "Which side of the spread wins",
-      },
       body: [
         "A component that wraps a DOM element should let callers pass any attribute that element accepts — `id`, `aria-*`, `data-*`, `onClick`, `title` — without listing them all. Collecting them with `...rest` and spreading them onto the element does exactly that.",
         "The rule is to **name every prop that is yours** in the destructuring, so it is removed from `rest`. Anything you forget stays in `rest`, lands on the DOM node, and since React 19 is written into the HTML with a warning rather than dropped.",

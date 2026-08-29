@@ -109,12 +109,6 @@ console.log("components that name \`user\` but do not use it — drilled:", 3, "
     {
       id: "slots",
       heading: "More than one hole: named slots",
-      visual: {
-        id: "composition-slots-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "Passing elements instead of data",
-      },
       body: [
         "`children` handles one hole. A layout usually has several, and the answer is that **props can hold elements**, not only data. There is nothing special about `children` beyond the JSX syntax that fills it.",
       ],

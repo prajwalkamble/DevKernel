@@ -199,13 +199,6 @@ try {
         "Everything above is one feature's state, so it belongs in that feature's folder — module 3's rule applied to state.",
         "Step the listing. Each file appears at the point the previous one stopped being enough, which is also the order to write them in.",
       ],
-      visual: {
-        id: "state-layout-visual",
-        kind: "react-structure",
-        algorithm: "state-layout",
-        lockAlgorithm: true,
-        title: "One feature's state, file by file",
-      },
       examples: [
         {
           id: "providers-file",

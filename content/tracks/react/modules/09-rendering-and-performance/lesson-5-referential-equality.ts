@@ -28,12 +28,6 @@ export const referentialEqualityLesson: Lesson = {
         "**Store selectors**, deciding whether a subscriber re-renders.",
         "Learn the rule once and all four stop being separate topics. Every \"why does this keep re-rendering / re-firing / recomputing?\" question is the same question.",
       ],
-      visual: {
-        id: "prop-comparison-visual",
-        kind: "react-rendering",
-        algorithm: "prop-comparison",
-        title: "Five props, compared one at a time",
-      },
       examples: [
         {
           id: "object-is-printed",

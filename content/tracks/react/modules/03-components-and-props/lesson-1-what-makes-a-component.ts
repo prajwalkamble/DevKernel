@@ -67,12 +67,6 @@ capitalised renders: <div><img alt=""/></div>`,
     {
       id: "what-it-returns",
       heading: "What a component may return",
-      visual: {
-        id: "component-returns-tree",
-        kind: "react-rendering",
-        algorithm: "element-tree",
-        title: "What a component hands back",
-      },
       body: [
         "Anything React can render, which is the list from module 2: elements, strings, numbers, arrays, `null`, `undefined`, `false`. Not plain objects.",
         "Returning `null` is the idiomatic way to say \"this component has decided to show nothing\". It is an ordinary return value, not a special case — the component still mounted, still has state, and its effects still run.",

@@ -25,12 +25,6 @@ export const useSyncExternalStoreLesson: Lesson = {
         "**`getSnapshot()`** returns the current value. React calls it during render and again after every notification, and re-renders when the result differs by `Object.is`.",
         "Notice what is absent: no state, no effect, no copy of the value. React reads through to the source every time, which is the entire point.",
       ],
-      visual: {
-        id: "external-store-visual",
-        kind: "react-rendering",
-        algorithm: "external-store",
-        title: "Subscribe, snapshot, notify",
-      },
     },
     {
       id: "the-missed-update",

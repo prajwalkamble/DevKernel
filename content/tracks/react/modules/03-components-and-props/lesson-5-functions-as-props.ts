@@ -78,12 +78,6 @@ function App() {
         "**Four: pass a function down** to every component that needs to request a change, and let the parent decide what the change means.",
         "The children come out of this simpler than they went in: they now take a value and a callback and hold nothing. A component with no state of its own is easier to test, easier to reuse, and impossible to get out of step with anything else.",
       ],
-      visual: {
-        id: "lifting-state-visual",
-        kind: "react-rendering",
-        algorithm: "lifting-state",
-        title: "The same value, owned twice and then once",
-      },
       examples: [
         {
           id: "lifted",

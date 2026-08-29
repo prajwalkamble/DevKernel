@@ -72,13 +72,6 @@ import "@testing-library/jest-dom/vitest";`,
         "Testing Library gives you many queries and an order to prefer them in, and the order is not a style preference: each rung down is one step further from what a user can actually perceive.",
         "Watch the ladder run against a small page — the query it picks for each element is computed from what that element offers, so the one that has to fall all the way to a test id is the one no user could have perceived either.",
       ],
-      visual: {
-        id: "query-ladder-visual",
-        kind: "react-tooling",
-        algorithm: "query-priority",
-        title: "Six elements down the ladder",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "the-queries",

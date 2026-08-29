@@ -138,12 +138,6 @@ function App() {
     {
       id: "compound",
       heading: "Compound components, briefly",
-      visual: {
-        id: "composition-compound-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "Sharing state without inheriting it",
-      },
       body: [
         "A compound component is a set of components designed to be used together, where the parent holds the state and the children read it — `<Tabs>` with `<Tabs.List>` and `<Tabs.Panel>`, or a `<Select>` with its `<Option>`s.",
         "It gives the caller control over structure and ordering while keeping the coordinating logic in one place. The children find the shared state through context rather than by being cloned, which is what makes it survive a caller wrapping something in a `<div>`.",

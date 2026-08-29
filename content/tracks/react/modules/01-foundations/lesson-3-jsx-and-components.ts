@@ -48,13 +48,6 @@ true`,
             "Three things fall out of this. The element's `type` is the string `\"span\"` for a DOM tag — it would be the *function itself* for a component. Everything you pass, including the children, ends up in `props`. And because it is a plain object, you can store an element in a variable, put it in an array, or return it from a function, which is exactly what components do.",
         },
       ],
-      visual: {
-        id: "element-tree-visual",
-        kind: "react-rendering",
-        algorithm: "element-tree",
-        title: "A tree of JSX becoming a tree of objects",
-        lockAlgorithm: true,
-      },
       pitfalls: [
         {
           title: "You no longer need `import React` for JSX",

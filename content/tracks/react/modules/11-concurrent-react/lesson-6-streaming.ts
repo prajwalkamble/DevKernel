@@ -24,13 +24,6 @@ export const streamingLesson: Lesson = {
         "It is also synchronous, so it cannot wait for anything at all. Any component that suspends gets its fallback in the output, permanently, and no data is ever fetched during the render.",
         "Streaming fixes both. React sends the parts of the page it can render immediately, keeps the connection open, and sends each Suspense boundary's real content as its data arrives.",
       ],
-      visual: {
-        id: "streaming-visual",
-        kind: "react-concurrent",
-        algorithm: "streaming",
-        title: "Four pieces, in the order they are ready",
-        lockAlgorithm: true,
-      },
     },
     {
       id: "the-shell",

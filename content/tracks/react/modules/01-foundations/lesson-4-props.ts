@@ -20,12 +20,6 @@ export const propsLesson: Lesson = {
     {
       id: "what-props-are",
       heading: "Props are the arguments of a component",
-      visual: {
-        id: "props-flow-down",
-        kind: "react-rendering",
-        algorithm: "props-down",
-        title: "One-way data flow, one prop at a time",
-      },
       body: [
         "A component is a function, and **props are how you pass it arguments.** That is the whole concept; everything else is detail.",
         "The mechanics: in JSX you write attributes on the element, and React collects every one of them into a single object and passes it as the function's first parameter. By convention that parameter is called `props`.",

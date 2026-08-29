@@ -125,12 +125,6 @@ console.log(\`\\n\${designed.length} states, each one deliberate, and no combina
     {
       id: "the-union",
       heading: "One field, four states",
-      visual: {
-        id: "boolean-states-visual",
-        kind: "react-forms",
-        algorithm: "boolean-states",
-        title: "Eight combinations, four of them real",
-      },
       body: [
         "The rewrite is mechanical: one `useState` holding a tagged object, and the render becomes a switch.",
         "The payoff is not elegance. It is that **TypeScript narrows on the tag**, so inside the `ready` branch `data` is not `null` and you stop writing `data!`. Every one of those non-null assertions was a place where the type system was telling you the shape was wrong and you told it to be quiet.",

@@ -29,12 +29,6 @@ export const resetWithKeyLesson: Lesson = {
     {
       id: "the-key",
       heading: "The one-line answer",
-      visual: {
-        id: "reset-by-key-visual",
-        kind: "react-state",
-        algorithm: "reset-by-key",
-        title: "What changing the key does to the state under it",
-      },
       body: [
         "`<Editor key={record.id} record={record} />`.",
         "A different key at the same position is a different identity, so React unmounts the old instance and mounts a fresh one. Every `useState` runs its initialiser again, refs are recreated, effects re-run their setup. There is no reset code because there is no instance to reset.",

@@ -113,13 +113,6 @@ export const queryKeys = {
           requires: "tsc (this module only declares; it prints nothing)",
         },
       ],
-      visual: {
-        id: "capstone-keys",
-        kind: "react-data",
-        algorithm: "key-matching",
-        lockAlgorithm: true,
-        title: "Which entries a partial key reaches",
-      },
       pitfalls: [
         {
           title: "The filters object is part of the key, and object identity is not",

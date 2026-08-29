@@ -19,12 +19,6 @@ export const objectsAndArraysLesson: Lesson = {
     {
       id: "why",
       heading: "Why mutation fails, precisely",
-      visual: {
-        id: "mutation-identity-visual",
-        kind: "react-state",
-        algorithm: "mutate-vs-copy",
-        title: "What Object.is says about a mutated array",
-      },
       body: [
         "React decides whether to re-render by comparing the new state with the old using `Object.is`. That is a reference comparison for objects and arrays.",
         "Mutate an object and hand back the same reference, and the comparison says nothing changed. React skips the render. The data has changed; the screen has not; nothing reports a problem. Lesson 3 measured exactly this — the render count did not move.",

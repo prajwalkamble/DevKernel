@@ -61,13 +61,6 @@ npm run dev`,
         "A fresh project is eighteen files and none of them are mysterious. Knowing what each one does is worth five minutes now and saves an hour later.",
         "Step through the listing below. The shape to hold on to is that **everything at the root is configuration and everything in `src/` is your code** — and that the generator has deliberately not invented a folder structure for you.",
       ],
-      visual: {
-        id: "vite-scaffold-visual",
-        kind: "react-structure",
-        algorithm: "scaffold",
-        lockAlgorithm: true,
-        title: "Every file create-vite writes, and why",
-      },
       examples: [
         {
           id: "project-tree",

@@ -69,12 +69,6 @@ clicked a twice: a:2b:0`,
     {
       id: "call-order",
       heading: "React finds it by call order",
-      visual: {
-        id: "usestate-call-order-visual",
-        kind: "react-rendering",
-        algorithm: "hook-slots",
-        title: "How a useState call finds its own value",
-      },
       body: [
         "React does not know your variable names. `const [count, setCount] = useState(0)` is array destructuring of a two-element array; the names are entirely yours.",
         "What React has is a **list per instance**, and it matches calls to entries by the order they happen in. The first `useState` in a render gets the first slot, the second gets the second, and so on. On the next render it walks the same list in the same order and hands back what it stored.",

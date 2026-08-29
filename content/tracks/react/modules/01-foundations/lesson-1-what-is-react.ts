@@ -28,12 +28,6 @@ export const whatIsReactLesson: Lesson = {
     {
       id: "the-problem",
       heading: "The problem: keeping the DOM in sync with your data",
-      visual: {
-        id: "by-hand-vs-described",
-        kind: "react-jsx",
-        algorithm: "imperative-vs-declarative",
-        title: "The same three changes, done twice",
-      },
       body: [
         "Every UI is the same job underneath: you have some data, the screen shows that data, and when the data changes the screen must change too. Doing that by hand is where the difficulty lives.",
         "Consider a counter with a number, a button and a message that only appears above ten. In plain DOM code you write the *transitions*: when this happens, change that. Each new piece of state multiplies the number of transitions you have to keep straight, and the bug is always the same — one of the paths forgot to update one of the elements.",

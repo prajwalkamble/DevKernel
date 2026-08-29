@@ -35,12 +35,6 @@ export const reconciliationLesson: Lesson = {
         "**Same type: keep the node and update what differs.** The DOM node survives, its state survives, and React sets only the props that changed. This is the case that makes React usable — a keystroke in a form does not rebuild the form.",
         "**Children are matched in order, unless they have keys.** Without keys, the first child is compared with the first child, the second with the second. With keys, they are matched by key wherever they moved to. That is the whole subject of the next lesson.",
       ],
-      visual: {
-        id: "reconciliation-visual",
-        kind: "react-rendering",
-        algorithm: "reconcile-same-type",
-        title: "Reconciliation, one comparison at a time",
-      },
       examples: [
         {
           id: "type-decides",
@@ -99,12 +93,6 @@ console.log("d's type is the function itself:", d.type === Panel);`,
     {
       id: "the-remount-trap",
       heading: "The conditional wrapper that remounts everything",
-      visual: {
-        id: "reconcile-type-change-visual",
-        kind: "react-rendering",
-        algorithm: "reconcile-type-change",
-        title: "A changed type at one position, and everything under it",
-      },
       body: [
         "The rule about differing types has a consequence that bites in real code, and the visual above is the shape of it: something at the top of the tree changes type, and a whole subtree that looks untouched is destroyed and rebuilt.",
         "The classic version is a wrapper that only sometimes exists. `{isModal ? <Dialog><Form /></Dialog> : <Form />}` puts `Form` at depth 1 in one branch and depth 0 in the other, so toggling `isModal` unmounts the form and mounts a new one — losing everything the user typed, every scroll position, and every piece of local state inside it.",

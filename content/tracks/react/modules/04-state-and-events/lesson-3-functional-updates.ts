@@ -25,12 +25,6 @@ export const functionalUpdatesLesson: Lesson = {
         "**A function** — `setCount(c => c + 1)` — queues \"replace the state with whatever this returns when given the value so far\".",
         "The difference only shows when more than one update is queued at once, and then it is decisive. React processes the queue in order, threading the result of each entry into the next. Values ignore what came before; functions receive it.",
       ],
-      visual: {
-        id: "state-queue-updaters-visual",
-        kind: "react-rendering",
-        algorithm: "queue-updaters",
-        title: "The same three calls, as updaters",
-      },
       examples: [
         {
           id: "three-updaters",

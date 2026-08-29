@@ -19,12 +19,6 @@ export const stateLibrariesLesson: Lesson = {
     {
       id: "the-base",
       heading: "The fourteen lines underneath all of them",
-      visual: {
-        id: "store-vs-context-visual",
-        kind: "react-arch",
-        algorithm: "context-vs-store",
-        title: "Who gets told when one field changes",
-      },
       body: [
         "A store is a value, a set of listeners, and a way to read part of it. `useSyncExternalStore` is the React hook for subscribing to exactly that shape — module 10 covers the hook properly; here it is the thing that makes the store a store.",
         "Build it once and the libraries stop being magic.",

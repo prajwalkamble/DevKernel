@@ -23,12 +23,6 @@ export const reactMemoLesson: Lesson = {
         "`memo(Component)` returns a component that, before rendering, compares each of the new props with the old ones using `Object.is`. If all of them match, React skips the render — **and everything inside it**.",
         "That last part is where the value is. A memo boundary is not a saving of one render; it is one comparison deciding the fate of an entire subtree.",
       ],
-      visual: {
-        id: "memo-boundary-visual",
-        kind: "react-rendering",
-        algorithm: "memo-boundary",
-        title: "One comparison, a whole branch spared",
-      },
       pitfalls: [
         {
           title: "It compares props only",
@@ -193,12 +187,6 @@ drive(Repaired, "  useMemo'd:");`,
           ],
         },
       ],
-      visual: {
-        id: "memo-defeated-visual",
-        kind: "react-rendering",
-        algorithm: "memo-defeated",
-        title: "The memo that does nothing",
-      },
       pitfalls: [
         {
           title: "`children` defeats memo, always",

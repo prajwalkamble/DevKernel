@@ -19,12 +19,6 @@ export const theUseHookLesson: Lesson = {
     {
       id: "what-it-is",
       heading: "One function, two jobs",
-      visual: {
-        id: "use-suspense-visual",
-        kind: "react-concurrent",
-        algorithm: "suspense-boundary",
-        title: "What throwing a promise reaches",
-      },
       body: [
         "`use(promise)` reads a promise's value. If it is not settled, the component suspends — that is where the throw in lesson 2 comes from. If it rejected, the error is thrown to the nearest error boundary.",
         "`use(Context)` reads a context, the same value `useContext` would give you.",

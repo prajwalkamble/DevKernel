@@ -24,12 +24,6 @@ export const transitionsLesson: Lesson = {
         "Both are set in the same handler, so both are urgent, so they render together and commit together — and the highlight, which was ready almost immediately, sits waiting for the table. The user clicks and, for as long as the table takes, nothing at all happens. Not even the highlight.",
         "That is the situation transitions exist for, and it is worth seeing the two schedules side by side.",
       ],
-      visual: {
-        id: "transition-off-visual",
-        kind: "react-concurrent",
-        algorithm: "transition-off",
-        title: "Both updates urgent",
-      },
     },
     {
       id: "the-fix",
@@ -38,12 +32,6 @@ export const transitionsLesson: Lesson = {
         "`startTransition(() => setTab(next))` says: this update is not what the user is waiting on. React renders it at a lower priority, may interrupt it, and — crucially — commits the urgent updates from the same handler without it.",
         "One click becomes two commits. The first is the tab highlight, on screen immediately. The second is the table, whenever it is done.",
       ],
-      visual: {
-        id: "transition-on-visual",
-        kind: "react-concurrent",
-        algorithm: "transition-on",
-        title: "The list update marked as a transition",
-      },
       examples: [
         {
           id: "two-renders",

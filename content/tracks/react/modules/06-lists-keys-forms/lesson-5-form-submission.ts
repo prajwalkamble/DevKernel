@@ -44,12 +44,6 @@ export const formSubmissionLesson: Lesson = {
     {
       id: "formdata",
       heading: "`FormData` reads the whole form",
-      visual: {
-        id: "formdata-visual",
-        kind: "react-forms",
-        algorithm: "form-data",
-        title: "Five fields, and what FormData collects",
-      },
       body: [
         "`new FormData(event.currentTarget)` gives every named field's value in one call, with no state, no refs and no per-field wiring. For a form whose values are only needed at submit time, this is the entire implementation.",
         "Two rules decide what it contains, and both catch people. **Only fields with a `name` are included** — an `id` is not enough. And **disabled fields are excluded**, which is the browser's rule rather than React's.",

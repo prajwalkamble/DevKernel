@@ -134,12 +134,6 @@ function UserList() {
     {
       id: "render-props",
       heading: "Render props",
-      visual: {
-        id: "render-prop-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "Handing behaviour down instead of data",
-      },
       body: [
         "The other pre-hooks answer to sharing logic: a component that holds state and calls a **function child** with it.",
         "Hooks replaced this for logic sharing, and it survives for a different job — a component that owns something the caller must render *around*, particularly when a type parameter is involved. Module 13's generic `List` is a render prop, and it has to be, because there is no other way to hand the caller a value the caller did not create.",

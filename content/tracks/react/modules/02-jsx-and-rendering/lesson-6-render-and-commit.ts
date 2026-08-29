@@ -25,13 +25,6 @@ export const renderAndCommitLesson: Lesson = {
         "**Commit.** React applies the differences to the DOM in one synchronous, uninterruptible pass, then assigns refs, then runs layout effects, and finally — after the browser has painted — runs passive effects. Once commit starts it runs to completion, which is what stops the user ever seeing a half-updated screen.",
         "Read those two paragraphs again with `useEffect` in mind and the hook stops being arbitrary. An effect is *how you get code to run in the commit phase*, because the render phase is the wrong place for anything that touches the world.",
       ],
-      visual: {
-        id: "render-commit-visual",
-        kind: "react-rendering",
-        algorithm: "render-commit",
-        title: "One update, both phases",
-        lockAlgorithm: true,
-      },
     },
     {
       id: "purity",

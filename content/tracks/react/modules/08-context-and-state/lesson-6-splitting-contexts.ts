@@ -166,12 +166,6 @@ for (const [k, v] of Object.entries(renders)) console.log(\`  \${k.padEnd(18)} \
     {
       id: "by-rate",
       heading: "Split by rate of change, not by subject",
-      visual: {
-        id: "context-split-visual",
-        kind: "react-rendering",
-        algorithm: "context-update",
-        title: "What one context value wakes",
-      },
       body: [
         "The instinct is to split by topic: a `UserContext`, a `SettingsContext`, a `CartContext`. That is a fine way to organise code, and it is not what makes the re-renders go away.",
         "**The axis that matters is how often a value changes.** Two values in one context means every reader of either re-renders at the combined rate. So the split to make is between the parts that change at different rates, even when they are obviously about the same thing.",

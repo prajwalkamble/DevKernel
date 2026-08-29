@@ -25,12 +25,6 @@ export const useReducerLesson: Lesson = {
         "The second trigger is **the next update depends on the current state in a non-trivial way**. `setCount(c => c + 1)` is fine; \"if this sku is already present increment it, otherwise append\" is a rule, and rules want a home.",
         "A reducer gives them one. All the transitions in one function, all the components saying only what happened.",
       ],
-      visual: {
-        id: "reducer-dispatch-visual",
-        kind: "react-rendering",
-        algorithm: "reducer-dispatch",
-        title: "Five actions through one function",
-      },
     },
     {
       id: "the-shape",

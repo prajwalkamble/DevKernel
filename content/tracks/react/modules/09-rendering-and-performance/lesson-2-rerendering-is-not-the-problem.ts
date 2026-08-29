@@ -19,12 +19,6 @@ export const rerenderingIsNotTheProblemLesson: Lesson = {
     {
       id: "counted",
       heading: "A render is not a DOM write",
-      visual: {
-        id: "render-vs-dom-visual",
-        kind: "react-perf",
-        algorithm: "render-vs-dom",
-        title: "Seven components run; one text node changes",
-      },
       body: [
         "The word \"re-render\" sounds like re-drawing. It is not. A render is React calling your function and getting back objects, which it then compares with the previous objects. The DOM is only touched where they differ.",
         "Count both and the gap is obvious.",

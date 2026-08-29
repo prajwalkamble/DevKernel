@@ -25,12 +25,6 @@ export const whatContextCostsLesson: Lesson = {
         "**Rule 2 — the consumer rule.** Any component that called `useContext` on that context re-renders, wherever it is, whatever its props are, and whether or not it is memoised. `memo` cannot stop it, because the value did not arrive through props and there is nothing for memo to compare.",
         "The two rules together are why people's mental model breaks: they memoise the tree, the re-renders mostly stop, and the expensive consumer keeps re-rendering — which looks like memo failing rather than like a second rule they had not accounted for.",
       ],
-      visual: {
-        id: "context-update-visual",
-        kind: "react-rendering",
-        algorithm: "context-update",
-        title: "One value change, two different reasons to re-render",
-      },
     },
     {
       id: "measured",

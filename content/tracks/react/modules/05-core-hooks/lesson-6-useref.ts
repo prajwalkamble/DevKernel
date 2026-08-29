@@ -87,12 +87,6 @@ after focus click, focused id: field
     {
       id: "values",
       heading: "Remembering something between renders",
-      visual: {
-        id: "ref-no-render-visual",
-        kind: "react-state",
-        algorithm: "ref-vs-state",
-        title: "A ref write against a state write",
-      },
       body: [
         "The second job has nothing to do with the DOM. A ref is the place for a value that must persist and must not trigger a render.",
         "The canonical cases: the id returned by `setInterval` so a later cleanup can clear it; the previous value of a prop, for comparing; whether a component has interacted yet; a mutable handle to a chart or map instance.",

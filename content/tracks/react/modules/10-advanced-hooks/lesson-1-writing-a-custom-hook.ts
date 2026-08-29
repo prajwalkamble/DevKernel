@@ -24,12 +24,6 @@ export const writingACustomHookLesson: Lesson = {
         "Module 5 established the mechanism: a component instance owns an ordered list of slots, and each hook call takes the next one. A custom hook has no list of its own — calling it simply runs its body, and *its* hook calls take slots in whichever component is currently rendering.",
         "Every property people find surprising falls out of that one fact. Step the animation: two components call the same hook, and the slots are two separate runs.",
       ],
-      visual: {
-        id: "custom-hook-slots-visual",
-        kind: "react-rendering",
-        algorithm: "custom-hook-slots",
-        title: "A custom hook has no state of its own",
-      },
       examples: [
         {
           id: "two-instances",
@@ -264,13 +258,6 @@ function SearchPage() {
         "Same rule as everything else in module 3: **a hook lives next to its only caller, and moves outward when it gains a second one.**",
         "Step the listing. Three steps, and the interesting one is the last, where the hook is renamed because it no longer belongs to the feature it came from.",
       ],
-      visual: {
-        id: "hooks-layout-visual",
-        kind: "react-structure",
-        algorithm: "hooks-layout",
-        lockAlgorithm: true,
-        title: "A hook moving outward as it gains callers",
-      },
       pitfalls: [
         {
           title: "A `hooks/` folder at the root is where single-caller hooks go to hide",

@@ -24,12 +24,6 @@ export const racesAndCleanupLesson: Lesson = {
         "Nothing in that sentence is wrong. The problem is the assumption hiding under it: that responses come back in the order the requests went out. They do not, and nothing makes them.",
         "Step the animation. The first request is the slow one — a longer query prefix that the server has to work harder on, a cold cache, a request that got unlucky — and it lands after the second.",
       ],
-      visual: {
-        id: "fetch-race-visual",
-        kind: "react-rendering",
-        algorithm: "fetch-race",
-        title: "Two keystrokes, and the response that arrives last",
-      },
       examples: [
         {
           id: "the-race",
@@ -154,12 +148,6 @@ await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
         "So when the effect re-runs for `ada`, React first calls the previous run's cleanup — the one holding `ad`'s flag — and sets *that* flag to true. `ad`'s `.then` callback closes over the same variable, so when it finally resolves it sees `true` and returns without touching state.",
         "This is the cleanup-before-next-effect ordering from lesson 2 doing real work. The flag belongs to a specific run of the effect, and it is set at exactly the moment that run stops being current.",
       ],
-      visual: {
-        id: "fetch-race-fixed-visual",
-        kind: "react-rendering",
-        algorithm: "fetch-race-fixed",
-        title: "The same two keystrokes, with the flag",
-      },
       pitfalls: [
         {
           title: "A ref does not work here",

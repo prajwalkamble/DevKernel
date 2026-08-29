@@ -24,13 +24,6 @@ export const testingInteractionLesson: Lesson = {
         "A real click is a sequence: the pointer arrives, the mouse enters, they both move, the button goes down, focus moves, the button comes up, and only then does `click` fire. Components listen to all of these — a menu that opens on hover, a drag that starts on `pointerdown`, a validation that runs on `blur`.",
         "`userEvent.click(button)` dispatches the whole sequence. The list below was captured by attaching a listener for every pointer, mouse and focus event to a real button and calling each API once.",
       ],
-      visual: {
-        id: "click-events-visual",
-        kind: "react-tooling",
-        algorithm: "click-events",
-        title: "fireEvent against userEvent",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "counted",

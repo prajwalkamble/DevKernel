@@ -129,12 +129,6 @@ export default async function Post({ id }: { id: string }) {
         "**No context.** A Server Component cannot read a context provided by a Client Component, because the provider only exists in the browser. Pass a prop instead.",
         "None of this is a limitation React chose to impose. It is what running on a server means, and the reason the boundary exists is that some components genuinely need the things on this list.",
       ],
-      visual: {
-        id: "server-components-visual",
-        kind: "react-server",
-        algorithm: "server-components",
-        title: "Which components reach the browser",
-      },
     },
     {
       id: "measured",

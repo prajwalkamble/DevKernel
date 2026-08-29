@@ -25,12 +25,6 @@ export const useLayoutEffectLesson: Lesson = {
         "`useLayoutEffect`:  render → commit → effect → *paint*.",
         "That gap is where the flash lives. If an effect changes something visible, `useEffect` gives the user one painted frame of the unadjusted version first. `useLayoutEffect` does not, because nothing has been painted yet.",
       ],
-      visual: {
-        id: "layout-effect-timing-visual",
-        kind: "react-rendering",
-        algorithm: "effect-timing",
-        title: "Both effects, and the paint between them",
-      },
       examples: [
         {
           id: "layout-order",

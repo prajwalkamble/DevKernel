@@ -30,12 +30,6 @@ export const mswLesson: Lesson = {
     {
       id: "handlers",
       heading: "Handlers and a server",
-      visual: {
-        id: "handler-matching-visual",
-        kind: "react-misc",
-        algorithm: "handler-matching",
-        title: "Which handler answers, and what falls through",
-      },
       body: [
         "A handler is a method, a path, and a function returning a response. `setupServer` collects them and installs the interception for the test run.",
       ],

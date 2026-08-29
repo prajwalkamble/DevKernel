@@ -33,12 +33,6 @@ export const projectStructureLesson: Lesson = {
         "This is what almost every tutorial produces: a folder per kind of thing. `components/`, `hooks/`, `api/`, `types/`, `utils/`. It is easy to explain, it is obvious where a new file goes, and for a small app it is genuinely fine.",
         "Then run the test that matters. Pick a feature — the shopping cart — and ask where it is.",
       ],
-      visual: {
-        id: "by-type-visual",
-        kind: "react-structure",
-        algorithm: "by-type",
-        title: "Fifteen files, grouped by kind — and where one feature ends up",
-      },
       examples: [
         {
           id: "by-type-tree",
@@ -88,12 +82,6 @@ export const projectStructureLesson: Lesson = {
         "The rule for the shared layer is the part people get wrong, so state it precisely: **a file moves to `shared/` when it acquires a second caller, and not before.** Not when it looks reusable, not when it is generic, not when somebody might want it later. `Button` is in `shared/` because two features import it. `CartLine` is not, because only the cart does.",
         "Inside `shared/`, the by-kind folders come back — `shared/components/`, `shared/hooks/`, `shared/utils/`. That is not an inconsistency. In the shared layer there is no feature to group by, so \"what kind of thing is this?\" is genuinely the right question again.",
       ],
-      visual: {
-        id: "by-feature-visual",
-        kind: "react-structure",
-        algorithm: "by-feature",
-        title: "The same fifteen files, regrouped one at a time",
-      },
       examples: [
         {
           id: "by-feature-tree",
@@ -145,12 +133,6 @@ export const projectStructureLesson: Lesson = {
         "Both layouts rest on the same underlying rule, and it is worth stating on its own because it decides every smaller question too: **a file lives next to the thing that uses it, and moves outward only when a second thing uses it.**",
         "That applies below the feature level as well. A component starts as one file. When it acquires a stylesheet, a test, a set of stories, and a hook that only it calls, those go into a folder named after it — not into four separate top-level folders that happen to contain one file each about `Button`.",
       ],
-      visual: {
-        id: "colocate-visual",
-        kind: "react-structure",
-        algorithm: "colocate",
-        title: "One component becoming a folder",
-      },
       examples: [
         {
           id: "colocated-folder",

@@ -106,13 +106,6 @@ await expect(page.getByRole("status")).toHaveText("Signed in");`,
         "**Component tests beside their component.** `Button.tsx` and `Button.test.tsx` are adjacent in the listing, so an untested file is a visible gap rather than an absence elsewhere in the tree, and moving or deleting the component takes its test with it.",
         "**End-to-end tests in their own top-level directory.** They are not about a component — they are about a journey across many — so there is nowhere to colocate them. `e2e/checkout.spec.ts` is about the checkout flow, not about any file.",
       ],
-      visual: {
-        id: "test-layout-visual",
-        kind: "react-structure",
-        algorithm: "test-layout",
-        title: "Beside it, or in __tests__",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "layout",

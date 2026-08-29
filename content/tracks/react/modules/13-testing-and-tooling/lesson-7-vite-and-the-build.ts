@@ -55,13 +55,6 @@ dist/assets/index-CP7Zf5UC.js   191.83 kB │ gzip: 60.53 kB
           requires: "vite (this is its build output, not a program's)",
         },
       ],
-      visual: {
-        id: "build-output-visual",
-        kind: "react-structure",
-        algorithm: "build-output",
-        title: "Everything the build wrote",
-        lockAlgorithm: true,
-      },
     },
     {
       id: "hashes",
@@ -85,13 +78,6 @@ dist/assets/index-CP7Zf5UC.js   191.83 kB │ gzip: 60.53 kB
         "One chunk means every user downloads every route. `React.lazy` plus a dynamic import creates a boundary the bundler cannot cross eagerly, so everything behind it becomes its own file.",
         "The reason it needs a Suspense boundary is now obvious: the component genuinely is not there yet, so the render suspends — module 11's mechanism, with a network request instead of a data fetch.",
       ],
-      visual: {
-        id: "code-splitting-visual",
-        kind: "react-tooling",
-        algorithm: "code-splitting",
-        title: "Reachability, and what lands in which chunk",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "lazy",

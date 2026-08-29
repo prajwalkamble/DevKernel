@@ -19,12 +19,6 @@ export const subscriptionsAndTimersLesson: Lesson = {
     {
       id: "stale-closure",
       heading: "The counter that sticks at 1",
-      visual: {
-        id: "stale-closure-visual",
-        kind: "react-state",
-        algorithm: "snapshot",
-        title: "The value the callback captured",
-      },
       body: [
         "An interval that increments a counter. Three lines, a cleanup, and a correct dependency array — the linter is happy, and it does not work.",
       ],

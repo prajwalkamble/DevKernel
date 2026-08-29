@@ -33,12 +33,6 @@ export const synchronisingLesson: Lesson = {
         "An external system is anything with a lifetime React does not manage: a chat connection, a WebSocket, a `setInterval`, an `IntersectionObserver`, a map widget, an analytics SDK, `document.title`.",
         "Every one of them has the same shape — start it, and return the function that stops it.",
       ],
-      visual: {
-        id: "effect-timing-visual",
-        kind: "react-rendering",
-        algorithm: "effect-timing",
-        title: "Where an effect sits, on mount and on update",
-      },
       examples: [
         {
           id: "connect-disconnect",

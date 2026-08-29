@@ -72,12 +72,6 @@ after the click, DOM shows: 1`,
         "That is exactly what happens. Three updates go on the queue, each saying \"the new value is 1\", and React applies them in order: 1, then 1, then 1.",
         "The number moves by one. Not three. This is the single most common surprise in React, and it is entirely explained by the previous section: `count` was a constant throughout the handler.",
       ],
-      visual: {
-        id: "state-queue-values-visual",
-        kind: "react-rendering",
-        algorithm: "queue-values",
-        title: "Three calls, and what actually reaches the queue",
-      },
       examples: [
         {
           id: "three-setters",

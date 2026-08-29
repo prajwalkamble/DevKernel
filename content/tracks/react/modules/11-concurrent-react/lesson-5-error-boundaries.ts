@@ -157,13 +157,6 @@ export class ErrorBoundary extends Component<Props, { error: Error | null }> {
         "It does not catch a throw from an **event handler**, from **`setTimeout`** or any async callback, from **server rendering**, or from the boundary **itself**.",
         "The reason is one rule rather than four: React catches what it is on the stack for. A render happens inside React's call stack, so a throw unwinds into React and React can act. A click handler is called by the browser's event dispatch — React is not above it on the stack, and there is nothing to unwind into.",
       ],
-      visual: {
-        id: "error-boundary-visual",
-        kind: "react-concurrent",
-        algorithm: "error-boundary",
-        title: "An error looking for a boundary",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "caught-and-not",

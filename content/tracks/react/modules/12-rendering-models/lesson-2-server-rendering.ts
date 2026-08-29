@@ -24,12 +24,6 @@ export const serverRenderingLesson: Lesson = {
         "The browser now paints real content on its first paint. The bundle still downloads, still executes, and still builds the same tree — but it does so behind a page the user is already reading.",
         "That is server-side rendering. Two APIs and one idea.",
       ],
-      visual: {
-        id: "ssr-timeline-visual",
-        kind: "react-server",
-        algorithm: "ssr-timeline",
-        title: "Request to content, server-rendered",
-      },
     },
     {
       id: "the-output",

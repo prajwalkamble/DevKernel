@@ -55,13 +55,6 @@ export const useDeferredValueLesson: Lesson = {
         "On the render where the value changes, `useDeferredValue` returns the **old** value. React then schedules a second, low-priority render with the new one — and if the value changes again before that render commits, it is abandoned and restarted.",
         "So a burst of typing produces a burst of cheap renders and, typically, one expensive one at the end.",
       ],
-      visual: {
-        id: "deferred-visual",
-        kind: "react-concurrent",
-        algorithm: "deferred-value",
-        title: "Five keystrokes, one expensive render",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "two-renders",

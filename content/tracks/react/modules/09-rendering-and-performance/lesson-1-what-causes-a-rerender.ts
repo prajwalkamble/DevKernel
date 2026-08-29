@@ -25,12 +25,6 @@ export const whatCausesARerenderLesson: Lesson = {
         "**A context it reads changed.** Module 8 covered this one; it is the rule `memo` cannot stop.",
         "That is the complete list. Everything else you might have heard is a consequence of one of these three.",
       ],
-      visual: {
-        id: "rerender-cascade-visual",
-        kind: "react-rendering",
-        algorithm: "rerender-cascade",
-        title: "One state change, and everything below it",
-      },
     },
     {
       id: "not-props",

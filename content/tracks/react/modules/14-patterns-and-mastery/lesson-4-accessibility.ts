@@ -109,13 +109,6 @@ for (const el of container.children) {
         "**Everything with a positive `tabindex` comes first**, in ascending numeric order, ahead of the entire rest of the document. Then everything with `tabindex=\"0\"` or native focusability, in document order.",
         "So a single `tabindex=\"1\"` does not move an element up by one. It moves it in front of every other focusable thing on the page.",
       ],
-      visual: {
-        id: "focus-order-visual",
-        kind: "react-patterns",
-        algorithm: "focus-order",
-        title: "The order that algorithm produces",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "tabindex-values",

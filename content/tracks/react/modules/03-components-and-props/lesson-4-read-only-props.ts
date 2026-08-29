@@ -71,12 +71,6 @@ element frozen? true | props frozen? true`,
         "**Renders stay predictable.** React re-renders a component when its own state changes or when it is given new props. If a child could write to a parent's data directly, React would have no way of knowing something changed — the screen and the data would drift apart, which is the exact failure mode the framework exists to remove.",
         "**Components stay honest about their inputs.** A component that only reads props is a function of its arguments, which is what makes it testable, memoisable and movable.",
       ],
-      visual: {
-        id: "one-way-data-flow-visual",
-        kind: "react-rendering",
-        algorithm: "props-down",
-        title: "One value, down the tree and back",
-      },
     },
     {
       id: "events-up",

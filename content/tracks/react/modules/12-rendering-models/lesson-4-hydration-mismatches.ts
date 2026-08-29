@@ -152,12 +152,6 @@ https://react.dev/link/hydration-mismatch
         "**4. Browser-only storage.** `localStorage`, `sessionStorage`, cookies read through `document.cookie`, `matchMedia`. The server has none of them, so it renders the default and the client renders the stored value. Theme switchers are the canonical case, which is why every one of them has a flash-of-wrong-theme story.",
         "**5. Invalid nesting.** This one is different from the others, because your React tree is fine. `<p><div/></p>` is invalid HTML, so the browser's parser *silently restructures the server's markup* before React sees it — and React then compares its tree against a DOM that no longer matches it. The tell is a mismatch you cannot explain from the component code.",
       ],
-      visual: {
-        id: "hydration-mismatch-visual",
-        kind: "react-server",
-        algorithm: "hydration-mismatch",
-        title: "One node differs, the whole tree goes",
-      },
       pitfalls: [
         {
           title: "The nesting one has a fixed list",

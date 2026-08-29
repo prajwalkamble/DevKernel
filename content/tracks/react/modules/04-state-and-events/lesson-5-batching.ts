@@ -19,12 +19,6 @@ export const batchingLesson: Lesson = {
     {
       id: "what-it-is",
       heading: "One pass, however many setters",
-      visual: {
-        id: "batching-queue-visual",
-        kind: "react-state",
-        algorithm: "batching",
-        title: "Four setters, and how many renders they cost",
-      },
       body: [
         "React does not re-render per setter call. It collects everything queued during a synchronous stretch of work, applies it all, and renders once.",
         "The reason is that an intermediate state is not a state anybody should see. A handler that sets a name, an email and a validity flag passes through combinations that were never true together — a new name with the old validity. Rendering those would be visible as flicker and, worse, would run effects against states that never really existed.",

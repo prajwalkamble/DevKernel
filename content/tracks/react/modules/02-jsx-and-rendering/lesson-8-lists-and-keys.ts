@@ -93,12 +93,6 @@ function Directory() {
         "That decision determines whether a DOM node is reused or rebuilt, and — far more importantly — whether the **state inside it** survives. An input's text, a checkbox's checkedness, a component's `useState`, the scroll position of a container, which element has focus: all of that belongs to the instance React decides to keep.",
         "So a key is an identity claim. `key={person.id}` says \"this row is that person, wherever it has moved to\". `key={i}` says \"this row is the row that was in this position\", which is a claim about the position and not about the data — and when the data moves, that claim is false.",
       ],
-      visual: {
-        id: "keys-visual",
-        kind: "react-rendering",
-        algorithm: "keys-by-index",
-        title: "Adding a row to the front, keyed two different ways",
-      },
     },
     {
       id: "the-bug",

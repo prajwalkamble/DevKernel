@@ -24,12 +24,6 @@ export const staticGenerationLesson: Lesson = {
         "So run it once, at build time, and write the result to a file. A request is now a file being served from a CDN edge, which is the cheapest and fastest thing the web does.",
         "The component code is unchanged. `renderToString` is still what runs. The only difference is *when*, and the whole of static generation follows from that one change.",
       ],
-      visual: {
-        id: "ssg-timeline-visual",
-        kind: "react-server",
-        algorithm: "ssg-timeline",
-        title: "Request to content, statically generated",
-      },
     },
     {
       id: "why-fast",

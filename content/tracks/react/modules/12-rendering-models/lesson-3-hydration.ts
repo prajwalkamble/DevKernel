@@ -24,12 +24,6 @@ export const hydrationLesson: Lesson = {
         "It would be wasteful to build it again — and worse than wasteful: replacing the DOM would throw away the paint the user is looking at, lose any focus or scroll or text selection, and restart every CSS animation.",
         "So `hydrateRoot` does something else. It renders the tree in memory and, instead of creating DOM nodes, walks the existing ones **in lockstep**, and where the type at a position matches, it adopts that node and attaches this position's props and handlers to it.",
       ],
-      visual: {
-        id: "hydration-visual",
-        kind: "react-server",
-        algorithm: "hydration",
-        title: "Adopting the server's DOM",
-      },
     },
     {
       id: "proving-it",

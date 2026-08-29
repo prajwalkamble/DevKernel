@@ -24,13 +24,6 @@ export const portalsAndAnimationLesson: Lesson = {
         "None of that is a React problem. It is CSS, and the CSS answer is to be somewhere else in the document.",
         "`createPortal(children, domNode)` renders into that other node while leaving the children exactly where they are in the **React** tree.",
       ],
-      visual: {
-        id: "portal-visual",
-        kind: "react-patterns",
-        algorithm: "portal",
-        title: "Two trees, one component",
-        lockAlgorithm: true,
-      },
     },
     {
       id: "what-moves",
