@@ -99,6 +99,13 @@ export const capstoneBackendLesson: Lesson = {
           requires: "nothing — this is the finished tree, for reference",
         },
       ],
+      visual: {
+        id: "capstone-workspace-visual",
+        kind: "react-structure",
+        algorithm: "capstone-workspace",
+        lockAlgorithm: true,
+        title: "The three packages, added one at a time",
+      },
       pitfalls: [
         {
           title: "`shared` has no build step, and that is the point",
