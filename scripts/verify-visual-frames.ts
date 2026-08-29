@@ -253,6 +253,13 @@ for (const track of tracks) {
    The pairs are pinned per track rather than merely allowing a dropdown,
    because the failure worth catching is not "a dropdown appeared" but "a
    React example offers to be read in Python". */
+/* The counterpart of each language: what "the same example, in the other
+   language" means. JSX and TSX are components; javascript and typescript are
+   the plain modules a lesson also carries. */
+const LANGUAGE_PAIR: Record<string, string> = {
+  jsx: "tsx", tsx: "jsx", javascript: "typescript", typescript: "javascript",
+};
+
 const DROPDOWN_LANGUAGES = new Map<string, ReadonlySet<string>>([
   ["dsa", new Set(["python", "java", "cpp", "rust", "go", "javascript", "typescript", "asm"])],
   // jsx/tsx for components, javascript/typescript for the plain modules a
@@ -281,6 +288,17 @@ for (const track of tracks) {
           for (const lang of [example.lang, ...example.alternates.map((v) => v.lang)]) {
             if (lang && !allowed.has(lang)) {
               fail(where, `offers ${lang}, which is not one of ${track.slug}'s dropdown languages`);
+            }
+          }
+          /* A dropdown offers one program in two languages, so the pair has to
+             be the two spellings of the same thing. A jsx primary beside a
+             `typescript` alternate is a real defect twice over: the reader is
+             shown a component highlighted as a plain module, and choosing
+             TypeScript on one example stops carrying to the next. */
+          for (const variant of example.alternates) {
+            const paired = LANGUAGE_PAIR[example.lang ?? ""];
+            if (paired && variant.lang !== paired) {
+              fail(where, `pairs ${example.lang} with ${variant.lang}; the counterpart of ${example.lang} is ${paired}`);
             }
           }
         }

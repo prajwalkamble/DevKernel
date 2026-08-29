@@ -140,7 +140,7 @@ act(() => { root.unmount(); });`,
       id: "timing",
       heading: "When an effect runs",
       body: [
-        "The animation above walks it, and it is worth being able to state without looking. Render, commit, **paint**, then effect.",
+        "The order is worth being able to state without looking. Render, commit, **paint**, then effect.",
         "The important word is *paint*. By the time your effect runs, the browser has already drawn the frame. That is deliberate: the effect cannot delay what the user sees, which is exactly the property you want for connecting a socket or sending an analytics ping.",
         "It is also the property you do not want when the effect changes something visible. If an effect measures an element and repositions it, the user sees one frame in the wrong place before the correction lands. That is `useLayoutEffect`, which runs before the paint, and it has a lesson of its own later in this module.",
         "On an update the sequence gains one step, and it goes early: render, commit, **cleanup of the previous effect**, paint, new effect.",

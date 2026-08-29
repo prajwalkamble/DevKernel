@@ -495,7 +495,10 @@ export const now = sql\`(datetime('now'))\`;`,
               lang: "typescript",
               title: "server/src/db/schema.ts",
               requires: "tsc and drizzle-kit (the schema is a declaration; it prints nothing)",
-              code: `import { sql } from "drizzle-orm";
+              code: `/* Identical to schema.js apart from the name. Drizzle's table builders
+   carry their own types, so there is nothing left here to annotate. */
+
+import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { bugSeverities, bugStatuses } from "@bug-tracker/shared";
 
@@ -641,7 +644,10 @@ bugRoutes.get("/projects/:projectId/triage", async (c) => {
               lang: "typescript",
               title: "server/src/routes/bugs.ts — reading",
               requires: "tsc (imports elided; see the repository for the full file)",
-              code: `const id = () => \`b_\${crypto.randomUUID().slice(0, 8)}\`;
+              code: `/* Identical to bugs.js apart from the name: every value in this handler
+   already has a type, from Hono, from Drizzle, or from the shared schema. */
+
+const id = () => \`b_\${crypto.randomUUID().slice(0, 8)}\`;
 const stamp = () => new Date().toISOString();
 
 /* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,

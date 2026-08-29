@@ -117,16 +117,18 @@ for (const el of container.children) {
           code: `/* 0 — put a non-interactive element into the natural order, at its
    position in the document. For a custom control, and always with a
    role and keyboard handlers to match. */
-<span role="button" tabIndex={0} onClick={…} onKeyDown={…} />
+const customControl = (
+  <span role="button" tabIndex={0} onClick={handleClick} onKeyDown={handleKeyDown} />
+);
 
 /* -1 — focusable by script, not by tabbing. This is what you put on the
    thing you are about to move focus *to*: a dialog, a route heading, an
    error summary. The user never tabs to it; you send them there. */
-<div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" />
+const dialog = <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" />;
 
 /* Any positive number — reordering the entire page. Do not. Change the
    DOM order instead, which is the thing you actually meant. */
-<input tabIndex={1} />`,
+const reordered = <input tabIndex={1} />;`,
           explanation:
             "`tabIndex={-1}` is the one people have not met and the one that matters most, because focus management is impossible without it: you cannot move focus to an element that cannot receive it, and a heading or a dialog container is not focusable by default.",
           alternates: [
@@ -139,16 +141,18 @@ for (const el of container.children) {
 /* 0 — put a non-interactive element into the natural order, at its
    position in the document. For a custom control, and always with a
    role and keyboard handlers to match. */
-<span role="button" tabIndex={0} onClick={…} onKeyDown={…} />
+const customControl = (
+  <span role="button" tabIndex={0} onClick={handleClick} onKeyDown={handleKeyDown} />
+);
 
 /* -1 — focusable by script, not by tabbing. This is what you put on the
    thing you are about to move focus *to*: a dialog, a route heading, an
    error summary. The user never tabs to it; you send them there. */
-<div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" />
+const dialog = <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" />;
 
 /* Any positive number — reordering the entire page. Do not. Change the
    DOM order instead, which is the thing you actually meant. */
-<input tabIndex={1} />`,
+const reordered = <input tabIndex={1} />;`,
             },
           ],
         },
@@ -325,14 +329,18 @@ function Results({ query, items }: { query: string; items: Item[] }) {
 }
 
 /* An icon-only button: the icon is decorative, the button needs a name. */
-<button aria-label="Close" onClick={close}>
-  <XIcon aria-hidden="true" />
-</button>
+const closeButton = (
+  <button aria-label="Close" onClick={close}>
+    <XIcon aria-hidden="true" />
+  </button>
+);
 
 /* Visible text already exists, so point at it rather than duplicating it. */
-<section aria-labelledby="billing-heading">
-  <h2 id="billing-heading">Billing</h2>
-</section>`,
+const billing = (
+  <section aria-labelledby="billing-heading">
+    <h2 id="billing-heading">Billing</h2>
+  </section>
+);`,
           explanation:
             "`aria-hidden` on the icon matters: without it a screen reader may read the SVG's title as well as the `aria-label`, and the button announces itself twice. Decorative graphics inside a labelled control should always be hidden from the tree.",
           alternates: [
@@ -360,14 +368,18 @@ function Results({ query, items }: { query: string; items: Item[] }) {
 }
 
 /* An icon-only button: the icon is decorative, the button needs a name. */
-<button aria-label="Close" onClick={close}>
-  <XIcon aria-hidden="true" />
-</button>
+const closeButton = (
+  <button aria-label="Close" onClick={close}>
+    <XIcon aria-hidden="true" />
+  </button>
+);
 
 /* Visible text already exists, so point at it rather than duplicating it. */
-<section aria-labelledby="billing-heading">
-  <h2 id="billing-heading">Billing</h2>
-</section>`,
+const billing = (
+  <section aria-labelledby="billing-heading">
+    <h2 id="billing-heading">Billing</h2>
+  </section>
+);`,
             },
           ],
         },

@@ -409,7 +409,10 @@ export function BugList({ projectId, projectKey }: BugListProps) {
             {
               lang: "tsx",
               title: "web/src/features/bugs/BugList.test.tsx",
-              code: `describe("BugList", () => {
+              code: `/* Identical to BugList.test.jsx apart from the name. Testing Library's
+   queries are typed already, and this test declares no values of its own. */
+
+describe("BugList", () => {
   it("lists the bugs with their key, severity and assignee", async () => {
     renderApp(<BugList projectId="p_web" projectKey="WEB" />);
 

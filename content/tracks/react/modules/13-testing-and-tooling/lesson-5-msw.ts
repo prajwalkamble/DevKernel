@@ -283,7 +283,7 @@ createRoot(document.getElementById("root")).render(<App />);`,
             "`bypass` rather than `error` here: in a browser you want unhandled requests — fonts, images, analytics — to go through untouched. It is the opposite choice from the test setup, and for the opposite reason.",
           alternates: [
             {
-              lang: "typescript",
+              lang: "tsx",
               code: `// src/mocks/browser.ts
 import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
