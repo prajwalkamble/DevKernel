@@ -2,9 +2,9 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneDataLayerLesson: Lesson = {
   id: "react-capstone-data-layer",
-  slug: "tracer-the-data-layer",
+  slug: "bug-tracker-the-data-layer",
   moduleSlug: "capstone-project",
-  title: "Tracer: The Data Layer",
+  title: "Bug Tracker: The Data Layer",
   summary:
     "Step four. One fetch wrapper that parses instead of casting, one table of cache keys, and seven hooks — including the three mutations that behave differently on purpose: a status change that is optimistic, a triage decision that optimistically removes a row, and a comment that is deliberately not optimistic at all.",
   estimatedMinutes: 32,
@@ -28,7 +28,7 @@ export const capstoneDataLayerLesson: Lesson = {
           title: "web/src/lib/api.ts",
           lang: "typescript",
           code: `import { z } from "zod";
-import { ApiError } from "@tracer/shared";
+import { ApiError } from "@bug-tracker/shared";
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8787/api";
 
@@ -92,7 +92,7 @@ export async function request<T>(
           id: "keys-table",
           title: "web/src/lib/queryKeys.ts",
           lang: "typescript",
-          code: `import type { BugQuery } from "@tracer/shared";
+          code: `import type { BugQuery } from "@bug-tracker/shared";
 
 /* One table of keys, so no component ever writes a key by hand. Every key
    starts with the same prefix as its parents, which is what makes a partial
@@ -140,7 +140,7 @@ export const queryKeys = {
           lang: "typescript",
           code: `import { useCallback } from "react";
 import { useSearchParams } from "react-router";
-import { BugQuery } from "@tracer/shared";
+import { BugQuery } from "@bug-tracker/shared";
 
 /* FR-6. The filters are not state: they are where you are. Keeping them in the
    URL is what makes the filtered view shareable, reloadable and reachable with
@@ -299,7 +299,7 @@ export function useAddComment(bugId: string) {
           title: "web/src/hooks/useTriage.ts — rolling back a removal",
           lang: "typescript",
           code: `import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bug, type TriageOutcome } from "@tracer/shared";
+import { Bug, type TriageOutcome } from "@bug-tracker/shared";
 import { request } from "../lib/api";
 import { queryKeys } from "../lib/queryKeys";
 

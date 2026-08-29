@@ -25,7 +25,7 @@ export const reactCapstoneModule: ModuleDefinition = {
   slug: "capstone-project",
   title: "Capstone: Build a Bug Tracker",
   description:
-    "Tracer — a bug tracker for one small team, in the shape of a small Bugzilla, Jira or GitHub Issues. Specified with numbered functional and non-functional requirements, then built: a shared schema package, a Hono and SQLite backend, and a React and TypeScript front end with filters in the URL, a triage queue ordered worst-first, two optimistic mutations and one deliberately not, and tests that fake the network rather than the modules.",
+    "Bug Tracker — an issue tracker for one small team, in the shape of a small Bugzilla, Jira or GitHub Issues. Specified with numbered functional and non-functional requirements, then built: a shared schema package, a Hono and SQLite backend, and a React and TypeScript front end with filters in the URL, a triage queue ordered worst-first, two optimistic mutations and one deliberately not, and tests that fake the network rather than the modules.",
   order: 15,
   status: "available",
   lessons: [

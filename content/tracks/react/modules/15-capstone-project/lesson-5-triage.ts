@@ -2,11 +2,11 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneTriageLesson: Lesson = {
   id: "react-capstone-triage",
-  slug: "tracer-the-triage-queue",
+  slug: "bug-tracker-the-triage-queue",
   moduleSlug: "capstone-project",
-  title: "Tracer: The Triage Queue",
+  title: "Bug Tracker: The Triage Queue",
   summary:
-    "Step six, and the screen that makes Tracer a bug tracker rather than a list. Every report nobody has judged yet, worst first and oldest within that, with enough of each report on screen to decide without opening it — plus the two-outcome decision, its optimistic removal, its rollback, and the test that proves the rollback actually happens.",
+    "Step six, and the screen that makes the app a bug tracker rather than a list. Every report nobody has judged yet, worst first and oldest within that, with enough of each report on screen to decide without opening it — plus the two-outcome decision, its optimistic removal, its rollback, and the test that proves the rollback actually happens.",
   estimatedMinutes: 26,
   objectives: [
     "Recognise when a filtered view is really a different screen",
@@ -20,7 +20,7 @@ export const capstoneTriageLesson: Lesson = {
       id: "why-a-queue",
       heading: "Why this is a screen and not a filter",
       body: [
-        "Every bug arrives as `open`, which in Tracer means *nobody has decided whether this is real*. That is a backlog, and a backlog that nobody works down stops being read: the useful signal — a blocker filed this morning — is buried under three months of duplicates and misunderstandings.",
+        "Every bug arrives as `open`, which in Bug Tracker means *nobody has decided whether this is real*. That is a backlog, and a backlog that nobody works down stops being read: the useful signal — a blocker filed this morning — is buried under three months of duplicates and misunderstandings.",
         "So FR-11 asks for a queue. The temptation is to make it a link to the list with `?status=open`, and it is worth being precise about why that does not work, because the reasoning generalises.",
         "**The order is different.** The list is newest-first, because a list is something you scan for what changed. A queue is worst-first, because a queue is something you work down — and within a severity, oldest-first, because the oldest unjudged report has been failing someone the longest.",
         "**The content is different.** A list row is one line: key, title, severity, status, assignee. To *judge* a report you need the thing itself — the steps, the expected and actual behaviour, the environment — because the decision is \"can I believe this happened\". A queue that makes you open each bug to judge it is a queue nobody uses.",
@@ -38,7 +38,7 @@ export const capstoneTriageLesson: Lesson = {
       id: "ordering",
       heading: "An order the database cannot guess",
       body: [
-        "`ORDER BY severity` sorts the text. Tracer's four severities are `blocker`, `major`, `minor`, `trivial`, and those happen to be in the right alphabetical order — which is the most dangerous kind of correct, because it is an accident that survives review and breaks the day somebody adds `critical`.",
+        "`ORDER BY severity` sorts the text. Bug Tracker's four severities are `blocker`, `major`, `minor`, `trivial`, and those happen to be in the right alphabetical order — which is the most dangerous kind of correct, because it is an accident that survives review and breaks the day somebody adds `critical`.",
         "So the rank is stated, not inferred.",
       ],
       examples: [
@@ -251,7 +251,7 @@ it("puts the bug back when the server rejects the decision", async () => {
     {
       question: "When is a filtered view really a separate screen?",
       answer:
-        "When more than the filter differs. Tracer's triage queue has a different sort order, shows a different amount of each record, and offers different controls — three differences on the same table. Building it as a preset filter would push a sort parameter, an expanded row mode and a conditional button set into the list, all of which are dead weight there and all of which can end up in a shared URL producing a screen no requirement describes. The shared thing is the table; that is all it needs to be.",
+        "When more than the filter differs. Bug Tracker's triage queue has a different sort order, shows a different amount of each record, and offers different controls — three differences on the same table. Building it as a preset filter would push a sort parameter, an expanded row mode and a conditional button set into the list, all of which are dead weight there and all of which can end up in a shared URL producing a screen no requirement describes. The shared thing is the table; that is all it needs to be.",
     },
     {
       question: "Why rank the severities in SQL instead of sorting in JavaScript after fetching?",

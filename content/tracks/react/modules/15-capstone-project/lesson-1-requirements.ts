@@ -2,11 +2,11 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneRequirementsLesson: Lesson = {
   id: "react-capstone-requirements",
-  slug: "tracer-requirements-and-architecture",
+  slug: "bug-tracker-requirements-and-architecture",
   moduleSlug: "capstone-project",
-  title: "Tracer: Requirements & Architecture",
+  title: "Bug Tracker: Requirements & Architecture",
   summary:
-    "You are building Tracer: a bug tracker for one small team — the shape of Bugzilla, Jira or GitHub Issues, cut down to what a team of four actually uses to decide which bugs are real and which one to fix next. React and TypeScript in the browser, a real HTTP API, a real database. This lesson specifies it the way a project actually gets specified: numbered functional requirements, numbered non-functional ones, a data model, an API surface, and a stack chosen on stated grounds.",
+    "You are building Bug Tracker: an issue tracker for one small team — the shape of Bugzilla, Jira or GitHub Issues, cut down to what a team of four actually uses to decide which bugs are real and which one to fix next. React and TypeScript in the browser, a real HTTP API, a real database. This lesson specifies it the way a project actually gets specified: numbered functional requirements, numbered non-functional ones, a data model, an API surface, and a stack chosen on stated grounds.",
   estimatedMinutes: 32,
   objectives: [
     "Know exactly what you are building: a small bug tracker, feature by feature",
@@ -21,10 +21,10 @@ export const capstoneRequirementsLesson: Lesson = {
       id: "the-brief",
       heading: "What you are building",
       body: [
-        "**Tracer** — a bug tracker for one small team. Not a task tracker, not a kanban board, not a todo list with statuses: a place where people report that the software did the wrong thing, and where somebody decides whether each report is real and how bad it is.",
+        "**Bug Tracker** — an issue tracker for one small team. Not a task tracker, not a kanban board, not a todo list with statuses: a place where people report that the software did the wrong thing, and where somebody decides whether each report is real and how bad it is.",
         "If you have used Bugzilla, Jira or GitHub Issues, you know the product. Somebody hits a problem and files a report. The report says what they did, what should have happened, what happened instead, and where — because a bug you cannot reproduce is not a bug you can fix. Somebody else reads the new reports, decides which are genuine, and the team works down the confirmed ones worst-first.",
         "You will build that. A list screen with filters and a search box, a report form, a detail screen with a status control and comments, and a **triage queue** — the screen a maintainer opens first, holding every report nobody has looked at yet, worst first and oldest first within that.",
-        "That is deliberately unglamorous, and it is deliberately not a todo list. A todo list has one entity and no relationships, so it never forces a decision. Tracer has four tables, two of them related to a third, filters that have to run in SQL rather than in JavaScript, a queue with a sort order the database has to express, two mutations that should be optimistic in different ways and one that should not be optimistic at all, and a piece of state — the filters — that belongs in the URL rather than in a component. Every one of those is a decision from an earlier module, arriving somewhere getting it wrong has a visible cost.",
+        "That is deliberately unglamorous, and it is deliberately not a todo list. A todo list has one entity and no relationships, so it never forces a decision. Bug Tracker has four tables, two of them related to a third, filters that have to run in SQL rather than in JavaScript, a queue with a sort order the database has to express, two mutations that should be optimistic in different ways and one that should not be optimistic at all, and a piece of state — the filters — that belongs in the URL rather than in a component. Every one of those is a decision from an earlier module, arriving somewhere getting it wrong has a visible cost.",
         "The whole thing is roughly a thousand lines across three packages. It is a weekend, not a quarter. The point is not size; it is that every line has a reason you can state.",
         "Two rules for the build, and they are the ones that make it worth doing at all. **Write the requirement number in the commit message**, so you can tell at the end what you built and what you drifted into. And **do not start the UI first** — the schema comes first, then the API, then the screens, because that is the direction the types flow.",
       ],

@@ -709,7 +709,7 @@ function buildOutput(): Visualisation {
 /* ------------------------------------------ 9. the capstone's workspaces -- */
 
 /**
- * Tracer's three packages, and the reason there are three.
+ * Bug Tracker's three packages, and the reason there are three.
  *
  * Read off the real project: the paths below are `find`'s output on the
  * working repository the capstone lessons are written from, not a sketch of
@@ -718,7 +718,7 @@ function buildOutput(): Visualisation {
  * it is introduced last, after the duplication it removes is visible.
  */
 const CAPSTONE_SHARED: SrcFile[] = [
-  { path: "shared/package.json", note: '"@tracer/shared", linked by npm workspaces' },
+  { path: "shared/package.json", note: '"@bug-tracker/shared", linked by npm workspaces' },
   { path: "shared/tsconfig.json", note: "extends the root base config" },
   { path: "shared/src/index.ts", note: "one re-export line" },
   { path: "shared/src/issue.ts", note: "every schema and every type" },
@@ -749,7 +749,7 @@ function capstoneWorkspace(): Visualisation {
   const rec = new Recorder<FileTreeFrame>();
 
   const emit = (files: SrcFile[], note: string) =>
-    rec.push({ kind: "filetree", root: "tracer/", entries: rollUp(listing(files)), note });
+    rec.push({ kind: "filetree", root: "bug-tracker/", entries: rollUp(listing(files)), note });
 
   const root: SrcFile[] = [
     { path: "package.json", note: '"workspaces": ["shared", "server", "web"]' },

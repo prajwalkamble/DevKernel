@@ -2,9 +2,9 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneComponentsLesson: Lesson = {
   id: "react-capstone-components",
-  slug: "tracer-components-screens-and-tests",
+  slug: "bug-tracker-components-screens-and-tests",
   moduleSlug: "capstone-project",
-  title: "Tracer: Components, Screens & Tests",
+  title: "Bug Tracker: Components, Screens & Tests",
   summary:
     "Step five. The four states in one component, the list and its filters, the report form that runs the same schema the server runs, and tests that fake the network rather than the modules — including the one where scoping a query to the list was the difference between a passing test and a passing bug.",
   estimatedMinutes: 30,
@@ -215,7 +215,7 @@ export function BugList({ projectId, projectKey }: BugListProps) {
       id: "tests",
       heading: "Tests that fake the network",
       body: [
-        "NFR-9 says the tests fake the network, not the modules. Nothing in a Tracer test knows the app uses `fetch`, or TanStack Query, or Zod — so replacing any of those does not rewrite the suite. MSW is what makes that possible: it intercepts at the network layer and answers with real HTTP responses.",
+        "NFR-9 says the tests fake the network, not the modules. Nothing in a Bug Tracker test knows the app uses `fetch`, or TanStack Query, or Zod — so replacing any of those does not rewrite the suite. MSW is what makes that possible: it intercepts at the network layer and answers with real HTTP responses.",
       ],
       examples: [
         {

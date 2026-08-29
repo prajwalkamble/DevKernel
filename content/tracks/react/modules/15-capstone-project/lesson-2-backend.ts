@@ -2,9 +2,9 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneBackendLesson: Lesson = {
   id: "react-capstone-backend",
-  slug: "tracer-structure-types-and-backend",
+  slug: "bug-tracker-structure-types-and-backend",
   moduleSlug: "capstone-project",
-  title: "Tracer: Folder Structure, Shared Types & the Backend",
+  title: "Bug Tracker: Folder Structure, Shared Types & the Backend",
   summary:
     "Steps one to three of the build. The complete folder map for all three packages, the Zod schemas that both sides import, the database schema those vocabularies generate, and the ten routes — including the two that carry rules rather than data: the triage queue's ordering, and triage itself.",
   estimatedMinutes: 40,
@@ -22,14 +22,14 @@ export const capstoneBackendLesson: Lesson = {
       heading: "The complete folder map",
       body: [
         "Every file in the finished project, with what each one is for. There are fifty-odd of them and about a third are configuration, which is worth seeing plainly — a real project is not all components.",
-        "The three packages are linked by npm workspaces, which means `@tracer/shared` is a normal import in both of the others and `npm install` at the root wires it up with no build step and no publishing.",
+        "The three packages are linked by npm workspaces, which means `@bug-tracker/shared` is a normal import in both of the others and `npm install` at the root wires it up with no build step and no publishing.",
       ],
       examples: [
         {
           id: "tree",
           title: "The whole project",
           lang: "bash",
-          code: `tracer/
+          code: `bug-tracker/
 ├── package.json                     # workspaces: shared, server, web
 ├── tsconfig.base.json               # strict settings, written once
 ├── tsconfig.json                    # project references, for \`tsc -b\`
@@ -291,7 +291,7 @@ export type ApiError = z.infer<typeof ApiError>;`,
           lang: "typescript",
           code: `import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { bugSeverities, bugStatuses } from "@tracer/shared";
+import { bugSeverities, bugStatuses } from "@bug-tracker/shared";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -370,7 +370,7 @@ export const now = sql\`(datetime('now'))\`;`,
       pitfalls: [
         {
           title: "Seed with fixed ids and fixed timestamps",
-          body: "A seed built on `Date.now()` and random ids makes every screenshot, every test fixture and every `curl` transcript differ from the last one, and \"it looks different for me\" becomes impossible to tell apart from a real bug. Tracer's seed writes `b_1`…`b_6` and dates in March 2026, so the triage order in this guide is the triage order you will see.",
+          body: "A seed built on `Date.now()` and random ids makes every screenshot, every test fixture and every `curl` transcript differ from the last one, and \"it looks different for me\" becomes impossible to tell apart from a real bug. Bug Tracker's seed writes `b_1`…`b_6` and dates in March 2026, so the triage order in this guide is the triage order you will see.",
         },
       ],
     },
