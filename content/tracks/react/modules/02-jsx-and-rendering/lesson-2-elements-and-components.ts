@@ -35,7 +35,7 @@ export const elementsAndComponentsLesson: Lesson = {
         {
           id: "element-vs-call",
           title: "`<Hello />` against `Hello()`",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Hello({ name }) {
   return <p>Hello, {name}!</p>;
 }
@@ -56,6 +56,25 @@ called.type:             p
 called.props:            {"children":["Hello, ","Ada","!"]}`,
           explanation:
             "`rendered` is a description React has not looked inside yet. `called` is the `<p>` element that came *out* of `Hello`, produced immediately — React never learns that `Hello` was involved. Both produce identical HTML, which is exactly why this mistake survives review.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Hello({ name }: { name: string }) {
+  return <p>Hello, {name}!</p>;
+}
+
+// Rendered: an element whose type is the function itself.
+const rendered = <Hello name="Ada" />;
+
+// Called: the function runs now, and you get back whatever it returned.
+const called = Hello({ name: "Ada" });
+
+console.log("rendered.type === Hello:", rendered.type === Hello);
+console.log("rendered.props:         ", JSON.stringify(rendered.props));
+console.log("called.type:            ", called.type);
+console.log("called.props:           ", JSON.stringify(called.props));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -76,7 +95,7 @@ called.props:            {"children":["Hello, ","Ada","!"]}`,
         {
           id: "elements-as-values",
           title: "Stored, chosen, collected, passed",
-          lang: "tsx",
+          lang: "jsx",
           code: `const warning = <strong>Careful</strong>;
 const ok = <em>Fine</em>;
 
@@ -106,6 +125,41 @@ function App() {
           output: `<section><h2>Status</h2><div><strong>Careful</strong><ul><li>one</li><li>two</li></ul></div></section>`,
           explanation:
             "`warning` and `ok` are created once, at module level, and reused. That is safe precisely because elements are immutable descriptions — nothing that renders one can change it. Note also that `Panel` never knows whether `heading` came from a literal, a variable or a ternary.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+const warning = <strong>Careful</strong>;
+const ok = <em>Fine</em>;
+
+// \`ReactNode\` is the type of "anything renderable": an element, a string, a
+// number, an array of them, null. It is what a slot prop should be typed as.
+function Panel({ heading, body }: { heading: ReactNode; body: ReactNode }) {
+  return <section>{heading}{body}</section>;
+}
+
+function App() {
+  const level = "warn";
+
+  // Chosen with a ternary, collected into an array, passed as a prop.
+  const badge = level === "warn" ? warning : ok;
+  const bullets = ["one", "two"].map((t) => <li key={t}>{t}</li>);
+
+  return (
+    <Panel
+      heading={<h2>Status</h2>}
+      body={
+        <div>
+          {badge}
+          <ul>{bullets}</ul>
+        </div>
+      }
+    />
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -121,7 +175,7 @@ function App() {
         {
           id: "creation-is-inert",
           title: "The component does not run until React renders it",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Expensive() {
   console.log("Expensive actually ran");
   return <div>done</div>;
@@ -140,6 +194,27 @@ Expensive actually ran
 <div>done</div>`,
           explanation:
             "The log from inside `Expensive` appears only when React renders `App`, well after the element was created. An element is a note saying *what* to render; the function runs when React gets round to it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactElement } from "react";
+
+function Expensive() {
+  console.log("Expensive actually ran");
+  return <div>done</div>;
+}
+
+console.log("before creating the element");
+// The annotation is the point: \`<Expensive />\` is a ReactElement, not the
+// result of calling Expensive. Nothing has run to produce it.
+const el: ReactElement = <Expensive />;
+console.log("after creating the element — nothing ran yet");
+
+function App() {
+  return el;
+}`,
+            },
+          ],
         },
       ],
     },
@@ -155,7 +230,7 @@ Expensive actually ran
         {
           id: "clone-and-validate",
           title: "Cloning to inject a prop",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Children, cloneElement, isValidElement } from "react";
 
 function Tab({ label, active }) {
@@ -183,6 +258,43 @@ function App() {
           output: `<ul><li class="off">First</li><li class="on">Second</li></ul>`,
           explanation:
             "It works, and the coupling is visible: `Tabs` assumes its children are tabs and that injecting `active` means something to them. Wrap either `<Tab>` in a `<div>` and the prop lands on the div instead. The version of this that survives refactoring passes `current` through context and lets each `Tab` read it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Children, cloneElement, isValidElement } from "react";
+import type { ReactNode } from "react";
+
+// \`active\` is optional: the caller below never passes it, because Tabs is the
+// one that injects it. A required prop here would not compile.
+function Tab({ label, active }: { label: string; active?: boolean }) {
+  return <li className={active ? "on" : "off"}>{label}</li>;
+}
+
+function Tabs({ children, current }: { children: ReactNode; current: number }) {
+  return (
+    <ul>
+      {Children.map(children, (child, i) =>
+        // The type argument is what lets \`cloneElement\` accept \`active\`:
+        // without it the child is ReactElement<unknown> and the extra prop is
+        // an error.
+        isValidElement<{ active?: boolean }>(child)
+          ? cloneElement(child, { active: i === current })
+          : child
+      )}
+    </ul>
+  );
+}
+
+function App() {
+  return (
+    <Tabs current={1}>
+      <Tab label="First" />
+      <Tab label="Second" />
+    </Tabs>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

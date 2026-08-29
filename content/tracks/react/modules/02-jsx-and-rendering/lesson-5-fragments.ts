@@ -34,7 +34,7 @@ export const fragmentsLesson: Lesson = {
         {
           id: "fragment-renders-nothing",
           title: "A fragment leaves no trace",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Wrapped() {
@@ -76,7 +76,7 @@ frag: <span>a</span><span>b</span>`,
         {
           id: "keyed-fragment",
           title: "One iteration, two sibling elements",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Fragment } from "react";
 import { renderToStaticMarkup as render } from "react-dom/server";
 
@@ -119,6 +119,53 @@ console.log("fragment:", render(<Fragged />));`,
 fragment: <dl><dt>Element</dt><dd>A description of UI</dd><dt>Component</dt><dd>A function that returns one</dd></dl>`,
           explanation:
             "The second output is the correct description list: four direct children of the `<dl>`, alternating. The first has wrapped each pair in a `<div>`, which browsers will render but which is not valid content for a `<dl>` and defeats any CSS that targets `dl > dt`. The same argument applies inside `<tr>`, `<select>` and `<ul>`, all of which constrain what their children may be.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Fragment } from "react";
+import { renderToStaticMarkup as render } from "react-dom/server";
+
+// Naming the row shape is the one thing TypeScript adds here: \`r.term\` and
+// \`r.def\` are checked at both call sites rather than inferred twice.
+type Row = { id: number; term: string; def: string };
+
+const rows: Row[] = [
+  { id: 1, term: "Element", def: "A description of UI" },
+  { id: 2, term: "Component", def: "A function that returns one" },
+];
+
+// A div per row: invalid inside <dl>, and it breaks the pairing.
+function Wrapped() {
+  return (
+    <dl>
+      {rows.map((r) => (
+        <div key={r.id}>
+          <dt>{r.term}</dt>
+          <dd>{r.def}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+// A keyed fragment: the dt and dd stay direct children of the dl.
+function Fragged() {
+  return (
+    <dl>
+      {rows.map((r) => (
+        <Fragment key={r.id}>
+          <dt>{r.term}</dt>
+          <dd>{r.def}</dd>
+        </Fragment>
+      ))}
+    </dl>
+  );
+}
+
+console.log("wrapped: ", render(<Wrapped />));
+console.log("fragment:", render(<Fragged />));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -140,7 +187,7 @@ fragment: <dl><dt>Element</dt><dd>A description of UI</dd><dt>Component</dt><dd>
         {
           id: "grid-children",
           title: "What the grid sees",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Returns one element: the grid gets one item.
 function WrappedPair() {
   return (

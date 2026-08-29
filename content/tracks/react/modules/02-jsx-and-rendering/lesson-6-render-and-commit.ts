@@ -46,7 +46,7 @@ export const renderAndCommitLesson: Lesson = {
         {
           id: "impure-render",
           title: "An impure render, and the same render made pure",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 // Impure: reads and writes a variable that outlives the render.
@@ -71,6 +71,30 @@ pure, first render:    <p>1</p>
 pure, second render:   <p>1</p>`,
           explanation:
             "Two identical renders of `Impure` produced different output. That is the entire definition of the bug: React is allowed to render a component an extra time, or to discard a render and redo it, and a component like this changes its answer when it does. `Pure` gives the same answer however many times it is called, so React can call it freely.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+// Impure: reads and writes a variable that outlives the render. Nothing in the
+// type system objects — purity is a rule about behaviour, not about types.
+let seen = 0;
+function Impure() {
+  seen++;
+  return <p>{seen}</p>;
+}
+
+// Pure: the output is a function of the input, and nothing else changes.
+function Pure({ n }: { n: number }) {
+  return <p>{n}</p>;
+}
+
+console.log("impure, first render: ", render(<Impure />));
+console.log("impure, second render:", render(<Impure />));
+console.log("pure, first render:   ", render(<Pure n={1} />));
+console.log("pure, second render:  ", render(<Pure n={1} />));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -92,7 +116,7 @@ pure, second render:   <p>1</p>`,
         {
           id: "render-order",
           title: "Depth-first, parent before child",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Leaf({ n }) {
@@ -124,6 +148,35 @@ console.log("markup:", html);`,
 markup: <main><ul><li>1</li><li>2</li></ul></main>`,
           explanation:
             "`Root` ran first and `Leaf 2` last. Nothing appeared on screen while any of this was happening — the markup only exists once the whole tree has been walked. On a client render this is the point where React would then begin the commit phase and touch the DOM for the first time.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+function Leaf({ n }: { n: number }) {
+  console.log("      Leaf", n);
+  return <li>{n}</li>;
+}
+
+function Branch() {
+  console.log("   Branch");
+  return (
+    <ul>
+      <Leaf n={1} />
+      <Leaf n={2} />
+    </ul>
+  );
+}
+
+function Root() {
+  console.log("Root");
+  return <main><Branch /></main>;
+}
+
+const html = render(<Root />);
+console.log("markup:", html);`,
+            },
+          ],
         },
       ],
     },

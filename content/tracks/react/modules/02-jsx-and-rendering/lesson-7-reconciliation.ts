@@ -45,7 +45,7 @@ export const reconciliationLesson: Lesson = {
         {
           id: "type-decides",
           title: "What React compares at a position",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Panel({ children }) {
   return <div className="panel">{children}</div>;
 }
@@ -66,6 +66,27 @@ c vs d — same type? false
 d's type is the function itself: true`,
           explanation:
             "Only `type` is consulted for this decision — never `className`, never the children. `a` to `b` keeps the node and changes one attribute. `b` to `c` looks like a trivial change and is not: `div` and `section` are different strings, so the node and everything under it goes. And a component's type is the function, so swapping which component renders at a position destroys the subtree just as surely.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+function Panel({ children }: { children?: ReactNode }) {
+  return <div className="panel">{children}</div>;
+}
+
+// Same position, three different element types.
+const a = <div className="panel" />;
+const b = <div className="panel highlighted" />;
+const c = <section className="panel" />;
+const d = <Panel />;
+
+console.log("a vs b — same type?", a.type === b.type);
+console.log("b vs c — same type?", b.type === c.type);
+console.log("c vs d — same type?", c.type === d.type);
+console.log("d's type is the function itself:", d.type === Panel);`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -93,7 +114,7 @@ d's type is the function itself: true`,
         {
           id: "wrapper-remount",
           title: "The same children at two different depths",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Form() {
   return <input defaultValue="typed so far" />;
 }
@@ -125,6 +146,39 @@ function App() {
           output: `<input value="typed so far"/><div class="dialog"><input value="typed so far"/></div><div class="plain"><input value="typed so far"/></div><div class="dialog"><input value="typed so far"/></div>`,
           explanation:
             "The markup is nearly identical, which is exactly why this is hard to spot in review. The difference is invisible in the output and decisive at runtime: in `Toggling` the `<input>` is a child of a `<div>` in one branch and of the fragment in the other, so flipping `isModal` changes the type at that position and React rebuilds the input from scratch. In `Stable` the position is unchanged and only `className` differs, so the input — and whatever the user had typed into it — survives.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Form() {
+  return <input defaultValue="typed so far" />;
+}
+
+// The form is a child of Dialog in one branch and a root in the other.
+function Toggling({ isModal }: { isModal: boolean }) {
+  return isModal ? <div className="dialog"><Form /></div> : <Form />;
+}
+
+// The structure is the same in both branches; only a prop differs.
+function Stable({ isModal }: { isModal: boolean }) {
+  return (
+    <div className={isModal ? "dialog" : "plain"}>
+      <Form />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Toggling isModal={false} />
+      <Toggling isModal={true} />
+      <Stable isModal={false} />
+      <Stable isModal={true} />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

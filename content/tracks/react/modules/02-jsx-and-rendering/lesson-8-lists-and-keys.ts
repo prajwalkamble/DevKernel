@@ -27,7 +27,7 @@ export const listsAndKeysLesson: Lesson = {
         {
           id: "map-basics",
           title: "Where the key goes, and where it does not",
-          lang: "tsx",
+          lang: "jsx",
           code: `const people = [
   { id: "a", name: "Ada", role: "Analyst" },
   { id: "g", name: "Grace", role: "Rear admiral" },
@@ -50,6 +50,32 @@ function Directory() {
           output: `<ul><li><strong>Ada</strong><span>Analyst</span></li><li><strong>Grace</strong><span>Rear admiral</span></li></ul>`,
           explanation:
             "Note what is absent from the output: the keys. A key is never rendered and never reaches the DOM. It is a message from you to React's reconciler, consumed entirely during the diff — which is also why a component cannot read its own key as a prop.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Person = { id: string; name: string; role: string };
+
+const people: Person[] = [
+  { id: "a", name: "Ada", role: "Analyst" },
+  { id: "g", name: "Grace", role: "Rear admiral" },
+];
+
+function Directory() {
+  return (
+    <ul>
+      {people.map((person) => (
+        // The key belongs here — on the element returned by the callback.
+        <li key={person.id}>
+          {/* Not here. These are not siblings in a dynamic list. */}
+          <strong>{person.name}</strong>
+          <span>{person.role}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -86,7 +112,7 @@ function Directory() {
         {
           id: "index-key-identity",
           title: "The identity each key claims",
-          lang: "tsx",
+          lang: "jsx",
           code: `const before = [
   { id: "a", name: "Ada" },
   { id: "g", name: "Grace" },
@@ -111,6 +137,31 @@ keyed by id — what each key means:
   after:  l=Alan  a=Ada  g=Grace`,
           explanation:
             "Read the index rows against each other: `0` meant Ada and now means Alan; `1` meant Grace and now means Ada. React is not doing anything clever or stupid here — it is believing exactly what the key told it. The id rows say the same thing about each person before and after, which is why the rows can simply be moved.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Row = { id: string; name: string };
+
+const before: Row[] = [
+  { id: "a", name: "Ada" },
+  { id: "g", name: "Grace" },
+];
+const after: Row[] = [{ id: "l", name: "Alan" }, ...before];
+
+// \`keyOf\` is the interesting signature: a key may be derived from the row, or
+// from its position, so it takes both and the two strategies share one type.
+const show = (label: string, rows: Row[], keyOf: (row: Row, index: number) => string | number) =>
+  console.log(label, rows.map((r, i) => \`\${keyOf(r, i)}=\${r.name}\`).join("  "));
+
+console.log("keyed by index — what each key means:");
+show("  before:", before, (_, i) => i);
+show("  after: ", after, (_, i) => i);
+
+console.log("keyed by id — what each key means:");
+show("  before:", before, (r) => r.id);
+show("  after: ", after, (r) => r.id);`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -146,7 +197,7 @@ keyed by id — what each key means:
         {
           id: "key-resets",
           title: "One prop, two identities",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Editor({ user }) {
   // Local state seeded from the prop — the classic thing that goes stale.
   return <input defaultValue={user.name} />;
@@ -167,6 +218,30 @@ function App() {
           output: `<input value="Ada"/><input value="Grace"/>`,
           explanation:
             "Rendered side by side the keys look decorative. The point is what happens when the *same* position switches from one user to the other: with `key={user.id}` React sees a new identity and builds a new `Editor` with fresh state, so nothing of the previous user survives. Without the key it would see the same `Editor` at the same position, keep the instance, and `defaultValue` — used only on the first render — would never be reapplied.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type User = { id: string; name: string };
+
+function Editor({ user }: { user: User }) {
+  // Local state seeded from the prop — the classic thing that goes stale.
+  return <input defaultValue={user.name} />;
+}
+
+function App() {
+  const ada: User = { id: "a", name: "Ada" };
+  const grace: User = { id: "g", name: "Grace" };
+
+  return (
+    <>
+      {/* Same position, different key: React mounts a fresh Editor. */}
+      <Editor key={ada.id} user={ada} />
+      <Editor key={grace.id} user={grace} />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

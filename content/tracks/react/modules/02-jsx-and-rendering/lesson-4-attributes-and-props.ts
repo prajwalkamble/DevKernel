@@ -43,7 +43,7 @@ export const attributesAndPropsLesson: Lesson = {
         {
           id: "attribute-naming",
           title: "What each form becomes in the markup",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Naming() {
   return (
     <div>
@@ -92,7 +92,7 @@ export const attributesAndPropsLesson: Lesson = {
         {
           id: "style-object",
           title: "Numbers, strings and custom properties",
-          lang: "tsx",
+          lang: "jsx",
           code: `const theme = { accent: "crimson" };
 
 function Styled() {
@@ -118,6 +118,37 @@ function Styled() {
           output: `<div style="padding:12px;opacity:0.5;flex-grow:2;width:50%;margin-block:1rem;--brand:crimson">content</div>`,
           explanation:
             "`padding: 12` became `12px`; `opacity` and `flexGrow` stayed bare. Note that inline styles cannot express a media query, a pseudo-class or a hover state — they are a single element's declarations and nothing more. Anything conditional beyond that belongs in a class you toggle.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { CSSProperties } from "react";
+
+const theme = { accent: "crimson" };
+
+function Styled() {
+  return (
+    <div
+      style={{
+        // Number on a length property: React appends px.
+        padding: 12,
+        // Number on a unitless property: left alone.
+        opacity: 0.5,
+        flexGrow: 2,
+        // Any other unit has to be a string.
+        width: "50%",
+        marginBlock: "1rem",
+        // Custom properties keep their dashes and take strings. \`CSSProperties\`
+        // has no index signature, so this one needs the assertion — the single
+        // most common piece of friction in a typed style object.
+        "--brand": theme.accent,
+      } as CSSProperties}
+    >
+      content
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -139,7 +170,7 @@ function Styled() {
         {
           id: "leaked-prop",
           title: "Taking your own props out of the spread",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Destructure what is yours; spread only what is left.
 function Row({ isActive, children, ...rest }) {
   return (
@@ -159,6 +190,33 @@ function App() {
           output: `<div class="row on" id="r1" data-testid="row" title="A row">body</div>`,
           explanation:
             "`isActive` was consumed by the component and never reached the DOM; `id`, `data-testid` and `title` passed straight through. This pattern — name your own props, spread the rest — is how nearly every component library forwards arbitrary DOM attributes without knowing what they are.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ComponentPropsWithoutRef } from "react";
+
+// Everything a \`<div>\` accepts, plus the one prop that is ours. Typing it this
+// way is what makes the spread below safe: \`rest\` is exactly the div props.
+type RowProps = ComponentPropsWithoutRef<"div"> & { isActive?: boolean };
+
+// Destructure what is yours; spread only what is left.
+function Row({ isActive, children, ...rest }: RowProps) {
+  return (
+    <div className={isActive ? "row on" : "row"} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Row isActive id="r1" data-testid="row" title="A row">
+      body
+    </Row>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
