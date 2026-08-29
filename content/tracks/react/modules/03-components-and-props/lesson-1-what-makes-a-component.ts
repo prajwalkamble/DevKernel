@@ -30,7 +30,7 @@ export const whatMakesAComponentLesson: Lesson = {
         {
           id: "capitalisation",
           title: "What the case actually changes",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 // Lowercase: the compiler passes the string "avatar".
@@ -55,6 +55,34 @@ lowercase renders: <div><avatar></avatar></div>
 capitalised renders: <div><img alt=""/></div>`,
           explanation:
             "There is no error and no warning. React was handed the string `\"avatar\"`, so it produced an `<avatar>` element — valid in HTML as a custom element, and completely empty, because your function was never called. The symptom is a blank space where a component should be, which sends people looking at CSS rather than at the letter `a`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+// Lowercase: the compiler passes the string "avatar".
+function avatar() {
+  return <img alt="" />;
+}
+
+// Capitalised: the compiler passes the function itself.
+function Avatar() {
+  return <img alt="" />;
+}
+
+// TypeScript catches at build time exactly what this example shows at run
+// time: \`avatar\` is not a tag in JSX.IntrinsicElements. The directives are
+// what keep the demonstration compiling.
+// @ts-expect-error - lowercase names are looked up as HTML tags
+console.log("lowercase type:", JSON.stringify((<avatar />).type));
+console.log("capitalised type is the function:", (<Avatar />).type === Avatar);
+
+// So the lowercase one is emitted as an unknown HTML tag, and its body never runs.
+// @ts-expect-error - same reason
+console.log("lowercase renders:", render(<div><avatar /></div>));
+console.log("capitalised renders:", render(<div><Avatar /></div>));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -67,12 +95,6 @@ capitalised renders: <div><img alt=""/></div>`,
     {
       id: "what-it-returns",
       heading: "What a component may return",
-      visual: {
-        id: "component-returns-tree",
-        kind: "react-rendering",
-        algorithm: "element-tree",
-        title: "What a component hands back",
-      },
       body: [
         "Anything React can render, which is the list from module 2: elements, strings, numbers, arrays, `null`, `undefined`, `false`. Not plain objects.",
         "Returning `null` is the idiomatic way to say \"this component has decided to show nothing\". It is an ordinary return value, not a special case — the component still mounted, still has state, and its effects still run.",
@@ -82,7 +104,7 @@ capitalised renders: <div><img alt=""/></div>`,
         {
           id: "return-values",
           title: "Four returns, all legal",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Nothing() { return null; }
@@ -100,6 +122,25 @@ string:   "<div>plain text</div>"
 array:    "<div><b>a</b><i>b</i></div>"`,
           explanation:
             "A component returning a bare string is genuinely useful — a `<Currency>` or a `<RelativeTime>` that produces text with no wrapper element, so the caller decides the markup. The array case needs keys for the same reason any list does.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+function Nothing() { return null; }
+function Implicit() {}                       // no return at all
+function JustText() { return "plain text"; }
+function Several() { return [<b key="a">a</b>, <i key="b">b</i>]; }
+
+console.log("null:    ", JSON.stringify(render(<div><Nothing /></div>)));
+// A component that returns nothing is \`() => void\`, and TypeScript will not
+// let one be rendered — the only case on this list it rejects outright.
+// @ts-expect-error - void is not a valid element type
+console.log("implicit:", JSON.stringify(render(<div><Implicit /></div>)));
+console.log("string:  ", JSON.stringify(render(<div><JustText /></div>)));
+console.log("array:   ", JSON.stringify(render(<div><Several /></div>)));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -121,7 +162,7 @@ array:    "<div><b>a</b><i>b</i></div>"`,
         {
           id: "nested-identity",
           title: "The identity a nested component has",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Stands in for two renders of a parent that defines a component inside itself.
 function renderParent() {
   function Row() { return <li />; }
@@ -141,6 +182,28 @@ console.log("top level — same type across renders?", (<StableRow />).type === 
 top level — same type across renders? true`,
           explanation:
             "`false` is the whole bug. React compares those two types, finds them different, and concludes the element at that position has been replaced by something else entirely. Everything below it is unmounted and rebuilt — on every single render of the parent, for as long as the code stays that way.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Nothing here to annotate, and nothing the compiler can see either: both
+// versions type-check identically. The difference is that one creates a new
+// function on every call, which is a fact about evaluation, not about types.
+function renderParent() {
+  function Row() { return <li />; }
+  return <Row />;
+}
+
+const firstRender = renderParent();
+const secondRender = renderParent();
+
+console.log("nested — same type across renders?", firstRender.type === secondRender.type);
+
+// Defined once, at the top level.
+function StableRow() { return <li />; }
+
+console.log("top level — same type across renders?", (<StableRow />).type === (<StableRow />).type);`,
+            },
+          ],
         },
       ],
       pitfalls: [

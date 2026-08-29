@@ -19,12 +19,6 @@ export const batchingLesson: Lesson = {
     {
       id: "what-it-is",
       heading: "One pass, however many setters",
-      visual: {
-        id: "batching-queue-visual",
-        kind: "react-state",
-        algorithm: "batching",
-        title: "Four setters, and how many renders they cost",
-      },
       body: [
         "React does not re-render per setter call. It collects everything queued during a synchronous stretch of work, applies it all, and renders once.",
         "The reason is that an intermediate state is not a state anybody should see. A handler that sets a name, an email and a validity flag passes through combinations that were never true together — a new name with the old validity. Rendering those would be visible as flicker and, worse, would run effects against states that never really existed.",
@@ -34,7 +28,7 @@ export const batchingLesson: Lesson = {
         {
           id: "batched",
           title: "Three pieces of state, one render",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -75,6 +69,46 @@ after three setters, renders: 2
 state: Ada|ada@example.com|true`,
           explanation:
             "One extra render for three setters. No render ever showed `Ada` with an empty email, which is the point — that combination was never a real state of this form, and React never displayed it as one.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let renders = 0;
+
+function Form() {
+  renders++;
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [valid, setValid] = useState(false);
+
+  function fill() {
+    setName("Ada");
+    setEmail("ada@example.com");
+    setValid(true);
+  }
+
+  return (
+    <>
+      <span id="v">{name}|{email}|{String(valid)}</span>
+      <button id="b" onClick={fill}>fill</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Form />); });
+console.log("mounted, renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+console.log("after three setters, renders:", renders);
+console.log("state:", container.querySelector("#v")!.textContent);`,
+            },
+          ],
         },
       ],
     },
@@ -90,7 +124,7 @@ state: Ada|ada@example.com|true`,
         {
           id: "auto-batching",
           title: "In a handler, and in a promise",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -131,6 +165,47 @@ two setters in a handler -> renders: 2 | state: 1/1
 two setters in a promise -> renders: 3 | state: 2/2`,
           explanation:
             "One extra render each time. On React 17 the second case would have printed `4` — two setters outside a React event, two renders. That difference is the whole of automatic batching, and it is why a codebase that carefully avoided setting two pieces of state in a promise callback is carrying a workaround it no longer needs.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let renders = 0;
+
+function Two() {
+  renders++;
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+
+  return (
+    <>
+      <span id="v">{a}/{b}</span>
+      {/* Inside a React event handler. */}
+      <button id="sync" onClick={() => { setA((x) => x + 1); setB((x) => x + 1); }}>sync</button>
+      {/* Outside one: before React 18 this was two renders. Identical types
+          in both branches — batching is a scheduling fact, not a typed one. */}
+      <button id="async" onClick={() => {
+        Promise.resolve().then(() => { setA((x) => x + 1); setB((x) => x + 1); });
+      }}>async</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Two />); });
+console.log("mounted, renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#sync")!.click(); });
+console.log("two setters in a handler -> renders:", renders, "| state:", container.querySelector("#v")!.textContent);
+
+await act(async () => { container.querySelector<HTMLButtonElement>("#async")!.click(); });
+console.log("two setters in a promise -> renders:", renders, "| state:", container.querySelector("#v")!.textContent);`,
+            },
+          ],
         },
       ],
     },

@@ -28,7 +28,7 @@ export const childrenLesson: Lesson = {
         {
           id: "children-is-a-prop",
           title: "Three spellings of the same thing",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Note({ children }) {
@@ -48,6 +48,27 @@ props from the attribute form: {"children":"hello"}
 same output? true`,
           explanation:
             "Identical props and identical output. Nobody writes the attribute form — it reads badly and loses the visual nesting — but knowing it exists is what makes `children` stop feeling like magic. It also explains the precedence rule: if you write both, the tag content wins, because the compiler assigns it last.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+import type { ReactNode } from "react";
+
+function Note({ children }: { children: ReactNode }) {
+  return <aside>{children}</aside>;
+}
+
+// Between the tags...
+const a = <Note>hello</Note>;
+// ...or as an ordinary attribute, which is identical — and the type says so:
+// \`children\` is declared like any other prop and can be passed like one.
+const b = <Note children="hello" />;
+
+console.log("props from the tag form:      ", JSON.stringify(a.props));
+console.log("props from the attribute form:", JSON.stringify(b.props));
+console.log("same output?", render(a) === render(b));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -69,12 +90,6 @@ same output? true`,
     {
       id: "several-slots",
       heading: "When one slot is not enough",
-      visual: {
-        id: "named-slots-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "Several children, several slots",
-      },
       body: [
         "A dialog usually needs a header, a body and a footer. There is only one `children`, so the second and third slots are ordinary props that happen to hold elements.",
         "Nothing about this is a special feature — module 2's lesson on elements established that an element is a value, so it may be passed as any prop. Naming the slots is clearer than trying to inspect `children` and split it up, and it survives a caller who wraps something in a `<div>`.",
@@ -83,7 +98,7 @@ same output? true`,
         {
           id: "named-slots",
           title: "One `children`, two named slots",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Dialog({ heading, children, footer = null }) {
   return (
     <section className="dialog">
@@ -108,6 +123,40 @@ function App() {
           output: `<section class="dialog"><header><h2>Delete project</h2></header><div class="body"><p>This cannot be undone.</p><p>All 42 files will be removed.</p></div><footer><button type="button">Cancel</button></footer></section>`,
           explanation:
             "`heading` and `footer` are elements in props; `children` is the main slot because it is the one with the most content and reads best nested. The `footer = null` default plus the `&&` means omitting it produces no `<footer>` element at all, rather than an empty one.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+// Every slot is a ReactNode, which is what makes them interchangeable: an
+// element, a string, an array of either, or null.
+function Dialog({ heading, children, footer = null }: {
+  heading: ReactNode;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <section className="dialog">
+      <header>{heading}</header>
+      <div className="body">{children}</div>
+      {footer && <footer>{footer}</footer>}
+    </section>
+  );
+}
+
+function App() {
+  return (
+    <Dialog
+      heading={<h2>Delete project</h2>}
+      footer={<button type="button">Cancel</button>}
+    >
+      <p>This cannot be undone.</p>
+      <p>All 42 files will be removed.</p>
+    </Dialog>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -123,7 +172,7 @@ function App() {
         {
           id: "render-prop",
           title: "The component owns the data; the caller owns the markup",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Knows how to pick a row; knows nothing about how a row looks.
 function Table({ rows, children }) {
   return (
@@ -158,6 +207,49 @@ function App() {
           output: `<table><tbody><tr><td>1</td><td>Ada</td><td>1815</td></tr><tr><td>2</td><td>Grace</td><td>1906</td></tr></tbody></table>`,
           explanation:
             "`Table` decided the `<table>`, `<tbody>` and `<tr>`, and where the key goes; the caller decided the cells. Neither could have been written without the other's cooperation, and neither had to know the other's details. Note that `children` here is called, not rendered — `{children(row, i)}`, not `{children}`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+// The generic is what makes a render prop pay for itself in TypeScript: \`row\`
+// inside the callback is the caller's own row type, so \`row.name\` is checked
+// at the call site without Table knowing anything about it.
+function Table<T extends { id: string }>({ rows, children }: {
+  rows: T[];
+  children: (row: T, index: number) => ReactNode;
+}) {
+  return (
+    <table>
+      <tbody>
+        {rows.map((row, i) => (
+          <tr key={row.id}>{children(row, i)}</tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+const rows = [
+  { id: "a", name: "Ada", year: 1815 },
+  { id: "g", name: "Grace", year: 1906 },
+];
+
+function App() {
+  return (
+    <Table rows={rows}>
+      {(row, i) => (
+        <>
+          <td>{i + 1}</td>
+          <td>{row.name}</td>
+          <td>{row.year}</td>
+        </>
+      )}
+    </Table>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

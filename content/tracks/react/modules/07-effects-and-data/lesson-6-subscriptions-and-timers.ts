@@ -19,12 +19,6 @@ export const subscriptionsAndTimersLesson: Lesson = {
     {
       id: "stale-closure",
       heading: "The counter that sticks at 1",
-      visual: {
-        id: "stale-closure-visual",
-        kind: "react-state",
-        algorithm: "snapshot",
-        title: "The value the callback captured",
-      },
       body: [
         "An interval that increments a counter. Three lines, a cleanup, and a correct dependency array — the linter is happy, and it does not work.",
       ],
@@ -32,8 +26,60 @@ export const subscriptionsAndTimersLesson: Lesson = {
         {
           id: "stale-interval",
           title: "Five ticks, two components",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* A hand-driven clock, so the number of ticks is exact rather than
+   whatever the machine managed in 120ms. It behaves exactly as setInterval
+   does in the way that matters: the callback is registered once and called
+   many times. */
+const clock = {
+  callbacks: new Set(),
+  every(fn) {
+    this.callbacks.add(fn);
+    return () => this.callbacks.delete(fn);
+  },
+  tick() { for (const fn of this.callbacks) fn(); },
+};
+
+/* Reads \`n\` from the render that created the callback. */
+function Stale() {
+  const [n, setN] = useState(0);
+  useEffect(() => clock.every(() => setN(n + 1)), []);
+  return <output>{n}</output>;
+}
+
+/* Tells React how to update, so it is handed the current value. */
+function Fresh() {
+  const [n, setN] = useState(0);
+  useEffect(() => clock.every(() => { setN((current) => current + 1); }), []);
+  return <output>{n}</output>;
+}
+
+function drive(Component, label) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => { root.render(<Component />); });
+  for (let i = 0; i < 5; i++) act(() => { clock.tick(); });
+  console.log(\`\${label} after 5 ticks: \${container.textContent}\`);
+  act(() => { root.unmount(); });
+  console.log(\`\${label} listeners left after unmount: \${clock.callbacks.size}\`);
+}
+
+drive(Stale, "setN(n + 1)      ");
+drive(Fresh, "setN(c => c + 1) ");`,
+          output: `setN(n + 1)       after 5 ticks: 1
+setN(n + 1)       listeners left after unmount: 0
+setN(c => c + 1)  after 5 ticks: 5
+setN(c => c + 1)  listeners left after unmount: 0`,
+          explanation:
+            "Five ticks and the first version reaches 1. The callback was created during the render where `n` was `0`, and a closure captures the *variable's value at that render*, not a live view of the state. So every tick computes `0 + 1` and sets 1, which is already the value, so nothing changes. Both versions clean up correctly — the leak and the staleness are separate problems.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* A hand-driven clock, so the number of ticks is exact rather than
@@ -76,12 +122,8 @@ function drive(Component: () => React.JSX.Element, label: string) {
 
 drive(Stale, "setN(n + 1)      ");
 drive(Fresh, "setN(c => c + 1) ");`,
-          output: `setN(n + 1)       after 5 ticks: 1
-setN(n + 1)       listeners left after unmount: 0
-setN(c => c + 1)  after 5 ticks: 5
-setN(c => c + 1)  listeners left after unmount: 0`,
-          explanation:
-            "Five ticks and the first version reaches 1. The callback was created during the render where `n` was `0`, and a closure captures the *variable's value at that render*, not a live view of the state. So every tick computes `0 + 1` and sets 1, which is already the value, so nothing changes. Both versions clean up correctly — the leak and the staleness are separate problems.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -106,7 +148,7 @@ setN(c => c + 1)  listeners left after unmount: 0`,
         {
           id: "listener-effect",
           title: "A window listener, added and removed",
-          lang: "tsx",
+          lang: "jsx",
           code: `function useWindowWidth() {
   const [width, setWidth] = useState(() => window.innerWidth);
 
@@ -165,8 +207,42 @@ function usePrefersDark() {
         {
           id: "intersection-observer",
           title: "Infinite scroll, without a scroll listener",
-          lang: "tsx",
-          code: `function useOnScreen(ref: RefObject<Element | null>, onEnter: () => void) {
+          lang: "jsx",
+          code: `function useOnScreen(ref, onEnter) {
+  useEffect(() => {
+    const node = ref.current;
+    // The ref is null on the first render, so bail rather than throw. The
+    // effect re-runs when \`onEnter\` changes, by which time it is set.
+    if (!node) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) onEnter();
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ref, onEnter]);
+}
+
+function Feed({ items, loadMore }) {
+  const sentinel = useRef(null);
+  // Stable identity, or the effect tears the observer down every render.
+  const onEnter = useCallback(() => loadMore(), [loadMore]);
+  useOnScreen(sentinel, onEnter);
+
+  return (
+    <>
+      {items.map((item) => <Row key={item.id} item={item} />)}
+      <div ref={sentinel} aria-hidden />
+    </>
+  );
+}`,
+          explanation:
+            "`onEnter` has to be stable. Passed as an inline arrow it would be a new function every render, so the effect would disconnect and reconnect the observer on every render — which mostly works and occasionally misses the exact frame the sentinel crosses the viewport, producing a feed that stops loading and cannot be reproduced.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function useOnScreen(ref: RefObject<Element | null>, onEnter: () => void) {
   useEffect(() => {
     const node = ref.current;
     // The ref is null on the first render, so bail rather than throw. The
@@ -195,8 +271,8 @@ function Feed({ items, loadMore }: { items: Item[]; loadMore: () => void }) {
     </>
   );
 }`,
-          explanation:
-            "`onEnter` has to be stable. Passed as an inline arrow it would be a new function every render, so the effect would disconnect and reconnect the observer on every render — which mostly works and occasionally misses the exact frame the sentinel crosses the viewport, producing a feed that stops loading and cannot be reproduced.",
+            },
+          ],
         },
       ],
     },

@@ -27,8 +27,73 @@ export const reducerContextStoreLesson: Lesson = {
         {
           id: "cart-store",
           title: "The whole store",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { createContext, useContext, useReducer, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case "added": return { items: [...state.items, action.sku] };
+    case "cleared": return { items: [] };
+  }
+}
+
+/* Two contexts, and no default that could stand in for a real one. */
+const CartState = createContext(null);
+const CartDispatch = createContext(null);
+
+export function CartProvider({ children }) {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  return (
+    <CartDispatch.Provider value={dispatch}>
+      <CartState.Provider value={state}>{children}</CartState.Provider>
+    </CartDispatch.Provider>
+  );
+}
+
+/* One hook per context, each refusing to work without a provider. */
+export function useCart() {
+  const value = useContext(CartState);
+  if (value === null) throw new Error("useCart must be used inside <CartProvider>");
+  return value;
+}
+export function useCartDispatch() {
+  const value = useContext(CartDispatch);
+  if (value === null) throw new Error("useCartDispatch must be used inside <CartProvider>");
+  return value;
+}
+
+function Total() { return <output>{useCart().items.length}</output>; }
+function AddButton() {
+  const dispatch = useCartDispatch();
+  return <button type="button" id="add" onClick={() => dispatch({ type: "added", sku: "pen" })}>add</button>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => {
+  createRoot(container).render(<CartProvider><Total /><AddButton /></CartProvider>);
+});
+act(() => { container.querySelector("#add").click(); });
+act(() => { container.querySelector("#add").click(); });
+console.log("after two adds:", container.querySelector("output").textContent);
+
+/* What happens with no provider above. */
+const bare = document.createElement("div");
+document.body.appendChild(bare);
+try {
+  act(() => { createRoot(bare).render(<Total />); });
+} catch (error) {
+  console.log("rendered outside the provider:", (error).message);
+}`,
+          output: `after two adds: 2
+rendered outside the provider: useCart must be used inside <CartProvider>`,
+          explanation:
+            "No library, no boilerplate directory, and the components see none of it: `Total` reads a value and `AddButton` sends an action. `cartReducer` is still the plain function from the last lesson, testable on its own.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, useContext, useReducer, act } from "react";
 import type { ReactNode, Dispatch } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -90,10 +155,8 @@ try {
 } catch (error) {
   console.log("rendered outside the provider:", (error as Error).message);
 }`,
-          output: `after two adds: 2
-rendered outside the provider: useCart must be used inside <CartProvider>`,
-          explanation:
-            "No library, no boilerplate directory, and the components see none of it: `Total` reads a value and `AddButton` sends an action. `cartReducer` is still the plain function from the last lesson, testable on its own.",
+            },
+          ],
         },
       ],
     },
@@ -136,19 +199,38 @@ rendered outside the provider: useCart must be used inside <CartProvider>`,
         "Everything above is one feature's state, so it belongs in that feature's folder — module 3's rule applied to state.",
         "Step the listing. Each file appears at the point the previous one stopped being enough, which is also the order to write them in.",
       ],
-      visual: {
-        id: "state-layout-visual",
-        kind: "react-structure",
-        algorithm: "state-layout",
-        lockAlgorithm: true,
-        title: "One feature's state, file by file",
-      },
       examples: [
         {
           id: "providers-file",
           title: "app/providers.tsx — the staircase, in one place",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Without this file, App.tsx grows a provider staircase and every new
+   feature makes it one level deeper. With it, App.tsx has one wrapper and
+   the nesting order is documented in the file whose job that is. */
+export function Providers({ children }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          {/* Cart needs the signed-in user, so it goes inside Auth.
+              The order is a real dependency, and this is where it is stated. */}
+          <CartProvider>{children}</CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+// App.tsx
+export default function App() {
+  return <Providers><Router /></Providers>;
+}`,
+          explanation:
+            "The comment about ordering is the point of the file. Provider nesting encodes real dependencies — a provider can only read a context that is above it — and when that ordering lives inline in `App.tsx` amongst routing and layout, somebody eventually reorders it and finds out at runtime.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Without this file, App.tsx grows a provider staircase and every new
    feature makes it one level deeper. With it, App.tsx has one wrapper and
    the nesting order is documented in the file whose job that is. */
 export function Providers({ children }: { children: ReactNode }) {
@@ -169,8 +251,8 @@ export function Providers({ children }: { children: ReactNode }) {
 export default function App() {
   return <Providers><Router /></Providers>;
 }`,
-          explanation:
-            "The comment about ordering is the point of the file. Provider nesting encodes real dependencies — a provider can only read a context that is above it — and when that ordering lives inline in `App.tsx` amongst routing and layout, somebody eventually reorders it and finds out at runtime.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -28,12 +28,6 @@ export const reactCompilerLesson: Lesson = {
     {
       id: "what-it-emits",
       heading: "What it actually emits",
-      visual: {
-        id: "compiler-cache-visual",
-        kind: "react-perf",
-        algorithm: "compiler-cache",
-        title: "The seven-slot cache, render by render",
-      },
       body: [
         "This is the compiler's real output for a four-line component. Reading it once removes most of the mystery.",
       ],
@@ -41,7 +35,7 @@ export const reactCompilerLesson: Lesson = {
         {
           id: "compiled-output",
           title: "In, and out",
-          lang: "tsx",
+          lang: "jsx",
           requires: "babel-plugin-react-compiler (the output is its emit, not the program's)",
           code: `// The source — no memo, no useMemo, no useCallback.
 function ProductList({ products, query }) {
@@ -110,7 +104,7 @@ function _temp(id) {
         {
           id: "compiler-bailout",
           title: "Two bail-outs and one success, in one file",
-          lang: "tsx",
+          lang: "jsx",
           requires: "babel-plugin-react-compiler (the output is its emit, not the program's)",
           code: `function Conditional({ enabled }) {
   if (enabled) {
@@ -197,8 +191,30 @@ function Fine(t0) {
         {
           id: "compiler-setup",
           title: "Turning it on with Vite",
-          lang: "typescript",
+          lang: "javascript",
           code: `// vite.config.ts
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          // Start with one directory rather than the whole tree, and
+          // measure before widening it.
+          ["babel-plugin-react-compiler", { sources: (f) => f.includes("/features/cart/") }],
+        ],
+      },
+    }),
+  ],
+});`,
+          explanation:
+            "The `sources` predicate is the incremental-adoption lever. Widen it as you fix the lint errors the compiler's rules surface — which is the real work of adopting it, and the part that improves the codebase whether or not you ever ship the compiler.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// vite.config.ts
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -215,8 +231,8 @@ export default defineConfig({
     }),
   ],
 });`,
-          explanation:
-            "The `sources` predicate is the incremental-adoption lever. Widen it as you fix the lint errors the compiler's rules surface — which is the real work of adopting it, and the part that improves the codebase whether or not you ever ship the compiler.",
+            },
+          ],
         },
       ],
     },

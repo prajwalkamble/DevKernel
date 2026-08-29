@@ -70,6 +70,11 @@ const RUNNABLE = new Set(["java", "python", "go", "tsx", "jsx"]);
  */
 const TRANSLATABLE = new Set([
   "java", "python", "go", "cpp", "rust", "javascript", "typescript", "asm",
+  // The React tracks carry each example as JSX and as TSX. Both go through
+  // `runReact`, so a translation here is checked exactly like every other one:
+  // left out of this set, an alternate is silently skipped and the dropdown
+  // becomes a promise nothing enforces.
+  "jsx", "tsx",
 ]);
 const onlyTrack = process.argv[2];
 const onlyModule = process.argv[3];

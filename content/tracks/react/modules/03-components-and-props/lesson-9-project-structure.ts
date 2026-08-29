@@ -33,12 +33,6 @@ export const projectStructureLesson: Lesson = {
         "This is what almost every tutorial produces: a folder per kind of thing. `components/`, `hooks/`, `api/`, `types/`, `utils/`. It is easy to explain, it is obvious where a new file goes, and for a small app it is genuinely fine.",
         "Then run the test that matters. Pick a feature — the shopping cart — and ask where it is.",
       ],
-      visual: {
-        id: "by-type-visual",
-        kind: "react-structure",
-        algorithm: "by-type",
-        title: "Fifteen files, grouped by kind — and where one feature ends up",
-      },
       examples: [
         {
           id: "by-type-tree",
@@ -88,12 +82,6 @@ export const projectStructureLesson: Lesson = {
         "The rule for the shared layer is the part people get wrong, so state it precisely: **a file moves to `shared/` when it acquires a second caller, and not before.** Not when it looks reusable, not when it is generic, not when somebody might want it later. `Button` is in `shared/` because two features import it. `CartLine` is not, because only the cart does.",
         "Inside `shared/`, the by-kind folders come back — `shared/components/`, `shared/hooks/`, `shared/utils/`. That is not an inconsistency. In the shared layer there is no feature to group by, so \"what kind of thing is this?\" is genuinely the right question again.",
       ],
-      visual: {
-        id: "by-feature-visual",
-        kind: "react-structure",
-        algorithm: "by-feature",
-        title: "The same fifteen files, regrouped one at a time",
-      },
       examples: [
         {
           id: "by-feature-tree",
@@ -145,12 +133,6 @@ export const projectStructureLesson: Lesson = {
         "Both layouts rest on the same underlying rule, and it is worth stating on its own because it decides every smaller question too: **a file lives next to the thing that uses it, and moves outward only when a second thing uses it.**",
         "That applies below the feature level as well. A component starts as one file. When it acquires a stylesheet, a test, a set of stories, and a hook that only it calls, those go into a folder named after it — not into four separate top-level folders that happen to contain one file each about `Button`.",
       ],
-      visual: {
-        id: "colocate-visual",
-        kind: "react-structure",
-        algorithm: "colocate",
-        title: "One component becoming a folder",
-      },
       examples: [
         {
           id: "colocated-folder",
@@ -189,7 +171,7 @@ export const projectStructureLesson: Lesson = {
         {
           id: "barrel-file",
           title: "features/cart/index.ts",
-          lang: "typescript",
+          lang: "javascript",
           code: `// The feature's public surface. Everything not listed here is internal,
 // and that is enforced by convention rather than by the compiler.
 export { CartTotal } from "./CartTotal";
@@ -200,6 +182,25 @@ export { useCart } from "./useCart";
 // useCart, and ./types, which callers get through the hook's return type.`,
           explanation:
             "Three lines and one comment. A barrel that re-exports every file in the folder has a front door with no walls around it — it is the *selection* that carries the meaning, so a barrel worth writing is one where something has been left out.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// The feature's public surface. Everything not listed here is internal.
+export { CartTotal } from "./CartTotal";
+export { CartLine } from "./CartLine";
+export { useCart } from "./useCart";
+
+// In TypeScript the barrel is also where the feature's types come out, and
+// \`export type\` is worth using rather than a plain re-export: it tells the
+// bundler the binding disappears at build time, so a type never drags its
+// module into the graph.
+export type { Cart, CartItem } from "./types";
+
+// Deliberately not exported: ./api, which is an implementation detail of
+// useCart. The boundary is still a convention — nothing stops a caller
+// importing "../cart/api" directly except a lint rule.`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -258,8 +259,8 @@ tsconfig.app.json(25,5): error TS5101: Option 'baseUrl' is deprecated and will s
         {
           id: "alias-in-use",
           title: "The same import, both ways",
-          lang: "tsx",
-          code: `// From src/features/cart/CartTotal.tsx:
+          lang: "jsx",
+          code: `// From src/features/cart/CartTotal.jsx:
 
 // Fragile. Correct today; wrong the moment this file moves one level.
 import { Button } from "../../shared/components/Button";
@@ -273,6 +274,23 @@ import { Button } from "@/shared/components/Button";
 import { CartLine } from "./CartLine";`,
           explanation:
             "The rule is one line: **alias across boundaries, relative within one.** A path that leaves your feature should say so; a path that stays inside it should stay short and move with the folder when the folder moves.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// From src/features/cart/CartTotal.tsx:
+
+// Fragile. Correct today; wrong the moment this file moves one level.
+import { Button } from "../../shared/components/Button";
+
+// Stable. Says where the module lives, not where you are standing.
+import { Button } from "@/shared/components/Button";
+
+// Sibling inside the same feature: keep it relative. It moves *with*
+// this file, and going out through the alias would route an import
+// through the feature's own barrel and back in.
+import { CartLine } from "./CartLine";`,
+            },
+          ],
         },
       ],
       pitfalls: [

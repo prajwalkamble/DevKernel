@@ -28,12 +28,6 @@ export const whatIsReactLesson: Lesson = {
     {
       id: "the-problem",
       heading: "The problem: keeping the DOM in sync with your data",
-      visual: {
-        id: "by-hand-vs-described",
-        kind: "react-jsx",
-        algorithm: "imperative-vs-declarative",
-        title: "The same three changes, done twice",
-      },
       body: [
         "Every UI is the same job underneath: you have some data, the screen shows that data, and when the data changes the screen must change too. Doing that by hand is where the difficulty lives.",
         "Consider a counter with a number, a button and a message that only appears above ten. In plain DOM code you write the *transitions*: when this happens, change that. Each new piece of state multiplies the number of transitions you have to keep straight, and the bug is always the same — one of the paths forgot to update one of the elements.",
@@ -63,11 +57,39 @@ button.addEventListener("click", () => {
 // updates there too. And a "load saved count" path. And an undo.`,
           explanation:
             "Nothing here is wrong, and for a counter it is perfectly readable. The problem is growth: every *source* of change has to know about every *consequence* of change. With four pieces of state and six places that can modify them, you are maintaining twenty-four relationships by hand, and the compiler cannot help you.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// \`querySelector\` returns \`Element | null\`. Neither \`hidden\` nor \`disabled\`
+// exists on \`Element\`, so the type argument is doing real work — and the null
+// check is not optional: TypeScript will not let the listener run without it.
+const button = document.querySelector<HTMLButtonElement>("#increment");
+const output = document.querySelector<HTMLElement>("#count");
+const warning = document.querySelector<HTMLElement>("#warning");
+
+if (!button || !output || !warning) throw new Error("markup is missing an element");
+
+let count = 0;
+
+button.addEventListener("click", () => {
+  count += 1;
+
+  // Every consequence of the change has to be spelled out, here,
+  // at every place the change can happen.
+  output.textContent = String(count);
+  warning.hidden = count <= 10;
+  button.disabled = count >= 20;
+});
+
+// ...and now add a reset button, and remember to repeat all three
+// updates there too. And a "load saved count" path. And an undo.`,
+            },
+          ],
         },
         {
           id: "declarative-react",
           title: "The declarative version: you describe the result",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Counter() {
   const [count, setCount] = useState(0);
 
@@ -85,6 +107,30 @@ button.addEventListener("click", () => {
 }`,
           explanation:
             "Add a reset button and it calls `setCount(0)`; the warning and the disabled state follow automatically, because they were never separately maintained — they are *expressions of the state*. This is the whole idea. Everything else in React is machinery to make it fast.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Nothing here needs an annotation. \`useState(0)\` infers \`number\` from its
+// initial value, and the component takes no props — so the TypeScript version
+// is the JavaScript one. That is true of most React code, which is why the
+// two tabs on this page are so often identical.
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  // One description of what the UI is, for any value of \`count\`.
+  // There is no code that says "when the count changes, update the warning".
+  return (
+    <div>
+      <p id="count">{count}</p>
+      {count > 10 && <p id="warning">That is quite a lot of clicks.</p>}
+      <button onClick={() => setCount(count + 1)} disabled={count >= 20}>
+        Increment
+      </button>
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -106,7 +152,7 @@ button.addEventListener("click", () => {
         {
           id: "components-are-functions",
           title: "Components compose the way functions compose",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Badge({ label }) {
   return <span className="badge">{label}</span>;
 }
@@ -135,6 +181,38 @@ function App() {
           output: `<div><h1 class="title">Hello, world!</h1><section><h2>Hello, Ada!</h2><p>Nested children render here.</p><span class="badge">new</span></section></div>`,
           explanation:
             "That output is the real HTML React produces for this tree. Note `className` became `class` — JSX uses the DOM property names, which the next lesson but one covers. `Badge` and `Greeting` are ordinary functions; the only thing that makes them components is that React calls them and they return elements.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+function Badge({ label }: { label: string }) {
+  return <span className="badge">{label}</span>;
+}
+
+function Greeting({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    <section>
+      <h2>Hello, {name}!</h2>
+      {children}
+    </section>
+  );
+}
+
+// Composed the same way you would compose any function call.
+function App() {
+  return (
+    <div>
+      <h1 className="title">Hello, world!</h1>
+      <Greeting name="Ada">
+        <p>Nested children render here.</p>
+        <Badge label="new" />
+      </Greeting>
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

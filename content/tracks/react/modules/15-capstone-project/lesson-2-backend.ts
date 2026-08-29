@@ -2,18 +2,19 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneBackendLesson: Lesson = {
   id: "react-capstone-backend",
-  slug: "tracer-structure-types-and-backend",
+  slug: "bug-tracker-structure-types-and-backend",
   moduleSlug: "capstone-project",
-  title: "Tracer: Folder Structure, Shared Types & the Backend",
+  title: "Bug Tracker: Folder Structure, Shared Types & the Backend",
   summary:
-    "Steps one to three of the build. The complete folder map for all three packages, the Zod schemas that both sides import, the database schema those schemas generate, and the eight routes — each one written out and each one verified against a running server.",
-  estimatedMinutes: 42,
+    "Steps one to three of the build. The complete folder map for all three packages, the Zod schemas that both sides import, the database schema those vocabularies generate, and the ten routes — including the two that carry rules rather than data: the triage queue's ordering, and triage itself.",
+  estimatedMinutes: 40,
   objectives: [
     "Lay out a three-package workspace and say what belongs in each",
     "Write schemas that produce a runtime validator and a TypeScript type from one declaration",
-    "Model a create request as its own schema rather than a partial of the entity",
+    "Model a report as its own schema rather than a partial of the entity",
     "Define a database schema whose vocabulary cannot drift from the app's",
     "Write routes that validate, filter in SQL, and fail in one shape",
+    "Express an ordering the database has no natural sort for",
   ],
   sections: [
     {
@@ -21,109 +22,87 @@ export const capstoneBackendLesson: Lesson = {
       heading: "The complete folder map",
       body: [
         "Every file in the finished project, with what each one is for. There are fifty-odd of them and about a third are configuration, which is worth seeing plainly — a real project is not all components.",
-        "The three packages are linked by npm workspaces, which means `@tracer/shared` is a normal import in both of the others and `npm install` at the root wires it up with no build step and no publishing.",
+        "The three packages are linked by npm workspaces, which means `@bug-tracker/shared` is a normal import in both of the others and `npm install` at the root wires it up with no build step and no publishing.",
       ],
       examples: [
         {
           id: "tree",
           title: "The whole project",
           lang: "bash",
-          code: `tracer/
-├── package.json                       # workspaces: shared, server, web
-├── tsconfig.base.json                 # strict settings, written once
+          code: `bug-tracker/
+├── package.json                     # workspaces: shared, server, web
+├── tsconfig.base.json               # strict settings, written once
+├── tsconfig.json                    # project references, for \`tsc -b\`
 │
-├── shared/                            # imported by both of the others
+├── shared/                          # imported by both of the others
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── src/
-│       ├── index.ts                   # re-exports issue.ts
-│       └── issue.ts                   # every schema and every type
+│       ├── index.ts                 # re-exports bug.ts
+│       └── bug.ts                   # every schema and every type
 │
 ├── server/
-│   ├── package.json                   # hono, drizzle-orm, @libsql/client
+│   ├── package.json
 │   ├── tsconfig.json
-│   ├── drizzle.config.ts              # where drizzle-kit finds the schema
-│   ├── .env.example
+│   ├── drizzle.config.ts
 │   └── src/
-│       ├── index.ts                   # the app: CORS, routes, error handler
+│       ├── index.ts                 # the app, CORS, 404 and 500
+│       ├── errors.ts                # the one error shape (NFR-4)
 │       ├── db/
-│       │   ├── schema.ts              # four tables, three indexes
-│       │   ├── index.ts               # one client, one exported db
-│       │   └── seed.ts                # fixed ids, fixed timestamps
+│       │   ├── schema.ts            # four tables, three indexes
+│       │   ├── index.ts             # the client
+│       │   └── seed.ts              # fixed ids, fixed timestamps
 │       └── routes/
-│           ├── issues.ts              # six endpoints
-│           └── projects.ts            # two endpoints
+│           ├── meta.ts              # projects, users
+│           └── bugs.ts              # the other eight
 │
 └── web/
-    ├── package.json                   # react, @tanstack/react-query, react-router
+    ├── package.json
+    ├── tsconfig.json
+    ├── vite.config.ts               # also the Vitest config
     ├── index.html
-    ├── vite.config.ts
-    ├── vitest.config.ts               # jsdom + one setup file
-    ├── tsconfig.json                  # references the two below
-    ├── tsconfig.app.json              # settings for src/ — strict lives here
-    ├── tsconfig.node.json             # settings for vite.config.ts
-    ├── .env.example
-    ├── public/
-    │   └── favicon.svg
     └── src/
-        ├── main.tsx                   # every provider, in order
-        ├── App.tsx                    # the routes, and nothing else
-        ├── index.css
-        │
-        ├── lib/                       # app-wide, no React in it
-        │   ├── api.ts                 # the only fetch in the app
-        │   └── queryKeys.ts           # every cache key, in one object
-        │
-        ├── components/                # shared, presentational
-        │   ├── StatusBadge.tsx
-        │   ├── PriorityBadge.tsx
-        │   └── QueryBoundary.tsx      # loading / error / empty / success
-        │
-        ├── hooks/                      # shared, with a second caller
-        │   ├── useDebouncedValue.ts
-        │   └── useUsers.ts
-        │
+        ├── main.tsx                 # providers, and nothing else
+        ├── App.tsx                  # the routes
+        ├── vite-env.d.ts
+        ├── lib/
+        │   ├── api.ts               # fetch, parse, one failure type
+        │   └── queryKeys.ts         # every cache key, in one table
+        ├── hooks/
+        │   ├── useBugFilters.ts     # the URL is the state (FR-6)
+        │   ├── useDebounced.ts
+        │   ├── useUsers.ts
+        │   ├── useBugs.ts           # the list, and the triage queue
+        │   ├── useBug.ts            # one bug, its comments, its edits
+        │   ├── useCreateBug.ts
+        │   └── useTriage.ts
+        ├── components/
+        │   └── AsyncBoundary.tsx    # the four states (FR-13)
         ├── features/
-        │   └── issues/                 # everything about an issue
-        │       ├── api.ts              # one function per endpoint
-        │       ├── hooks/
-        │       │   ├── useIssues.ts
-        │       │   ├── useIssue.ts
-        │       │   ├── useCreateIssue.ts
-        │       │   ├── useUpdateIssue.ts
-        │       │   └── useIssueFilters.ts
-        │       └── components/
-        │           ├── IssueRow.tsx
-        │           ├── IssueFilters.tsx
-        │           ├── NewIssueForm.tsx
-        │           ├── StatusSelect.tsx
-        │           └── CommentList.tsx
-        │
-        ├── routes/                     # one file per screen
-        │   ├── IssueListPage.tsx
-        │   ├── IssueListPage.test.tsx  # beside the thing it tests
-        │   └── IssueDetailPage.tsx
-        │
+        │   ├── bugs/
+        │   │   ├── BugList.tsx
+        │   │   ├── BugList.test.tsx
+        │   │   ├── BugRow.tsx
+        │   │   ├── BugFilters.tsx
+        │   │   ├── BugDetail.tsx
+        │   │   └── NewBugForm.tsx
+        │   └── triage/
+        │       ├── TriageQueue.tsx
+        │       └── TriageQueue.test.tsx
         └── test/
-            ├── setup.ts                # jest-dom matchers
-            ├── renderWithProviders.tsx # a fresh QueryClient per test
-            └── handlers.ts             # MSW: fakes the network, not modules`,
+            ├── setup.ts             # MSW lifecycle
+            ├── server.ts            # the handlers
+            ├── fixtures.ts
+            └── render.tsx           # providers, per test`,
           explanation:
-            "The rule that produced `web/src` is module 3's: things that change together live together. Everything about an issue is in `features/issues/`, so the answer to \"where is the issue code\" is one folder. `components/` and `hooks/` at the top level hold only what has a caller in more than one place — nothing arrives there in anticipation of a second caller, it arrives when the second caller does.",
-          requires: "the capstone project checked out (this is `tree` over it)",
+            "This is the TypeScript layout. Build it in JavaScript and the shape is identical — every `.ts` becomes `.js`, every `.tsx` becomes `.jsx`, the three `tsconfig` files and `vite-env.d.ts` are not needed, and `shared/package.json` points `main` straight at `src/index.js`. The listing cannot offer the language dropdown the code blocks do, because it is a directory listing rather than a program. Three groupings are doing work here. `lib/` is code that would still make sense in a different app — a fetch wrapper, a key table. `hooks/` is this app's data layer: everything that knows about TanStack Query lives here and nowhere else, which is why swapping it out would be a contained change. `features/` is the app itself, grouped by the thing it is about rather than by what kind of file it is, so `bugs/` and `triage/` are the two areas and a `components/BugRow.tsx` folder full of unrelated pieces never forms.",
+          requires: "nothing — this is the finished tree, for reference",
         },
       ],
-      visual: {
-        id: "capstone-src",
-        kind: "react-structure",
-        algorithm: "capstone-web",
-        lockAlgorithm: true,
-        title: "web/src, built in dependency order",
-      },
       pitfalls: [
         {
-          title: "`lib/` versus `hooks/` versus `features/`",
-          body: "Three shared folders is two more than most projects need, so the boundary has to be stated or it becomes a coin flip. `lib/` is app-wide code with no React in it — if it imports a hook it is in the wrong folder. `hooks/` is React code with callers in more than one feature. `features/` is everything else, and it is where a file should start. The failure mode is a `utils/` folder, which has no rule at all and therefore collects everything nobody wanted to think about.",
+          title: "`shared` has no build step, and that is the point",
+          body: "Its `package.json` points `main` and `types` straight at `src/index.ts`. Both consumers are bundled (Vite) or run through a TypeScript-aware runtime (tsx), so neither needs compiled JavaScript, and adding a build step would mean every schema change needs a rebuild before the other packages see it. The one thing it does emit is declarations, for `tsc -b`'s project references.",
         },
       ],
     },
@@ -131,75 +110,173 @@ export const capstoneBackendLesson: Lesson = {
       id: "shared-schemas",
       heading: "The shared package: one declaration, two outputs",
       body: [
-        "This is NFR-2's mechanism, and it is worth being precise about why it works. A Zod schema is a runtime value — an object that can check data — and `z.infer` extracts the TypeScript type that value describes. So one declaration produces both the validator the server runs and the type the compiler enforces, and they cannot disagree, because one is derived from the other.",
-        "Start with the vocabularies, because everything else refers to them.",
+        "NFR-2 says every shared shape is defined once. This is that file. In both builds the schema is the runtime validator; in the TypeScript one it is *also* the type, inferred from the same object, so there is no way for the check and the type to disagree. That second half is the whole of what the TypeScript version buys you here, and the reason the dropdown above is worth reaching for.",
+        "Start with the vocabularies, because everything else refers to them and because they are what the database columns will be built from.",
       ],
       examples: [
         {
           id: "vocab",
-          title: "shared/src/issue.ts — the vocabularies",
-          lang: "typescript",
+          title: "shared/src/bug.js — the vocabularies",
+          lang: "javascript",
           code: `import { z } from "zod";
 
-/* The two closed vocabularies the whole app agrees on. They are \`const\`
-   tuples so the TypeScript union and the Zod enum come from one source: add
-   "blocked" here and both the compiler and the request validator learn it. */
-export const STATUSES = ["open", "in_progress", "done"] as const;
-export const PRIORITIES = ["low", "medium", "high"] as const;
+/* The vocabularies. Every one of these is defined once, here, and imported by
+   both the server and the browser — NFR-2. Adding a severity is one edit. */
 
-export const statusSchema = z.enum(STATUSES);
-export const prioritySchema = z.enum(PRIORITIES);
+/** Where a bug is in its life. Triage moves \`open\` to \`confirmed\` or \`wontfix\`. */
+export const bugStatuses = [
+  "open",
+  "confirmed",
+  "in_progress",
+  "fixed",
+  "closed",
+  "wontfix",
+];
+export const BugStatus = z.enum(bugStatuses);
 
-export type Status = z.infer<typeof statusSchema>;
-export type Priority = z.infer<typeof prioritySchema>;`,
+/** How much damage the bug does, which is not the same as how urgent it is. */
+export const bugSeverities = ["blocker", "major", "minor", "trivial"];
+export const BugSeverity = z.enum(bugSeverities);
+
+/** A status a bug can be moved to from \`open\` during triage. */
+export const triageOutcomes = ["confirmed", "wontfix"];
+export const TriageOutcome = z.enum(triageOutcomes);`,
           explanation:
-            "The `as const` is what makes this work. Without it `STATUSES` is `string[]` and `Status` is `string`, and every downstream exhaustiveness check quietly stops checking anything. With it, `Status` is `\"open\" | \"in_progress\" | \"done\"` — and the same tuple is passed to the database schema later, so the CHECK constraint the database enforces has the same three values by construction.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "Each vocabulary is exported three times over and every one has a use. The `as const` array is what the `<select>` maps over and what the database column's `enum` is built from, so neither can list an option the other does not have. The Zod schema is what parses a value arriving from outside. The type is what everything else is annotated with. `TriageOutcome` being its own two-value vocabulary rather than a subset of `BugStatus` is what makes an illegal triage request unrepresentable rather than merely refused.",
+          requires: "tsc (this file only declares; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "shared/src/bug.ts — the vocabularies",
+              requires: "tsc (this file only declares; it prints nothing)",
+              code: `import { z } from "zod";
+
+/* The vocabularies. Every one of these is defined once, here, and imported by
+   both the server and the browser — NFR-2. Adding a severity is one edit. */
+
+/** Where a bug is in its life. Triage moves \`open\` to \`confirmed\` or \`wontfix\`. */
+export const bugStatuses = [
+  "open",
+  "confirmed",
+  "in_progress",
+  "fixed",
+  "closed",
+  "wontfix",
+] as const;
+export const BugStatus = z.enum(bugStatuses);
+export type BugStatus = z.infer<typeof BugStatus>;
+
+/** How much damage the bug does, which is not the same as how urgent it is. */
+export const bugSeverities = ["blocker", "major", "minor", "trivial"] as const;
+export const BugSeverity = z.enum(bugSeverities);
+export type BugSeverity = z.infer<typeof BugSeverity>;
+
+/** A status a bug can be moved to from \`open\` during triage. */
+export const triageOutcomes = ["confirmed", "wontfix"] as const;
+export const TriageOutcome = z.enum(triageOutcomes);
+export type TriageOutcome = z.infer<typeof TriageOutcome>;`,
+            },
+          ],
         },
         {
           id: "entities",
           title: "The entities",
-          lang: "typescript",
-          code: `export const userSchema = z.object({
+          lang: "javascript",
+          code: `export const User = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.email(),
+  email: z.string(),
 });
 
-export const projectSchema = z.object({
+export const Project = z.object({
   id: z.string(),
   name: z.string(),
   key: z.string(),
 });
 
-export const issueSchema = z.object({
+/* A bug report is a claim that the software did the wrong thing. The three
+   fields that make it actionable — what you did, what should have happened,
+   what did — are separate columns rather than one description, because a
+   report missing any one of them cannot be reproduced, and a schema is the
+   only place that requirement survives contact with a hurried reporter. */
+export const Bug = z.object({
   id: z.string(),
   projectId: z.string(),
   number: z.number().int().positive(),
   title: z.string(),
-  description: z.string(),
-  status: statusSchema,
-  priority: prioritySchema,
+  stepsToReproduce: z.string(),
+  expected: z.string(),
+  actual: z.string(),
+  environment: z.string(),
+  severity: BugSeverity,
+  status: BugStatus,
+  reporterId: z.string(),
   assigneeId: z.string().nullable(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
-export const commentSchema = z.object({
+export const Comment = z.object({
   id: z.string(),
-  issueId: z.string(),
+  bugId: z.string(),
   authorId: z.string(),
   body: z.string(),
-  createdAt: z.iso.datetime(),
-});
-
-export type User = z.infer<typeof userSchema>;
-export type Project = z.infer<typeof projectSchema>;
-export type Issue = z.infer<typeof issueSchema>;
-export type Comment = z.infer<typeof commentSchema>;`,
+  createdAt: z.string(),
+});`,
           explanation:
-            "`assigneeId` is `.nullable()` and `authorId` is not, which is the data model's decision showing up in the type: a component that renders an assignee is forced by the compiler to handle the unassigned case, and one that renders a comment author is not.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "`assigneeId` is `.nullable()` and `reporterId` is not, and that one-word difference is the data model's opinion showing up in the type system: every screen that renders an assignee is now forced by the compiler to say what an unassigned bug looks like, and no screen is ever forced to handle a bug that nobody reported.",
+          requires: "tsc (this file only declares; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              requires: "tsc (this file only declares; it prints nothing)",
+              code: `export const User = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+});
+export type User = z.infer<typeof User>;
+
+export const Project = z.object({
+  id: z.string(),
+  name: z.string(),
+  key: z.string(),
+});
+export type Project = z.infer<typeof Project>;
+
+/* A bug report is a claim that the software did the wrong thing. The three
+   fields that make it actionable — what you did, what should have happened,
+   what did — are separate columns rather than one description, because a
+   report missing any one of them cannot be reproduced, and a schema is the
+   only place that requirement survives contact with a hurried reporter. */
+export const Bug = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  number: z.number().int().positive(),
+  title: z.string(),
+  stepsToReproduce: z.string(),
+  expected: z.string(),
+  actual: z.string(),
+  environment: z.string(),
+  severity: BugSeverity,
+  status: BugStatus,
+  reporterId: z.string(),
+  assigneeId: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Bug = z.infer<typeof Bug>;
+
+export const Comment = z.object({
+  id: z.string(),
+  bugId: z.string(),
+  authorId: z.string(),
+  body: z.string(),
+  createdAt: z.string(),
+});
+export type Comment = z.infer<typeof Comment>;`,
+            },
+          ],
         },
       ],
     },
@@ -207,77 +284,122 @@ export type Comment = z.infer<typeof commentSchema>;`,
       id: "requests",
       heading: "Request schemas are not partial entities",
       body: [
-        "The tempting move is `issueSchema.partial()` for the update and `issueSchema.omit({ id: true })` for the create. Both are wrong, and the reason is the same in each case: **the client and the server own different fields.**",
-        "The server owns `id`, `number`, `createdAt` and `updatedAt`. A create request that carries them should be *rejected*, not quietly ignored — because a body containing `\"number\": 1` is a client that believes something false, and the sooner it finds out the better. Deriving the schema from the entity makes that impossible to express.",
-        "The create schema also does work the entity schema must not do: it trims, it enforces a maximum length, and it supplies defaults. Those are rules about a *request*, not facts about an issue.",
+        "The shape a client may *send* is a different shape from the thing it becomes. `Bug.partial()` would be shorter and would be wrong: it would let a client choose its own `id`, set `number` to 9000, backdate `createdAt`, and file a bug that is already `fixed`.",
+        "So each request gets its own schema, listing exactly the fields the client owns.",
       ],
       examples: [
         {
           id: "request-schemas",
           title: "What a client may send",
-          lang: "typescript",
-          code: `/* What a client may send. Deliberately *not* \`issueSchema.partial()\`: the
-   server owns id, number and both timestamps, and a body that tries to set
-   them should be rejected rather than quietly ignored. */
-export const createIssueSchema = z.object({
-  title: z.string().trim().min(1, "Title is required").max(120),
-  description: z.string().trim().max(5000).default(""),
-  priority: prioritySchema.default("medium"),
-  assigneeId: z.string().nullable().default(null),
+          lang: "javascript",
+          code: `export const CreateBug = z.object({
+  title: z.string().trim().min(4, "Title must be at least 4 characters").max(120),
+  stepsToReproduce: z.string().trim().min(10, "Say what you did, in enough detail to repeat it"),
+  expected: z.string().trim().min(3, "Say what should have happened"),
+  actual: z.string().trim().min(3, "Say what happened instead"),
+  environment: z.string().trim().min(3, "Name the browser and OS"),
+  severity: BugSeverity,
+  reporterId: z.string().min(1),
+  assigneeId: z.string().nullable().optional(),
 });
 
-export const updateIssueSchema = z
+export const UpdateBug = z
   .object({
-    title: z.string().trim().min(1, "Title is required").max(120),
-    description: z.string().trim().max(5000),
-    status: statusSchema,
-    priority: prioritySchema,
-    assigneeId: z.string().nullable(),
+    status: BugStatus.optional(),
+    severity: BugSeverity.optional(),
+    assigneeId: z.string().nullable().optional(),
   })
-  .partial()
   .refine((patch) => Object.keys(patch).length > 0, {
-    message: "Patch must change at least one field",
+    message: "Send at least one field to change",
   });
 
-/* Query strings arrive as strings, so this schema is where "?status=open" is
-   turned into a typed filter. \`catch\` rather than \`optional\` means a junk
-   value degrades to "no filter" instead of 400-ing a page load. */
-export const issueQuerySchema = z.object({
-  status: statusSchema.optional().catch(undefined),
+export const CreateComment = z.object({
+  authorId: z.string().min(1),
+  body: z.string().trim().min(1, "A comment cannot be empty").max(2000),
+});
+
+/* The list query. \`.catch()\` rather than \`.optional()\`: a filter arriving from
+   a URL someone edited by hand should fall back to "no filter" rather than
+   fail the request — FR-6 puts these in the address bar, so they are user
+   input in the most literal sense. */
+export const BugQuery = z.object({
+  status: BugStatus.optional().catch(undefined),
+  severity: BugSeverity.optional().catch(undefined),
   assigneeId: z.string().optional().catch(undefined),
-  q: z.string().trim().optional().catch(undefined),
+  q: z.string().optional().catch(undefined),
 });
 
-export const createCommentSchema = z.object({
-  body: z.string().trim().min(1, "Comment cannot be empty").max(5000),
-  authorId: z.string(),
-});
-
-/* One error shape for every failure, so the client has one thing to render.
-   \`fieldErrors\` is keyed by form field name, which is what a form needs. */
-export const apiErrorSchema = z.object({
+/** One error shape for every failure — NFR-4. */
+export const ApiError = z.object({
   error: z.string(),
-  fieldErrors: z.record(z.string(), z.string()).optional(),
-});
-
-export type CreateIssue = z.infer<typeof createIssueSchema>;
-export type UpdateIssue = z.infer<typeof updateIssueSchema>;
-export type IssueQuery = z.infer<typeof issueQuerySchema>;
-export type CreateComment = z.infer<typeof createCommentSchema>;
-export type ApiError = z.infer<typeof apiErrorSchema>;`,
+  fieldErrors: z.record(z.string(), z.array(z.string())).optional(),
+});`,
           explanation:
-            "`updateIssueSchema` is `.partial()` of its *own* object, not of the entity — which is why `id` cannot appear in a patch at all. The `.refine` is the rule that an empty patch is a mistake rather than a no-op: `PATCH` with `{}` almost always means a client bug, and 400-ing it surfaces that instead of returning 200 for a write that did nothing.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "The `min()` messages are written for the person filing the report, not for the developer: \"Say what you did, in enough detail to repeat it\" tells them what to do, where \"String must contain at least 10 character(s)\" tells them what a validator thinks. Those strings travel all the way to the field in the form, so this file is quietly also a copy deck. `UpdateBug`'s `.refine()` exists because `{}` is a valid object of every optional field, and a PATCH that changes nothing should be a 400 rather than a silent no-op that still bumps `updatedAt`.",
+          requires: "tsc (this file only declares; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              requires: "tsc (this file only declares; it prints nothing)",
+              code: `export const CreateBug = z.object({
+  title: z.string().trim().min(4, "Title must be at least 4 characters").max(120),
+  stepsToReproduce: z.string().trim().min(10, "Say what you did, in enough detail to repeat it"),
+  expected: z.string().trim().min(3, "Say what should have happened"),
+  actual: z.string().trim().min(3, "Say what happened instead"),
+  environment: z.string().trim().min(3, "Name the browser and OS"),
+  severity: BugSeverity,
+  reporterId: z.string().min(1),
+  assigneeId: z.string().nullable().optional(),
+});
+export type CreateBug = z.infer<typeof CreateBug>;
+
+export const UpdateBug = z
+  .object({
+    status: BugStatus.optional(),
+    severity: BugSeverity.optional(),
+    assigneeId: z.string().nullable().optional(),
+  })
+  .refine((patch) => Object.keys(patch).length > 0, {
+    message: "Send at least one field to change",
+  });
+export type UpdateBug = z.infer<typeof UpdateBug>;
+
+export const CreateComment = z.object({
+  authorId: z.string().min(1),
+  body: z.string().trim().min(1, "A comment cannot be empty").max(2000),
+});
+export type CreateComment = z.infer<typeof CreateComment>;
+
+/* The list query. \`.catch()\` rather than \`.optional()\`: a filter arriving from
+   a URL someone edited by hand should fall back to "no filter" rather than
+   fail the request — FR-6 puts these in the address bar, so they are user
+   input in the most literal sense. */
+export const BugQuery = z.object({
+  status: BugStatus.optional().catch(undefined),
+  severity: BugSeverity.optional().catch(undefined),
+  assigneeId: z.string().optional().catch(undefined),
+  q: z.string().optional().catch(undefined),
+});
+export type BugQuery = z.infer<typeof BugQuery>;
+
+/** One error shape for every failure — NFR-4. */
+export const ApiError = z.object({
+  error: z.string(),
+  fieldErrors: z.record(z.string(), z.array(z.string())).optional(),
+});
+export type ApiError = z.infer<typeof ApiError>;`,
+            },
+          ],
         },
       ],
       pitfalls: [
         {
           title: "`.catch()` on the query schema, `.optional()` everywhere else",
-          body: "A query string is user-editable — it is in the address bar. `?status=banana` is a thing that will happen, from a stale bookmark or a typo, and the right response is to ignore the filter and render the page, not to throw during render. Everywhere else, invalid data means a bug worth surfacing, so `.optional()` and a hard failure are correct. The difference is who wrote the value: a person editing a URL, or your own code.",
+          body: "The difference is who wrote the value. A request body is written by your own client, so a wrong shape is a bug and should be a 400 you can see. A query string is written by whoever last edited the address bar, so `?status=banana` should quietly mean \"no status filter\" rather than break the page. Using `.catch()` in a body schema hides real bugs; using `.optional()` in a query schema turns a typo into an error screen.",
         },
         {
           title: "`z.infer` and `z.input` are different types",
-          body: "Because of the `.default()` calls, `createIssueSchema`'s input allows `description` and `priority` to be missing while its output guarantees them present. `z.infer` gives you the output type. A function that accepts a *caller's* object — like the client's `createIssue` — should take `z.input<typeof createIssueSchema>` and parse it, or the defaults become required arguments at every call site.",
+          body: "This one only applies to the TypeScript build; in JavaScript the schema is a validator and nothing more. `z.infer` is what comes *out* of a parse, after defaults and transforms have run. `z.input` is what may go in. They are the same here because nothing has a default, but the moment you add `.default(\"open\")` to a field, the input type makes it optional and the output type does not — and a form typed with the wrong one will insist on a value the user is not being asked for.",
         },
       ],
     },
@@ -285,16 +407,16 @@ export type ApiError = z.infer<typeof apiErrorSchema>;`,
       id: "db",
       heading: "The database schema",
       body: [
-        "Drizzle's table definitions are TypeScript, which is the property that matters: the query builder's types are derived from them, so renaming a column is a compile error in every query that used it rather than a runtime error in one you forgot.",
-        "The important line in this file is the `import` at the top. The status and priority vocabularies come from the shared package, so the values SQLite will enforce and the union the compiler will enforce are the same tuple.",
+        "Four tables. The interesting part is the two `enum` columns, which are built from the shared arrays rather than from string literals — so a column and a `<select>` cannot list different options, and adding a severity is still one edit.",
       ],
       examples: [
         {
           id: "schema",
-          title: "server/src/db/schema.ts",
-          lang: "typescript",
-          code: `import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { PRIORITIES, STATUSES } from "@tracer/shared";
+          title: "server/src/db/schema.js",
+          lang: "javascript",
+          code: `import { sql } from "drizzle-orm";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { bugSeverities, bugStatuses } from "@bug-tracker/shared";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -308,28 +430,42 @@ export const projects = sqliteTable("projects", {
   key: text("key").notNull().unique(),
 });
 
-export const issues = sqliteTable(
-  "issues",
+export const bugs = sqliteTable(
+  "bugs",
   {
     id: text("id").primaryKey(),
     projectId: text("project_id")
       .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
-    /* Per-project, human-facing: WEB-1, WEB-2. Not the primary key — the id
-       is, so a renumbering can never break a foreign key. */
+      .references(() => projects.id),
+    /* What people say out loud is WEB-4, but that is per-project and so not
+       unique here, and a renumbering must never be able to break a foreign
+       key. \`id\` is the database's key; \`number\` is the humans'. */
     number: integer("number").notNull(),
     title: text("title").notNull(),
-    description: text("description").notNull().default(""),
-    status: text("status", { enum: STATUSES }).notNull().default("open"),
-    priority: text("priority", { enum: PRIORITIES }).notNull().default("medium"),
-    assigneeId: text("assignee_id").references(() => users.id, { onDelete: "set null" }),
+    stepsToReproduce: text("steps_to_reproduce").notNull(),
+    expected: text("expected").notNull(),
+    actual: text("actual").notNull(),
+    environment: text("environment").notNull(),
+    /* The vocabulary comes from the shared package, so the column and the
+       client cannot drift apart. */
+    severity: text("severity", { enum: bugSeverities }).notNull(),
+    status: text("status", { enum: bugStatuses }).notNull().default("open"),
+    /* A bug nobody reported is not a state this app has; an unassigned bug
+       is the normal one. */
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id),
+    assigneeId: text("assignee_id").references(() => users.id),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
   },
   (table) => [
-    uniqueIndex("issues_project_number_idx").on(table.projectId, table.number),
-    /* The list screen's only query: one project, newest first. */
-    index("issues_project_created_idx").on(table.projectId, table.createdAt),
+    uniqueIndex("bugs_project_number").on(table.projectId, table.number),
+    /* FR-1 is exactly this query — one project, newest first — and it runs on
+       every page load. */
+    index("bugs_project_created").on(table.projectId, table.createdAt),
+    /* FR-11's triage queue: one project, still open, worst first. */
+    index("bugs_project_status_severity").on(table.projectId, table.status, table.severity),
   ],
 );
 
@@ -337,46 +473,109 @@ export const comments = sqliteTable(
   "comments",
   {
     id: text("id").primaryKey(),
-    issueId: text("issue_id")
+    bugId: text("bug_id")
       .notNull()
-      .references(() => issues.id, { onDelete: "cascade" }),
+      .references(() => bugs.id),
     authorId: text("author_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id),
     body: text("body").notNull(),
     createdAt: text("created_at").notNull(),
   },
-  (table) => [index("comments_issue_created_idx").on(table.issueId, table.createdAt)],
-);`,
+  (table) => [index("comments_bug_created").on(table.bugId, table.createdAt)],
+);
+
+export const schema = { users, projects, bugs, comments };
+export const now = sql\`(datetime('now'))\`;`,
           explanation:
-            "The two `onDelete` behaviours are the data model's nullability decision again, one layer down. Deleting an issue **cascades** to its comments, because a comment on nothing is not a state. Deleting a user **sets null** on their issues, because an unassigned issue *is* a state — the same reason `assigneeId` was nullable in the Zod schema.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "db-client",
-          title: "server/src/db/index.ts",
-          lang: "typescript",
-          code: `import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
-import * as schema from "./schema";
+            "`text(\"severity\", { enum: bugSeverities })` is the line that makes NFR-2 real rather than aspirational. The column's type is now the same union the client uses, so inserting `\"critical\"` does not compile — and when someone adds it to the shared array, both the column and every `<select>` gain it at once. The four report columns are all `notNull()`, which is the requirement \"a report must be reproducible\" written somewhere it cannot be forgotten.",
+          requires: "tsc and drizzle-kit (the schema is a declaration; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "server/src/db/schema.ts",
+              requires: "tsc and drizzle-kit (the schema is a declaration; it prints nothing)",
+              code: `import { sql } from "drizzle-orm";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { bugSeverities, bugStatuses } from "@bug-tracker/shared";
 
-const client = createClient({ url: process.env.DATABASE_URL ?? "file:tracer.db" });
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+});
 
-/* Passing the schema in is what makes \`db.query.issues.findMany(...)\` exist
-   and be typed. Without it you still get the query builder, but none of the
-   relational helpers. */
-export const db = drizzle(client, { schema });
+export const projects = sqliteTable("projects", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  key: text("key").notNull().unique(),
+});
 
-export { schema };`,
-          explanation:
-            "One client, created once at module scope, exported. A module body runs once per process, so this is the idiomatic singleton in Node — and it is the same reasoning as creating the `QueryClient` outside the component in `main.tsx`.",
-          requires: "the capstone project (this file is type-checked, not run)",
+export const bugs = sqliteTable(
+  "bugs",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id),
+    /* What people say out loud is WEB-4, but that is per-project and so not
+       unique here, and a renumbering must never be able to break a foreign
+       key. \`id\` is the database's key; \`number\` is the humans'. */
+    number: integer("number").notNull(),
+    title: text("title").notNull(),
+    stepsToReproduce: text("steps_to_reproduce").notNull(),
+    expected: text("expected").notNull(),
+    actual: text("actual").notNull(),
+    environment: text("environment").notNull(),
+    /* The vocabulary comes from the shared package, so the column and the
+       client cannot drift apart. */
+    severity: text("severity", { enum: bugSeverities }).notNull(),
+    status: text("status", { enum: bugStatuses }).notNull().default("open"),
+    /* A bug nobody reported is not a state this app has; an unassigned bug
+       is the normal one. */
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id),
+    assigneeId: text("assignee_id").references(() => users.id),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("bugs_project_number").on(table.projectId, table.number),
+    /* FR-1 is exactly this query — one project, newest first — and it runs on
+       every page load. */
+    index("bugs_project_created").on(table.projectId, table.createdAt),
+    /* FR-11's triage queue: one project, still open, worst first. */
+    index("bugs_project_status_severity").on(table.projectId, table.status, table.severity),
+  ],
+);
+
+export const comments = sqliteTable(
+  "comments",
+  {
+    id: text("id").primaryKey(),
+    bugId: text("bug_id")
+      .notNull()
+      .references(() => bugs.id),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("comments_bug_created").on(table.bugId, table.createdAt)],
+);
+
+export const schema = { users, projects, bugs, comments };
+export const now = sql\`(datetime('now'))\`;`,
+            },
+          ],
         },
       ],
       pitfalls: [
         {
           title: "Seed with fixed ids and fixed timestamps",
-          body: "A seed script with `Date.now()` in it produces a different ordering on every run, which makes any test that asserts on the first row flaky for reasons that have nothing to do with the code. Tracer's seed uses `2026-03-01`, `2026-03-02` and so on, and ids like `i_1`. Determinism in the fixtures is what lets a failing test mean something.",
+          body: "A seed built on `Date.now()` and random ids makes every screenshot, every test fixture and every `curl` transcript differ from the last one, and \"it looks different for me\" becomes impossible to tell apart from a real bug. Bug Tracker's seed writes `b_1`…`b_6` and dates in March 2026, so the triage order in this guide is the triage order you will see.",
         },
       ],
     },
@@ -384,190 +583,230 @@ export { schema };`,
       id: "routes",
       heading: "The routes",
       body: [
-        "Six endpoints for issues and two for projects. Every handler has the same three-step shape — validate, query, respond — and the validation always comes from the shared schema, never from a hand-written check.",
-        "One helper first, because both write endpoints need it: turning Zod's issue list into the field-keyed object NFR-4 promised.",
+        "Ten of them across two files. The reads first: the list with its four filters, and the triage queue with the ordering that is the whole reason it is a separate endpoint.",
       ],
       examples: [
         {
           id: "routes-read",
-          title: "server/src/routes/issues.ts — reading",
-          lang: "typescript",
-          code: `import { and, asc, desc, eq, like, max } from "drizzle-orm";
-import { Hono } from "hono";
-import {
-  createCommentSchema,
-  createIssueSchema,
-  issueQuerySchema,
-  updateIssueSchema,
-} from "@tracer/shared";
-import type { ZodError } from "zod";
-import { db } from "../db";
-import { comments, issues } from "../db/schema";
+          title: "server/src/routes/bugs.js — reading",
+          lang: "javascript",
+          code: `const id = () => \`b_\${crypto.randomUUID().slice(0, 8)}\`;
+const stamp = () => new Date().toISOString();
 
-/* Zod's issue list keyed by field name, which is the shape a form wants:
-   \`fieldErrors.title\` goes under the title input and nowhere else. */
-function fieldErrors(error: ZodError): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = issue.path.join(".") || "_";
-    out[key] ??= issue.message;
-  }
-  return out;
-}
+/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
+   trivial happens to be right by luck, and would stop being right the moment
+   anyone adds "critical". Rank it explicitly instead. */
+const severityOrder = sql\`CASE \${bugs.severity}
+  WHEN 'blocker' THEN 0 WHEN 'major' THEN 1 WHEN 'minor' THEN 2 ELSE 3 END\`;
 
-const now = () => new Date().toISOString();
-const id = (prefix: string) => \`\${prefix}_\${crypto.randomUUID().slice(0, 8)}\`;
+export const bugRoutes = new Hono();
 
-export const issueRoutes = new Hono();
+/* FR-1 to FR-5. Every filter is applied in SQL — NFR-5. */
+bugRoutes.get("/projects/:projectId/bugs", async (c) => {
+  const query = BugQuery.parse({
+    status: c.req.query("status"),
+    severity: c.req.query("severity"),
+    assigneeId: c.req.query("assigneeId"),
+    q: c.req.query("q"),
+  });
 
-/* Filtering happens in SQL, not in JavaScript after the fact. The difference
-   does not show at four rows and is the whole game at forty thousand. */
-issueRoutes.get("/projects/:projectId/issues", async (c) => {
-  const projectId = c.req.param("projectId");
-  const query = issueQuerySchema.parse(Object.fromEntries(new URL(c.req.url).searchParams));
+  const where = [eq(bugs.projectId, c.req.param("projectId"))];
+  if (query.status) where.push(eq(bugs.status, query.status));
+  if (query.severity) where.push(eq(bugs.severity, query.severity));
+  if (query.assigneeId) where.push(eq(bugs.assigneeId, query.assigneeId));
+  if (query.q) where.push(like(bugs.title, \`%\${query.q}%\`));
 
-  const filters = [eq(issues.projectId, projectId)];
-  if (query.status) filters.push(eq(issues.status, query.status));
-  if (query.assigneeId) filters.push(eq(issues.assigneeId, query.assigneeId));
-  if (query.q) filters.push(like(issues.title, \`%\${query.q}%\`));
-
-  const rows = await db
-    .select()
-    .from(issues)
-    .where(and(...filters))
-    .orderBy(desc(issues.createdAt));
-
-  return c.json(rows);
+  return c.json(
+    await db.select().from(bugs).where(and(...where)).orderBy(desc(bugs.createdAt)),
+  );
 });
 
-issueRoutes.get("/issues/:id", async (c) => {
-  const [row] = await db.select().from(issues).where(eq(issues.id, c.req.param("id")));
-  if (!row) return c.json({ error: "Issue not found" }, 404);
-  return c.json(row);
-});
-
-issueRoutes.get("/issues/:id/comments", async (c) => {
-  const rows = await db
-    .select()
-    .from(comments)
-    .where(eq(comments.issueId, c.req.param("id")))
-    .orderBy(asc(comments.createdAt));
-  return c.json(rows);
+/* FR-11. The triage queue is not a filter on the list: it has its own order —
+   worst first, then oldest — because triage is a queue you work down, and the
+   oldest unlooked-at report is the one that has been failing someone longest. */
+bugRoutes.get("/projects/:projectId/triage", async (c) => {
+  return c.json(
+    await db
+      .select()
+      .from(bugs)
+      .where(and(eq(bugs.projectId, c.req.param("projectId")), eq(bugs.status, "open")))
+      .orderBy(severityOrder, asc(bugs.createdAt)),
+  );
 });`,
           explanation:
-            "The filter array is the pattern worth keeping. Each optional filter appends a condition, then `and(...filters)` combines whatever accumulated — so three optional filters are three `if`s rather than eight branches, and adding a fourth is one line. `.parse` rather than `.safeParse` is safe here precisely because the query schema uses `.catch()`: it cannot throw.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "`severityOrder` is the piece worth stopping on. `ORDER BY severity` would sort the text, and the four words happen to be in the right alphabetical order today — which is exactly the kind of accident that survives review and breaks the day somebody adds `critical`. Ranking the values explicitly costs one `CASE` and means the order is stated rather than lucky. Note also that the filters are built as an array of conditions and spread into a single `and()`: no branching query builders, no string concatenation, and an empty array yields no `WHERE` clause at all.",
+          requires: "tsc (imports elided; see the repository for the full file)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "server/src/routes/bugs.ts — reading",
+              requires: "tsc (imports elided; see the repository for the full file)",
+              code: `const id = () => \`b_\${crypto.randomUUID().slice(0, 8)}\`;
+const stamp = () => new Date().toISOString();
+
+/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
+   trivial happens to be right by luck, and would stop being right the moment
+   anyone adds "critical". Rank it explicitly instead. */
+const severityOrder = sql\`CASE \${bugs.severity}
+  WHEN 'blocker' THEN 0 WHEN 'major' THEN 1 WHEN 'minor' THEN 2 ELSE 3 END\`;
+
+export const bugRoutes = new Hono();
+
+/* FR-1 to FR-5. Every filter is applied in SQL — NFR-5. */
+bugRoutes.get("/projects/:projectId/bugs", async (c) => {
+  const query = BugQuery.parse({
+    status: c.req.query("status"),
+    severity: c.req.query("severity"),
+    assigneeId: c.req.query("assigneeId"),
+    q: c.req.query("q"),
+  });
+
+  const where = [eq(bugs.projectId, c.req.param("projectId"))];
+  if (query.status) where.push(eq(bugs.status, query.status));
+  if (query.severity) where.push(eq(bugs.severity, query.severity));
+  if (query.assigneeId) where.push(eq(bugs.assigneeId, query.assigneeId));
+  if (query.q) where.push(like(bugs.title, \`%\${query.q}%\`));
+
+  return c.json(
+    await db.select().from(bugs).where(and(...where)).orderBy(desc(bugs.createdAt)),
+  );
+});
+
+/* FR-11. The triage queue is not a filter on the list: it has its own order —
+   worst first, then oldest — because triage is a queue you work down, and the
+   oldest unlooked-at report is the one that has been failing someone longest. */
+bugRoutes.get("/projects/:projectId/triage", async (c) => {
+  return c.json(
+    await db
+      .select()
+      .from(bugs)
+      .where(and(eq(bugs.projectId, c.req.param("projectId")), eq(bugs.status, "open")))
+      .orderBy(severityOrder, asc(bugs.createdAt)),
+  );
+});`,
+            },
+          ],
         },
         {
           id: "routes-write",
-          title: "server/src/routes/issues.ts — writing",
-          lang: "typescript",
-          code: `issueRoutes.post("/projects/:projectId/issues", async (c) => {
+          title: "server/src/routes/bugs.js — writing, and the triage rule",
+          lang: "javascript",
+          code: `/* FR-7. */
+bugRoutes.post("/projects/:projectId/bugs", async (c) => {
+  const parsed = CreateBug.safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) return fail(c, 400, "Invalid bug report", flatten(parsed.error));
+
   const projectId = c.req.param("projectId");
-  const parsed = createIssueSchema.safeParse(await c.req.json());
-  if (!parsed.success) {
-    return c.json({ error: "Invalid issue", fieldErrors: fieldErrors(parsed.error) }, 400);
-  }
+  const [high] = await db
+    .select({ number: sql<number>\`COALESCE(MAX(\${bugs.number}), 0)\` })
+    .from(bugs)
+    .where(eq(bugs.projectId, projectId));
 
-  /* The per-project number is derived, never sent by the client. */
-  const [highest] = await db
-    .select({ value: max(issues.number) })
-    .from(issues)
-    .where(eq(issues.projectId, projectId));
-
-  const timestamp = now();
+  const at = stamp();
   const row = {
-    id: id("i"),
+    id: id(),
     projectId,
-    number: (highest?.value ?? 0) + 1,
+    number: (high?.number ?? 0) + 1,
     ...parsed.data,
-    status: "open" as const,
-    createdAt: timestamp,
-    updatedAt: timestamp,
+    assigneeId: parsed.data.assigneeId ?? null,
+    status: "open",
+    createdAt: at,
+    updatedAt: at,
   };
-
-  await db.insert(issues).values(row);
+  await db.insert(bugs).values(row);
   return c.json(row, 201);
 });
 
-issueRoutes.patch("/issues/:id", async (c) => {
-  const parsed = updateIssueSchema.safeParse(await c.req.json());
-  if (!parsed.success) {
-    return c.json({ error: "Invalid patch", fieldErrors: fieldErrors(parsed.error) }, 400);
-  }
+/* FR-12. Triage is its own endpoint rather than a PATCH of \`status\`, because
+   it is a decision with a rule: only an open bug can be triaged, and the only
+   two answers are "confirmed" and "wontfix". A general PATCH would let the
+   client move a fixed bug back to open by accident. */
+bugRoutes.post("/bugs/:id/triage", async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const parsed = TriageOutcome.safeParse(
+    body && typeof body === "object" ? (body).outcome : undefined,
+  );
+  if (!parsed.success) return fail(c, 400, "Outcome must be 'confirmed' or 'wontfix'");
 
-  const [row] = await db
-    .update(issues)
-    .set({ ...parsed.data, updatedAt: now() })
-    .where(eq(issues.id, c.req.param("id")))
+  const [bug] = await db.select().from(bugs).where(eq(bugs.id, c.req.param("id")));
+  if (!bug) return fail(c, 404, "No such bug");
+  if (bug.status !== "open") return fail(c, 409, \`Already triaged: this bug is \${bug.status}\`);
+
+  const [updated] = await db
+    .update(bugs)
+    .set({ status: parsed.data, updatedAt: stamp() })
+    .where(eq(bugs.id, bug.id))
     .returning();
+  return c.json(updated);
+});`,
+          explanation:
+            "The triage handler is four lines of rule and three of work, which is the right ratio for a decision endpoint. It reads before it writes because it has to answer a question about the *current* state — a blind `UPDATE ... WHERE status = 'open'` would refuse correctly but could not say what the bug had been triaged as, and \"already triaged\" without the outcome sends the reader back to the list to find out. The 409 is deliberate: this is not a malformed request (400) and the bug exists (not 404); the request conflicts with the state of the thing.",
+          requires: "tsc (imports elided; see the repository for the full file)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "server/src/routes/bugs.ts — writing, and the triage rule",
+              requires: "tsc (imports elided; see the repository for the full file)",
+              code: `/* FR-7. */
+bugRoutes.post("/projects/:projectId/bugs", async (c) => {
+  const parsed = CreateBug.safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) return fail(c, 400, "Invalid bug report", flatten(parsed.error));
 
-  if (!row) return c.json({ error: "Issue not found" }, 404);
-  return c.json(row);
-});
+  const projectId = c.req.param("projectId");
+  const [high] = await db
+    .select({ number: sql<number>\`COALESCE(MAX(\${bugs.number}), 0)\` })
+    .from(bugs)
+    .where(eq(bugs.projectId, projectId));
 
-issueRoutes.post("/issues/:id/comments", async (c) => {
-  const issueId = c.req.param("id");
-  const parsed = createCommentSchema.safeParse(await c.req.json());
-  if (!parsed.success) {
-    return c.json({ error: "Invalid comment", fieldErrors: fieldErrors(parsed.error) }, 400);
-  }
-
-  const [issue] = await db.select({ id: issues.id }).from(issues).where(eq(issues.id, issueId));
-  if (!issue) return c.json({ error: "Issue not found" }, 404);
-
-  const row = { id: id("c"), issueId, ...parsed.data, createdAt: now() };
+  const at = stamp();
+  const row = {
+    id: id(),
+    projectId,
+    number: (high?.number ?? 0) + 1,
+    ...parsed.data,
+    assigneeId: parsed.data.assigneeId ?? null,
+    status: "open" as const,
+    createdAt: at,
+    updatedAt: at,
+  };
+  await db.insert(bugs).values(row);
   return c.json(row, 201);
-});`,
-          explanation:
-            "Note the order in the create handler: `...parsed.data` is spread first and `status` written after, so a client that sends a status cannot set it. Spreading a request body into a database row is only safe when the schema that produced it lists exactly the fields the client may set — which is the second reason the create schema is not derived from the entity.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "app",
-          title: "server/src/index.ts",
-          lang: "typescript",
-          code: `import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { issueRoutes } from "./routes/issues";
-import { projectRoutes } from "./routes/projects";
-
-const app = new Hono();
-
-/* The dev server is on 5173 and the API is on 8787, so they are different
-   origins and the browser will preflight. In production they are behind one
-   origin and this middleware does nothing. */
-app.use("/api/*", cors({ origin: ["http://localhost:5173"] }));
-
-app.route("/api", projectRoutes);
-app.route("/api", issueRoutes);
-
-/* One place where an unhandled throw becomes the same JSON error shape every
-   other failure uses, so the client never has to parse an HTML stack trace. */
-app.onError((error, c) => {
-  console.error(error);
-  return c.json({ error: "Internal server error" }, 500);
 });
 
-const port = Number(process.env.PORT ?? 8787);
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(\`API listening on http://localhost:\${info.port}\`);
+/* FR-12. Triage is its own endpoint rather than a PATCH of \`status\`, because
+   it is a decision with a rule: only an open bug can be triaged, and the only
+   two answers are "confirmed" and "wontfix". A general PATCH would let the
+   client move a fixed bug back to open by accident. */
+bugRoutes.post("/bugs/:id/triage", async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const parsed = TriageOutcome.safeParse(
+    body && typeof body === "object" ? (body as { outcome?: unknown }).outcome : undefined,
+  );
+  if (!parsed.success) return fail(c, 400, "Outcome must be 'confirmed' or 'wontfix'");
+
+  const [bug] = await db.select().from(bugs).where(eq(bugs.id, c.req.param("id")));
+  if (!bug) return fail(c, 404, "No such bug");
+  if (bug.status !== "open") return fail(c, 409, \`Already triaged: this bug is \${bug.status}\`);
+
+  const [updated] = await db
+    .update(bugs)
+    .set({ status: parsed.data, updatedAt: stamp() })
+    .where(eq(bugs.id, bug.id))
+    .returning();
+  return c.json(updated);
 });`,
-          output: `API listening on http://localhost:8787`,
-          explanation:
-            "Thirty lines, and `app.onError` is the one doing the most work. Without it an unexpected throw produces a framework's HTML error page, which the client's `response.json()` cannot parse — so a server bug arrives in the browser as a JSON syntax error pointing at the wrong file. With it, every failure in the system has the shape NFR-4 promised.",
-          requires: "the capstone project, with the database pushed and seeded",
+            },
+          ],
         },
       ],
       pitfalls: [
         {
-          title: "The `max(number) + 1` race",
-          body: "Two simultaneous creates can read the same highest number and both write it. The unique index on `(project_id, number)` means the second insert fails rather than silently duplicating — which is the important half — but a real product would wrap the read and the write in a transaction, or keep a counter on the project row. It is worth knowing that this is a known, bounded shortcut rather than something the design overlooked.",
+          title: "The `MAX(number) + 1` race",
+          body: "Two reports filed in the same millisecond can read the same maximum and both claim `WEB-7`. The unique index on `(project_id, number)` turns that into a failed insert rather than two bugs with one name, which is the right failure — but the honest fix is a per-project counter row updated in the same transaction, or a database sequence. This project keeps the simple version and the index that catches it, and says so, because an unmentioned race is worse than a known one.",
         },
         {
           title: "`like` is not full-text search",
-          body: "`LIKE '%text%'` cannot use an index, so FR-4's search is a table scan. At a few thousand issues that is imperceptible and the honest answer; at a million it is SQLite's FTS5 extension, and the migration is contained to this one line. Knowing which one you have is the difference between a shortcut and a bug.",
+          body: "`like(bugs.title, '%text%')` cannot use an index, so it is a table scan on every keystroke. At six rows that is free; at forty thousand it is the slowest thing in the app. It is the right code for FR-5's actual requirement and the wrong code for a search feature, and the difference is worth knowing before somebody asks for the second one. SQLite's answer is FTS5.",
         },
       ],
     },
@@ -575,63 +814,61 @@ serve({ fetch: app.fetch, port }, (info) => {
       id: "running",
       heading: "Three commands to a running system",
       body: [
-        "NFR-10, checked. From a clean clone, this is everything.",
+        "NFR-10 says a clean clone runs in three commands. This is that, and it is worth doing before writing any of the client, because it is the point where the schema, the database and the routes have to agree.",
       ],
       examples: [
         {
-          id: "setup",
-          title: "Clean clone to seeded database",
+          id: "boot",
+          title: "Creating the database and filling it",
           lang: "bash",
-          code: `npm install                                  # links the three workspaces
+          code: `npm install
+npm run db:push && npm run db:seed`,
+          output: `> drizzle-kit push
 
-npm run db:push --workspace server           # creates the tables from schema.ts
-npm run db:seed --workspace server           # 2 users, 1 project, 4 issues
+No config path provided, using default 'drizzle.config.ts'
+Reading config file 'server/drizzle.config.ts'
+[✓] Pulling schema from database...
+[✓] Changes applied
 
-npm run dev                                  # server on 8787, web on 5173`,
-          output: `[✓] Changes applied
-Seeded 2 users, 1 project, 4 issues, 1 comment.
-API listening on http://localhost:8787`,
+> tsx src/db/seed.ts
+
+seeded 3 users, 2 projects, 6 bugs, 3 comments`,
           explanation:
-            "`db:push` reads `schema.ts` and applies the difference directly to the database — no migration files, which is the right trade for a project at this stage. A production system would use `drizzle-kit generate` instead and commit the SQL, because \"apply the difference\" is not something you want deciding on its own what to do with a column that has data in it.",
-          requires: "the capstone project and a local SQLite file",
+            "`db:push` runs `drizzle-kit push`, which diffs the TypeScript schema against the actual database and applies the difference — no migration files while the shape is still moving. \"Pulling schema from database\" is it reading what is already there in order to work out the difference, which is why the same command is safe to run again. Once the project has users, that changes: `drizzle-kit generate` writes a migration you can read and review, and `push` becomes the thing you only do locally. The third command, `npm run dev`, starts the API on 8787 and Vite on 5173.",
+          requires: "Node 20+, and the repository checked out (npm output trimmed to the two tools' own lines)",
         },
       ],
     },
   ],
   interviewQuestions: [
     {
-      question: "Why not derive the create schema from the entity schema with .omit()?",
+      question: "Why build the database column's enum from the shared array rather than writing the strings twice?",
       answer:
-        "Because the client and the server own different fields, and an omit expresses the wrong thing. The server owns id, number, createdAt and updatedAt, so a create body containing them should be rejected rather than ignored — a client sending \"number\": 1 believes something false and should find out. The create schema also carries rules that are about the request rather than about the entity: trimming, maximum lengths, and defaults. An entity schema that trimmed its title would be asserting that stored titles are trimmed, which is a different claim.",
+        "Because the two copies drift, and nothing catches it. Written twice, adding `critical` to the client's `<select>` produces a value the column will happily store — SQLite does not enforce a CHECK you did not write — and now a row exists that the client's own parser rejects on the way back. Built from the shared array, the column's TypeScript type *is* the union, so the mismatch is a compile error at the point of insert, and adding a severity is one edit that both sides pick up.",
     },
     {
-      question: "How does one Zod schema end up enforcing the same rule in three places?",
+      question: "The triage endpoint reads the bug before updating it. Isn't that a wasted round trip?",
       answer:
-        "A schema is a runtime value that can validate, and z.infer extracts the TypeScript type it describes — so one declaration gives you a validator and a type that cannot disagree. In Tracer the STATUSES tuple is passed to z.enum for the request validator, to Drizzle's text() for the database CHECK constraint, and inferred into the Status union the components are written against. Adding \"blocked\" to that one tuple updates all three, and any switch that is no longer exhaustive stops compiling.",
+        "It is an extra query, and it buys the error message. `UPDATE ... WHERE id = ? AND status = 'open'` would refuse the illegal case correctly by returning zero rows, but zero rows cannot tell you *why* — a missing bug and an already-triaged bug look identical, so the handler could not choose between 404 and 409, or say what the bug had been triaged as. Under real contention you would want both: read for the message, and keep the status in the UPDATE's WHERE clause so the check and the write cannot be split by another request.",
     },
     {
-      question: "Why .catch() on the query schema but .optional() elsewhere?",
+      question: "Why does the list build an array of conditions instead of chaining `.where()` calls?",
       answer:
-        "Because of who wrote the value. A query string is in the address bar, so ?status=banana will happen — from a stale bookmark or a typo — and the right response is to ignore the filter and render the page rather than throw during render. Everywhere else the data came from your own code or your own server, so invalid data means a bug, and failing loudly at the boundary is what surfaces it. The distinction is user-editable input versus internal data, not strictness for its own sake.",
+        "Because the number of conditions is not known until runtime, and a query builder that is reassigned in four `if` branches is both harder to read and easy to get wrong — a missed reassignment silently drops a filter. Collecting conditions into an array and spreading them into one `and()` makes the filter set data rather than control flow: the shape of the query is one expression, an empty array produces no WHERE clause, and adding a fifth filter is one push.",
     },
     {
-      question: "What does app.onError actually buy you?",
+      question: "What is wrong with `Bug.partial()` as the update schema?",
       answer:
-        "It makes every failure in the system the same shape. Without it, an unhandled throw produces the framework's HTML error page — which the client's response.json() cannot parse — so a server bug reaches the browser as a JSON syntax error pointing at the wrong file, and the actual stack trace is on the other side of the network. With it, a 500 is `{ error }` like every other failure, the client's one error path renders it, and the real error is logged where it happened.",
+        "It makes every field optional, including the ones the server owns — so a client could send `id`, `number`, `createdAt`, or file something already `fixed`. It also drifts in the wrong direction: adding a column to the entity silently adds it to what clients may write. An explicit `UpdateBug` lists the three fields that are actually editable, so a new column is not writable until somebody decides it should be.",
     },
   ],
   takeaways: [
-    "Three packages: the third exists so the other two cannot disagree",
-    "`lib/` is React-free app-wide code; `hooks/` needs a second caller; everything else starts in the feature",
-    "`as const` on the vocabulary tuples, or every exhaustiveness check silently stops checking",
-    "Request schemas are written, not derived — the client and server own different fields",
-    "`.partial()` the request object, never the entity",
-    "`.catch()` for user-editable input, `.optional()` for everything else",
-    "`z.input` for what a caller may pass; `z.infer` for what comes out",
-    "Cascade where the child cannot exist alone; set-null where the absence is a real state",
-    "Build the filter array, then `and(...filters)` — three optionals, three ifs",
-    "Spread the parsed body, then write the server-owned fields after it",
-    "One `onError`, so every failure in the system has one shape",
+    "One schema per request shape, never a partial of the entity — the server owns id, number, status and timestamps",
+    "Build database enums from the shared vocabulary, so a column and a `<select>` cannot disagree",
+    "`.catch()` for values from the address bar, `.optional()` for values from your own client",
+    "An ordering the data has no natural sort for should be stated with a CASE, not left to alphabetical luck",
+    "A decision with a rule gets its own endpoint; 409 is for a request that conflicts with the state, not the shape",
+    "Seed with fixed ids and fixed timestamps, or nothing downstream is reproducible",
   ],
   status: "available",
 };

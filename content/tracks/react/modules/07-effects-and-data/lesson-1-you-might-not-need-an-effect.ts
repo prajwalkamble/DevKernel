@@ -28,12 +28,6 @@ export const youMightNotNeedAnEffectLesson: Lesson = {
     {
       id: "derived",
       heading: "Deriving a value from other values",
-      visual: {
-        id: "derived-not-effect-visual",
-        kind: "react-state",
-        algorithm: "derived-state",
-        title: "Storing it against computing it",
-      },
       body: [
         "The most common unnecessary effect in every codebase: some state, and an effect that keeps it in step with props or other state.",
         "Run it and watch what the component actually does.",
@@ -42,8 +36,62 @@ export const youMightNotNeedAnEffectLesson: Lesson = {
         {
           id: "derived-state",
           title: "One value derived two ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+
+/* Reaching for an effect to derive one value from two others. */
+function ViaEffect({ first, last }) {
+  const [full, setFull] = useState("");
+  useEffect(() => {
+    setFull(first + " " + last);
+  }, [first, last]);
+  console.log("  ViaEffect renders with full =", JSON.stringify(full));
+  return <p>{full}</p>;
+}
+
+/* The same value, computed where it is used. */
+function Plain({ first, last }) {
+  const full = first + " " + last;
+  console.log("  Plain renders with full =", JSON.stringify(full));
+  return <p>{full}</p>;
+}
+
+const root = createRoot(container);
+
+console.log("mount ViaEffect:");
+act(() => { root.render(<ViaEffect first="Ada" last="Lovelace" />); });
+console.log("  DOM:", container.innerHTML);
+
+console.log("change the last name prop:");
+act(() => { root.render(<ViaEffect first="Ada" last="Byron" />); });
+console.log("  DOM:", container.innerHTML);
+
+const second = document.createElement("div");
+document.body.appendChild(second);
+console.log("mount Plain:");
+act(() => { createRoot(second).render(<Plain first="Ada" last="Lovelace" />); });
+console.log("  DOM:", second.innerHTML);`,
+          output: `mount ViaEffect:
+  ViaEffect renders with full = ""
+  ViaEffect renders with full = "Ada Lovelace"
+  DOM: <p>Ada Lovelace</p>
+change the last name prop:
+  ViaEffect renders with full = "Ada Lovelace"
+  ViaEffect renders with full = "Ada Byron"
+  DOM: <p>Ada Byron</p>
+mount Plain:
+  Plain renders with full = "Ada Lovelace"
+  DOM: <p>Ada Lovelace</p>`,
+          explanation:
+            "Read the middle block. The prop became `Byron`, and the component's **first** render after that still says `Ada Lovelace` — the old value, because the effect that would fix it has not run yet. Then a second render corrects it. The version with no effect and no state gets it right on the first pass, in one render, with three fewer lines.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const container = document.createElement("div");
@@ -81,19 +129,8 @@ document.body.appendChild(second);
 console.log("mount Plain:");
 act(() => { createRoot(second).render(<Plain first="Ada" last="Lovelace" />); });
 console.log("  DOM:", second.innerHTML);`,
-          output: `mount ViaEffect:
-  ViaEffect renders with full = ""
-  ViaEffect renders with full = "Ada Lovelace"
-  DOM: <p>Ada Lovelace</p>
-change the last name prop:
-  ViaEffect renders with full = "Ada Lovelace"
-  ViaEffect renders with full = "Ada Byron"
-  DOM: <p>Ada Byron</p>
-mount Plain:
-  Plain renders with full = "Ada Lovelace"
-  DOM: <p>Ada Lovelace</p>`,
-          explanation:
-            "Read the middle block. The prop became `Byron`, and the component's **first** render after that still says `Ada Lovelace` — the old value, because the effect that would fix it has not run yet. Then a second render corrects it. The version with no effect and no state gets it right on the first pass, in one render, with three fewer lines.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -118,8 +155,68 @@ mount Plain:
         {
           id: "reset-with-key",
           title: "Clearing a draft: effect against key",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* Version 1: an effect that watches the prop and clears the draft. */
+function ViaEffect({ userId }) {
+  const [draft, setDraft] = useState("");
+  useEffect(() => { setDraft(""); }, [userId]);
+  console.log(\`  render userId=\${userId} draft=\${JSON.stringify(draft)}\`);
+  return <input value={draft} onChange={(e) => setDraft(e.target.value)} />;
+}
+
+/* Version 2: no effect at all. A different key is a different component
+   instance, so React discards the old state instead of clearing it. */
+function Editor({ userId }) {
+  const [draft, setDraft] = useState("");
+  console.log(\`  render userId=\${userId} draft=\${JSON.stringify(draft)}\`);
+  return <input value={draft} onChange={(e) => setDraft(e.target.value)} />;
+}
+const ViaKey = ({ userId }) => <Editor key={userId} userId={userId} />;
+
+function drive(Component, label) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  const input = () => container.querySelector("input");
+  console.log(label);
+  act(() => { root.render(<Component userId="ada" />); });
+  act(() => {
+    // What the browser does when the user types.
+    const node = input();
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")
+      .set.call(node, "half-written note");
+    node.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  console.log("  after typing:", JSON.stringify(input().value));
+  act(() => { root.render(<Component userId="grace" />); });
+  console.log("  after switching user:", JSON.stringify(input().value));
+}
+
+drive(ViaEffect, "reset with an effect:");
+drive(ViaKey, "reset with a key:");`,
+          output: `reset with an effect:
+  render userId=ada draft=""
+  render userId=ada draft="half-written note"
+  render userId=ada draft="half-written note"
+  after typing: "half-written note"
+  render userId=grace draft="half-written note"
+  render userId=grace draft=""
+  after switching user: ""
+reset with a key:
+  render userId=ada draft=""
+  render userId=ada draft="half-written note"
+  after typing: "half-written note"
+  render userId=grace draft=""
+  after switching user: ""`,
+          explanation:
+            "Look at the line `render userId=grace draft=\"half-written note\"`. That is one render, committed to the DOM, showing **Grace's editor containing Ada's unsaved text**. On a real screen that is a visible flash, and if the user is quick it is a keystroke landing in the wrong record. The keyed version never produces that frame: a new key means a new instance, so the old state is thrown away before anything renders.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* Version 1: an effect that watches the prop and clears the draft. */
@@ -160,22 +257,8 @@ function drive(Component: (p: { userId: string }) => React.JSX.Element, label: s
 
 drive(ViaEffect, "reset with an effect:");
 drive(ViaKey, "reset with a key:");`,
-          output: `reset with an effect:
-  render userId=ada draft=""
-  render userId=ada draft="half-written note"
-  render userId=ada draft="half-written note"
-  after typing: "half-written note"
-  render userId=grace draft="half-written note"
-  render userId=grace draft=""
-  after switching user: ""
-reset with a key:
-  render userId=ada draft=""
-  render userId=ada draft="half-written note"
-  after typing: "half-written note"
-  render userId=grace draft=""
-  after switching user: ""`,
-          explanation:
-            "Look at the line `render userId=grace draft=\"half-written note\"`. That is one render, committed to the DOM, showing **Grace's editor containing Ada's unsaved text**. On a real screen that is a visible flash, and if the user is quick it is a keystroke landing in the wrong record. The keyed version never produces that frame: a new key means a new instance, so the old state is thrown away before anything renders.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -200,8 +283,76 @@ reset with a key:
         {
           id: "effect-vs-handler",
           title: "One click, counted at the server",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, StrictMode, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let sent = 0;
+const post = (what) => { sent++; console.log(\`  POST /analytics \${what}\`); };
+
+/* "The user added something, so tell the server" — written as an effect that
+   watches the fact. \`added\` lives in the parent, as it would if the cart were
+   shared, and the panel unmounts when the user switches tab. */
+function Panel({ added, onAdd }) {
+  useEffect(() => {
+    if (added) post("add-to-cart");
+  }, [added]);
+  return <button type="button" onClick={onAdd}>Add</button>;
+}
+
+/* The same thing, sent from the place where the event happened. */
+function HandlerPanel({ onAdd }) {
+  return (
+    <button type="button" onClick={() => { onAdd(); post("add-to-cart"); }}>Add</button>
+  );
+}
+
+function Shop({ effectVersion }) {
+  const [added, setAdded] = useState(false);
+  const [tab, setTab] = useState("shop");
+  return (
+    <>
+      {tab === "shop" && (effectVersion
+        ? <Panel added={added} onAdd={() => setAdded(true)} />
+        : <HandlerPanel onAdd={() => setAdded(true)} />)}
+      <button type="button" id="tab" onClick={() => setTab((t) => (t === "shop" ? "help" : "shop"))}>
+        switch tab
+      </button>
+    </>
+  );
+}
+
+function drive(effectVersion, label) {
+  sent = 0;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  console.log(label);
+  act(() => { root.render(<StrictMode><Shop effectVersion={effectVersion} /></StrictMode>); });
+  const click = (id) =>
+    act(() => { (id ? container.querySelector(\`#\${id}\`) : container.querySelector("button")).dispatchEvent(new MouseEvent("click", { bubbles: true })); });
+  click();               // Add
+  click("tab");          // leave the shop tab
+  click("tab");          // come back
+  console.log(\`  the user clicked Add once; the server was told \${sent} time(s)\`);
+}
+
+drive(true, "the fact, watched by an effect:");
+drive(false, "the event, handled where it happened:");`,
+          output: `the fact, watched by an effect:
+  POST /analytics add-to-cart
+  POST /analytics add-to-cart
+  POST /analytics add-to-cart
+  the user clicked Add once; the server was told 3 time(s)
+the event, handled where it happened:
+  POST /analytics add-to-cart
+  the user clicked Add once; the server was told 1 time(s)`,
+          explanation:
+            "One click, three requests. The first fired when `added` became true. Then the user visited another tab and came back: the panel re-mounted, `added` was still true, and the effect stated the fact again — twice, because Strict Mode mounts a component, unmounts it and mounts it again. The handler version fires once per click because a click happens once.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, StrictMode, act } from "react";
 import { createRoot } from "react-dom/client";
 
 let sent = 0;
@@ -256,16 +407,8 @@ function drive(effectVersion: boolean, label: string) {
 
 drive(true, "the fact, watched by an effect:");
 drive(false, "the event, handled where it happened:");`,
-          output: `the fact, watched by an effect:
-  POST /analytics add-to-cart
-  POST /analytics add-to-cart
-  POST /analytics add-to-cart
-  the user clicked Add once; the server was told 3 time(s)
-the event, handled where it happened:
-  POST /analytics add-to-cart
-  the user clicked Add once; the server was told 1 time(s)`,
-          explanation:
-            "One click, three requests. The first fired when `added` became true. Then the user visited another tab and came back: the panel re-mounted, `added` was still true, and the effect stated the fact again — twice, because Strict Mode mounts a component, unmounts it and mounts it again. The handler version fires once per click because a click happens once.",
+            },
+          ],
         },
       ],
       pitfalls: [

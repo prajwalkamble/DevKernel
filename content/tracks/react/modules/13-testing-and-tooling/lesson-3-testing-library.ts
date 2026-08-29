@@ -35,7 +35,7 @@ export const testingLibraryLesson: Lesson = {
         {
           id: "config",
           title: "The whole setup",
-          lang: "typescript",
+          lang: "javascript",
           code: `// vitest.config.ts
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
@@ -72,18 +72,11 @@ import "@testing-library/jest-dom/vitest";`,
         "Testing Library gives you many queries and an order to prefer them in, and the order is not a style preference: each rung down is one step further from what a user can actually perceive.",
         "Watch the ladder run against a small page — the query it picks for each element is computed from what that element offers, so the one that has to fall all the way to a test id is the one no user could have perceived either.",
       ],
-      visual: {
-        id: "query-ladder-visual",
-        kind: "react-tooling",
-        algorithm: "query-priority",
-        title: "Six elements down the ladder",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "the-queries",
           title: "The rungs, in order",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* 1. Role and accessible name. The default for nearly everything. */
 screen.getByRole("button", { name: "Sign in" });
 screen.getByRole("textbox", { name: "Email address" });
@@ -135,7 +128,7 @@ screen.getByTestId("toast-container");`,
         {
           id: "prefix-choice",
           title: "The same assertion, three ways, two of them wrong",
-          lang: "tsx",
+          lang: "jsx",
           code: `await user.click(screen.getByRole("button", { name: "Save" }));
 
 /* ✗ Fails, and looks like a bug in the component. The save is async, so

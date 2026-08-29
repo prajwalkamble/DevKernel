@@ -45,6 +45,13 @@ export interface CodeVariant {
   code: string;
   /** Overrides the example's `output` when this language genuinely differs. */
   output?: string;
+  /**
+   * Overrides the example's `title`. Needed wherever the title names a file:
+   * the module a TypeScript project keeps in `db/schema.ts` is `db/schema.js`
+   * in a JavaScript one, and a heading that disagrees with the code under it
+   * is worse than no heading.
+   */
+  title?: string;
   /** As on CodeExample: names a toolchain the verifier does not have. */
   requires?: string;
 }

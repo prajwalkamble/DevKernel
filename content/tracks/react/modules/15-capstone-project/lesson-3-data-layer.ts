@@ -2,343 +2,627 @@ import type { Lesson } from "@/content/types";
 
 export const capstoneDataLayerLesson: Lesson = {
   id: "react-capstone-data-layer",
-  slug: "tracer-the-data-layer",
+  slug: "bug-tracker-the-data-layer",
   moduleSlug: "capstone-project",
-  title: "Tracer: The Data Layer",
+  title: "Bug Tracker: The Data Layer",
   summary:
-    "Step four of the build — everything between the API and the components. One typed fetch wrapper that parses instead of casting, a table of query keys whose nesting makes a single invalidation do the right thing, and six hooks: three that ask questions, two that write, and one that keeps the filters in the URL.",
-  estimatedMinutes: 30,
+    "Step four. One fetch wrapper that parses instead of casting, one table of cache keys, and seven hooks — including the three mutations that behave differently on purpose: a status change that is optimistic, a triage decision that optimistically removes a row, and a comment that is deliberately not optimistic at all.",
+  estimatedMinutes: 32,
   objectives: [
-    "Build a typed fetch layer that parses rather than casts",
-    "Design query keys whose nesting makes one invalidation do the right thing",
-    "Write a hook per question the UI asks, not a hook per endpoint",
-    "Keep the filters in the URL without a render loop",
-    "Decide which mutations may be optimistic, and defend the answer",
+    "Write a fetch wrapper that parses responses and produces one failure type",
+    "Design cache keys so a partial key invalidates everything beneath it",
+    "Keep the filters in the URL, and know why that is a hook rather than state",
+    "Choose which mutations should be optimistic, and justify the ones that should not",
+    "Roll back an optimistic update that removed a row, not just changed a field",
   ],
   sections: [
     {
-      id: "fetch-layer",
-      heading: "One place that fetches",
-      visual: {
-        id: "query-key-matching-visual",
-        kind: "react-data",
-        algorithm: "key-matching",
-        title: "One invalidateQueries, and every entry it reaches",
-      },
+      id: "fetching",
+      heading: "One way in and out",
       body: [
-        "Everything above this file works with typed values and thrown errors. The only code in the app that knows about status codes, JSON parsing and the base URL is here — which is what makes the whole data layer testable by swapping one network handler rather than by mocking modules.",
-        "The `schema` parameter is NFR-1 made mandatory. There is no way to call `request` without saying what shape you expect, so there is no way to accidentally cast.",
+        "Every request in the app goes through one function. It does three things nothing else has to repeat: it sets the JSON header when there is a body, it turns a failed response into a typed error carrying the shape from NFR-4, and it *parses* the success case rather than casting it.",
       ],
       examples: [
         {
-          id: "api-ts",
-          title: "src/lib/api.ts",
-          lang: "typescript",
-          code: `import { apiErrorSchema } from "@tracer/shared";
-import type { ZodType } from "zod";
+          id: "api-module",
+          title: "web/src/lib/api.js",
+          lang: "javascript",
+          code: `import { z } from "zod";
+import { ApiError } from "@bug-tracker/shared";
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8787/api";
 
-/** A failed request, carrying the field errors a form needs to render. */
-export class ApiRequestError extends Error {
-  readonly status: number;
-  readonly fieldErrors: Record<string, string>;
-
-  constructor(status: number, message: string, fieldErrors: Record<string, string> = {}) {
-    super(message);
-    this.name = "ApiRequestError";
+/** A failure the server described, carrying the one error shape from NFR-4. */
+export class ApiFailure extends Error {
+  // TypeScript would declare and assign these three in the signature, with
+  // \`readonly status: number\`. JavaScript has no parameter properties, so the
+  // fields are assigned here instead.
+  constructor(status, fieldErrors, message) {
+    super(message ?? "Request failed");
     this.status = status;
     this.fieldErrors = fieldErrors;
+    this.name = "ApiFailure";
   }
 }
 
-interface RequestOptions<T> {
-  /** Parsed with the *shared* schema, so a server change fails here loudly. */
-  schema: ZodType<T>;
-  method?: "GET" | "POST" | "PATCH" | "DELETE";
-  body?: unknown;
-  signal?: AbortSignal;
-}
-
-export async function request<T>(path: string, options: RequestOptions<T>): Promise<T> {
-  const { schema, method = "GET", body, signal } = options;
-
+/* Parse, do not cast — NFR-1. Without a compiler the temptation is to trust
+   \`await response.json()\` and read fields off it; the first time the backend
+   renames one, the failure surfaces somewhere far away as \`undefined\`. Parsing
+   turns that into one clear error here, at the boundary that can explain it. */
+export async function request(path, schema, init) {
   const response = await fetch(\`\${BASE}\${path}\`, {
-    method,
-    signal,
-    headers: body === undefined ? undefined : { "content-type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    ...init,
+    headers: init?.body ? { "content-type": "application/json", ...init.headers } : init?.headers,
   });
 
-  const payload: unknown = await response.json().catch(() => null);
-
   if (!response.ok) {
-    const parsed = apiErrorSchema.safeParse(payload);
-    throw new ApiRequestError(
+    const problem = ApiError.safeParse(await response.json().catch(() => null));
+    throw new ApiFailure(
       response.status,
-      parsed.success ? parsed.data.error : \`Request failed (\${response.status})\`,
-      parsed.success ? (parsed.data.fieldErrors ?? {}) : {},
+      problem.success ? problem.data.fieldErrors : undefined,
+      problem.success ? problem.data.error : \`HTTP \${response.status}\`,
     );
   }
 
-  /* Parse rather than cast. A cast is a promise the compiler cannot keep; a
-     parse is a check that turns a backend change into one clear error here
-     instead of \`undefined is not an object\` three components away. */
-  return schema.parse(payload);
+  return schema.parse(await response.json());
 }`,
           explanation:
-            "Three details earn their place. `fetch` does not reject on a 404 or a 500, so the `!response.ok` check is not optional — omitting it is the single most common bug in hand-rolled fetch code. The error body is itself parsed with `apiErrorSchema`, because a 500 from a proxy will not have the shape your server promised. And `signal` is threaded through: it is what lets React Query abort a request whose answer is no longer wanted.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "keys",
-          title: "src/lib/queryKeys.ts",
-          lang: "typescript",
-          code: `import type { IssueQuery } from "@tracer/shared";
+            "The generic is `z.ZodType<T>` rather than a concrete schema type, so callers pass `Bug`, `z.array(Bug)` or anything else and get the parsed type back with no annotation. Note the two `.catch(() => null)` calls around `response.json()`: a 500 from a proxy is very often HTML, and `await response.json()` on HTML throws a `SyntaxError` that would replace the real failure with a parsing one. Falling back to `null` lets `ApiError.safeParse` fail cleanly and the status code become the message.",
+          requires: "tsc (this module only declares; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "web/src/lib/api.ts",
+              requires: "tsc (this module only declares; it prints nothing)",
+              code: `import { z } from "zod";
+import { ApiError } from "@bug-tracker/shared";
 
-/**
- * Every cache key in the app, in one object.
- *
- * Keys are built by functions so they cannot be mistyped at a call site, and
- * they nest — \`issues.list(id, filters)\` starts with \`issues.all\`, so
- * invalidating \`issues.all\` invalidates every list and every detail under it.
- * That prefix relationship is the entire reason to centralise them.
- */
-export const queryKeys = {
-  projects: ["projects"] as const,
-  users: ["users"] as const,
+const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8787/api";
 
-  issues: {
-    all: ["issues"] as const,
-    list: (projectId: string, query: IssueQuery) =>
-      [...queryKeys.issues.all, "list", projectId, query] as const,
-    detail: (issueId: string) => [...queryKeys.issues.all, "detail", issueId] as const,
-    comments: (issueId: string) => [...queryKeys.issues.all, "detail", issueId, "comments"] as const,
-  },
-} as const;`,
-          explanation:
-            "The nesting is the design. React Query matches keys by prefix, so `invalidateQueries({ queryKey: queryKeys.issues.all })` after a mutation refetches every issue list under every filter *and* every open detail — which is what you want, because a status change alters both. Keys written as string literals at eleven call sites cannot have that property, and the bug it causes — a stale list after a successful write — is one people chase for an afternoon.",
-          requires: "the capstone project (this file is type-checked, not run)",
+/** A failure the server described, carrying the one error shape from NFR-4. */
+export class ApiFailure extends Error {
+  constructor(
+    readonly status: number,
+    readonly fieldErrors?: ApiError["fieldErrors"],
+    message?: string,
+  ) {
+    super(message ?? "Request failed");
+    this.name = "ApiFailure";
+  }
+}
+
+/* Parse, do not cast — NFR-1. \`as Bug[]\` compiles and is a lie the compiler
+   will then defend: every downstream error points somewhere other than the
+   wrong assumption. Parsing turns a backend change into one clear error here,
+   at the boundary that can actually explain it. */
+export async function request<T>(
+  path: string,
+  schema: z.ZodType<T>,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetch(\`\${BASE}\${path}\`, {
+    ...init,
+    headers: init?.body ? { "content-type": "application/json", ...init.headers } : init?.headers,
+  });
+
+  if (!response.ok) {
+    const problem = ApiError.safeParse(await response.json().catch(() => null));
+    throw new ApiFailure(
+      response.status,
+      problem.success ? problem.data.fieldErrors : undefined,
+      problem.success ? problem.data.error : \`HTTP \${response.status}\`,
+    );
+  }
+
+  return schema.parse(await response.json());
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
         {
-          title: "The filter object is part of the key, and that is deliberate",
-          body: "`list(projectId, query)` puts the whole filter object in the key, so changing a filter is a *different query* rather than a refetch of the same one. That is what makes going back to a filter you already used instant — the answer is still in the cache. It also means the key must be serialisable and stable: React Query hashes it, so `{ status: \"open\" }` and `{ status: \"open\" }` match, but a key containing a function or a fresh object identity per render would never hit.",
+          title: "`response.ok` is not `response.status === 200`",
+          body: "`ok` is true for the whole 2xx range, which is what you want — the create endpoint returns 201. Checking for 200 specifically would turn every successful report into an error, and it is the kind of bug that passes review because the happy path in the test fixture happens to return 200.",
         },
       ],
     },
     {
-      id: "query-hooks",
-      heading: "A hook per question, not per endpoint",
+      id: "keys",
+      heading: "Every cache key in one table",
       body: [
-        "The feature's `api.ts` has one function per endpoint. The hooks are a different layer, and they exist to answer the questions the *screens* ask — which is why `useIssue` and `useComments` live in one file: they are two questions about the same screen.",
-        "`useIssues` is where FR-1 through FR-4 and NFR-6 and NFR-8 all land, in about ten lines.",
+        "A cache key written inline is a cache key that will be written slightly differently somewhere else, and two spellings of the same key are two caches. So they live in one object, and they are built so that a shorter key is a prefix of every longer one.",
       ],
       examples: [
         {
-          id: "use-issues",
-          title: "src/features/issues/hooks/useIssues.ts",
-          lang: "typescript",
-          code: `import { useQuery } from "@tanstack/react-query";
-import type { Issue, IssueQuery } from "@tracer/shared";
-import { queryKeys } from "../../../lib/queryKeys";
-import { listIssues } from "../api";
-
-export function useIssues(projectId: string, query: IssueQuery) {
-  return useQuery<Issue[]>({
-    queryKey: queryKeys.issues.list(projectId, query),
-    queryFn: ({ signal }) => listIssues(projectId, query, signal),
-    /* Keeps the previous list on screen while the new one loads, so changing
-       a filter does not flash a spinner over content that is still valid. */
-    placeholderData: (previous) => previous,
-  });
-}`,
+          id: "keys-table",
+          title: "web/src/lib/queryKeys.js",
+          lang: "javascript",
+          code: `/* One table of keys, so no component ever writes a key by hand. Every key
+   starts with the same prefix as its parents, which is what makes a partial
+   key invalidate everything beneath it: invalidating ["bugs"] reaches every
+   filtered list, and ["bugs", "list", projectId] reaches only that project's. */
+export const queryKeys = {
+  users: () => ["users"],
+  projects: () => ["projects"],
+  bugs: () => ["bugs"],
+  bugList: (projectId, filters) =>
+    [...queryKeys.bugs(), "list", projectId, filters],
+  triage: (projectId) => [...queryKeys.bugs(), "triage", projectId],
+  bug: (bugId) => [...queryKeys.bugs(), "detail", bugId],
+  comments: (bugId) => [...queryKeys.bug(bugId), "comments"],
+};`,
           explanation:
-            "`signal` comes from React Query and is forwarded to `fetch`, so a filter changed three times in a second leaves one in-flight request rather than three — NFR-6, and also the cure for module 7's race condition, where the slowest response wins. `placeholderData` is NFR-8: the previous list stays on screen rather than the page collapsing to a spinner.",
-          requires: "the capstone project (this file is type-checked, not run)",
-        },
-        {
-          id: "use-filters",
-          title: "src/features/issues/hooks/useIssueFilters.ts — FR-5",
-          lang: "typescript",
-          code: `import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router";
-import { issueQuerySchema, type IssueQuery } from "@tracer/shared";
+            "The prefix relationship is the whole design. TanStack Query matches keys *partially*, so `invalidateQueries({ queryKey: [\"bugs\"] })` reaches every list, every filtered list, the triage queue, every open bug and every comment thread — which is exactly what a mutation that changed a bug's status should do, because it may have changed which lists that bug belongs to. Building `comments` on top of `bug` rather than as a sibling means invalidating one bug also refreshes its comments, and nothing else's.",
+          requires: "tsc (this module only declares; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "web/src/lib/queryKeys.ts",
+              requires: "tsc (this module only declares; it prints nothing)",
+              code: `import type { BugQuery } from "@bug-tracker/shared";
 
-/**
- * The filters, stored in the URL rather than in \`useState\`.
- *
- * This is module 4's rule applied to a real screen: the filters are not
- * component state, they are *where you are*.
- */
-export function useIssueFilters(): [IssueQuery, (next: Partial<IssueQuery>) => void] {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const filters = useMemo(
-    () => issueQuerySchema.parse(Object.fromEntries(searchParams)),
-    [searchParams],
-  );
-
-  const setFilters = useCallback(
-    (next: Partial<IssueQuery>) => {
-      setSearchParams(
-        (current) => {
-          const params = new URLSearchParams(current);
-          for (const [key, value] of Object.entries(next)) {
-            if (value) params.set(key, value);
-            else params.delete(key);
-          }
-          return params;
-        },
-        /* Twenty keystrokes in a search box should not be twenty back-button
-           presses. */
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
-
-  return [filters, setFilters];
-}`,
-          explanation:
-            "The signature is deliberately `[value, setValue]` — the same shape as `useState` — so a component using it reads identically to one using local state, and swapping the implementation would not change a call site. The `useMemo` matters more than it looks: without it, `filters` is a new object every render, and since it goes into the query key, every render would be a cache miss.",
-          requires: "the capstone project (this file is type-checked, not run)",
+/* One table of keys, so no component ever writes a key by hand. Every key
+   starts with the same prefix as its parents, which is what makes a partial
+   key invalidate everything beneath it: invalidating ["bugs"] reaches every
+   filtered list, and ["bugs", "list", projectId] reaches only that project's. */
+export const queryKeys = {
+  users: () => ["users"] as const,
+  projects: () => ["projects"] as const,
+  bugs: () => ["bugs"] as const,
+  bugList: (projectId: string, filters: BugQuery) =>
+    [...queryKeys.bugs(), "list", projectId, filters] as const,
+  triage: (projectId: string) => [...queryKeys.bugs(), "triage", projectId] as const,
+  bug: (bugId: string) => [...queryKeys.bugs(), "detail", bugId] as const,
+  comments: (bugId: string) => [...queryKeys.bug(bugId), "comments"] as const,
+};`,
+            },
+          ],
         },
       ],
       pitfalls: [
         {
-          title: "`setFilters` must be stable",
-          body: "`IssueFilters` calls `onChange` from inside an effect that watches the debounced text. If `setFilters` were a new function each render, that effect would re-run every render and push the same value back into the URL forever — a render loop that only appears once the two pieces are wired together. The `useCallback` with `[setSearchParams]` is what prevents it, and this is the one place in the app where an unstable identity would be a bug rather than a missed optimisation.",
+          title: "The filters object is part of the key, and object identity is not",
+          body: "`bugList(projectId, filters)` puts the whole filter object into the key. That is correct — two different filter sets are two different results and must not share a cache entry — and it works because TanStack Query hashes keys structurally rather than by reference. It also means the key changes on every keystroke in the search box, which is exactly why FR-5's debounce is a requirement rather than a nicety.",
+        },
+      ],
+    },
+    {
+      id: "url-state",
+      heading: "The filters are not state",
+      body: [
+        "FR-6 says the filtered view has its own address. That single requirement decides where the filters live: not in `useState`, but in the URL, read and written through one hook.",
+      ],
+      examples: [
+        {
+          id: "filters-hook",
+          title: "web/src/hooks/useBugFilters.js",
+          lang: "javascript",
+          code: `import { useCallback } from "react";
+import { useSearchParams } from "react-router";
+import { BugQuery } from "@bug-tracker/shared";
+
+/* FR-6. The filters are not state: they are where you are. Keeping them in the
+   URL is what makes the filtered view shareable, reloadable and reachable with
+   the back button, and it is one hook rather than the four-file change it
+   becomes if you start with useState. */
+export function useBugFilters() {
+  const [params, setParams] = useSearchParams();
+
+  const filters = BugQuery.parse({
+    status: params.get("status") ?? undefined,
+    severity: params.get("severity") ?? undefined,
+    assigneeId: params.get("assigneeId") ?? undefined,
+    q: params.get("q") ?? undefined,
+  });
+
+  const setFilter = useCallback(
+    (key, value) => {
+      const next = new URLSearchParams(params);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      /* Replace rather than push: twenty keystrokes in the search box must not
+         become twenty entries the back button has to walk out of. */
+      setParams(next, { replace: key === "q" });
+    },
+    [params, setParams],
+  );
+
+  return { filters, setFilter };
+}`,
+          explanation:
+            "`BugQuery.parse` is doing real work here, and it is where the `.catch()` from the shared schemas pays off: `?status=banana` yields `undefined` rather than throwing, so an address somebody edited by hand degrades to \"no filter\" instead of an error screen. The `replace: key === \"q\"` line is the difference between a back button that works and one that does not — a dropdown change is a navigation the user meant, and a keystroke is not.",
+          requires: "tsc (this module only declares; it prints nothing)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "web/src/hooks/useBugFilters.ts",
+              requires: "tsc (this module only declares; it prints nothing)",
+              code: `import { useCallback } from "react";
+import { useSearchParams } from "react-router";
+import { BugQuery } from "@bug-tracker/shared";
+
+/* FR-6. The filters are not state: they are where you are. Keeping them in the
+   URL is what makes the filtered view shareable, reloadable and reachable with
+   the back button, and it is one hook rather than the four-file change it
+   becomes if you start with useState. */
+export function useBugFilters() {
+  const [params, setParams] = useSearchParams();
+
+  const filters = BugQuery.parse({
+    status: params.get("status") ?? undefined,
+    severity: params.get("severity") ?? undefined,
+    assigneeId: params.get("assigneeId") ?? undefined,
+    q: params.get("q") ?? undefined,
+  });
+
+  const setFilter = useCallback(
+    (key: keyof BugQuery, value: string | undefined) => {
+      const next = new URLSearchParams(params);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      /* Replace rather than push: twenty keystrokes in the search box must not
+         become twenty entries the back button has to walk out of. */
+      setParams(next, { replace: key === "q" });
+    },
+    [params, setParams],
+  );
+
+  return { filters, setFilter };
+}`,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "queries",
+      heading: "The queries",
+      body: [
+        "Two of the reads are worth showing together, because they are the same table asked two different questions — and having them as separate hooks with separate keys is what keeps the two orders from fighting.",
+      ],
+      examples: [
+        {
+          id: "bugs-hooks",
+          title: "web/src/hooks/useBugs.js",
+          lang: "javascript",
+          code: `const BugList = z.array(Bug);
+
+function toSearch(filters) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value) params.set(key, value);
+  }
+  const search = params.toString();
+  return search ? \`?\${search}\` : "";
+}
+
+export function useBugs(projectId, filters) {
+  return useQuery({
+    queryKey: queryKeys.bugList(projectId, filters),
+    queryFn: ({ signal }) =>
+      request(\`/projects/\${projectId}/bugs\${toSearch(filters)}\`, BugList, { signal }),
+    /* NFR-8. Without this, every filter change collapses the page to a spinner
+       and the reader loses their place; with it the previous list stays put
+       until the new one arrives. */
+    placeholderData: keepPreviousData,
+  });
+}
+
+/* FR-11. Its own key, because it is a different question with a different
+   order — not the list with a filter on it. */
+export function useTriageQueue(projectId) {
+  return useQuery({
+    queryKey: queryKeys.triage(projectId),
+    queryFn: ({ signal }) => request(\`/projects/\${projectId}/triage\`, BugList, { signal }),
+  });
+}`,
+          explanation:
+            "The `signal` is NFR-6's other half. TanStack Query hands each query function an `AbortSignal` and aborts it when the query is superseded — so typing quickly in the search box does not leave five in-flight requests racing to be the one that resolves last. Passing it through to `fetch` is the entire implementation; forgetting to pass it is a bug you cannot see, because the results still arrive and usually in order.",
+          requires: "tsc (imports elided; see the repository for the full file)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "web/src/hooks/useBugs.ts",
+              requires: "tsc (imports elided; see the repository for the full file)",
+              code: `const BugList = z.array(Bug);
+
+function toSearch(filters: BugQuery): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value) params.set(key, value);
+  }
+  const search = params.toString();
+  return search ? \`?\${search}\` : "";
+}
+
+export function useBugs(projectId: string, filters: BugQuery) {
+  return useQuery({
+    queryKey: queryKeys.bugList(projectId, filters),
+    queryFn: ({ signal }) =>
+      request(\`/projects/\${projectId}/bugs\${toSearch(filters)}\`, BugList, { signal }),
+    /* NFR-8. Without this, every filter change collapses the page to a spinner
+       and the reader loses their place; with it the previous list stays put
+       until the new one arrives. */
+    placeholderData: keepPreviousData,
+  });
+}
+
+/* FR-11. Its own key, because it is a different question with a different
+   order — not the list with a filter on it. */
+export function useTriageQueue(projectId: string) {
+  return useQuery({
+    queryKey: queryKeys.triage(projectId),
+    queryFn: ({ signal }) => request(\`/projects/\${projectId}/triage\`, BugList, { signal }),
+  });
+}`,
+            },
+          ],
+        },
+      ],
+      pitfalls: [
+        {
+          title: "`keepPreviousData` is not `initialData`",
+          body: "`initialData` seeds a key that has never been fetched, and it is the same value every time. `keepPreviousData` shows the result of the *previous key* while the new one loads — which is what NFR-8 asks for, because the previous key is the previous filter. It also means `isPending` stays false during that window, so a component that renders a spinner on `isPending` correctly does not, and one that renders it on `isFetching` incorrectly does.",
         },
       ],
     },
     {
       id: "mutations",
-      heading: "One optimistic mutation, one deliberately not",
+      heading: "Three mutations, three different answers",
       body: [
-        "This is the most interesting pair of files in the project, because they look like they should be symmetrical and are not.",
-        "**Changing a status can be optimistic.** The new value is a value you already hold — the user picked it from a list of three. There is nothing to guess.",
-        "**Creating an issue cannot.** The server assigns the id, the number and both timestamps. An optimistic row would have to invent four fields it cannot know, and the id is the React key — so the invented row would unmount and remount when the real one arrived, throwing away any focus or scroll position attached to it.",
-        "Knowing which mutations may be optimistic is the actual skill here. The rule: **be optimistic when you already know the answer**, not when you would like to.",
+        "The interesting decisions in this app are all in the mutations, and they do not agree with each other — which is the point. \"Always be optimistic\" is not a rule; it is a question you answer per mutation, and the answer follows from what the user loses if it fails.",
+        "**Changing a status is optimistic.** It is a decision the user already made, the server almost never refuses it, and the cost of being wrong is that a dropdown flicks back — annoying, and recoverable, because the value is still on screen.",
+        "**Adding a comment is not optimistic.** It is content the user wrote. Showing it and then removing it loses their words, and no amount of rollback gives them back.",
+        "**Triage is optimistic, and removes a row.** That is the hard one: the rollback has to put a row back rather than restore a field.",
       ],
       examples: [
         {
-          id: "use-update",
-          title: "src/features/issues/hooks/useUpdateIssue.ts — FR-8",
-          lang: "typescript",
-          code: `import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Issue, UpdateIssue } from "@tracer/shared";
-import { queryKeys } from "../../../lib/queryKeys";
-import { updateIssue } from "../api";
+          id: "status-and-comment",
+          title: "web/src/hooks/useBug.js — the contrast",
+          lang: "javascript",
+          code: `/* FR-9, optimistic. Changing a status is a decision the user already made and
+   the server almost never refuses, so showing it immediately is honest. The
+   rollback is not optional: an optimistic update without one is a lie that
+   survives until the next refetch. */
+export function useUpdateBug(bugId) {
+  const client = useQueryClient();
 
-interface Variables {
-  issueId: string;
-  patch: UpdateIssue;
-}
+  return useMutation({
+    mutationFn: (patch) =>
+      request(\`/bugs/\${bugId}\`, Bug, { method: "PATCH", body: JSON.stringify(patch) }),
 
-export function useUpdateIssue() {
-  const queryClient = useQueryClient();
-
-  return useMutation<Issue, Error, Variables, { previous: Issue | undefined }>({
-    mutationFn: ({ issueId, patch }) => updateIssue(issueId, patch),
-
-    onMutate: async ({ issueId, patch }) => {
-      const key = queryKeys.issues.detail(issueId);
-      await queryClient.cancelQueries({ queryKey: key });
-
-      const previous = queryClient.getQueryData<Issue>(key);
-      if (previous) queryClient.setQueryData<Issue>(key, { ...previous, ...patch });
-
+    onMutate: async (patch) => {
+      await client.cancelQueries({ queryKey: queryKeys.bug(bugId) });
+      const previous = client.getQueryData(queryKeys.bug(bugId));
+      if (previous) client.setQueryData(queryKeys.bug(bugId), { ...previous, ...patch });
       return { previous };
     },
 
-    onError: (_error, { issueId }, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKeys.issues.detail(issueId), context.previous);
-      }
+    onError: (_error, _patch, context) => {
+      if (context?.previous) client.setQueryData(queryKeys.bug(bugId), context.previous);
     },
 
-    /* \`issues.all\` is a prefix of both the detail key and every list key, so
-       one invalidation covers the list the user came from too. */
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.issues.all });
+      void client.invalidateQueries({ queryKey: queryKeys.bugs() });
+    },
+  });
+}
+
+/* FR-10, deliberately *not* optimistic. A comment is content the user wrote; if
+   it fails, showing it and then removing it loses their words. The pending
+   state is the honest one here, and the contrast with the status control is
+   the point. */
+export function useAddComment(bugId) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (comment) =>
+      request(\`/bugs/\${bugId}/comments\`, Comment, {
+        method: "POST",
+        body: JSON.stringify(comment),
+      }),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: queryKeys.comments(bugId) });
     },
   });
 }`,
           explanation:
-            "Each callback has exactly one job. `onMutate` cancels in-flight refetches — without that, a request that started before the write can land after it and undo it — then snapshots and writes the guess. `onError` puts the snapshot back. `onSettled` invalidates either way, which is what replaces the guess with the server's answer, including the fields the server changed and the client did not: `updatedAt`.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "`cancelQueries` in `onMutate` is the line people leave out, and leaving it out produces a bug that looks like a race because it is one: a refetch already in flight resolves *after* the optimistic write and overwrites it with the old value, so the dropdown snaps back for no visible reason. Note also that `onSettled` invalidates the whole `[\"bugs\"]` prefix rather than the one bug: a status change can move a bug into or out of the triage queue and every filtered list, and the key table is built so that is one call.",
+          requires: "tsc (imports elided; see the repository for the full file)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "web/src/hooks/useBug.ts — the contrast",
+              requires: "tsc (imports elided; see the repository for the full file)",
+              code: `/* FR-9, optimistic. Changing a status is a decision the user already made and
+   the server almost never refuses, so showing it immediately is honest. The
+   rollback is not optional: an optimistic update without one is a lie that
+   survives until the next refetch. */
+export function useUpdateBug(bugId: string) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (patch: UpdateBug) =>
+      request(\`/bugs/\${bugId}\`, Bug, { method: "PATCH", body: JSON.stringify(patch) }),
+
+    onMutate: async (patch) => {
+      await client.cancelQueries({ queryKey: queryKeys.bug(bugId) });
+      const previous = client.getQueryData<Bug>(queryKeys.bug(bugId));
+      if (previous) client.setQueryData<Bug>(queryKeys.bug(bugId), { ...previous, ...patch });
+      return { previous };
+    },
+
+    onError: (_error, _patch, context) => {
+      if (context?.previous) client.setQueryData(queryKeys.bug(bugId), context.previous);
+    },
+
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: queryKeys.bugs() });
+    },
+  });
+}
+
+/* FR-10, deliberately *not* optimistic. A comment is content the user wrote; if
+   it fails, showing it and then removing it loses their words. The pending
+   state is the honest one here, and the contrast with the status control is
+   the point. */
+export function useAddComment(bugId: string) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (comment: CreateComment) =>
+      request(\`/bugs/\${bugId}/comments\`, Comment, {
+        method: "POST",
+        body: JSON.stringify(comment),
+      }),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: queryKeys.comments(bugId) });
+    },
+  });
+}`,
+            },
+          ],
         },
         {
-          id: "use-create",
-          title: "src/features/issues/hooks/useCreateIssue.ts — FR-6",
-          lang: "typescript",
+          id: "triage-mutation",
+          title: "web/src/hooks/useTriage.js — rolling back a removal",
+          lang: "javascript",
           code: `import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { CreateIssue, Issue } from "@tracer/shared";
-import { queryKeys } from "../../../lib/queryKeys";
-import { createIssue } from "../api";
+import { Bug } from "@bug-tracker/shared";
+import { request } from "../lib/api";
+import { queryKeys } from "../lib/queryKeys";
 
-export function useCreateIssue(projectId: string) {
-  const queryClient = useQueryClient();
+/* FR-12. Triage removes a bug from the queue it is displayed in, so an
+   optimistic update here is not "change a field" but "drop a row" — and the
+   rollback has to put it back in the right place. Filtering the cached list is
+   enough because the server's order is severity then age, and removing an item
+   cannot reorder the rest. */
+export function useTriage(projectId) {
+  const client = useQueryClient();
 
-  return useMutation<Issue, Error, CreateIssue>({
-    mutationFn: (input) => createIssue(projectId, input),
-    onSuccess: (issue) => {
-      /* Seed the detail cache so navigating to the new issue renders with no
-         request at all. */
-      queryClient.setQueryData(queryKeys.issues.detail(issue.id), issue);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.issues.all });
+  return useMutation({
+    mutationFn: ({ bugId, outcome }) =>
+      request(\`/bugs/\${bugId}/triage\`, Bug, {
+        method: "POST",
+        body: JSON.stringify({ outcome }),
+      }),
+
+    onMutate: async ({ bugId }) => {
+      await client.cancelQueries({ queryKey: queryKeys.triage(projectId) });
+      const previous = client.getQueryData(queryKeys.triage(projectId));
+      if (previous) {
+        client.setQueryData(
+          queryKeys.triage(projectId),
+          previous.filter((bug) => bug.id !== bugId),
+        );
+      }
+      return { previous };
+    },
+
+    onError: (_error, _variables, context) => {
+      if (context?.previous) client.setQueryData(queryKeys.triage(projectId), context.previous);
+    },
+
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: queryKeys.bugs() });
     },
   });
 }`,
           explanation:
-            "Half the size, because it does not guess. The one clever thing it does is put the created issue straight into the detail cache — the server just returned the complete row, so navigating to it after creation renders instantly with no request. That is a cache write with the *real* value, which is the opposite of an optimistic one.",
-          requires: "the capstone project (this file is type-checked, not run)",
+            "The rollback stores the *whole previous array* rather than the removed item and its index, and that is deliberate. Restoring one item by index is correct only if nothing else changed in the meantime, and something else can: a concurrent refetch, or a second triage decision the user made before the first one failed. Keeping the array is a few more bytes and is right under every interleaving. The comment above the hook is doing real work too — it records *why* filtering is enough here, so the next person does not have to re-derive that a removal cannot reorder a sorted list.",
+          requires: "tsc (this is the complete file)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "web/src/hooks/useTriage.ts — rolling back a removal",
+              requires: "tsc (this is the complete file)",
+              code: `import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Bug, type TriageOutcome } from "@bug-tracker/shared";
+import { request } from "../lib/api";
+import { queryKeys } from "../lib/queryKeys";
+
+/* FR-12. Triage removes a bug from the queue it is displayed in, so an
+   optimistic update here is not "change a field" but "drop a row" — and the
+   rollback has to put it back in the right place. Filtering the cached list is
+   enough because the server's order is severity then age, and removing an item
+   cannot reorder the rest. */
+export function useTriage(projectId: string) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ bugId, outcome }: { bugId: string; outcome: TriageOutcome }) =>
+      request(\`/bugs/\${bugId}/triage\`, Bug, {
+        method: "POST",
+        body: JSON.stringify({ outcome }),
+      }),
+
+    onMutate: async ({ bugId }) => {
+      await client.cancelQueries({ queryKey: queryKeys.triage(projectId) });
+      const previous = client.getQueryData<Bug[]>(queryKeys.triage(projectId));
+      if (previous) {
+        client.setQueryData<Bug[]>(
+          queryKeys.triage(projectId),
+          previous.filter((bug) => bug.id !== bugId),
+        );
+      }
+      return { previous };
+    },
+
+    onError: (_error, _variables, context) => {
+      if (context?.previous) client.setQueryData(queryKeys.triage(projectId), context.previous);
+    },
+
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: queryKeys.bugs() });
+    },
+  });
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
         {
-          title: "`cancelQueries` is not optional",
-          body: "Without it: a background refetch starts, you write your optimistic value, the refetch's stale response lands and overwrites it, and the UI reverts for a fraction of a second before the invalidation fixes it. It looks like a flicker, it is intermittent, and it is invisible on a fast local network — which is exactly the kind of bug that ships.",
+          title: "An optimistic update with no rollback is worse than none",
+          body: "Without `onError`, a failed mutation leaves the cache holding a value the server rejected, and it stays there until something happens to refetch — which may be never, if the user does not change filters. The screen is then confidently wrong, and the user's next action is based on it. If you are not going to write the rollback, do not write the optimistic update: a spinner that is honest beats an instant result that is fiction.",
+        },
+        {
+          title: "`onSettled`, not `onSuccess`, for the invalidation",
+          body: "`onSettled` runs after both outcomes. Invalidating only on success means a *failed* mutation leaves the rolled-back cache unverified against the server — and the rollback restored what the client last believed, which may itself be stale. Refetching either way costs one request and makes the recovery path converge on the truth rather than on an older guess.",
         },
       ],
     },
   ],
   interviewQuestions: [
     {
-      question: "Which mutations should be optimistic, and how do you decide?",
+      question: "How do you decide whether a mutation should be optimistic?",
       answer:
-        "Be optimistic when you already know the answer. A status change is safe because the value came from a list of three the user picked from — there is nothing to guess, and rolling back is restoring one snapshot. A create is not, because the server assigns the id, the sequence number and the timestamps: an optimistic row would invent four fields, and since the id is the React key, the row would unmount and remount when the real one arrived, throwing away focus and scroll. The tell is whether the client can compute the post-state exactly.",
+        "Ask what the user loses if the optimistic version is wrong. For a status dropdown they lose nothing — the value is still on screen, it flicks back, and they can try again. For a comment they lose text they typed, which no rollback can return, so it stays pessimistic and shows a pending state instead. The second question is how often the server refuses: an operation with a real rule attached, like triage, will sometimes 409, so if you make it optimistic the rollback is not an edge case you can skip — it is a path users will actually see.",
     },
     {
-      question: "Why centralise query keys instead of writing them at the call site?",
+      question: "Why does `onMutate` call `cancelQueries` first?",
       answer:
-        "Because React Query matches by prefix, and that only works if the keys nest deliberately. In Tracer every issue key starts with [\"issues\"], so one invalidateQueries after a mutation refetches every filtered list and every open detail — which is what a status change actually affects. Keys written as literals at eleven call sites cannot have that property, and the resulting bug is a stale list after a successful write: intermittent, invisible locally, and an afternoon to find.",
+        "Because a refetch that is already in flight will resolve after the optimistic write and overwrite it with the pre-mutation value. The symptom is a control that snaps back a moment after the user changed it, with no error and nothing in the network tab that looks wrong — the request succeeded, it was just started before the change. Cancelling in-flight queries for that key closes the window.",
     },
     {
-      question: "What does parsing a response buy over casting it?",
+      question: "The triage rollback keeps the whole previous array. Why not just re-insert the removed bug?",
       answer:
-        "An error that points at the actual problem. A cast is a claim the compiler will now defend, so when the backend drops a field you get 'Cannot read properties of undefined' inside a component three layers from the fetch, with a stack trace that describes rendering rather than data. Parsing with the shared schema fails at the boundary with the field name and the expected type. It costs one schema argument per request, and the schema already exists because the server validates with it.",
+        "Because re-inserting is only correct if nothing else changed while the request was in flight, and things can: a background refetch may have replaced the list, or the user may have triaged a second bug before the first failed. Restoring the snapshot you took in `onMutate` is right under every interleaving and costs an array reference. Re-inserting by index is the version that works in testing and produces a duplicated or misplaced row in production.",
     },
     {
-      question: "Why does the filters hook have to return a stable setter?",
+      question: "Why is the whole `[\"bugs\"]` prefix invalidated after a status change, rather than the single bug?",
       answer:
-        "Because the filter bar calls it from inside an effect that watches the debounced search text. If the setter were a new function on every render, that effect's dependency list would differ every render, so it would re-run every render and push the same value straight back into the URL — a render loop that only appears once the two pieces are wired together. The useCallback around it is the one place in this app where an unstable identity is a bug rather than a missed optimisation.",
+        "Because a status change can move the bug between result sets. It may leave the triage queue, enter or leave any filtered list, and change what the unfiltered list shows — none of which the detail-key invalidation would touch. The key table is built as a prefix tree precisely so that this is one call instead of an enumeration of every filter combination currently in the cache, which the client cannot know anyway.",
     },
   ],
   takeaways: [
-    "One fetch wrapper, and it takes a schema — so there is no way to cast by accident",
-    "`fetch` does not reject on 404 or 500; the `!response.ok` check is the common bug",
-    "Parse the error body too: a 500 from a proxy will not have your error shape",
-    "Query keys nest, so one invalidation covers every list and detail under it",
-    "The filter object belongs in the key: a new filter is a new query, and going back is instant",
-    "Forward `signal`, and the superseded-request race stops existing",
-    "`placeholderData: (previous) => previous` is why changing a filter does not flash a spinner",
-    "Give the filters hook a `[value, setValue]` shape, so swapping the implementation changes no call site",
-    "Be optimistic when you already know the answer — not when you would like to",
-    "`cancelQueries` first, or a stale refetch overwrites the guess",
-    "Seed the detail cache from a create response: the real value, not an optimistic one",
+    "One request function: sets headers, parses the success case, and turns failures into one typed error",
+    "Cache keys in one table, built as prefixes, so invalidating a parent reaches every child",
+    "Filters live in the URL; replace history for keystrokes and push it for deliberate choices",
+    "Whether a mutation is optimistic depends on what the user loses when it fails",
+    "Cancel in-flight queries before writing optimistically, or a slower refetch will undo you",
+    "Roll back with the snapshot you took, not by reversing the operation",
   ],
   status: "available",
 };

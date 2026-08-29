@@ -13,6 +13,14 @@
   --accent: #4338ca;
   --accent-foreground: #ffffff;
   --accent-soft: #eef2ff;
+  /* Brand gradient, swept left to right across the logo. The stops are the
+     site's own colours — the TypeScript blue, the accent the whole UI is built
+     on, and the Angular violet — so the mark cannot drift out of the palette.
+     Restated per theme rather than derived, because a fixed gradient cannot
+     invert and the logo has no background to sit on. */
+  --brand-from: #1d4ed8;
+  --brand-mid: #4338ca;
+  --brand-to: #7e22ce;
   /* Track colours double as badge text on their own -soft background, so each
      one has to clear 4.5:1 against it. That rules out the bright yellows and
      cyans the brands themselves use. */
@@ -85,6 +93,9 @@
   --accent: #818cf8;
   --accent-foreground: #0a0d14;
   --accent-soft: #1a1c33;
+  --brand-from: #60a5fa;
+  --brand-mid: #818cf8;
+  --brand-to: #c084fc;
   --js-color: #facc15;
   --js-soft: #1c1a0f;
   --ts-color: #60a5fa;

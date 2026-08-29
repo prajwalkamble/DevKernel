@@ -34,19 +34,84 @@ export const compoundComponentsLesson: Lesson = {
         "The parent owns the state and provides it. The children consume it. The caller writes ordinary JSX in between.",
         "The mechanism is module 8's context, doing precisely what it is for: the pieces do not know how deep they are, because the lookup goes up the tree rather than along a list.",
       ],
-      visual: {
-        id: "compound-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "A piece finding its parent's state",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "tabs",
           title: "Tabs, including a piece buried under a wrapper the library never heard of",
-          lang: "tsx",
-          code: `import { createContext, useContext, useState, act, type ReactNode } from "react";
+          lang: "jsx",
+          code: `import { createContext, useContext, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+const TabsContext = createContext(null);
+
+function useTabs() {
+  const value = useContext(TabsContext);
+  if (value === null) throw new Error("<Tab> must be used inside <Tabs>");
+  return value;
+}
+
+function Tabs({ initial, children }) {
+  const [active, select] = useState(initial);
+  return <TabsContext.Provider value={{ active, select }}>{children}</TabsContext.Provider>;
+}
+
+function Tab({ id, children }) {
+  const { active, select } = useTabs();
+  return (
+    <button role="tab" aria-selected={active === id} onClick={() => select(id)}>{children}</button>
+  );
+}
+
+function Panel({ id, children }) {
+  const { active } = useTabs();
+  return active === id ? <section>{children}</section> : null;
+}
+
+/* A wrapper the library has never heard of, four levels deep. */
+function Fancy({ children }) {
+  return <div className="fancy"><div className="inner">{children}</div></div>;
+}
+
+function App() {
+  return (
+    <Tabs initial="home">
+      <div role="tablist">
+        <Tab id="home">Home</Tab>
+        <Fancy><Tab id="posts">Posts</Tab></Fancy>
+      </div>
+      <Panel id="home">the home panel</Panel>
+      <Panel id="posts">the posts panel</Panel>
+    </Tabs>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+console.log("on mount: ", container.querySelector("section").textContent);
+
+const buried = container.querySelectorAll("button")[1];
+await act(async () => { buried.click(); });
+console.log("after clicking the buried Tab:", container.querySelector("section").textContent);
+
+/* And the same Tab, used outside any Tabs. */
+try {
+  const stray = document.createElement("div");
+  document.body.appendChild(stray);
+  await act(async () => {
+    createRoot(stray, { onUncaughtError() {}, onCaughtError() {} }).render(<Tab id="x">stray</Tab>);
+  });
+} catch (error) {
+  console.log("outside <Tabs>:", (error).message);
+}`,
+          output: `on mount:  the home panel
+after clicking the buried Tab: the posts panel
+outside <Tabs>: <Tab> must be used inside <Tabs>`,
+          explanation:
+            "The second line is the whole argument. That `Tab` is inside a `Fancy`, inside a `div`, inside another `div` — a component the tabs library has never seen and could not have anticipated — and it works, because the state lookup walks up the tree. A `Children.map` over `props.children` would not have found it, which is why the old version of this pattern (cloning children to inject props) was fragile and is not how it is written any more.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, useContext, useState, act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 interface TabsValue { active: string; select: (id: string) => void }
@@ -112,11 +177,8 @@ try {
 } catch (error) {
   console.log("outside <Tabs>:", (error as Error).message);
 }`,
-          output: `on mount:  the home panel
-after clicking the buried Tab: the posts panel
-outside <Tabs>: <Tab> must be used inside <Tabs>`,
-          explanation:
-            "The second line is the whole argument. That `Tab` is inside a `Fancy`, inside a `div`, inside another `div` — a component the tabs library has never seen and could not have anticipated — and it works, because the state lookup walks up the tree. A `Children.map` over `props.children` would not have found it, which is why the old version of this pattern (cloning children to inject props) was fragile and is not how it is written any more.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -142,8 +204,29 @@ outside <Tabs>: <Tab> must be used inside <Tabs>`,
         {
           id: "slots-code",
           title: "A slot API",
-          lang: "tsx",
-          code: `interface DialogProps {
+          lang: "jsx",
+          code: `function Dialog({ title, children, footer }) {
+  return (
+    <div role="dialog" aria-modal="true">
+      <header><h2>{title}</h2></header>
+      <div className="body">{children}</div>
+      {footer && <footer>{footer}</footer>}
+    </div>
+  );
+}
+
+<Dialog
+  title={<><WarningIcon /> Delete this project?</>}
+  footer={<><Button variant="ghost">Cancel</Button><Button variant="danger">Delete</Button></>}
+>
+  This cannot be undone.
+</Dialog>`,
+          explanation:
+            "`title` is a `ReactNode` rather than a `string`, which is the small decision that stops this API from growing a `titleIcon` prop next month. Anything a caller might want to decorate should be a node.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `interface DialogProps {
   title: ReactNode;
   children: ReactNode;
   /* Optional, and the component decides where it goes and what happens
@@ -167,8 +250,8 @@ function Dialog({ title, children, footer }: DialogProps) {
 >
   This cannot be undone.
 </Dialog>`,
-          explanation:
-            "`title` is a `ReactNode` rather than a `string`, which is the small decision that stops this API from growing a `titleIcon` prop next month. Anything a caller might want to decorate should be a node.",
+            },
+          ],
         },
       ],
     },

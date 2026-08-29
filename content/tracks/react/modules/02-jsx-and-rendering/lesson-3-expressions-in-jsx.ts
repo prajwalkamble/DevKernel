@@ -28,12 +28,6 @@ export const expressionsInJsxLesson: Lesson = {
     {
       id: "what-renders",
       heading: "What React draws, and what it ignores",
-      visual: {
-        id: "what-renders-visual",
-        kind: "react-jsx",
-        algorithm: "children-flatten",
-        title: "Nine values, and what each one renders as",
-      },
       body: [
         "There is a short list of values React deliberately renders as nothing, and it is worth knowing exactly rather than approximately — the difference between `0` and `false` is behind one of the most common visual bugs in React.",
         "**Rendered as nothing:** `null`, `undefined`, `false`, `true`, and the empty string. **Rendered:** every other string, every number including `0`, and BigInts. **Flattened and rendered:** arrays, at any depth, with the ignorable values dropped along the way. **Thrown on:** plain objects.",
@@ -42,7 +36,7 @@ export const expressionsInJsxLesson: Lesson = {
         {
           id: "renders-what",
           title: "Every case, measured",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup } from "react-dom/server";
 
 const cases = [
@@ -73,6 +67,33 @@ nested array   <div>abc</div>
 10n (BigInt)   <div>10</div>`,
           explanation:
             "The two lines to memorise are the fourth and the sixth. `true` renders nothing — so `{isReady && <Spinner />}` is safe when `isReady` is a real boolean. `0` renders — so `{count && <Badge />}` prints a bare `0` when the count is zero. Note too that the array dropped its `null` and `false` and concatenated the rest with no separator: `\"a\"`, `1`, `\"b\"` became `a1b`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup } from "react-dom/server";
+import type { ReactNode } from "react";
+
+// The annotation is load-bearing. Without it TypeScript infers a union from
+// the rows and \`label.padEnd\` stops compiling, because \`label\` could be any
+// of the second-column types too.
+const cases: [string, ReactNode][] = [
+  ["null", null],
+  ["undefined", undefined],
+  ["false", false],
+  ["true", true],
+  ["empty string", ""],
+  ["0", 0],
+  ["string", "hi"],
+  ["array", ["a", 1, null, false, "b"]],
+  ["nested array", [["a", "b"], "c"]],
+  ["10n (BigInt)", 10n],
+];
+
+for (const [label, value] of cases) {
+  console.log(label.padEnd(14), renderToStaticMarkup(<div>{value}</div>));
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -97,7 +118,7 @@ nested array   <div>abc</div>
         {
           id: "object-child",
           title: "The error, and what it tells you",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup } from "react-dom/server";
 
 const user = { name: "Ada", age: 36 };
@@ -119,6 +140,32 @@ try {
 Objects are not valid as a React child (found: [object Date]). If you meant to render a collection of children, use an array instead.`,
           explanation:
             "The first message lists the object's keys, which points straight at the property you forgot. The second is the one that surprises people: a `Date` is an object, so rendering one throws rather than printing the date — and the message degrades to a bare `[object Date]`, naming the type but nothing about the value. Format it first: `{date.toLocaleDateString()}`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup } from "react-dom/server";
+
+const user = { name: "Ada", age: 36 };
+
+try {
+  // Meant \`{user.name}\`. TypeScript does not stop this: an object is not a
+  // ReactNode, but \`{user}\` in a child position is checked loosely enough
+  // that the failure still arrives at runtime.
+  renderToStaticMarkup(<p>{user as never}</p>);
+} catch (error) {
+  // Under \`strict\`, a caught value is \`unknown\` — reaching for \`.message\`
+  // needs a narrowing or a cast first.
+  console.log((error as Error).message);
+}
+
+// Dates and other class instances are objects too.
+try {
+  renderToStaticMarkup(<p>{new Date(0) as never}</p>);
+} catch (error) {
+  console.log((error as Error).message);
+}`,
+            },
+          ],
         },
       ],
     },
@@ -135,7 +182,7 @@ Objects are not valid as a React child (found: [object Date]). If you meant to r
         {
           id: "conditional-idioms",
           title: "All four, in one component",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Status({ state, count }) {
   // Early return: nothing to show at all.
   if (state === "idle") return null;
@@ -171,6 +218,48 @@ function App() {
           output: `<div><em>Loading…</em><small>ok</small></div><div><strong>Failed</strong><span class="badge">3</span><button type="button">Retry</button></div>`,
           explanation:
             "The `idle` case produced nothing at all — the early return. The `loading` case shows no badge because `count > 0` is `false`, and `false` renders as nothing. Had that been written `{count && …}`, the loading case would have printed a stray `0` between the label and the `ok`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+type State = "idle" | "loading" | "error" | "ready";
+
+function Status({ state, count }: { state: State; count: number }) {
+  // Early return: nothing to show at all.
+  if (state === "idle") return null;
+
+  // Extracted variable: clearer than a nested ternary in place. \`ReactNode\`
+  // rather than a bare \`let\`, which would be an implicit \`any\`.
+  let label: ReactNode;
+  if (state === "loading") label = <em>Loading…</em>;
+  else if (state === "error") label = <strong>Failed</strong>;
+  else label = <span>Ready</span>;
+
+  return (
+    <div>
+      {label}
+
+      {/* \`&&\` with a real boolean on the left. */}
+      {count > 0 && <span className="badge">{count}</span>}
+
+      {/* A ternary: this or that, no falsy trap. */}
+      {state === "error" ? <button type="button">Retry</button> : <small>ok</small>}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Status state="idle" count={0} />
+      <Status state="loading" count={0} />
+      <Status state="error" count={3} />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -192,7 +281,7 @@ function App() {
         {
           id: "jsx-whitespace",
           title: "Five arrangements, five results",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 // Text on two lines: the newline becomes one space.
@@ -230,6 +319,46 @@ D "<p>hello world</p>"
 E "<p>ab</p>"`,
           explanation:
             "`B` is the one that bites: two links or two badges laid out on separate lines for readability render flush against each other. If you want the space, either put them on one line, add `{\" \"}` between them, or — usually better — make it a styling decision with a gap rather than a text space.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+import type { ReactElement } from "react";
+
+// Text on two lines: the newline becomes one space.
+const A = () => (
+  <p>
+    one
+    two
+  </p>
+);
+
+// Elements on two lines: the newline disappears.
+const B = () => (
+  <p>
+    <span>a</span>
+    <span>b</span>
+  </p>
+);
+
+// Elements on one line with a space: the space is kept.
+const C = () => <p><span>a</span> <span>b</span></p>;
+
+// Text and an expression on one line: the space is kept.
+const D = () => <p>hello {"world"}</p>;
+
+// Two adjacent expressions: nothing between them.
+const E = () => <p>{"a"}{"b"}</p>;
+
+// Annotated for the same reason as the table above: otherwise each row is a
+// \`string | (() => ReactElement)\` and \`<Case />\` is not callable.
+const cases: [string, () => ReactElement][] = [["A", A], ["B", B], ["C", C], ["D", D], ["E", E]];
+
+for (const [name, Case] of cases) {
+  console.log(name, JSON.stringify(render(<Case />)));
+}`,
+            },
+          ],
         },
       ],
     },

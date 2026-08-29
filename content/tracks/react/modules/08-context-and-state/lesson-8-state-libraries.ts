@@ -19,12 +19,6 @@ export const stateLibrariesLesson: Lesson = {
     {
       id: "the-base",
       heading: "The fourteen lines underneath all of them",
-      visual: {
-        id: "store-vs-context-visual",
-        kind: "react-arch",
-        algorithm: "context-vs-store",
-        title: "Who gets told when one field changes",
-      },
       body: [
         "A store is a value, a set of listeners, and a way to read part of it. `useSyncExternalStore` is the React hook for subscribing to exactly that shape — module 10 covers the hook properly; here it is the thing that makes the store a store.",
         "Build it once and the libraries stop being magic.",
@@ -33,8 +27,63 @@ export const stateLibrariesLesson: Lesson = {
         {
           id: "hand-built-store",
           title: "A store with selectors, and what that buys",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useSyncExternalStore, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* A store, in fourteen lines. This is what every store library is
+   underneath: a value, a set of listeners, and a way to select part of it. */
+function createStore(initial) {
+  let state = initial;
+  const listeners = new Set();
+  return {
+    get: () => state,
+    set(update) {
+      state = update(state);
+      for (const listener of listeners) listener();
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+}
+
+const cart = createStore({ items: 0, coupon: "" });
+
+/* The selector is the whole point: a component subscribes to a slice, and
+   React skips it when that slice is unchanged. Context cannot do this. */
+function useCart(select) {
+  return useSyncExternalStore(cart.subscribe, () => select(cart.get()));
+}
+
+const renders = {};
+const count = (n) => { renders[n] = (renders[n] ?? 0) + 1; };
+
+function ItemCount() { count("ItemCount"); return <output>{useCart((s) => s.items)}</output>; }
+function CouponTag() { count("CouponTag"); return <em>{useCart((s) => s.coupon)}</em>; }
+function App() { return <><ItemCount /><CouponTag /></>; }
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+for (const k of Object.keys(renders)) renders[k] = 0;
+
+console.log("no provider wraps these components, and nothing was drilled.");
+act(() => { cart.set((s) => ({ ...s, items: s.items + 1 })); });
+console.log("after changing items: ", JSON.stringify(renders), container.innerHTML);
+for (const k of Object.keys(renders)) renders[k] = 0;
+act(() => { cart.set((s) => ({ ...s, coupon: "SAVE10" })); });
+console.log("after changing coupon:", JSON.stringify(renders), container.innerHTML);`,
+          output: `no provider wraps these components, and nothing was drilled.
+after changing items:  {"ItemCount":1,"CouponTag":0} <output>1</output><em></em>
+after changing coupon: {"ItemCount":0,"CouponTag":1} <output>1</output><em>SAVE10</em>`,
+          explanation:
+            "Two things context could not do, in one run. **The selector**: changing `items` re-rendered only the component that reads `items`, and changing `coupon` only the one that reads `coupon`. And **no provider**: the store is a module-level object, so components subscribe from anywhere and nothing wraps the tree.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useSyncExternalStore, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* A store, in fourteen lines. This is what every store library is
@@ -81,11 +130,8 @@ console.log("after changing items: ", JSON.stringify(renders), container.innerHT
 for (const k of Object.keys(renders)) renders[k] = 0;
 act(() => { cart.set((s) => ({ ...s, coupon: "SAVE10" })); });
 console.log("after changing coupon:", JSON.stringify(renders), container.innerHTML);`,
-          output: `no provider wraps these components, and nothing was drilled.
-after changing items:  {"ItemCount":1,"CouponTag":0} <output>1</output><em></em>
-after changing coupon: {"ItemCount":0,"CouponTag":1} <output>1</output><em>SAVE10</em>`,
-          explanation:
-            "Two things context could not do, in one run. **The selector**: changing `items` re-rendered only the component that reads `items`, and changing `coupon` only the one that reads `coupon`. And **no provider**: the store is a module-level object, so components subscribe from anywhere and nothing wraps the tree.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -110,8 +156,38 @@ after changing coupon: {"ItemCount":0,"CouponTag":1} <output>1</output><em>SAVE1
         {
           id: "zustand-store",
           title: "The same cart",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { create } from "zustand";
+
+/* State and the functions that change it, in one object. \`set\` merges at
+   the top level, so a partial object is enough. */
+export const useCart = create((set) => ({
+  items: [],
+  coupon: null,
+  add: (item) => set((s) => ({ items: [...s.items, item] })),
+  clear: () => set({ items: [], coupon: null }),
+}));
+
+/* Subscribes to one number. Adding a coupon does not re-render this. */
+function CartBadge() {
+  const count = useCart((s) => s.items.length);
+  return <span>{count}</span>;
+}
+
+/* Actions are stable, so this component never re-renders from the store. */
+function AddButton({ item }) {
+  const add = useCart((s) => s.add);
+  return <button type="button" onClick={() => add(item)}>Add</button>;
+}
+
+// Usable outside React too, which context cannot do:
+socket.on("cart:updated", (items) => useCart.setState({ items }));`,
+          explanation:
+            "The last line is the second reason to reach for a store. `useCart.setState` works from a socket handler, a router guard, a test setup, or any non-React code — the store is an ordinary object that happens to have a React hook attached, rather than something that only exists inside the tree.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { create } from "zustand";
 
 /* State and the functions that change it, in one object. \`set\` merges at
    the top level, so a partial object is enough. */
@@ -141,8 +217,8 @@ function AddButton({ item }: { item: Item }) {
 
 // Usable outside React too, which context cannot do:
 socket.on("cart:updated", (items) => useCart.setState({ items }));`,
-          explanation:
-            "The last line is the second reason to reach for a store. `useCart.setState` works from a socket handler, a router guard, a test setup, or any non-React code — the store is an ordinary object that happens to have a React hook attached, rather than something that only exists inside the tree.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -165,8 +241,34 @@ socket.on("cart:updated", (items) => useCart.setState({ items }));`,
         {
           id: "rtk-slice",
           title: "A slice",
-          lang: "typescript",
+          lang: "javascript",
           code: `import { createSlice } from "@reduxjs/toolkit";
+
+const cartSlice = createSlice({
+  name: "cart",
+  initialState: { items: [], coupon: null },
+  reducers: {
+    // Immer: this *looks* like mutation and produces a new object.
+    // Writing it this way outside a slice would be a real bug.
+    added(state, action) {
+      state.items.push(action.payload);
+    },
+    cleared(state) {
+      state.items = [];
+      state.coupon = null;
+    },
+  },
+});
+
+// Action creators and their types, generated from the reducer names.
+export const { added, cleared } = cartSlice.actions;
+export default cartSlice.reducer;`,
+          explanation:
+            "`state.items.push` is safe here and only here. Immer hands the reducer a draft proxy, records what you did to it, and produces a new object from the recording — so the rule from lesson 4 about never mutating still holds; Immer is just doing the copying for you.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `import { createSlice } from "@reduxjs/toolkit";
 
 const cartSlice = createSlice({
   name: "cart",
@@ -187,8 +289,8 @@ const cartSlice = createSlice({
 // Action creators and their types, generated from the reducer names.
 export const { added, cleared } = cartSlice.actions;
 export default cartSlice.reducer;`,
-          explanation:
-            "`state.items.push` is safe here and only here. Immer hands the reducer a draft proxy, records what you did to it, and produces a new object from the recording — so the rule from lesson 4 about never mutating still holds; Immer is just doing the copying for you.",
+            },
+          ],
         },
       ],
     },

@@ -26,8 +26,72 @@ export const whyADataLibraryLesson: Lesson = {
         {
           id: "duplicate-requests",
           title: "One user, four requests",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let requests = 0;
+function loadUser(id) {
+  requests++;
+  console.log(\`  GET /users/\${id}   (request #\${requests})\`);
+  return Promise.resolve({ name: "Ada" });
+}
+
+/* The hand-rolled hook: everything module 7 has covered so far, and nothing
+   more. It is correct. It is also the whole of what most codebases have. */
+function useUser(id) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    let ignore = false;
+    loadUser(id).then((user) => { if (!ignore) setData(user); });
+    return () => { ignore = true; };
+  }, [id]);
+  return data;
+}
+
+function Avatar({ id }) {
+  const user = useUser(id);
+  return <img alt={user?.name ?? "…"} />;
+}
+function Greeting({ id }) {
+  const user = useUser(id);
+  return <h1>Hello, {user?.name ?? "…"}</h1>;
+}
+function Page() {
+  return <><Avatar id="ada" /><Greeting id="ada" /></>;
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+console.log("two components on one page, both wanting the same user:");
+await act(async () => { root.render(<Page />); });
+await act(async () => { await sleep(20); });
+console.log(\`  \${requests} requests for one user\`);
+
+console.log("\\nthe page re-mounts (a route change and back):");
+await act(async () => { root.unmount(); });
+const second = createRoot(container);
+await act(async () => { second.render(<Page />); });
+await act(async () => { await sleep(20); });
+console.log(\`  \${requests} requests in total, and nothing was reused\`);`,
+          output: `two components on one page, both wanting the same user:
+  GET /users/ada   (request #1)
+  GET /users/ada   (request #2)
+  2 requests for one user
+
+the page re-mounts (a route change and back):
+  GET /users/ada   (request #3)
+  GET /users/ada   (request #4)
+  4 requests in total, and nothing was reused`,
+          explanation:
+            "Nothing here is a bug. Each hook is independently correct, and that is the point: **the hook has nowhere to keep anything.** Its state is inside a component, so it is born when the component mounts and dies when it unmounts, and two components have two of them. The information that this user was fetched four seconds ago does not exist anywhere.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 let requests = 0;
@@ -77,17 +141,8 @@ const second = createRoot(container);
 await act(async () => { second.render(<Page />); });
 await act(async () => { await sleep(20); });
 console.log(\`  \${requests} requests in total, and nothing was reused\`);`,
-          output: `two components on one page, both wanting the same user:
-  GET /users/ada   (request #1)
-  GET /users/ada   (request #2)
-  2 requests for one user
-
-the page re-mounts (a route change and back):
-  GET /users/ada   (request #3)
-  GET /users/ada   (request #4)
-  4 requests in total, and nothing was reused`,
-          explanation:
-            "Nothing here is a bug. Each hook is independently correct, and that is the point: **the hook has nowhere to keep anything.** Its state is inside a component, so it is born when the component mounts and dies when it unmounts, and two components have two of them. The information that this user was fetched four seconds ago does not exist anywhere.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -100,12 +155,6 @@ the page re-mounts (a route change and back):
     {
       id: "the-six",
       heading: "The six problems a cache solves",
-      visual: {
-        id: "query-cache-lifecycle-visual",
-        kind: "react-data",
-        algorithm: "cache-lifecycle",
-        title: "One cache entry, from first fetch to garbage collection",
-      },
       body: [
         "A data library is, underneath, **one cache outside the component tree, keyed by request**. Every feature below is a consequence of that one structural change.",
         "**Deduplication.** Two components asking for the same key at the same time make one request. The second gets the in-flight promise.",
@@ -127,8 +176,42 @@ the page re-mounts (a route change and back):
         {
           id: "library-shape",
           title: "The same screen, with a cache behind it",
-          lang: "tsx",
+          lang: "jsx",
           code: `// The key is what makes deduplication, caching and invalidation possible:
+// it names the data rather than the component asking for it.
+function useUser(id) {
+  return useQuery({
+    queryKey: ["users", id],
+    queryFn: ({ signal }) => getJSON(\`/api/users/\${id}\`, signal),
+  });
+}
+
+function Avatar({ id }) {
+  const { data, isPending, error } = useUser(id);
+  if (isPending) return <AvatarSkeleton />;
+  if (error) return <BrokenAvatar />;
+  return <img alt={data.name} src={data.avatarUrl} />;
+}
+
+// Called by two components on one page: one request.
+// Rendered again after a route change: instant, from cache, then revalidated.
+
+function useRenameUser() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (next) =>
+      postJSON(\`/api/users/\${next.id}\`, next),
+    // "Everything under users is now wrong." Every mounted component
+    // showing one refetches; nothing had to be told about anything.
+    onSuccess: () => client.invalidateQueries({ queryKey: ["users"] }),
+  });
+}`,
+          explanation:
+            "Note the `signal` in `queryFn`: the library hands you an `AbortSignal` and cancels superseded requests for you — the lesson-4 fix, built in. And note what is *absent*: no `useEffect`, no `useState`, no ignore flag, no dependency array. The effect did not go away; it went into the library, once, instead of into every hook you write.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// The key is what makes deduplication, caching and invalidation possible:
 // it names the data rather than the component asking for it.
 function useUser(id: string) {
   return useQuery({
@@ -157,8 +240,8 @@ function useRenameUser() {
     onSuccess: () => client.invalidateQueries({ queryKey: ["users"] }),
   });
 }`,
-          explanation:
-            "Note the `signal` in `queryFn`: the library hands you an `AbortSignal` and cancels superseded requests for you — the lesson-4 fix, built in. And note what is *absent*: no `useEffect`, no `useState`, no ignore flag, no dependency array. The effect did not go away; it went into the library, once, instead of into every hook you write.",
+            },
+          ],
         },
       ],
     },

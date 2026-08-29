@@ -19,12 +19,6 @@ export const controlledInputsLesson: Lesson = {
     {
       id: "who-owns-it",
       heading: "Who owns the value",
-      visual: {
-        id: "controlled-round-trip-visual",
-        kind: "react-state",
-        algorithm: "controlled-input",
-        title: "One keystroke, all the way round",
-      },
       body: [
         "**Uncontrolled** is how HTML works. The `<input>` element holds its own value; typing updates it; the DOM node is the source of truth. React sets an initial value with `defaultValue` and then stops being involved.",
         "**Controlled** hands ownership to React. The input's `value` comes from state, and every keystroke fires `onChange`, which sets state, which re-renders with the new value. The DOM node holds whatever React last told it to.",
@@ -35,7 +29,7 @@ export const controlledInputsLesson: Lesson = {
         {
           id: "controlled-loop",
           title: "The value passing through state",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -111,7 +105,7 @@ typed more  -> ADA LOVELACE | 12 characters`,
         {
           id: "both-models",
           title: "The same field, both ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

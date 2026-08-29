@@ -26,8 +26,74 @@ export const splittingContextsLesson: Lesson = {
         {
           id: "split-measurement",
           title: "Combined against split",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { createContext, useContext, useReducer, act } from "react";
+import { createRoot } from "react-dom/client";
+const reducer = (n, a) => (a.type === "added" ? n + 1 : n);
+
+const renders = {};
+const count = (n) => { renders[n] = (renders[n] ?? 0) + 1; };
+
+/* ---- one context holding both the value and the dispatcher ---- */
+const Combined = createContext([0, () => {}]);
+function CombinedProvider({ children }) {
+  const [n, dispatch] = useReducer(reducer, 0);
+  return <Combined.Provider value={[n, dispatch]}>{children}</Combined.Provider>;
+}
+function CombinedReader() { count("reader(combined)"); return <output>{useContext(Combined)[0]}</output>; }
+function CombinedWriter() {
+  count("writer(combined)");
+  const [, dispatch] = useContext(Combined);
+  return <button type="button" id="a" onClick={() => dispatch({ type: "added" })}>+</button>;
+}
+
+/* ---- the same state, split into two contexts ---- */
+const ValueCtx = createContext(0);
+const DispatchCtx = createContext(() => {});
+function SplitProvider({ children }) {
+  const [n, dispatch] = useReducer(reducer, 0);
+  return (
+    <DispatchCtx.Provider value={dispatch}>
+      <ValueCtx.Provider value={n}>{children}</ValueCtx.Provider>
+    </DispatchCtx.Provider>
+  );
+}
+function SplitReader() { count("reader(split)"); return <output>{useContext(ValueCtx)}</output>; }
+function SplitWriter() {
+  count("writer(split)");
+  const dispatch = useContext(DispatchCtx);
+  return <button type="button" id="b" onClick={() => dispatch({ type: "added" })}>+</button>;
+}
+
+function App() {
+  return (
+    <>
+      <CombinedProvider><CombinedReader /><CombinedWriter /></CombinedProvider>
+      <SplitProvider><SplitReader /><SplitWriter /></SplitProvider>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+for (const k of Object.keys(renders)) renders[k] = 0;
+
+act(() => { container.querySelector("#a").click(); });
+act(() => { container.querySelector("#b").click(); });
+console.log("one increment on each side:");
+for (const [k, v] of Object.entries(renders)) console.log(\`  \${k.padEnd(18)} \${v} re-render(s)\`);`,
+          output: `one increment on each side:
+  reader(combined)   1 re-render(s)
+  writer(combined)   1 re-render(s)
+  reader(split)      1 re-render(s)
+  writer(split)      0 re-render(s)`,
+          explanation:
+            "Zero. The split writer does not re-render at all, because the only context it reads is the dispatch context, and `dispatch` has the same identity it has always had. On a real page that is every button, every menu item and every form control that writes to the store dropping out of the re-render set — and it cost one extra `createContext` call.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, useContext, useReducer, act } from "react";
 import type { ReactNode, Dispatch } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -86,13 +152,8 @@ act(() => { container.querySelector<HTMLButtonElement>("#a")!.click(); });
 act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
 console.log("one increment on each side:");
 for (const [k, v] of Object.entries(renders)) console.log(\`  \${k.padEnd(18)} \${v} re-render(s)\`);`,
-          output: `one increment on each side:
-  reader(combined)   1 re-render(s)
-  writer(combined)   1 re-render(s)
-  reader(split)      1 re-render(s)
-  writer(split)      0 re-render(s)`,
-          explanation:
-            "Zero. The split writer does not re-render at all, because the only context it reads is the dispatch context, and `dispatch` has the same identity it has always had. On a real page that is every button, every menu item and every form control that writes to the store dropping out of the re-render set — and it cost one extra `createContext` call.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -105,12 +166,6 @@ for (const [k, v] of Object.entries(renders)) console.log(\`  \${k.padEnd(18)} \
     {
       id: "by-rate",
       heading: "Split by rate of change, not by subject",
-      visual: {
-        id: "context-split-visual",
-        kind: "react-rendering",
-        algorithm: "context-update",
-        title: "What one context value wakes",
-      },
       body: [
         "The instinct is to split by topic: a `UserContext`, a `SettingsContext`, a `CartContext`. That is a fine way to organise code, and it is not what makes the re-renders go away.",
         "**The axis that matters is how often a value changes.** Two values in one context means every reader of either re-renders at the combined rate. So the split to make is between the parts that change at different rates, even when they are obviously about the same thing.",
@@ -121,8 +176,40 @@ for (const [k, v] of Object.entries(renders)) console.log(\`  \${k.padEnd(18)} \
         {
           id: "rate-split",
           title: "Three rates, three contexts",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* One provider, three contexts, split by how often each value changes.
+   Nothing else about the component changes. */
+const DocumentCtx = createContext(null);      // rarely: on save
+const SelectionCtx = createContext(null);   // constantly: every keystroke
+const EditorActions = createContext(null); // never: stable callbacks
+
+export function EditorProvider({ children }) {
+  const [doc, setDoc] = useState(emptyDoc);
+  const [selection, setSelection] = useState(emptyRange);
+
+  // Stable for the provider's whole life, so EditorActions never changes value.
+  const actions = useMemo(
+    () => ({ save: () => save(doc), select: setSelection }),
+    [doc],
+  );
+
+  return (
+    <EditorActions.Provider value={actions}>
+      <DocumentCtx.Provider value={doc}>
+        <SelectionCtx.Provider value={selection}>{children}</SelectionCtx.Provider>
+      </DocumentCtx.Provider>
+    </EditorActions.Provider>
+  );
+}
+
+// A toolbar that reads only useEditorActions() now re-renders when its
+// parent does, and never because the cursor moved.`,
+          explanation:
+            "`actions` depends on `doc` because `save` closes over it, so it changes on save and not on every keystroke — which is the rate that matters. Getting a genuinely never-changing actions object means putting `doc` in a ref, which is worth doing when the toolbar is expensive and is over-engineering when it is not.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* One provider, three contexts, split by how often each value changes.
    Nothing else about the component changes. */
 const DocumentCtx = createContext<Doc | null>(null);      // rarely: on save
 const SelectionCtx = createContext<Range | null>(null);   // constantly: every keystroke
@@ -149,8 +236,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
 // A toolbar that reads only useEditorActions() now re-renders when its
 // parent does, and never because the cursor moved.`,
-          explanation:
-            "`actions` depends on `doc` because `save` closes over it, so it changes on save and not on every keystroke — which is the rate that matters. Getting a genuinely never-changing actions object means putting `doc` in a ref, which is worth doing when the toolbar is expensive and is over-engineering when it is not.",
+            },
+          ],
         },
       ],
     },

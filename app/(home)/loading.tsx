@@ -1,6 +1,13 @@
 import { LoadingRegion, Skeleton, SkeletonTrackCard } from "@/components/skeleton/Skeleton";
 
-/** Mirrors app/page.tsx: hero, three feature cards, then the track grid. */
+/**
+ * Mirrors app/(home)/page.tsx: hero, three feature cards, then the track grid.
+ *
+ * It lives in the `(home)` route group rather than at `app/loading.tsx` so that
+ * it covers only `/`. A loading file wraps the page *and every nested layout
+ * below it*, so at the root this hero stood in for every route on the site —
+ * including the ones with a skeleton of their own.
+ */
 export default function HomeLoading() {
   return (
     <LoadingRegion label="Loading DevKernel">

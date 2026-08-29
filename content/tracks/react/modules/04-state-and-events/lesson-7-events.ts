@@ -19,12 +19,6 @@ export const eventsLesson: Lesson = {
     {
       id: "delegation",
       heading: "Where the listener actually is",
-      visual: {
-        id: "event-delegation-visual",
-        kind: "react-tooling",
-        algorithm: "click-events",
-        title: "One listener, and the path an event takes",
-      },
       body: [
         "Writing `onClick` on a hundred buttons does not create a hundred listeners. React attaches a small number of listeners to the **root container** — the element passed to `createRoot` — and works out which of your handlers to run from the event's target.",
         "This is event delegation, and React does it for the obvious reason: attaching and detaching a real listener every time a component mounts or unmounts would be far more expensive than one listener per event type at the top.",
@@ -34,7 +28,7 @@ export const eventsLesson: Lesson = {
         {
           id: "delegation-order",
           title: "Handler order, and where the native listener sits",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -69,6 +63,37 @@ act(() => { container.querySelector("#b").click(); });`,
   6. native listener on document`,
           explanation:
             "Every React handler ran before the native listener on the very same container. That is the delegation showing: one real click reached the container, and React then replayed the whole capture-then-bubble journey through its own tree synthetically before the browser's own bubbling continued. Nothing was ever attached to the `<button>`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+
+function App() {
+  return (
+    <div
+      id="outer"
+      onClickCapture={() => console.log("  2. parent, capture phase")}
+      onClick={() => console.log("  4. parent, bubble phase")}
+    >
+      <button id="b" onClick={() => console.log("  3. button")}>go</button>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<App />); });
+
+// Native listeners, for comparison with React's synthetic pass.
+container.addEventListener("click", () => console.log("  5. native listener on the root container"));
+document.addEventListener("click", () => console.log("  6. native listener on document"));
+
+console.log("1. clicking the button:");
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });`,
+            },
+          ],
         },
       ],
     },
@@ -84,7 +109,7 @@ act(() => { container.querySelector("#b").click(); });`,
         {
           id: "synthetic-shape",
           title: "What is in your hand",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -114,6 +139,38 @@ currentTarget:     b
 nativeEvent real?  true`,
           explanation:
             "`target` is what was clicked; `currentTarget` is the element whose handler is running. They are the same here because the handler is on the button itself — on the parent's handler, `target` would still be `b` while `currentTarget` became `outer`. That distinction is the whole of delegation in one pair of properties.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+import type { MouseEvent } from "react";
+
+function App() {
+  return (
+    <div id="outer">
+      {/* \`MouseEvent\` here is React's synthetic one, not the DOM's — the two
+          share a name, which is why the import matters. \`currentTarget\` is
+          typed from the element, but \`target\` is only an EventTarget, so
+          reading \`.id\` off it needs the assertion. */}
+      <button id="b" onClick={(event: MouseEvent<HTMLButtonElement>) => {
+        console.log("constructor:      ", event.constructor.name);
+        console.log("type:             ", event.type);
+        console.log("target:           ", (event.target as HTMLElement).id);
+        console.log("currentTarget:    ", event.currentTarget.id);
+        console.log("nativeEvent real? ", event.nativeEvent instanceof MouseEvent);
+      }}>go</button>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<App />); });
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });`,
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -28,7 +28,7 @@ export const updatesAreQueuedLesson: Lesson = {
         {
           id: "not-immediate",
           title: "Reading the value straight after setting it",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -61,6 +61,38 @@ click:
 after the click, DOM shows: 1`,
           explanation:
             "Both logs inside the handler say `0`, and the DOM says `1` immediately afterwards. Nothing is delayed or racy here: the handler ran to completion with `count` frozen at the value its render was given, React then processed the queue, called the component again, and that second call saw `1`. The setter is a request, not an assignment.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    // \`count\` is a \`number\` on both lines and the same \`number\` on both —
+    // it is a value captured by this render, not a variable being watched.
+    console.log("  before setCount, count =", count);
+    setCount(count + 1);
+    console.log("  after  setCount, count =", count);
+  }
+
+  return <button id="b" onClick={handleClick}>{count}</button>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Counter />); });
+console.log("mounted, DOM shows:", container.textContent);
+
+console.log("click:");
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+console.log("after the click, DOM shows:", container.textContent);`,
+            },
+          ],
         },
       ],
     },
@@ -72,17 +104,11 @@ after the click, DOM shows: 1`,
         "That is exactly what happens. Three updates go on the queue, each saying \"the new value is 1\", and React applies them in order: 1, then 1, then 1.",
         "The number moves by one. Not three. This is the single most common surprise in React, and it is entirely explained by the previous section: `count` was a constant throughout the handler.",
       ],
-      visual: {
-        id: "state-queue-values-visual",
-        kind: "react-rendering",
-        algorithm: "queue-values",
-        title: "Three calls, and what actually reaches the queue",
-      },
       examples: [
         {
           id: "three-setters",
           title: "Three setters, one increment",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -114,6 +140,38 @@ console.log("after three setCount(count + 1):", container.textContent, "| render
 after three setCount(count + 1): 1 | renders: 2`,
           explanation:
             "Two numbers to read. The count went to **1**, not 3, because all three calls computed `0 + 1` — `count` was the same constant for all of them. And the render count went from 1 to **2**, not to 4: React batched the three queued updates into a single re-render. The next lesson changes one character in this example and gets 3.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let renders = 0;
+
+function Counter() {
+  renders++;
+  const [count, setCount] = useState(0);
+
+  function bumpThreeTimes() {
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  }
+
+  return <button id="b" onClick={bumpThreeTimes}>{count}</button>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Counter />); });
+console.log("mounted:", container.textContent, "| renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+console.log("after three setCount(count + 1):", container.textContent, "| renders:", renders);`,
+            },
+          ],
         },
       ],
       pitfalls: [

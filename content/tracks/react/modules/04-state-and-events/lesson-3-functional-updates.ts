@@ -25,17 +25,11 @@ export const functionalUpdatesLesson: Lesson = {
         "**A function** — `setCount(c => c + 1)` — queues \"replace the state with whatever this returns when given the value so far\".",
         "The difference only shows when more than one update is queued at once, and then it is decisive. React processes the queue in order, threading the result of each entry into the next. Values ignore what came before; functions receive it.",
       ],
-      visual: {
-        id: "state-queue-updaters-visual",
-        kind: "react-rendering",
-        algorithm: "queue-updaters",
-        title: "The same three calls, as updaters",
-      },
       examples: [
         {
           id: "three-updaters",
           title: "The same example as the last lesson, with one change",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -83,6 +77,55 @@ three values:        1 | renders: 2
 three updaters:      4 | renders: 3`,
           explanation:
             "Three values moved it from 0 to 1; three updaters moved it from 1 to 4. Both were a single re-render, so this is not about batching — it is about what each queued entry knows. The updater form is handed `1`, then `2`, then `3`, and returns `2`, `3`, `4`. The value form computed `0 + 1` three times.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let renders = 0;
+
+function Counter() {
+  renders++;
+  const [count, setCount] = useState(0);
+
+  function withValues() {
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  }
+
+  function withUpdaters() {
+    // The updater's parameter is typed from the state: \`c\` is a number
+    // without being annotated, because setCount is Dispatch<SetStateAction<number>>.
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+  }
+
+  return (
+    <>
+      <span id="v">{count}</span>
+      <button id="values" onClick={withValues}>values</button>
+      <button id="updaters" onClick={withUpdaters}>updaters</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Counter />); });
+console.log("mounted:            ", container.querySelector("#v")!.textContent, "| renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#values")!.click(); });
+console.log("three values:       ", container.querySelector("#v")!.textContent, "| renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#updaters")!.click(); });
+console.log("three updaters:     ", container.querySelector("#v")!.textContent, "| renders:", renders);`,
+            },
+          ],
         },
       ],
     },
@@ -114,7 +157,7 @@ three updaters:      4 | renders: 3`,
         {
           id: "bailout-on-mutation",
           title: "The render that never happens",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -152,6 +195,45 @@ after mutate:  Ada | renders: 1
 after replace: Grace | renders: 2`,
           explanation:
             "The mutating click produced no render at all — the render count did not move, and the screen still said `Ada` even though `user.name` was by then `\"Grace\"`. The data and the display had diverged with nothing to indicate it. The replacing click returned a new object, React saw a different reference, and the screen caught up.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let renders = 0;
+
+function Profile() {
+  renders++;
+  const [user, setUser] = useState({ name: "Ada" });
+
+  return (
+    <>
+      <span id="v">{user.name}</span>
+      {/* Mutates and returns the same object. Perfectly well typed: \`u\` is
+          the state object and \`name\` is a string. The bug is the identity,
+          which no type describes. */}
+      <button id="bad" onClick={() => setUser((u) => { u.name = "Grace"; return u; })}>bad</button>
+      {/* Returns a new object. */}
+      <button id="good" onClick={() => setUser((u) => ({ ...u, name: "Grace" }))}>good</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Profile />); });
+console.log("mounted:      ", container.querySelector("#v")!.textContent, "| renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#bad")!.click(); });
+console.log("after mutate: ", container.querySelector("#v")!.textContent, "| renders:", renders);
+
+act(() => { container.querySelector<HTMLButtonElement>("#good")!.click(); });
+console.log("after replace:", container.querySelector("#v")!.textContent, "| renders:", renders);`,
+            },
+          ],
         },
       ],
     },

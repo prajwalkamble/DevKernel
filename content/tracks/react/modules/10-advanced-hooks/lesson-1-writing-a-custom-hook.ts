@@ -24,18 +24,57 @@ export const writingACustomHookLesson: Lesson = {
         "Module 5 established the mechanism: a component instance owns an ordered list of slots, and each hook call takes the next one. A custom hook has no list of its own — calling it simply runs its body, and *its* hook calls take slots in whichever component is currently rendering.",
         "Every property people find surprising falls out of that one fact. Step the animation: two components call the same hook, and the slots are two separate runs.",
       ],
-      visual: {
-        id: "custom-hook-slots-visual",
-        kind: "react-rendering",
-        algorithm: "custom-hook-slots",
-        title: "A custom hook has no state of its own",
-      },
       examples: [
         {
           id: "two-instances",
           title: "One hook, two components, two states",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* A custom hook is a function whose name begins with \`use\` and which calls
+   other hooks. There is no registration and no React API involved. */
+function useCounter(start = 0) {
+  const [n, setN] = useState(start);
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    if (n !== start) setTouched(true);
+  }, [n, start]);
+  return { n, touched, increment: () => setN((c) => c + 1) };
+}
+
+function Left() {
+  const { n, touched, increment } = useCounter();
+  return <button type="button" className="left" onClick={increment}>{n}{touched ? "*" : ""}</button>;
+}
+function Right() {
+  const { n, touched, increment } = useCounter(10);
+  return <button type="button" className="right" onClick={increment}>{n}{touched ? "*" : ""}</button>;
+}
+function App() { return <><Left /><Right /></>; }
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+const show = () => \`left=\${container.querySelector(".left").textContent} right=\${container.querySelector(".right").textContent}\`;
+
+console.log("both mounted:            ", show());
+act(() => { container.querySelector(".left").click(); });
+act(() => { container.querySelector(".left").click(); });
+console.log("two clicks on the left:  ", show());
+act(() => { container.querySelector(".right").click(); });
+console.log("one click on the right:  ", show());
+console.log("the hook is shared; the state is not.");`,
+          output: `both mounted:             left=0 right=10
+two clicks on the left:   left=2* right=10
+one click on the right:   left=2* right=11*
+the hook is shared; the state is not.`,
+          explanation:
+            "Two clicks on the left moved the left counter to 2 and did nothing to the right. **A custom hook shares logic, never state.** If you want two components to share a value, that is lifting it or a store — module 8 — and a hook cannot do it however you write it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* A custom hook is a function whose name begins with \`use\` and which calls
@@ -71,12 +110,8 @@ console.log("two clicks on the left:  ", show());
 act(() => { container.querySelector<HTMLButtonElement>(".right")!.click(); });
 console.log("one click on the right:  ", show());
 console.log("the hook is shared; the state is not.");`,
-          output: `both mounted:             left=0 right=10
-two clicks on the left:   left=2* right=10
-one click on the right:   left=2* right=11*
-the hook is shared; the state is not.`,
-          explanation:
-            "Two clicks on the left moved the left counter to 2 and did nothing to the right. **A custom hook shares logic, never state.** If you want two components to share a value, that is lifting it or a store — module 8 — and a hook cannot do it however you write it.",
+            },
+          ],
         },
       ],
     },
@@ -107,8 +142,57 @@ the hook is shared; the state is not.`,
         {
           id: "extraction",
           title: "Before and after",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Before: three concerns in one component body.
+function SearchPage() {
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(query), 300);
+    return () => clearTimeout(id);
+  }, [query]);
+
+  const [results, setResults] = useState([]);
+  useEffect(() => {
+    let ignore = false;
+    search(debounced).then((r) => { if (!ignore) setResults(r); });
+    return () => { ignore = true; };
+  }, [debounced]);
+
+  return <>{/* … */}</>;
+}
+
+// After: two capabilities, each named, each usable elsewhere.
+function useDebounced(value, ms = 300) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setSettled(value), ms);
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return settled;
+}
+
+function useSearch(query) {
+  const [results, setResults] = useState([]);
+  useEffect(() => {
+    let ignore = false;
+    search(query).then((r) => { if (!ignore) setResults(r); });
+    return () => { ignore = true; };
+  }, [query]);
+  return results;
+}
+
+function SearchPage() {
+  const [query, setQuery] = useState("");
+  const results = useSearch(useDebounced(query));
+  return <>{/* … */}</>;
+}`,
+          explanation:
+            "The component went from twelve lines of mechanism to two lines of intent, and neither hook mentions searching *pages* — `useDebounced` will be used by something else within a month. Note that the extraction did not remove a single effect; it moved them somewhere they can be understood one at a time.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Before: three concerns in one component body.
 function SearchPage() {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -152,8 +236,8 @@ function SearchPage() {
   const results = useSearch(useDebounced(query));
   return <>{/* … */}</>;
 }`,
-          explanation:
-            "The component went from twelve lines of mechanism to two lines of intent, and neither hook mentions searching *pages* — `useDebounced` will be used by something else within a month. Note that the extraction did not remove a single effect; it moved them somewhere they can be understood one at a time.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -174,13 +258,6 @@ function SearchPage() {
         "Same rule as everything else in module 3: **a hook lives next to its only caller, and moves outward when it gains a second one.**",
         "Step the listing. Three steps, and the interesting one is the last, where the hook is renamed because it no longer belongs to the feature it came from.",
       ],
-      visual: {
-        id: "hooks-layout-visual",
-        kind: "react-structure",
-        algorithm: "hooks-layout",
-        lockAlgorithm: true,
-        title: "A hook moving outward as it gains callers",
-      },
       pitfalls: [
         {
           title: "A `hooks/` folder at the root is where single-caller hooks go to hide",

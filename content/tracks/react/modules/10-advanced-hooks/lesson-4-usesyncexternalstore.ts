@@ -25,12 +25,6 @@ export const useSyncExternalStoreLesson: Lesson = {
         "**`getSnapshot()`** returns the current value. React calls it during render and again after every notification, and re-renders when the result differs by `Object.is`.",
         "Notice what is absent: no state, no effect, no copy of the value. React reads through to the source every time, which is the entire point.",
       ],
-      visual: {
-        id: "external-store-visual",
-        kind: "react-rendering",
-        algorithm: "external-store",
-        title: "Subscribe, snapshot, notify",
-      },
     },
     {
       id: "the-missed-update",
@@ -44,8 +38,58 @@ export const useSyncExternalStoreLesson: Lesson = {
         {
           id: "missed-update",
           title: "The same store, subscribed two ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, useSyncExternalStore, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const listeners = new Set();
+let status = "online";
+const store = {
+  get: () => status,
+  set(next) { status = next; for (const l of listeners) l(); },
+  subscribe(l) { listeners.add(l); return () => listeners.delete(l); },
+};
+
+/* The version everybody writes first: a copy in state, kept up to date by
+   an effect. It reads during render and subscribes afterwards. */
+function useStatusCopy() {
+  const [value, setValue] = useState(store.get());
+  useEffect(() => store.subscribe(() => setValue(store.get())), []);
+  return value;
+}
+
+/* The version React provides. Nothing is copied; it reads through the
+   snapshot, and React re-checks the snapshot right after subscribing. */
+function useStatusSync() {
+  return useSyncExternalStore(store.subscribe, store.get);
+}
+
+function drive(useStatus, label) {
+  status = "online";
+  let fired = false;
+  function Badge() {
+    const value = useStatus();
+    // A ref callback runs at commit time — after the render, before any
+    // effect. That is exactly the window in which an effect-based
+    // subscription is not yet listening.
+    return <output ref={() => { if (!fired) { fired = true; store.set("offline"); } }}>{value}</output>;
+  }
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  act(() => { createRoot(container).render(<Badge />); });
+  console.log(\`\${label.padEnd(26)} store says "\${store.get()}", the screen says "\${container.textContent}"\`);
+}
+
+drive(useStatusCopy, "useState + useEffect:");
+drive(useStatusSync, "useSyncExternalStore:");`,
+          output: `useState + useEffect:      store says "offline", the screen says "online"
+useSyncExternalStore:      store says "offline", the screen says "offline"`,
+          explanation:
+            "The first line is a permanently wrong screen. The store says `offline`, the badge says `online`, and it will stay that way until something else happens to change the store again. `useSyncExternalStore` re-reads the snapshot immediately after subscribing, precisely to close that window — that check is the reason the hook exists rather than being a documented pattern.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, useSyncExternalStore, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const listeners = new Set<() => void>();
@@ -88,10 +132,8 @@ function drive(useStatus: () => string, label: string) {
 
 drive(useStatusCopy, "useState + useEffect:");
 drive(useStatusSync, "useSyncExternalStore:");`,
-          output: `useState + useEffect:      store says "offline", the screen says "online"
-useSyncExternalStore:      store says "offline", the screen says "offline"`,
-          explanation:
-            "The first line is a permanently wrong screen. The store says `offline`, the badge says `online`, and it will stay that way until something else happens to change the store again. `useSyncExternalStore` re-reads the snapshot immediately after subscribing, precisely to close that window — that check is the reason the hook exists rather than being a documented pattern.",
+            },
+          ],
         },
       ],
     },
@@ -123,8 +165,35 @@ useSyncExternalStore:      store says "offline", the screen says "offline"`,
         {
           id: "browser-source",
           title: "A browser value, wrapped safely",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Module scope, so their identity never changes and React never
+   resubscribes. A subscribe defined inside the hook would be a new
+   function on every render. */
+const subscribe = (onChange) => {
+  window.addEventListener("online", onChange);
+  window.addEventListener("offline", onChange);
+  return () => {
+    window.removeEventListener("online", onChange);
+    window.removeEventListener("offline", onChange);
+  };
+};
+
+const getSnapshot = () => navigator.onLine;
+
+/* On the server there is no navigator. Assume online: it is the state the
+   page is almost certainly in, and the client corrects it immediately after
+   hydration if not. */
+const getServerSnapshot = () => true;
+
+export function useOnline() {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}`,
+          explanation:
+            "Both functions are module-level constants for the reason module 9 gave: a new `subscribe` identity makes React unsubscribe and resubscribe on every render, and a new `getSnapshot` that returns a new object makes it loop. Defining them outside the hook removes both possibilities structurally.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Module scope, so their identity never changes and React never
    resubscribes. A subscribe defined inside the hook would be a new
    function on every render. */
 const subscribe = (onChange: () => void) => {
@@ -146,8 +215,8 @@ const getServerSnapshot = () => true;
 export function useOnline() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }`,
-          explanation:
-            "Both functions are module-level constants for the reason module 9 gave: a new `subscribe` identity makes React unsubscribe and resubscribe on every render, and a new `getSnapshot` that returns a new object makes it loop. Defining them outside the hook removes both possibilities structurally.",
+            },
+          ],
         },
       ],
       pitfalls: [

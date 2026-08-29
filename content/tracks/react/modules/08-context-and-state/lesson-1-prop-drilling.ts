@@ -19,12 +19,6 @@ export const propDrillingLesson: Lesson = {
     {
       id: "what-it-is",
       heading: "What it is, and what it costs",
-      visual: {
-        id: "drilling-depth-visual",
-        kind: "react-arch",
-        algorithm: "drilling-depth",
-        title: "How many components carry a prop they never read",
-      },
       body: [
         "Prop drilling is passing a value through components that do not use it, only so that something further down can have it. `Page` has the user, `Header` does not need it, `Menu` does not need it, `Avatar` does — so `user` appears in all four.",
         "It is worth being precise about the cost, because the received wisdom overstates one part of it and misses another.",

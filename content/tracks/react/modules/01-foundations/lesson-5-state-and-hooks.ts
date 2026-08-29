@@ -32,7 +32,7 @@ export const stateAndHooksLesson: Lesson = {
         {
           id: "broken-counter",
           title: "The version that does nothing",
-          lang: "tsx",
+          lang: "jsx",
           code: `function BrokenCounter() {
   let count = 0;               // recreated on every call of this function
 
@@ -47,6 +47,26 @@ export const stateAndHooksLesson: Lesson = {
 }`,
           explanation:
             "The console proves the increment works. The screen never updates, because React was never asked to re-render — and if it had been, `count` would have been reset to 0 by the new function call. Both problems, in four lines.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Types do not catch this one. \`count\` is a \`number\` in both languages and
+// every line type-checks; the bug is that the value is recreated on each
+// call, which is a fact about React rather than about the type.
+function BrokenCounter() {
+  let count = 0;               // recreated on every call of this function
+
+  return (
+    <button onClick={() => {
+      count += 1;              // this really does happen…
+      console.log(count);      // …and logs 1, 2, 3 as you click
+    }}>
+      Clicked {count} times    {/* …but this never changes */}
+    </button>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -62,7 +82,7 @@ export const stateAndHooksLesson: Lesson = {
         {
           id: "usestate-basic",
           title: "useState, and the pair it returns",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState } from "react";
 
 function Counter() {
@@ -81,6 +101,32 @@ function Counter() {
 }`,
           explanation:
             "The names are yours; the convention is `[thing, setThing]`. The argument to `useState` is the **initial** value, used only on the first render of this component instance — React ignores it on every subsequent render, because by then it has a value stored.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState } from "react";
+
+function Counter() {
+  // useState returns exactly two things, and array destructuring names them.
+  //   [0] the current value for this render
+  //   [1] a function that asks React to change it and re-render
+  //
+  // The type is inferred from the initial value, so this is \`number\` without
+  // being told. You only reach for \`useState<T>(...)\` when the initial value
+  // does not describe the state — \`useState<User | null>(null)\` being the one
+  // you will write most often.
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>Clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <button onClick={() => setCount(0)}>Reset</button>
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -93,12 +139,6 @@ function Counter() {
     {
       id: "snapshot",
       heading: "State updates are queued, and a render sees a snapshot",
-      visual: {
-        id: "first-state-snapshot",
-        kind: "react-state",
-        algorithm: "snapshot",
-        title: "Each render has its own variables",
-      },
       body: [
         "This is the single most confusing thing about React state, and it explains a whole family of bugs.",
         "**`setCount(1)` does not change `count`.** It schedules an update and asks React to render again. The `count` variable in the currently-running function is a `const` belonging to *this* render, and it will hold its value until the function ends. Reading it immediately after setting it gives you the old value — not because of a delay, but because it is a different variable from the one the next render will see.",
@@ -108,7 +148,7 @@ function Counter() {
         {
           id: "stale-snapshot",
           title: "Reading state after setting it",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Confusing() {
   const [count, setCount] = useState(0);
 
@@ -144,6 +184,47 @@ function Counter() {
 }`,
           explanation:
             "**The rule: when the new value depends on the old one, pass a function.** `setCount(c => c + 1)` is queued as an instruction rather than a value, and React applies each queued instruction in order to the result of the last. This also matters inside timers, promises and event handlers that run later, where the frozen value may be several renders stale.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Another one the compiler cannot see. \`count\` is a \`number\` on every line,
+// including the three that read the same frozen one — staleness is about
+// *when* a value was captured, which no type records.
+function Confusing() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(count + 1);
+    console.log(count);      // logs the OLD value, every time
+  }
+
+  function handleTriple() {
+    // All three read the same frozen \`count\`. If count is 0, all three
+    // compute 1, and the result is 1 — not 3.
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  }
+
+  function handleTripleFixed() {
+    // A functional update receives the latest queued value instead of
+    // the frozen one. 0 -> 1 -> 2 -> 3.
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+  }
+
+  return (
+    <>
+      <p>{count}</p>
+      <button onClick={handleClick}>+1</button>
+      <button onClick={handleTriple}>+3 (broken: adds 1)</button>
+      <button onClick={handleTripleFixed}>+3 (works)</button>
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -164,7 +245,7 @@ function Counter() {
         {
           id: "immutable-updates",
           title: "The patterns you will use constantly",
-          lang: "tsx",
+          lang: "jsx",
           code: `const [user, setUser] = useState({ name: "Ada", address: { city: "London" } });
 const [todos, setTodos] = useState([{ id: 1, text: "Learn React", done: false }]);
 
@@ -186,6 +267,36 @@ setTodos(todos.map((t) =>                                   // update one
 setTodos(todos.toSorted((a, b) => a.text.localeCompare(b.text)));  // reorder`,
           explanation:
             "The array methods split cleanly: `map`, `filter`, `slice`, `concat`, `toSorted` and `toReversed` return something new and are safe; `push`, `pop`, `splice`, `sort` and `reverse` mutate and are not. Deeply nested state is a signal to flatten the shape or reach for a library such as Immer — the spread chains get unreadable at three levels.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type User = { name: string; address: { city: string } };
+type Todo = { id: number; text: string; done: boolean };
+
+const [user, setUser] = useState<User>({ name: "Ada", address: { city: "London" } });
+const [todos, setTodos] = useState<Todo[]>([{ id: 1, text: "Learn React", done: false }]);
+
+// --- objects ---
+user.name = "Grace";                    // WRONG: same reference, no re-render
+setUser({ ...user, name: "Grace" });    // right: new object, one field changed
+
+// Nested: every level you change must be copied.
+setUser({ ...user, address: { ...user.address, city: "Paris" } });
+
+// --- arrays ---
+todos.push(newTodo);                    // WRONG: mutates
+setTodos([...todos, newTodo]);          // add to the end
+setTodos([newTodo, ...todos]);          // add to the start
+setTodos(todos.filter((t) => t.id !== 1));                 // remove
+setTodos(todos.map((t) =>                                   // update one
+  t.id === 1 ? { ...t, done: !t.done } : t
+));
+setTodos(todos.toSorted((a, b) => a.text.localeCompare(b.text)));  // reorder
+
+// Typing the state as \`readonly Todo[]\` turns the two WRONG lines into
+// compile errors: neither \`push\` nor an in-place \`sort\` exists on it.`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -208,7 +319,7 @@ setTodos(todos.toSorted((a, b) => a.text.localeCompare(b.text)));  // reorder`,
         {
           id: "hook-rules",
           title: "Why the order matters",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Broken({ isLoggedIn }) {
   // WRONG: on the render where isLoggedIn flips, every hook after this
   // one shifts by a slot and picks up the wrong stored value.
@@ -229,6 +340,30 @@ function Fixed({ isLoggedIn }) {
 }`,
           explanation:
             "Almost every apparent need to call a hook conditionally is really a need to *render* conditionally, or to split the component in two so that the hook lives in the child that is conditionally rendered. Install `eslint-plugin-react-hooks` and never disable its rules — it catches this at the moment you type it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Broken({ isLoggedIn }: { isLoggedIn: boolean }) {
+  // WRONG: on the render where isLoggedIn flips, every hook after this
+  // one shifts by a slot and picks up the wrong stored value.
+  if (isLoggedIn) {
+    const [name, setName] = useState("");
+  }
+  const [count, setCount] = useState(0);
+  // ...
+}
+
+function Fixed({ isLoggedIn }: { isLoggedIn: boolean }) {
+  // Hooks unconditionally at the top; the condition moves into the JSX,
+  // where it belongs. Types do not catch the version above — the rule of
+  // hooks is a runtime rule, which is what the eslint plugin is for.
+  const [name, setName] = useState("");
+  const [count, setCount] = useState(0);
+
+  return isLoggedIn ? <p>{name}</p> : <p>Please sign in</p>;
+}`,
+            },
+          ],
         },
       ],
     },

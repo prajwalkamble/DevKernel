@@ -25,12 +25,6 @@ export const useReducerLesson: Lesson = {
         "The second trigger is **the next update depends on the current state in a non-trivial way**. `setCount(c => c + 1)` is fine; \"if this sku is already present increment it, otherwise append\" is a rule, and rules want a home.",
         "A reducer gives them one. All the transitions in one function, all the components saying only what happened.",
       ],
-      visual: {
-        id: "reducer-dispatch-visual",
-        kind: "react-rendering",
-        algorithm: "reducer-dispatch",
-        title: "Five actions through one function",
-      },
     },
     {
       id: "the-shape",
@@ -42,8 +36,76 @@ export const useReducerLesson: Lesson = {
         {
           id: "reducer-in-and-out",
           title: "The same reducer, called directly and through React",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useReducer, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* An ordinary function. It never touches React, so it can be called and
+   tested directly — which is the line below. */
+function cartReducer(state, action) {
+  switch (action.type) {
+    case "added": {
+      const existing = state.items.find((i) => i.sku === action.sku);
+      return existing
+        ? { items: state.items.map((i) => (i.sku === action.sku ? { ...i, qty: i.qty + 1 } : i)) }
+        : { items: [...state.items, { sku: action.sku, qty: 1 }] };
+    }
+    case "removed":
+      return { items: state.items.filter((i) => i.sku !== action.sku) };
+    case "cleared":
+      return { items: [] };
+  }
+}
+
+const show = (s) => s.items.map((i) => \`\${i.sku}x\${i.qty}\`).join(",") || "empty";
+
+console.log("the reducer, called directly — no React involved:");
+let s = { items: [] };
+for (const a of [
+  { type: "added", sku: "pen" }, { type: "added", sku: "pen" },
+  { type: "added", sku: "ink" }, { type: "removed", sku: "ink" },
+]) {
+  const before = show(s);
+  s = cartReducer(s, a);
+  console.log(\`  \${JSON.stringify(a).padEnd(34)} \${before}  ->  \${show(s)}\`);
+}
+
+function Cart() {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  return (
+    <div>
+      <output>{show(state)}</output>
+      <button type="button" id="add" onClick={() => dispatch({ type: "added", sku: "pen" })}>add</button>
+      <button type="button" id="clear" onClick={() => dispatch({ type: "cleared" })}>clear</button>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<Cart />); });
+const click = (id) => act(() => { container.querySelector(\`#\${id}\`).click(); });
+
+console.log("\\nthe same reducer, inside a component:");
+click("add"); click("add");
+console.log("  after two adds: ", container.querySelector("output").textContent);
+click("clear");
+console.log("  after clear:    ", container.querySelector("output").textContent);`,
+          output: `the reducer, called directly — no React involved:
+  {"type":"added","sku":"pen"}       empty  ->  penx1
+  {"type":"added","sku":"pen"}       penx1  ->  penx2
+  {"type":"added","sku":"ink"}       penx2  ->  penx2,inkx1
+  {"type":"removed","sku":"ink"}     penx2,inkx1  ->  penx2
+
+the same reducer, inside a component:
+  after two adds:  penx2
+  after clear:     empty`,
+          explanation:
+            "The top half is the whole testing story: a loop, four calls, no renderer, no DOM, no mocking. \"Adding a sku that is already present increments the quantity\" is one assertion on one function call. The bottom half is the same function inside a component, and the component contains none of that logic — it says `added` and `cleared` and nothing else.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useReducer, act } from "react";
 import { createRoot } from "react-dom/client";
 
 type Item = { sku: string; qty: number };
@@ -104,17 +166,8 @@ click("add"); click("add");
 console.log("  after two adds: ", container.querySelector("output")!.textContent);
 click("clear");
 console.log("  after clear:    ", container.querySelector("output")!.textContent);`,
-          output: `the reducer, called directly — no React involved:
-  {"type":"added","sku":"pen"}       empty  ->  penx1
-  {"type":"added","sku":"pen"}       penx1  ->  penx2
-  {"type":"added","sku":"ink"}       penx2  ->  penx2,inkx1
-  {"type":"removed","sku":"ink"}     penx2,inkx1  ->  penx2
-
-the same reducer, inside a component:
-  after two adds:  penx2
-  after clear:     empty`,
-          explanation:
-            "The top half is the whole testing story: a loop, four calls, no renderer, no DOM, no mocking. \"Adding a sku that is already present increments the quantity\" is one assertion on one function call. The bottom half is the same function inside a component, and the component contains none of that logic — it says `added` and `cleared` and nothing else.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -141,8 +194,21 @@ the same reducer, inside a component:
         {
           id: "action-naming",
           title: "Two reducers, same feature",
-          lang: "typescript",
-          code: `// Setter-shaped actions. Every caller has to know all three rules, and a
+          lang: "javascript",
+          code: `function reducer(state, action) {
+  switch (action.type) {
+    case "checkoutStarted":
+      // Three fields, one rule, one place.
+      return { ...state, coupon: null, frozen: true, startedAt: action.at };
+    // …
+  }
+}`,
+          explanation:
+            "Note `action.at` rather than `Date.now()` inside the reducer. The impure part — reading the clock — happens where the action is created, and the reducer receives the result. That keeps the reducer pure and, incidentally, makes the test deterministic.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// Setter-shaped actions. Every caller has to know all three rules, and a
 // new caller that forgets one produces a cart in an impossible state.
 type BadAction =
   | { type: "setItems"; items: Item[] }
@@ -163,8 +229,8 @@ function reducer(state: State, action: Action): State {
     // …
   }
 }`,
-          explanation:
-            "Note `action.at` rather than `Date.now()` inside the reducer. The impure part — reading the clock — happens where the action is created, and the reducer receives the result. That keeps the reducer pure and, incidentally, makes the test deterministic.",
+            },
+          ],
         },
       ],
     },

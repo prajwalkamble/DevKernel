@@ -23,17 +23,11 @@ export const indexKeyBugLesson: Lesson = {
         "Two identical lists. Each row shows a name and has a text box beside it. Something is typed into the box next to Ada, and then a new person is added at the front.",
         "The only difference between the two runs is `key={i}` against `key={row.id}`.",
       ],
-      visual: {
-        id: "index-key-visual",
-        kind: "react-rendering",
-        algorithm: "keys-by-index",
-        title: "The same insertion, keyed both ways",
-      },
       examples: [
         {
           id: "state-follows-the-key",
           title: "Where the typed text ends up",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

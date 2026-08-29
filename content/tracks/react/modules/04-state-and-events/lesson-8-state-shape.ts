@@ -19,12 +19,6 @@ export const stateShapeLesson: Lesson = {
     {
       id: "derived",
       heading: "Do not store what you can calculate",
-      visual: {
-        id: "derived-state-visual",
-        kind: "react-state",
-        algorithm: "derived-state",
-        title: "Storing the filtered list, against computing it",
-      },
       body: [
         "This is the highest-value rule in the module, and the one most often broken. If a value can be worked out from props and other state, work it out during render. Do not put it in state.",
         "A total from a list of items, a filtered view of an array, whether a form is valid, the full name from a first and last name, whether anything is selected — all of these are derived. Storing them creates a second source of truth that has to be kept in step with the first, and the code that keeps them in step is where the bug will be.",
@@ -35,7 +29,7 @@ export const stateShapeLesson: Lesson = {
         {
           id: "derived-vs-stored",
           title: "The total that lags, and the total that cannot",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -78,6 +72,49 @@ after one add: stored=22 derived=22
 after two adds: stored=29 derived=29`,
           explanation:
             "Here the two agree — because the handler was written carefully, recomputing from `items` and adding the new price by hand. That is the point: the stored version is only correct for as long as every future edit remembers to do this. Add a remove button, a discount, or a quantity field and one of them will forget. The derived version cannot be forgotten, because there is nothing to remember.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Cart() {
+  const [items, setItems] = useState<{ price: number }[]>([{ price: 10 }, { price: 5 }]);
+
+  // Stored: a second source of truth, updated by hand. Both are \`number\`, so
+  // the type system has no opinion about which one is right.
+  const [storedTotal, setStoredTotal] = useState(15);
+
+  // Derived: recalculated from the items every render. Cannot be stale.
+  const derivedTotal = items.reduce((sum, i) => sum + i.price, 0);
+
+  function addItem() {
+    setItems([...items, { price: 7 }]);
+    // Computed from \`items\`, which is this render's snapshot — already old.
+    setStoredTotal(items.reduce((sum, i) => sum + i.price, 0) + 7);
+  }
+
+  return (
+    <>
+      <span id="v">stored={storedTotal} derived={derivedTotal}</span>
+      <button id="b" onClick={addItem}>add</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+const show = (label: string) => console.log(label, container.querySelector("#v")!.textContent);
+
+act(() => { root.render(<Cart />); });
+show("initial:      ");
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+show("after one add:");
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+show("after two adds:");`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -99,7 +136,7 @@ after two adds: stored=29 derived=29`,
         {
           id: "status-union",
           title: "Four flags, or one status",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -151,6 +188,62 @@ failed:  Failed: Network unreachable
 ok:      Done`,
           explanation:
             "Each transition is a single assignment to `status`, so there is no combination of flags to keep consistent and no way to be loading and failed at once. `error` is still separate because it carries a message rather than a state — and it is set to `null` on success, which is the one bit of bookkeeping this shape still asks for. A discriminated union of the whole thing would remove even that.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+// This is the example where TypeScript earns the most. The union is the
+// design: four states and no combinations, written down so that a fifth
+// spelling is a compile error rather than a branch that never renders.
+type Status = "idle" | "loading" | "error" | "success";
+
+function Panel() {
+  const [status, setStatus] = useState<Status>("idle");
+  // Without the type argument this would be \`null\` and nothing else, so the
+  // string assignment below would not compile.
+  const [error, setError] = useState<string | null>(null);
+
+  function fail() {
+    setStatus("error");
+    setError("Network unreachable");
+  }
+  function succeed() {
+    setStatus("success");
+    setError(null);
+  }
+
+  return (
+    <>
+      <span id="v">
+        {status === "loading" && "Loading…"}
+        {status === "error" && \`Failed: \${error}\`}
+        {status === "success" && "Done"}
+        {status === "idle" && "Ready"}
+      </span>
+      <button id="load" onClick={() => setStatus("loading")}>load</button>
+      <button id="fail" onClick={fail}>fail</button>
+      <button id="ok" onClick={succeed}>ok</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+const show = (label: string) => console.log(label, container.querySelector("#v")!.textContent);
+
+act(() => { root.render(<Panel />); });
+show("initial:");
+act(() => { container.querySelector<HTMLButtonElement>("#load")!.click(); });
+show("loading:");
+act(() => { container.querySelector<HTMLButtonElement>("#fail")!.click(); });
+show("failed: ");
+act(() => { container.querySelector<HTMLButtonElement>("#ok")!.click(); });
+show("ok:     ");`,
+            },
+          ],
         },
       ],
     },

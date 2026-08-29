@@ -27,8 +27,53 @@ export const loadingAndErrorStatesLesson: Lesson = {
         {
           id: "impossible-states",
           title: "Every combination, enumerated",
-          lang: "tsx",
-          code: `/* The three-boolean shape almost every fetch hook starts with. */
+          lang: "jsx",
+          code: `/* Every combination the type permits, enumerated rather than guessed at. */
+const all = [];
+for (const isLoading of [true, false]) {
+  for (const isError of [true, false]) {
+    for (const data of ["Ada", null]) all.push({ isLoading, isError, data });
+  }
+}
+
+const meaning = (f) => {
+  if (f.isLoading && f.isError) return "contradiction — loading and failed at once";
+  if (f.isLoading) return f.data ? "refetching, stale data on screen" : "first load";
+  if (f.isError) return f.data ? "failed, but stale data on screen" : "failed";
+  return f.data ? "ready" : "idle — or a load that silently returned nothing";
+};
+
+console.log(\`\${all.length} combinations of three booleans:\\n\`);
+for (const f of all) {
+  const tag = \`\${f.isLoading ? "loading" : "-"} \${f.isError ? "error" : "-"} \${f.data ?? "null"}\`;
+  console.log(\`  \${tag.padEnd(22)} \${meaning(f)}\`);
+}
+
+const designed = [
+  { tag: "idle" },
+  { tag: "loading", previous: null },
+  { tag: "ready", data: "Ada" },
+  { tag: "error", error: "404", previous: null },
+];
+console.log(\`\\n\${designed.length} states, each one deliberate, and no combination to check.\`);`,
+          output: `8 combinations of three booleans:
+
+  loading error Ada      contradiction — loading and failed at once
+  loading error null     contradiction — loading and failed at once
+  loading - Ada          refetching, stale data on screen
+  loading - null         first load
+  - error Ada            failed, but stale data on screen
+  - error null           failed
+  - - Ada                ready
+  - - null               idle — or a load that silently returned nothing
+
+4 states, each one deliberate, and no combination to check.`,
+          explanation:
+            "Two of the eight are outright contradictions the type happily allows. Three more are states a real UI does want — refetching with stale data on screen, a failed refresh that keeps showing the last good data, an initial idle — but with booleans you cannot tell \"I meant that\" from \"that is a bug\", because nothing in the shape records the intent. The union has four states because somebody chose four.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* The three-boolean shape almost every fetch hook starts with. */
 type Flags = { isLoading: boolean; isError: boolean; data: string | null };
 
 /* Every combination the type permits, enumerated rather than guessed at. */
@@ -66,20 +111,8 @@ const designed: Status[] = [
   { tag: "error", error: "404", previous: null },
 ];
 console.log(\`\\n\${designed.length} states, each one deliberate, and no combination to check.\`);`,
-          output: `8 combinations of three booleans:
-
-  loading error Ada      contradiction — loading and failed at once
-  loading error null     contradiction — loading and failed at once
-  loading - Ada          refetching, stale data on screen
-  loading - null         first load
-  - error Ada            failed, but stale data on screen
-  - error null           failed
-  - - Ada                ready
-  - - null               idle — or a load that silently returned nothing
-
-4 states, each one deliberate, and no combination to check.`,
-          explanation:
-            "Two of the eight are outright contradictions the type happily allows. Three more are states a real UI does want — refetching with stale data on screen, a failed refresh that keeps showing the last good data, an initial idle — but with booleans you cannot tell \"I meant that\" from \"that is a bug\", because nothing in the shape records the intent. The union has four states because somebody chose four.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -92,12 +125,6 @@ console.log(\`\\n\${designed.length} states, each one deliberate, and no combina
     {
       id: "the-union",
       heading: "One field, four states",
-      visual: {
-        id: "boolean-states-visual",
-        kind: "react-forms",
-        algorithm: "boolean-states",
-        title: "Eight combinations, four of them real",
-      },
       body: [
         "The rewrite is mechanical: one `useState` holding a tagged object, and the render becomes a switch.",
         "The payoff is not elegance. It is that **TypeScript narrows on the tag**, so inside the `ready` branch `data` is not `null` and you stop writing `data!`. Every one of those non-null assertions was a place where the type system was telling you the shape was wrong and you told it to be quiet.",
@@ -106,8 +133,38 @@ console.log(\`\\n\${designed.length} states, each one deliberate, and no combina
         {
           id: "status-union",
           title: "The same component, as a union",
-          lang: "tsx",
-          code: `type Status<T> =
+          lang: "jsx",
+          code: `function Profile({ id }) {
+  const [status, setStatus] = useState({ tag: "loading" });
+
+  useEffect(() => {
+    let ignore = false;
+    setStatus({ tag: "loading" });
+    getJSON(\`/api/users/\${id}\`).then(
+      (data) => { if (!ignore) setStatus({ tag: "ready", data }); },
+      (error) => { if (!ignore) setStatus({ tag: "error", message: error.message }); },
+    );
+    return () => { ignore = true; };
+  }, [id]);
+
+  switch (status.tag) {
+    case "loading":
+      return <ProfileSkeleton />;
+    case "error":
+      // \`message\` exists here and \`data\` does not. No assertions needed.
+      return <LoadFailed message={status.message} onRetry={() => setStatus({ tag: "loading" })} />;
+    case "ready":
+      return status.data.orders.length === 0
+        ? <NoOrdersYet name={status.data.name} />
+        : <Orders orders={status.data.orders} />;
+  }
+}`,
+          explanation:
+            "Note where the empty check lives: **inside** `ready`. Empty is not a fourth loading state — it is a successful load whose answer happens to be nothing, and conflating the two is what produces a screen that says \"Loading…\" forever when the real answer is \"you have no orders\".",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Status<T> =
   | { tag: "loading" }
   | { tag: "ready"; data: T }
   | { tag: "error"; message: string };
@@ -137,8 +194,8 @@ function Profile({ id }: { id: string }) {
         : <Orders orders={status.data.orders} />;
   }
 }`,
-          explanation:
-            "Note where the empty check lives: **inside** `ready`. Empty is not a fourth loading state — it is a successful load whose answer happens to be nothing, and conflating the two is what produces a screen that says \"Loading…\" forever when the real answer is \"you have no orders\".",
+            },
+          ],
         },
       ],
     },
@@ -173,10 +230,10 @@ function Profile({ id }: { id: string }) {
         {
           id: "delayed-spinner",
           title: "A spinner that only appears when it is needed",
-          lang: "tsx",
+          lang: "jsx",
           code: `/** True once \`active\` has been true for \`delay\` ms — and then true for at
  *  least \`minimum\` ms, so it cannot flash. */
-function useDelayedFlag(active: boolean, delay = 200, minimum = 300) {
+function useDelayedFlag(active, delay = 200, minimum = 300) {
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
@@ -197,6 +254,32 @@ function useDelayedFlag(active: boolean, delay = 200, minimum = 300) {
 }`,
           explanation:
             "Two effects rather than one, because they are two different synchronisations with two different dependency sets — the lesson-2 rule applied. Both clean their timer up, so a component that unmounts mid-delay leaves nothing behind.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/** True once \`active\` has been true for \`delay\` ms — and then true for at
+ *  least \`minimum\` ms, so it cannot flash. */
+function useDelayedFlag(active: boolean, delay = 200, minimum = 300) {
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (!active) return;
+    // Started: wait \`delay\` before admitting anything is happening.
+    const id = setTimeout(() => setShown(true), delay);
+    return () => clearTimeout(id);
+  }, [active, delay]);
+
+  useEffect(() => {
+    if (active || !shown) return;
+    // Finished, but the spinner is up: hold it for \`minimum\`.
+    const id = setTimeout(() => setShown(false), minimum);
+    return () => clearTimeout(id);
+  }, [active, shown, minimum]);
+
+  return shown;
+}`,
+            },
+          ],
         },
       ],
     },

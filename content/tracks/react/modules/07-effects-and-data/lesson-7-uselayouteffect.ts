@@ -25,21 +25,15 @@ export const useLayoutEffectLesson: Lesson = {
         "`useLayoutEffect`:  render → commit → effect → *paint*.",
         "That gap is where the flash lives. If an effect changes something visible, `useEffect` gives the user one painted frame of the unadjusted version first. `useLayoutEffect` does not, because nothing has been painted yet.",
       ],
-      visual: {
-        id: "layout-effect-timing-visual",
-        kind: "react-rendering",
-        algorithm: "effect-timing",
-        title: "Both effects, and the paint between them",
-      },
       examples: [
         {
           id: "layout-order",
           title: "The order, printed",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, useLayoutEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
-function Both({ label }: { label: string }) {
+function Both({ label }) {
   console.log(\`  render (\${label})\`);
   useLayoutEffect(() => {
     console.log(\`  useLayoutEffect (\${label})  <- before the browser paints\`);
@@ -81,6 +75,39 @@ unmount:
   cleanup effect (second)`,
           explanation:
             "The two queues are processed separately rather than component by component: on the update, the layout cleanup **and** the layout effect both run before the passive effect's cleanup. So a layout effect can never observe a state left behind by a passive cleanup that has not run yet.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, useLayoutEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Both({ label }: { label: string }) {
+  console.log(\`  render (\${label})\`);
+  useLayoutEffect(() => {
+    console.log(\`  useLayoutEffect (\${label})  <- before the browser paints\`);
+    return () => console.log(\`  cleanup layout (\${label})\`);
+  }, [label]);
+  useEffect(() => {
+    console.log(\`  useEffect (\${label})        <- after the browser paints\`);
+    return () => console.log(\`  cleanup effect (\${label})\`);
+  }, [label]);
+  return <p>{label}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+console.log("mount:");
+act(() => { root.render(<Both label="first" />); });
+
+console.log("\\nchange the label prop:");
+act(() => { root.render(<Both label="second" />); });
+
+console.log("\\nunmount:");
+act(() => { root.unmount(); });`,
+            },
+          ],
         },
       ],
     },
@@ -96,9 +123,9 @@ unmount:
         {
           id: "tooltip-flip",
           title: "A tooltip that flips before anyone sees it",
-          lang: "tsx",
-          code: `function Tooltip({ anchor, children }: { anchor: DOMRect; children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
+          lang: "jsx",
+          code: `function Tooltip({ anchor, children }) {
+  const ref = useRef(null);
   const [above, setAbove] = useState(false);
 
   useLayoutEffect(() => {
@@ -131,6 +158,43 @@ unmount:
 }`,
           explanation:
             "Setting state inside `useLayoutEffect` is not a mistake here — it is the mechanism. React notices the update during the layout phase and re-renders synchronously, before yielding to the browser. The user never sees the first position. Doing exactly this in a `useEffect` is what produces the visible jump.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Tooltip({ anchor, children }: { anchor: DOMRect; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [above, setAbove] = useState(false);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    // getBoundingClientRect forces layout, which is only possible because
+    // the node is in the document — that is what "after commit" buys us.
+    const height = node.getBoundingClientRect().height;
+    const overflows = anchor.bottom + height > window.innerHeight;
+
+    // Setting state here triggers a second render *before* the paint.
+    // React runs it synchronously, so only the corrected version is drawn.
+    setAbove(overflows);
+  }, [anchor]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: "fixed",
+        left: anchor.left,
+        top: above ? undefined : anchor.bottom,
+        bottom: above ? window.innerHeight - anchor.top : undefined,
+      }}
+    >
+      {children}
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

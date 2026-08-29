@@ -19,12 +19,6 @@ export const fragmentsLesson: Lesson = {
     {
       id: "one-root",
       heading: "Why only one root",
-      visual: {
-        id: "fragment-vs-div",
-        kind: "react-jsx",
-        algorithm: "fragment-vs-wrapper",
-        title: "A wrapper div against a fragment",
-      },
       body: [
         "A component returns one value, because it is a function and functions return one value. There is no React rule here at all — `return <p /> <p />;` is not valid JavaScript, and never gets as far as React.",
         "So when you need two siblings, you need one thing that contains them. A `<div>` works and adds a node to the DOM. A **fragment** works and adds nothing.",
@@ -34,7 +28,7 @@ export const fragmentsLesson: Lesson = {
         {
           id: "fragment-renders-nothing",
           title: "A fragment leaves no trace",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Wrapped() {
@@ -61,6 +55,36 @@ console.log("frag:", render(<Fragged />));`,
 frag: <span>a</span><span>b</span>`,
           explanation:
             "The fragment version produces exactly the two spans, with nothing around them. That is the whole feature. Note also that the two spans came out flush against each other despite being on separate lines in the source — the whitespace rule from the previous lesson, not anything to do with fragments.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+// Neither component takes props and nothing needs annotating, so this file is
+// the same in both languages. A fragment has no type of its own to declare:
+// \`<>...</>\` is ordinary JSX and produces an element like any other.
+function Wrapped() {
+  return (
+    <div>
+      <span>a</span>
+      <span>b</span>
+    </div>
+  );
+}
+
+function Fragged() {
+  return (
+    <>
+      <span>a</span>
+      <span>b</span>
+    </>
+  );
+}
+
+console.log("div: ", render(<Wrapped />));
+console.log("frag:", render(<Fragged />));`,
+            },
+          ],
         },
       ],
     },
@@ -76,7 +100,7 @@ frag: <span>a</span><span>b</span>`,
         {
           id: "keyed-fragment",
           title: "One iteration, two sibling elements",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Fragment } from "react";
 import { renderToStaticMarkup as render } from "react-dom/server";
 
@@ -119,6 +143,53 @@ console.log("fragment:", render(<Fragged />));`,
 fragment: <dl><dt>Element</dt><dd>A description of UI</dd><dt>Component</dt><dd>A function that returns one</dd></dl>`,
           explanation:
             "The second output is the correct description list: four direct children of the `<dl>`, alternating. The first has wrapped each pair in a `<div>`, which browsers will render but which is not valid content for a `<dl>` and defeats any CSS that targets `dl > dt`. The same argument applies inside `<tr>`, `<select>` and `<ul>`, all of which constrain what their children may be.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Fragment } from "react";
+import { renderToStaticMarkup as render } from "react-dom/server";
+
+// Naming the row shape is the one thing TypeScript adds here: \`r.term\` and
+// \`r.def\` are checked at both call sites rather than inferred twice.
+type Row = { id: number; term: string; def: string };
+
+const rows: Row[] = [
+  { id: 1, term: "Element", def: "A description of UI" },
+  { id: 2, term: "Component", def: "A function that returns one" },
+];
+
+// A div per row: invalid inside <dl>, and it breaks the pairing.
+function Wrapped() {
+  return (
+    <dl>
+      {rows.map((r) => (
+        <div key={r.id}>
+          <dt>{r.term}</dt>
+          <dd>{r.def}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+// A keyed fragment: the dt and dd stay direct children of the dl.
+function Fragged() {
+  return (
+    <dl>
+      {rows.map((r) => (
+        <Fragment key={r.id}>
+          <dt>{r.term}</dt>
+          <dd>{r.def}</dd>
+        </Fragment>
+      ))}
+    </dl>
+  );
+}
+
+console.log("wrapped: ", render(<Wrapped />));
+console.log("fragment:", render(<Fragged />));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -140,7 +211,7 @@ fragment: <dl><dt>Element</dt><dd>A description of UI</dd><dt>Component</dt><dd>
         {
           id: "grid-children",
           title: "What the grid sees",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Returns one element: the grid gets one item.
 function WrappedPair() {
   return (
@@ -171,6 +242,41 @@ function App() {
           output: `<dl style="display:grid;grid-template-columns:8rem 1fr"><dt>Term</dt><dd>Definition</dd></dl>`,
           explanation:
             "The `<dt>` and `<dd>` are direct children of the grid, so they land in the two declared columns. Swap in `WrappedPair` and the markup gains a `<div>` between them — the grid then has a single item spanning the first column, and the two-column layout silently stops working.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Returns one element: the grid gets one item.
+function WrappedPair() {
+  return (
+    <div>
+      <dt>Term</dt>
+      <dd>Definition</dd>
+    </div>
+  );
+}
+
+// Returns two elements: the grid gets two items.
+function FraggedPair() {
+  return (
+    <>
+      <dt>Term</dt>
+      <dd>Definition</dd>
+    </>
+  );
+}
+
+function App() {
+  // The style object is checked against CSSProperties: \`gridTemplateColumns\`
+  // has to be spelled in camelCase and take a string, which is the only thing
+  // TypeScript contributes to this file.
+  return (
+    <dl style={{ display: "grid", gridTemplateColumns: "8rem 1fr" }}>
+      <FraggedPair />
+    </dl>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

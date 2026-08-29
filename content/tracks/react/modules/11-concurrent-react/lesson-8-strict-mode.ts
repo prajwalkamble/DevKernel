@@ -27,15 +27,26 @@ export const strictModeLesson: Lesson = {
         {
           id: "where-it-comes-from",
           title: "Where it comes from",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* main.tsx, exactly as create-vite generates it. */
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <App />
   </StrictMode>
 );`,
           explanation:
             "It is on by default in every scaffolded app, it does nothing in a production build, and it applies to everything inside it — so wrapping only part of the tree while you work on it is a legitimate move.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* main.tsx, exactly as create-vite generates it. */
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);`,
+            },
+          ],
         },
       ],
     },
@@ -49,12 +60,6 @@ createRoot(document.getElementById("root")!).render(
         "**Effects.** These are not doubled but *remounted*: setup, cleanup, setup — in that order, in one mount.",
         "And what is not: event handlers, `useEffect` cleanups on unmount, refs, and anything in a production build. It is all stripped from the production bundle, so the doubling costs your users nothing.",
       ],
-      visual: {
-        id: "strict-off-visual",
-        kind: "react-concurrent",
-        algorithm: "strict-off",
-        title: "Mounting without Strict Mode",
-      },
     },
     {
       id: "the-double-render",
@@ -64,21 +69,15 @@ createRoot(document.getElementById("root")!).render(
         "Calling the function twice is a cheap test for it. If it is pure, the second call is invisible: same output, no observable difference. If it is not, you get a visible wrong answer *on every mount*, in development, instead of an occasional wrong answer in production.",
         "Watch the cart in this one.",
       ],
-      visual: {
-        id: "strict-on-visual",
-        kind: "react-concurrent",
-        algorithm: "strict-on",
-        title: "The same mount, inside Strict Mode",
-      },
       examples: [
         {
           id: "the-log",
           title: "The same component, in and out of Strict Mode",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { StrictMode, useEffect, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
-const log: string[] = [];
+const log = [];
 
 function Chat() {
   const [id] = useState(() => { log.push("initialiser"); return 1; });
@@ -115,6 +114,37 @@ disconnect(1)
 connect(1)`,
           explanation:
             "Read the last three lines as one unit: **connect, disconnect, connect**. It is not the effect running twice. It is a full mount, unmount and mount, which is exactly what a route change or a Fast Refresh does — and the cleanup is being tested, not the effect.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { StrictMode, useEffect, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log: string[] = [];
+
+function Chat() {
+  const [id] = useState(() => { log.push("initialiser"); return 1; });
+  log.push("render");
+  useEffect(() => {
+    log.push(\`connect(\${id})\`);
+    return () => log.push(\`disconnect(\${id})\`);
+  }, [id]);
+  return <p>chat</p>;
+}
+
+const a = document.createElement("div");
+document.body.appendChild(a);
+log.push("--- without StrictMode ---");
+await act(async () => { createRoot(a).render(<Chat />); });
+
+const b = document.createElement("div");
+document.body.appendChild(b);
+log.push("--- with StrictMode ---");
+await act(async () => { createRoot(b).render(<StrictMode><Chat /></StrictMode>); });
+
+console.log(log.join("\\n"));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -136,7 +166,7 @@ connect(1)`,
         {
           id: "the-fixes",
           title: "The three shapes",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* A subscription: the cleanup is the unsubscriber. */
 useEffect(() => {
   const connection = createConnection(roomId);

@@ -19,12 +19,6 @@ export const attributesAndPropsLesson: Lesson = {
     {
       id: "one-rule",
       heading: "The rule that decides whether any of this matters",
-      visual: {
-        id: "attribute-mapping-visual",
-        kind: "react-misc",
-        algorithm: "attribute-mapping",
-        title: "Eleven props, and where each one goes",
-      },
       body: [
         "There is exactly one question: **is the tag a DOM element or a component?**",
         "For a DOM element — lowercase, so the compiler passed a string — React has to turn your props into real HTML, and the naming rules in this lesson apply. For a component, props are handed to your function untouched. `<Widget className=\"x\" htmlFor=\"y\" whateverYouLike={1} />` passes three ordinary values; nothing is translated, nothing is validated, nothing is dropped.",
@@ -43,7 +37,7 @@ export const attributesAndPropsLesson: Lesson = {
         {
           id: "attribute-naming",
           title: "What each form becomes in the markup",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Naming() {
   return (
     <div>
@@ -71,6 +65,42 @@ export const attributesAndPropsLesson: Lesson = {
           output: `<div><label class="lbl" for="email">Email</label><input id="email" type="email" tabindex="-1"/><button type="button">A</button><button type="button" disabled="">B</button><p style="margin-top:8px;line-height:2;z-index:3;width:50%">styled</p><div data-testid="box" aria-live="polite" aria-hidden="true"></div><div><b>raw</b></div></div>`,
           explanation:
             "Four things to read off that line. `className`/`htmlFor` came out as `class`/`for`. `disabled={false}` produced **no attribute at all**, which is the correct HTML — a `disabled=\"false\"` attribute would still disable the button. `marginTop: 8` gained a `px` while `lineHeight: 2` and `zIndex: 3` did not. And the `data-` and `aria-` names are untouched.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// The one thing TypeScript adds here is the checking. Every attribute below
+// is looked up on the element's own prop type, so \`classname\`, \`tabindex\` or
+// \`onclick\` are compile errors rather than props React silently ignores —
+// which is exactly the class of mistake this example is about.
+function Naming() {
+  return (
+    <div>
+      {/* The two renames, both forced by JavaScript's reserved words. */}
+      <label className="lbl" htmlFor="email">Email</label>
+
+      {/* camelCase in, lowercase attribute out. */}
+      <input id="email" type="email" tabIndex={-1} />
+
+      {/* Booleans: false removes the attribute, true writes it empty. */}
+      <button type="button" disabled={false}>A</button>
+      <button type="button" disabled={true}>B</button>
+
+      {/* An object, camelCase keys, and \`px\` added only where it applies.
+          The keys are checked against CSSProperties, so \`margin-top\` here
+          would not compile either. */}
+      <p style={{ marginTop: 8, lineHeight: 2, zIndex: 3, width: "50%" }}>styled</p>
+
+      {/* Dashed names pass through unchanged — and are the one place the
+          checking stops, since \`data-\` and \`aria-\` are open-ended. */}
+      <div data-testid="box" aria-live="polite" aria-hidden="true" />
+
+      {/* The deliberately unpleasant name for injecting raw HTML. */}
+      <div dangerouslySetInnerHTML={{ __html: "<b>raw</b>" }} />
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -92,7 +122,7 @@ export const attributesAndPropsLesson: Lesson = {
         {
           id: "style-object",
           title: "Numbers, strings and custom properties",
-          lang: "tsx",
+          lang: "jsx",
           code: `const theme = { accent: "crimson" };
 
 function Styled() {
@@ -118,6 +148,37 @@ function Styled() {
           output: `<div style="padding:12px;opacity:0.5;flex-grow:2;width:50%;margin-block:1rem;--brand:crimson">content</div>`,
           explanation:
             "`padding: 12` became `12px`; `opacity` and `flexGrow` stayed bare. Note that inline styles cannot express a media query, a pseudo-class or a hover state — they are a single element's declarations and nothing more. Anything conditional beyond that belongs in a class you toggle.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { CSSProperties } from "react";
+
+const theme = { accent: "crimson" };
+
+function Styled() {
+  return (
+    <div
+      style={{
+        // Number on a length property: React appends px.
+        padding: 12,
+        // Number on a unitless property: left alone.
+        opacity: 0.5,
+        flexGrow: 2,
+        // Any other unit has to be a string.
+        width: "50%",
+        marginBlock: "1rem",
+        // Custom properties keep their dashes and take strings. \`CSSProperties\`
+        // has no index signature, so this one needs the assertion — the single
+        // most common piece of friction in a typed style object.
+        "--brand": theme.accent,
+      } as CSSProperties}
+    >
+      content
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -139,7 +200,7 @@ function Styled() {
         {
           id: "leaked-prop",
           title: "Taking your own props out of the spread",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Destructure what is yours; spread only what is left.
 function Row({ isActive, children, ...rest }) {
   return (
@@ -159,6 +220,33 @@ function App() {
           output: `<div class="row on" id="r1" data-testid="row" title="A row">body</div>`,
           explanation:
             "`isActive` was consumed by the component and never reached the DOM; `id`, `data-testid` and `title` passed straight through. This pattern — name your own props, spread the rest — is how nearly every component library forwards arbitrary DOM attributes without knowing what they are.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ComponentPropsWithoutRef } from "react";
+
+// Everything a \`<div>\` accepts, plus the one prop that is ours. Typing it this
+// way is what makes the spread below safe: \`rest\` is exactly the div props.
+type RowProps = ComponentPropsWithoutRef<"div"> & { isActive?: boolean };
+
+// Destructure what is yours; spread only what is left.
+function Row({ isActive, children, ...rest }: RowProps) {
+  return (
+    <div className={isActive ? "row on" : "row"} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Row isActive id="r1" data-testid="row" title="A row">
+      body
+    </Row>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

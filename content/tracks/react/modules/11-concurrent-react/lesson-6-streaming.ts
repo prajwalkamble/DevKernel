@@ -24,13 +24,6 @@ export const streamingLesson: Lesson = {
         "It is also synchronous, so it cannot wait for anything at all. Any component that suspends gets its fallback in the output, permanently, and no data is ever fetched during the render.",
         "Streaming fixes both. React sends the parts of the page it can render immediately, keeps the connection open, and sends each Suspense boundary's real content as its data arrives.",
       ],
-      visual: {
-        id: "streaming-visual",
-        kind: "react-concurrent",
-        algorithm: "streaming",
-        title: "Four pieces, in the order they are ready",
-        lockAlgorithm: true,
-      },
     },
     {
       id: "the-shell",
@@ -51,8 +44,59 @@ export const streamingLesson: Lesson = {
         {
           id: "chunks",
           title: "Two chunks from one response",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use } from "react";
+import { renderToPipeableStream } from "react-dom/server";
+import { Writable } from "node:stream";
+
+let arrive;
+const comments = new Promise((resolve) => { arrive = resolve; });
+
+function Comments() { return <p>{use(comments)}</p>; }
+
+function Page() {
+  return (
+    <main>
+      <h1>A post</h1>
+      <Suspense fallback={<p>Loading comments…</p>}>
+        <Comments />
+      </Suspense>
+    </main>
+  );
+}
+
+const chunks = [];
+const sink = new Writable({
+  write(chunk, _encoding, done) { chunks.push(String(chunk)); done(); },
+});
+
+sink.on("finish", () => {
+  chunks.forEach((chunk, i) => {
+    /* The inline scripts are React's own boundary-swapping code, and they are
+       long. Their length is the point, not their contents. */
+    const readable = chunk.replace(
+      /<script>[\\s\\S]*?<\\/script>/g,
+      (s) => \`<script>…\${s.length} bytes…</script>\`
+    );
+    console.log(\`chunk \${i + 1}: \${readable}\`);
+  });
+});
+
+const { pipe } = renderToPipeableStream(<Page />, {
+  onShellReady() {
+    /* The shell goes out now; the comments are still in flight. */
+    pipe(sink);
+    setTimeout(() => arrive("Two comments"), 10);
+  },
+});`,
+          output: `chunk 1: <main><h1>A post</h1><!--$?--><template id="B:0"></template><p>Loading comments…</p><!--/$--></main><script>…74 bytes…</script>
+chunk 2: <div hidden id="S:0"><p>Two comments</p></div><script>…862 bytes…</script>`,
+          explanation:
+            "Read chunk 1 carefully. `<!--$?-->` and `<!--/$-->` are the comment markers that delimit a suspended boundary — React uses comments because they are legal in any position that HTML allows. Between them sits the fallback, and a `<template id=\"B:0\">` marking the slot. The browser is already parsing and painting this.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use } from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { Writable } from "node:stream";
 
@@ -96,10 +140,8 @@ const { pipe } = renderToPipeableStream(<Page />, {
     setTimeout(() => arrive("Two comments"), 10);
   },
 });`,
-          output: `chunk 1: <main><h1>A post</h1><!--$?--><template id="B:0"></template><p>Loading comments…</p><!--/$--></main><script>…74 bytes…</script>
-chunk 2: <div hidden id="S:0"><p>Two comments</p></div><script>…862 bytes…</script>`,
-          explanation:
-            "Read chunk 1 carefully. `<!--$?-->` and `<!--/$-->` are the comment markers that delimit a suspended boundary — React uses comments because they are legal in any position that HTML allows. Between them sits the fallback, and a `<template id=\"B:0\">` marking the slot. The browser is already parsing and painting this.",
+            },
+          ],
         },
       ],
     },
@@ -129,7 +171,7 @@ chunk 2: <div hidden id="S:0"><p>Two comments</p></div><script>…862 bytes…</
         {
           id: "on-all-ready",
           title: "The two moments you can start sending",
-          lang: "tsx",
+          lang: "jsx",
           code: `const { pipe } = renderToPipeableStream(<Page />, {
   bootstrapScripts: ["/main.js"],
 

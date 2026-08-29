@@ -24,12 +24,6 @@ export const transitionsLesson: Lesson = {
         "Both are set in the same handler, so both are urgent, so they render together and commit together — and the highlight, which was ready almost immediately, sits waiting for the table. The user clicks and, for as long as the table takes, nothing at all happens. Not even the highlight.",
         "That is the situation transitions exist for, and it is worth seeing the two schedules side by side.",
       ],
-      visual: {
-        id: "transition-off-visual",
-        kind: "react-concurrent",
-        algorithm: "transition-off",
-        title: "Both updates urgent",
-      },
     },
     {
       id: "the-fix",
@@ -38,18 +32,44 @@ export const transitionsLesson: Lesson = {
         "`startTransition(() => setTab(next))` says: this update is not what the user is waiting on. React renders it at a lower priority, may interrupt it, and — crucially — commits the urgent updates from the same handler without it.",
         "One click becomes two commits. The first is the tab highlight, on screen immediately. The second is the table, whenever it is done.",
       ],
-      visual: {
-        id: "transition-on-visual",
-        kind: "react-concurrent",
-        algorithm: "transition-on",
-        title: "The list update marked as a transition",
-      },
       examples: [
         {
           id: "two-renders",
           title: "What the component sees",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log = [];
+
+function App() {
+  const [tab, setTab] = useState("home");
+  const [pending, startTransition] = useTransition();
+  log.push(\`render: tab=\${tab} pending=\${pending}\`);
+  return (
+    <div>
+      <span>{tab}</span>
+      <button onClick={() => startTransition(() => setTab("posts"))}>posts</button>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+log.push("--- click ---");
+await act(async () => { container.querySelector("button").click(); });
+console.log(log.join("\\n"));`,
+          output: `render: tab=home pending=false
+--- click ---
+render: tab=home pending=true
+render: tab=posts pending=false`,
+          explanation:
+            "Two renders from one click, and look at the middle one: `tab` is still `home` while `pending` is already true. That is the urgent commit — the screen has not changed yet, but React has told you it is working on it, and that is the frame in which you show a pending indicator.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const log: string[] = [];
@@ -72,12 +92,8 @@ await act(async () => { createRoot(container).render(<App />); });
 log.push("--- click ---");
 await act(async () => { container.querySelector("button")!.click(); });
 console.log(log.join("\\n"));`,
-          output: `render: tab=home pending=false
---- click ---
-render: tab=home pending=true
-render: tab=posts pending=false`,
-          explanation:
-            "Two renders from one click, and look at the middle one: `tab` is still `home` while `pending` is already true. That is the urgent commit — the screen has not changed yet, but React has told you it is working on it, and that is the frame in which you show a pending indicator.",
+            },
+          ],
         },
       ],
     },
@@ -93,13 +109,13 @@ render: tab=posts pending=false`,
         {
           id: "hook-vs-import",
           title: "The same transition, both ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useTransition, startTransition as globalStartTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
-const log: string[] = [];
-let viaHook: () => void;
-let viaImport: () => void;
+const log = [];
+let viaHook;
+let viaImport;
 
 function Tabs() {
   const [tab, setTab] = useState("home");
@@ -129,6 +145,38 @@ render tab=posts isPending=false
 render tab=home isPending=false`,
           explanation:
             "The hook's version produces the extra pending render. The imported one schedules the same low-priority update and produces one render, because there is no `isPending` state for it to set. Same scheduling, different bookkeeping — so if a transition seems not to be working because nothing shows as pending, check which one you imported.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useTransition, startTransition as globalStartTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log: string[] = [];
+let viaHook: () => void;
+let viaImport: () => void;
+
+function Tabs() {
+  const [tab, setTab] = useState("home");
+  const [pending, startTransition] = useTransition();
+  viaHook = () => startTransition(() => setTab(tab === "home" ? "posts" : "home"));
+  viaImport = () => globalStartTransition(() => setTab(tab === "home" ? "posts" : "home"));
+  log.push(\`render tab=\${tab} isPending=\${pending}\`);
+  return <p>{tab}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<Tabs />); });
+
+log.push("--- the startTransition from useTransition ---");
+await act(async () => { viaHook(); });
+
+log.push("--- the startTransition imported from react ---");
+await act(async () => { viaImport(); });
+
+console.log(log.join("\\n"));`,
+            },
+          ],
         },
       ],
     },
@@ -143,7 +191,7 @@ render tab=home isPending=false`,
         {
           id: "pending-styling",
           title: "The shape that works",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Tabs() {
   const [tab, setTab] = useState<Tab>("home");
   const [isPending, startTransition] = useTransition();
@@ -188,7 +236,7 @@ render tab=home isPending=false`,
         {
           id: "async-trap",
           title: "The version that quietly does nothing",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Wrong: the only thing inside the callback is a promise being created. */
 startTransition(() => {
   fetch(url).then((r) => r.json()).then(setResults);
@@ -209,8 +257,65 @@ startTransition(() => setResults(results));`,
         {
           id: "ispending-is-not-proof",
           title: "The same flag, two different schedules",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use, useState, useTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const cache = new Map();
+function load(id) {
+  if (!cache.has(id)) {
+    let resolve;
+    cache.set(id, { promise: new Promise((r) => { resolve = r; }), resolve });
+  }
+  return cache.get(id);
+}
+
+function Page({ id }) {
+  return <b>{use(load(id).promise)}</b>;
+}
+
+let goSync;
+let goAsync;
+
+function App() {
+  const [id, setId] = useState("a");
+  const [pending, startTransition] = useTransition();
+  goSync = () => startTransition(() => setId("b"));
+  goAsync = () => startTransition(async () => {
+    await Promise.resolve();
+    setId("c");
+  });
+  return (
+    <Suspense fallback={<i>fallback</i>}>
+      <span data-pending={pending} />
+      <Page id={id} />
+    </Suspense>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const show = (label) => console.log(\`\${label} \${container.innerHTML}\`);
+
+await act(async () => { createRoot(container).render(<App />); });
+await act(async () => { load("a").resolve("page A"); });
+show("mounted:                     ");
+
+await act(async () => { goSync(); });
+show("set inside the callback:     ");
+await act(async () => { load("b").resolve("page B"); });
+
+await act(async () => { goAsync(); await new Promise((r) => setTimeout(r, 10)); });
+show("set after an await:          ");`,
+          output: `mounted:                      <span data-pending="false"></span><b>page A</b>
+set inside the callback:      <span data-pending="true"></span><b>page A</b>
+set after an await:           <span data-pending="true" style="display: none;"></span><b style="display: none;">page B</b><i>fallback</i>`,
+          explanation:
+            "`data-pending` is `true` on both of the last two lines. Only the middle one is a transition: page A is still on screen while page B renders. In the last line React has hidden the old content and put the fallback up, which is precisely the behaviour a transition prevents — so the update made after the `await` was an ordinary urgent one, whatever the flag said.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, useState, useTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const cache = new Map<string, { promise: Promise<string>; resolve: (v: string) => void }>();
@@ -259,11 +364,8 @@ await act(async () => { load("b").resolve("page B"); });
 
 await act(async () => { goAsync(); await new Promise((r) => setTimeout(r, 10)); });
 show("set after an await:          ");`,
-          output: `mounted:                      <span data-pending="false"></span><b>page A</b>
-set inside the callback:      <span data-pending="true"></span><b>page A</b>
-set after an await:           <span data-pending="true" style="display: none;"></span><b style="display: none;">page B</b><i>fallback</i>`,
-          explanation:
-            "`data-pending` is `true` on both of the last two lines. Only the middle one is a transition: page A is still on screen while page B renders. In the last line React has hidden the old content and put the fallback up, which is precisely the behaviour a transition prevents — so the update made after the `await` was an ordinary urgent one, whatever the flag said.",
+            },
+          ],
         },
       ],
       pitfalls: [

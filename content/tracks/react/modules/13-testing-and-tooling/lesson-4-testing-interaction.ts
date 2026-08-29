@@ -24,13 +24,6 @@ export const testingInteractionLesson: Lesson = {
         "A real click is a sequence: the pointer arrives, the mouse enters, they both move, the button goes down, focus moves, the button comes up, and only then does `click` fire. Components listen to all of these — a menu that opens on hover, a drag that starts on `pointerdown`, a validation that runs on `blur`.",
         "`userEvent.click(button)` dispatches the whole sequence. The list below was captured by attaching a listener for every pointer, mouse and focus event to a real button and calling each API once.",
       ],
-      visual: {
-        id: "click-events-visual",
-        kind: "react-tooling",
-        algorithm: "click-events",
-        title: "fireEvent against userEvent",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "counted",
@@ -48,7 +41,7 @@ userEvent.click:  ["pointerover","pointerenter","mouseover","mouseenter",
         {
           id: "setup-call",
           title: "The two lines it needs",
-          lang: "tsx",
+          lang: "jsx",
           code: `import userEvent from "@testing-library/user-event";
 
 test("submits", async () => {
@@ -83,8 +76,50 @@ test("submits", async () => {
         {
           id: "form-test",
           title: "The component and its test",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- LoginForm.tsx ---------------------------------------------------- */
+export function LoginForm({ onSubmit }) {
+  const [status, setStatus] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <form
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setBusy(true);
+        const email = new FormData(event.currentTarget).get("email");
+        setStatus(await onSubmit(email));
+        setBusy(false);
+      }}
+    >
+      <label htmlFor="email">Email address</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" />
+      <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+      {status && <p role="status">{status}</p>}
+    </form>
+  );
+}
+
+/* ---- LoginForm.test.tsx ----------------------------------------------- */
+test("signs in and reports the result", async () => {
+  const user = userEvent.setup();
+  render(<LoginForm onSubmit={async (email) => \`Signed in as \${email}\`} />);
+
+  await user.type(screen.getByLabelText("Email address"), "ada@example.com");
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+  expect(await screen.findByRole("status")).toHaveTextContent("Signed in as ada@example.com");
+});`,
+          output: ` Test Files  1 passed (1)
+      Tests  1 passed (1)`,
+          explanation:
+            "Read the test as a sentence and it is one: type an email into the field labelled *Email address*, press the button called *Sign in*, and expect a status message naming that email. Every identifier in it is something a user can see. That is why it will still be correct after the component is rewritten.",
+          requires: "vitest with Testing Library (this is its summary, not a program's output)",
+          alternates: [
+            {
+              lang: "tsx",
+              requires: "vitest with Testing Library (this is its summary, not a program's output)",
+              code: `/* ---- LoginForm.tsx ---------------------------------------------------- */
 export function LoginForm({ onSubmit }: { onSubmit: (email: string) => Promise<string> }) {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -117,11 +152,8 @@ test("signs in and reports the result", async () => {
 
   expect(await screen.findByRole("status")).toHaveTextContent("Signed in as ada@example.com");
 });`,
-          output: ` Test Files  1 passed (1)
-      Tests  1 passed (1)`,
-          explanation:
-            "Read the test as a sentence and it is one: type an email into the field labelled *Email address*, press the button called *Sign in*, and expect a status message naming that email. Every identifier in it is something a user can see. That is why it will still be correct after the component is rewritten.",
-          requires: "vitest with Testing Library (this is its summary, not a program's output)",
+            },
+          ],
         },
       ],
     },
@@ -139,7 +171,7 @@ test("signs in and reports the result", async () => {
         {
           id: "waiting-code",
           title: "The three, and the thing that is not one of them",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Appearing. */
 expect(await screen.findByRole("status")).toHaveTextContent("Saved");
 
@@ -180,7 +212,7 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
         {
           id: "fake-timers",
           title: "The timer case",
-          lang: "tsx",
+          lang: "jsx",
           code: `test("counts down", async () => {
   vi.useFakeTimers();
   /* userEvent schedules its own work on timers, so it must be told to use
@@ -214,8 +246,30 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
         {
           id: "controlled-promise",
           title: "Holding the promise open",
-          lang: "tsx",
+          lang: "jsx",
           code: `test("shows a loading state while the save is in flight", async () => {
+  const user = userEvent.setup();
+
+  /* A promise this test controls. Nothing resolves until it says so. */
+  let finish;
+  const pending = new Promise((resolve) => { finish = resolve; });
+
+  render(<LoginForm onSubmit={() => pending} />);
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+  /* Now, with the request deliberately still open. */
+  expect(screen.getByRole("button")).toBeDisabled();
+  expect(screen.getByRole("button")).toHaveTextContent("Signing in…");
+
+  await act(async () => { finish("Signed in"); });
+  expect(await screen.findByRole("status")).toHaveTextContent("Signed in");
+});`,
+          explanation:
+            "This pattern is worth internalising, because it is the only reliable way to test a transient state. A `setTimeout` would be a race; a resolver you hold is not — the loading assertions run at a moment you chose.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `test("shows a loading state while the save is in flight", async () => {
   const user = userEvent.setup();
 
   /* A promise this test controls. Nothing resolves until it says so. */
@@ -232,8 +286,8 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
   await act(async () => { finish("Signed in"); });
   expect(await screen.findByRole("status")).toHaveTextContent("Signed in");
 });`,
-          explanation:
-            "This pattern is worth internalising, because it is the only reliable way to test a transient state. A `setTimeout` would be a race; a resolver you hold is not — the loading assertions run at a moment you chose.",
+            },
+          ],
         },
       ],
     },

@@ -239,22 +239,49 @@ for (const track of tracks) {
   }
 }
 
-/* The language dropdown belongs to the DSA track and nowhere else.
-   A C++ course's examples are C++ because that is the subject; offering to
-   read one "in Python" would be incoherent. The JS/TS track shows its two
-   languages side by side rather than behind a picker. So an `alternates`
-   block outside `dsa` is a mistake, and this is where it gets caught. */
+/* The language dropdown belongs to the tracks where one program genuinely
+   exists in two languages, and nowhere else. A C++ course's examples are C++
+   because that is the subject; offering to read one "in Python" would be
+   incoherent, and the JS/TS track shows its two languages side by side rather
+   than behind a picker.
+
+   Two shapes qualify. DSA carries a translation per interview language. The
+   framework tracks carry each example twice — as JSX and as TSX for React and
+   Next, as JavaScript and TypeScript for Angular — because the same component
+   really is written both ways, and the reader has already picked a side.
+
+   The pairs are pinned per track rather than merely allowing a dropdown,
+   because the failure worth catching is not "a dropdown appeared" but "a
+   React example offers to be read in Python". */
+const DROPDOWN_LANGUAGES = new Map<string, ReadonlySet<string>>([
+  ["dsa", new Set(["python", "java", "cpp", "rust", "go", "javascript", "typescript", "asm"])],
+  // jsx/tsx for components, javascript/typescript for the plain modules a
+  // React lesson also carries — a hook file with no JSX in it is not JSX.
+  ["react", new Set(["jsx", "tsx", "javascript", "typescript"])],
+  ["nextjs", new Set(["jsx", "tsx", "javascript", "typescript"])],
+  ["angular", new Set(["javascript", "typescript"])],
+]);
+
 let alternates = 0;
+const dropdownsByTrack = new Map<string, number>();
 for (const track of tracks) {
+  const allowed = DROPDOWN_LANGUAGES.get(track.slug);
   for (const mod of track.modules) {
     for (const lesson of mod.lessons) {
       for (const section of lesson.sections) {
         for (const example of section.examples ?? []) {
           if (!example.alternates?.length) continue;
           alternates += 1;
-          if (track.slug !== "dsa") {
-            fail(`${track.slug}/${mod.slug}/${lesson.slug} \u203a ${example.id}`,
-              `carries translations, but the dropdown is for the DSA track only`);
+          dropdownsByTrack.set(track.slug, (dropdownsByTrack.get(track.slug) ?? 0) + 1);
+          const where = `${track.slug}/${mod.slug}/${lesson.slug} \u203a ${example.id}`;
+          if (!allowed) {
+            fail(where, `carries translations, but ${track.slug} has no language dropdown`);
+            continue;
+          }
+          for (const lang of [example.lang, ...example.alternates.map((v) => v.lang)]) {
+            if (lang && !allowed.has(lang)) {
+              fail(where, `offers ${lang}, which is not one of ${track.slug}'s dropdown languages`);
+            }
           }
         }
       }
@@ -263,7 +290,8 @@ for (const track of tracks) {
 }
 
 console.log(`${checked} visualisations run, ${frameCount} frames checked, ${specs} lesson specs resolved.`);
-console.log(`${alternates} examples carry a language dropdown, all of them in the DSA track.`);
+const spread = [...dropdownsByTrack].map(([t, n]) => `${t} ${n}`).join(", ");
+console.log(`${alternates} examples carry a language dropdown (${spread}).`);
 if (problems.length) {
   console.error(`\n${problems.length} problem(s):`);
   for (const p of problems) console.error(`  ${p}`);

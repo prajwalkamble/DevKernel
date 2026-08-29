@@ -29,12 +29,6 @@ export const profilingLesson: Lesson = {
     {
       id: "flame-graph",
       heading: "Reading the flame graph",
-      visual: {
-        id: "flame-graph-visual",
-        kind: "react-perf",
-        algorithm: "flame-graph",
-        title: "actualDuration against baseDuration, in one commit",
-      },
       body: [
         "Install the React Developer Tools extension, open the **Profiler** tab, press record, do the slow thing, stop.",
         "You get one bar per **commit** — one for each time React applied changes to the DOM. Click a commit and you get its flame graph.",
@@ -85,8 +79,33 @@ export const profilingLesson: Lesson = {
         {
           id: "profiler-api",
           title: "Measuring in production",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Profiler } from "react";
+
+/* Fires on every commit inside the boundary. Keep the callback cheap and
+   sample rather than reporting everything, or the measurement becomes the
+   performance problem. */
+function onRender(
+  id,
+  phase,
+  actualDuration,   // this commit, for this subtree
+  baseDuration,     // what it would cost with no memoisation at all
+) {
+  if (actualDuration > 50) {
+    analytics.timing("react.commit", actualDuration, { id, phase });
+  }
+  void baseDuration;
+}
+
+<Profiler id="Checkout" onRender={onRender}>
+  <CheckoutPage />
+</Profiler>;`,
+          explanation:
+            "`baseDuration` against `actualDuration` is the one number that says whether your memoisation is doing anything: it is what the subtree would have cost with nothing memoised. If the two are equal on every commit, every memo in that subtree is missing.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Profiler } from "react";
 
 /* Fires on every commit inside the boundary. Keep the callback cheap and
    sample rather than reporting everything, or the measurement becomes the
@@ -106,8 +125,8 @@ function onRender(
 <Profiler id="Checkout" onRender={onRender}>
   <CheckoutPage />
 </Profiler>;`,
-          explanation:
-            "`baseDuration` against `actualDuration` is the one number that says whether your memoisation is doing anything: it is what the subtree would have cost with nothing memoised. If the two are equal on every commit, every memo in that subtree is missing.",
+            },
+          ],
         },
       ],
     },

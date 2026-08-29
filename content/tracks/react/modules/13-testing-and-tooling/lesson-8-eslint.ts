@@ -62,10 +62,10 @@ export default defineConfig([
         {
           id: "real-output",
           title: "Three violations, three messages",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect } from "react";
 
-export function Bad({ id, enabled }: { id: string; enabled: boolean }) {
+export function Bad({ id, enabled }) {
   const [user, setUser] = useState(null);
 
   /* 1. A hook inside a condition. */
@@ -95,6 +95,36 @@ export function Bad({ id, enabled }: { id: string; enabled: boolean }) {
           explanation:
             "The third message is worth reading in full, because it explains the naming convention people treat as decoration: the plugin identifies components and hooks **by their names**. A capital letter means component, a `use` prefix means hook, and a function that is neither cannot contain hooks. That is why a helper called `getInitialState` cannot call `useState` and one called `useInitialState` can.",
           requires: "eslint (the output is its report, not a program's)",
+          alternates: [
+            {
+              lang: "tsx",
+              requires: "eslint (the output is its report, not a program's)",
+              code: `import { useState, useEffect } from "react";
+
+export function Bad({ id, enabled }: { id: string; enabled: boolean }) {
+  const [user, setUser] = useState(null);
+
+  /* 1. A hook inside a condition. */
+  if (enabled) {
+    const [extra] = useState(0);
+    console.log(extra);
+  }
+
+  /* 2. A dependency that is read but not declared. */
+  useEffect(() => {
+    fetchUser(id).then(setUser);
+  }, []);
+
+  /* 3. A hook called from a plain function. */
+  function helper() {
+    const [x] = useState(1);
+    return x;
+  }
+
+  return <p onClick={helper}>{user}</p>;
+}`,
+            },
+          ],
         },
       ],
     },
@@ -168,8 +198,39 @@ to update as expected.
         {
           id: "the-four",
           title: "The same warning, four different fixes",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* The warning: missing dependency 'roomId'. */
+useEffect(() => {
+  connect(roomId);
+}, []);
+
+/* 1. It really is a dependency. Reconnect when the room changes. */
+useEffect(() => {
+  const connection = connect(roomId);
+  return () => connection.close();
+}, [roomId]);
+
+/* 2. The function was the problem: define it inside. */
+useEffect(() => {
+  const format = (n) => n.toFixed(precision);
+  setLabel(format(value));
+}, [value, precision]);
+
+/* 3. Genuinely shared, so stabilise it once. */
+const format = useCallback((n) => n.toFixed(precision), [precision]);
+useEffect(() => { setLabel(format(value)); }, [value, format]);
+
+/* 4. Not an effect at all. This runs once per checkout, not once per mount. */
+function handleCheckout() {
+  analytics.track("checkout_started", { cart });
+  startCheckout(cart);
+}`,
+          explanation:
+            "Every one of these is a change to the effect rather than to the lint configuration. That is the pattern: the rule is a design review, and the fix is usually smaller than the argument about whether to suppress it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* The warning: missing dependency 'roomId'. */
 useEffect(() => {
   connect(roomId);
 }, []);
@@ -195,8 +256,8 @@ function handleCheckout() {
   analytics.track("checkout_started", { cart });
   startCheckout(cart);
 }`,
-          explanation:
-            "Every one of these is a change to the effect rather than to the lint configuration. That is the pattern: the rule is a design review, and the fix is usually smaller than the argument about whether to suppress it.",
+            },
+          ],
         },
       ],
     },

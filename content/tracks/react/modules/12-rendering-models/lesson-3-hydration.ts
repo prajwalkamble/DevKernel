@@ -24,12 +24,6 @@ export const hydrationLesson: Lesson = {
         "It would be wasteful to build it again — and worse than wasteful: replacing the DOM would throw away the paint the user is looking at, lose any focus or scroll or text selection, and restart every CSS animation.",
         "So `hydrateRoot` does something else. It renders the tree in memory and, instead of creating DOM nodes, walks the existing ones **in lockstep**, and where the type at a position matches, it adopts that node and attaches this position's props and handlers to it.",
       ],
-      visual: {
-        id: "hydration-visual",
-        kind: "react-server",
-        algorithm: "hydration",
-        title: "Adopting the server's DOM",
-      },
     },
     {
       id: "proving-it",
@@ -41,8 +35,43 @@ export const hydrationLesson: Lesson = {
         {
           id: "same-node",
           title: "Dead, then alive, same button",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
+
+function Counter() {
+  const [n, setN] = useState(0);
+  return <button onClick={() => setN(n + 1)}>clicked {n} times</button>;
+}
+
+const html = renderToString(<Counter />);
+console.log("server HTML:", html);
+
+const container = document.createElement("div");
+container.innerHTML = html;
+document.body.appendChild(container);
+const before = container.querySelector("button");
+
+/* Before hydration the button is in the page and does nothing. */
+before.click();
+console.log("click before hydration:", before.textContent);
+
+await act(async () => { hydrateRoot(container, <Counter />); });
+console.log("same DOM node afterwards:", container.querySelector("button") === before);
+
+await act(async () => { container.querySelector("button").click(); });
+console.log("click after hydration: ", container.querySelector("button").textContent);`,
+          output: `server HTML: <button>clicked <!-- -->0<!-- --> times</button>
+click before hydration: clicked 0 times
+same DOM node afterwards: true
+click after hydration:  clicked 1 times`,
+          explanation:
+            "The third line is the whole lesson: `true`. Not a new button that looks the same — the same object. The click before hydration does nothing at all, because the handler does not exist yet, and the click afterwards works, on that identical node.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -68,12 +97,8 @@ console.log("same DOM node afterwards:", container.querySelector("button") === b
 
 await act(async () => { container.querySelector("button")!.click(); });
 console.log("click after hydration: ", container.querySelector("button")!.textContent);`,
-          output: `server HTML: <button>clicked <!-- -->0<!-- --> times</button>
-click before hydration: clicked 0 times
-same DOM node afterwards: true
-click after hydration:  clicked 1 times`,
-          explanation:
-            "The third line is the whole lesson: `true`. Not a new button that looks the same — the same object. The click before hydration does nothing at all, because the handler does not exist yet, and the click afterwards works, on that identical node.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -95,8 +120,48 @@ click after hydration:  clicked 1 times`,
         {
           id: "attribute-mismatch",
           title: "An attribute that differs, and what React does about it",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
+
+/* React's attribute warning is a console.error and it is long. Route it to
+   stdout and keep the first two sentences, which are the ones that matter. */
+console.error = (...args) =>
+  console.log("React warns:", String(args[0]).split(". ").slice(0, 2).join(". ") + ".");
+
+/* Same elements, same text — only the className differs. */
+let onServer = true;
+function Box() {
+  return <div className={onServer ? "a" : "b"}><span>text</span></div>;
+}
+
+const html = renderToString(<Box />);
+onServer = false;
+
+const container = document.createElement("div");
+container.innerHTML = html;
+document.body.appendChild(container);
+const before = container.querySelector("span");
+
+let recoverable = 0;
+await act(async () => {
+  hydrateRoot(container, <Box />, { onRecoverableError() { recoverable++; } });
+});
+console.log("server:", html);
+console.log("after: ", container.innerHTML);
+console.log("same <span> node:", container.querySelector("span") === before,
+  "| recoverable errors:", recoverable);`,
+          output: `React warns: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up.
+server: <div class="a"><span>text</span></div>
+after:  <div class="a"><span>text</span></div>
+same <span> node: true | recoverable errors: 0`,
+          explanation:
+            "Three surprises in three lines. The tree is **not** thrown away — the span is the same node and hydration succeeded. The attribute is **not** corrected: the page keeps `class=\"a\"`, the server's value, and React's own warning says so in as many words — *\"This won't be patched up\"*. And it is not a recoverable error, so `onRecoverableError` never fires; the only signal is a `console.error` in development, which is invisible in production.\n\nSo an attribute mismatch is quieter and more permanent than a structural one: your page runs, and one element is wearing the server's class until something re-renders it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -127,12 +192,8 @@ console.log("server:", html);
 console.log("after: ", container.innerHTML);
 console.log("same <span> node:", container.querySelector("span") === before,
   "| recoverable errors:", recoverable);`,
-          output: `React warns: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up.
-server: <div class="a"><span>text</span></div>
-after:  <div class="a"><span>text</span></div>
-same <span> node: true | recoverable errors: 0`,
-          explanation:
-            "Three surprises in three lines. The tree is **not** thrown away — the span is the same node and hydration succeeded. The attribute is **not** corrected: the page keeps `class=\"a\"`, the server's value, and React's own warning says so in as many words — *\"This won't be patched up\"*. And it is not a recoverable error, so `onRecoverableError` never fires; the only signal is a `console.error` in development, which is invisible in production.\n\nSo an attribute mismatch is quieter and more permanent than a structural one: your page runs, and one element is wearing the server's class until something re-renders it.",
+            },
+          ],
         },
       ],
     },
@@ -158,7 +219,7 @@ same <span> node: true | recoverable errors: 0`,
         {
           id: "measuring",
           title: "Measuring your own gap",
-          lang: "javascript",
+          lang: "jsx",
           code: `/* Paste into the console on a server-rendered page. FCP is when the
    content appeared; the hydration mark is when it started working. The
    distance between them is the window where the page lied. */

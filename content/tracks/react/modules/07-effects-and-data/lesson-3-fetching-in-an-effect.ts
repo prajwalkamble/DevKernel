@@ -35,8 +35,65 @@ export const fetchingInAnEffectLesson: Lesson = {
         {
           id: "fetch-shape",
           title: "Loading, then either data or an error",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function loadUser(id) {
+  return new Promise((resolve, reject) =>
+    setTimeout(() => (id === "missing" ? reject(new Error("404")) : resolve({ name: "Ada" })), 10),
+  );
+}
+
+function Profile({ id }) {
+  const [status, setStatus] = useState("loading");
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    setStatus("loading");
+    loadUser(id).then(
+      (data) => { if (!ignore) { setUser(data); setStatus("ready"); } },
+      (err) => { if (!ignore) { setError(err); setStatus("error"); } },
+    );
+    return () => { ignore = true; };
+  }, [id]);
+
+  console.log("  render status =", status);
+  if (status === "loading") return <p>Loading…</p>;
+  if (status === "error") return <p role="alert">Could not load: {error.message}</p>;
+  return <h1>{user.name}</h1>;
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function drive(id) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  console.log(\`id=\${JSON.stringify(id)}:\`);
+  await act(async () => { root.render(<Profile id={id} />); });
+  await act(async () => { await sleep(50); });
+  console.log("  DOM:", container.innerHTML);
+}
+
+await drive("ada");
+await drive("missing");`,
+          output: `id="ada":
+  render status = loading
+  render status = ready
+  DOM: <h1>Ada</h1>
+id="missing":
+  render status = loading
+  render status = error
+  DOM: <p role="alert">Could not load: 404</p>`,
+          explanation:
+            "Two renders per load, and that is the minimum: one to show the loading state, one to show the result. Both paths end in a rendered state the user can act on — note the `role=\"alert\"`, which is what makes the failure reach a screen reader rather than only the sighted user.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 type Status = "loading" | "ready" | "error";
@@ -82,16 +139,8 @@ async function drive(id: string) {
 
 await drive("ada");
 await drive("missing");`,
-          output: `id="ada":
-  render status = loading
-  render status = ready
-  DOM: <h1>Ada</h1>
-id="missing":
-  render status = loading
-  render status = error
-  DOM: <p role="alert">Could not load: 404</p>`,
-          explanation:
-            "Two renders per load, and that is the minimum: one to show the loading state, one to show the result. Both paths end in a rendered state the user can act on — note the `role=\"alert\"`, which is what makes the failure reach a screen reader rather than only the sighted user.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -117,8 +166,26 @@ id="missing":
         {
           id: "fetch-ok",
           title: "The wrapper worth writing once",
-          lang: "typescript",
-          code: `export async function getJSON<T>(url: string, signal?: AbortSignal): Promise<T> {
+          lang: "javascript",
+          code: `export async function getJSON(url, signal) {
+  const response = await fetch(url, { signal });
+
+  // fetch resolves for 404 and 500. Only a failure to *make* the request
+  // rejects, so the status check has to be explicit.
+  if (!response.ok) {
+    throw new Error(\`\${response.status} \${response.statusText}\`);
+  }
+
+  // A 204, or an error page that forgot its content type, has no JSON body.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : null);
+}`,
+          explanation:
+            "Notice the `signal` parameter threaded through — that is what makes the request cancellable from the effect's cleanup, which the next lesson uses. Passing `undefined` is fine and means \"not cancellable\", so callers that do not care are unaffected.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `export async function getJSON<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
 
   // fetch resolves for 404 and 500. Only a failure to *make* the request
@@ -131,8 +198,8 @@ id="missing":
   const text = await response.text();
   return (text ? JSON.parse(text) : null) as T;
 }`,
-          explanation:
-            "Notice the `signal` parameter threaded through — that is what makes the request cancellable from the effect's cleanup, which the next lesson uses. Passing `undefined` is fine and means \"not cancellable\", so callers that do not care are unaffected.",
+            },
+          ],
         },
       ],
     },
@@ -150,8 +217,39 @@ id="missing":
         {
           id: "unstable-dep",
           title: "The infinite loop, and the two fixes",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Broken: \`params\` is a new object on every render, so the effect runs on
+// every render, so it sets state, so the component renders again.
+function Broken({ userId }) {
+  const params = { userId, include: "orders" };
+  useEffect(() => {
+    getJSON(\`/api/user?\${new URLSearchParams(params)}\`).then(setData);
+  }, [params]);          // <- new object every time
+}
+
+// Fix 1, and the one to reach for first: depend on the primitives.
+// Two strings are the same two strings every render.
+function Fixed({ userId }) {
+  useEffect(() => {
+    const params = { userId, include: "orders" };   // built inside the effect
+    getJSON(\`/api/user?\${new URLSearchParams(params)}\`).then(setData);
+  }, [userId]);
+}
+
+// Fix 2, when the object genuinely has to exist outside the effect:
+// give it a stable identity.
+function AlsoFixed({ userId }) {
+  const params = useMemo(() => ({ userId, include: "orders" }), [userId]);
+  useEffect(() => {
+    getJSON(\`/api/user?\${new URLSearchParams(params)}\`).then(setData);
+  }, [params]);
+}`,
+          explanation:
+            "Fix 1 is better whenever it is available, because it removes the problem rather than managing it: the effect owns the object, so nothing outside can change its identity. Reach for `useMemo` only when the object is also used by something else in the component.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Broken: \`params\` is a new object on every render, so the effect runs on
 // every render, so it sets state, so the component renders again.
 function Broken({ userId }: { userId: string }) {
   const params = { userId, include: "orders" };
@@ -177,8 +275,8 @@ function AlsoFixed({ userId }: { userId: string }) {
     getJSON(\`/api/user?\${new URLSearchParams(params)}\`).then(setData);
   }, [params]);
 }`,
-          explanation:
-            "Fix 1 is better whenever it is available, because it removes the problem rather than managing it: the effect owns the object, so nothing outside can change its identity. Reach for `useMemo` only when the object is also used by something else in the component.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -191,12 +289,6 @@ function AlsoFixed({ userId }: { userId: string }) {
     {
       id: "still-wrong",
       heading: "What this still gets wrong",
-      visual: {
-        id: "fetch-in-effect-visual",
-        kind: "react-rendering",
-        algorithm: "fetch-race",
-        title: "Why the naive version is still wrong",
-      },
       body: [
         "The version above handles loading, errors, both fetch quirks and refetching, and it is the version most codebases ship. It is still wrong in five ways, and the rest of this module is those five.",
         "**It races.** Two requests in flight, and the response order is not the request order. The next lesson.",

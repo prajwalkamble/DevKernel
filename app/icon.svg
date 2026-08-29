@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" width="41" height="41" role="img" aria-label="DevKernel">
+  <style>
+    /* Same sweep as the header mark, restated per scheme: a standalone SVG has
+       no page to inherit the theme variables from. A browser that ignores the
+       query keeps the light stops. */
+    :root { --from: #1d4ed8; --mid: #4338ca; --to: #7e22ce; }
+    @media (prefers-color-scheme: dark) { :root { --from: #60a5fa; --mid: #818cf8; --to: #c084fc; } }
+  </style>
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="41" y2="0">
+      <stop offset="0" stop-color="var(--from)"/>
+      <stop offset="0.5" stop-color="var(--mid)"/>
+      <stop offset="1" stop-color="var(--to)"/>
+    </linearGradient>
+  </defs>
+  <!-- The header mark with the inner `</>` at 0.8 scale. The braces and the
+       1.55-unit sidebearing gaps are untouched, so this is the same mark, just
+       less wide — which is what buys back height on a square canvas. -->
+  <g transform="translate(0 8.5)" fill="none" stroke="url(#g)"
+     stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 3H6a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/>
+    <path d="M34 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/>
+    <path d="M14.91 7.6 10.75 12l4.16 4.4"/>
+    <path d="M26.09 7.6 30.25 12l-4.16 4.4"/>
+    <path d="M22.34 7 18.66 17"/>
+  </g>
+</svg>

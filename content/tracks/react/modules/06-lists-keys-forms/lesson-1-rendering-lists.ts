@@ -28,7 +28,7 @@ export const renderingListsLesson: Lesson = {
         {
           id: "key-placement",
           title: "Three shapes, one rule",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Fragment } from "react";
 
 const people = [
@@ -75,12 +75,6 @@ function App() {
     {
       id: "finding-one",
       heading: "Finding a stable key",
-      visual: {
-        id: "stable-keys-visual",
-        kind: "react-rendering",
-        algorithm: "keys-stable",
-        title: "The same reorder, keyed by id",
-      },
       body: [
         "**A database id.** Always the answer when it exists. Stable across reorders, filters and reloads.",
         "**A natural key.** An email, an ISO country code, an ISBN, a slug. Good when it is genuinely unique in the list and does not change — a username that can be edited is not one.",
@@ -92,7 +86,7 @@ function App() {
         {
           id: "composite-and-nested",
           title: "A grid, and a list inside a list",
-          lang: "tsx",
+          lang: "jsx",
           code: `const grid = [["a", "b"], ["c", "d"]];
 
 const teams = [

@@ -19,12 +19,6 @@ export const theUseHookLesson: Lesson = {
     {
       id: "what-it-is",
       heading: "One function, two jobs",
-      visual: {
-        id: "use-suspense-visual",
-        kind: "react-concurrent",
-        algorithm: "suspense-boundary",
-        title: "What throwing a promise reaches",
-      },
       body: [
         "`use(promise)` reads a promise's value. If it is not settled, the component suspends — that is where the throw in lesson 2 comes from. If it rejected, the error is thrown to the nearest error boundary.",
         "`use(Context)` reads a context, the same value `useContext` would give you.",
@@ -43,8 +37,45 @@ export const theUseHookLesson: Lesson = {
         {
           id: "conditional-use",
           title: "A call no other hook could make",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { createContext, use, Suspense, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const Theme = createContext("light");
+
+/* A hook could not be called here: it is after a return, and inside an if. */
+function Label({ loud, from }) {
+  if (!loud) return <span>quiet</span>;
+  const theme = use(Theme);
+  const text = from ? use(from) : "no data";
+  return <span>{theme}: {text}</span>;
+}
+
+const ready = Promise.resolve("hello");
+
+function App() {
+  return (
+    <Theme.Provider value="dark">
+      <Suspense fallback={<i>…</i>}>
+        <Label loud={false} />
+        <Label loud={true} />
+        <Label loud={true} from={ready} />
+      </Suspense>
+    </Theme.Provider>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+console.log(container.innerHTML);`,
+          output: `<span>quiet</span><span>dark: no data</span><span>dark: hello</span>`,
+          explanation:
+            "Three instances of one component, calling `use` a different number of times each. With `useContext` this would be a violation of the rules of hooks and, in the third instance, a genuine bug. Here it is just control flow.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, use, Suspense, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const Theme = createContext("light");
@@ -75,9 +106,8 @@ const container = document.createElement("div");
 document.body.appendChild(container);
 await act(async () => { createRoot(container).render(<App />); });
 console.log(container.innerHTML);`,
-          output: `<span>quiet</span><span>dark: no data</span><span>dark: hello</span>`,
-          explanation:
-            "Three instances of one component, calling `use` a different number of times each. With `useContext` this would be a violation of the rules of hooks and, in the third instance, a genuine bug. Here it is just control flow.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -99,8 +129,39 @@ console.log(container.innerHTML);`,
         {
           id: "uncached",
           title: "A new promise every render",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const handedToUse = new Set();
+
+/* A new promise on every render — the mistake everyone makes once. */
+function Bad() {
+  const promise = new Promise((resolve) => setTimeout(() => resolve("done"), 1));
+  handedToUse.add(promise);
+  return <b>{use(promise)}</b>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+await act(async () => {
+  root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
+});
+await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+/* Stop the retry loop before reading anything. Nothing else stops it: each
+   attempt creates the next promise, so the component can suspend for as long
+   as you let it run. */
+await act(async () => { root.unmount(); });
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
+          output: `use() was handed a different promise each render
+A component was suspended by an uncached promise. Creating promises inside a Client Component or hook is not yet supported, except via a Suspense-compatible library or framework.`,
+          explanation:
+            "React's warning goes to standard error, so where it lands relative to the other line depends on how your terminal interleaves the two streams. What the example does *not* print is whether the screen ever reached `done`, and that omission is the finding: the loop terminates only if some attempt happens to commit before its promise resolves, which is a race. On a fast machine it usually wins within a few attempts and the component looks like it works — that is what lets this bug survive review, because with a real `fetch` it also \"works\", having issued several requests, and shows up only as unexplained load on the network tab. On a slower or busier machine the same code can suspend indefinitely. A render that may or may not terminate depending on the host is not a working component, and the warning is the one signal you get.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const handedToUse = new Set<Promise<string>>();
@@ -114,17 +175,18 @@ function Bad() {
 
 const container = document.createElement("div");
 document.body.appendChild(container);
+const root = createRoot(container);
 await act(async () => {
-  createRoot(container).render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
+  root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
 await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
-console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
-console.log(\`the screen says: \${container.innerHTML}\`);`,
-          output: `use() was handed a different promise each render
-the screen says: <b>done</b>
-A component was suspended by an uncached promise. Creating promises inside a Client Component or hook is not yet supported, except via a Suspense-compatible library or framework.`,
-          explanation:
-            "React's warning goes to standard error, so where it lands relative to the other two lines depends on how your terminal interleaves the two streams. Note that the component *worked* — the screen says `done`. That is what makes this bug survive review: with a real `fetch` it works too, having issued several requests, and it shows up only as an unexplained load on the network tab. The warning is the one signal you get.",
+/* Stop the retry loop before reading anything. Nothing else stops it: each
+   attempt creates the next promise, so the component can suspend for as long
+   as you let it run. */
+await act(async () => { root.unmount(); });
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -149,8 +211,39 @@ A component was suspended by an uncached promise. Creating promises inside a Cli
         {
           id: "server-component",
           title: "Where use actually earns its place",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- app/post/[id]/page.tsx — a Server Component ------------------- */
+/* It can simply await. No use, no Suspense gymnastics. */
+async function Post({ id }) {
+  const post = await db.posts.find(id);
+  /* The promise is started here and never awaited, so the query runs while
+     this component renders instead of after it. */
+  const comments = db.comments.forPost(id);
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <Suspense fallback={<CommentsSkeleton />}>
+        {/* A promise crossing into a Client Component, read with use. */}
+        <Comments from={comments} />
+      </Suspense>
+    </article>
+  );
+}
+
+/* ---- app/post/[id]/comments.tsx ------------------------------------- */
+"use client";
+
+function Comments({ from }) {
+  const comments = use(from);
+  return <ul>{comments.map((c) => <li key={c.id}>{c.body}</li>)}</ul>;
+}`,
+          explanation:
+            "This is the shape `use` was designed for. The server starts both queries at once, awaits the one it needs to render, and hands the slow one over the boundary as a promise. Nothing is waterfalled, the client component has no fetching code in it at all, and the promise is owned by something outside the render — the server.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ---- app/post/[id]/page.tsx — a Server Component ------------------- */
 /* It can simply await. No use, no Suspense gymnastics. */
 async function Post({ id }: { id: string }) {
   const post = await db.posts.find(id);
@@ -176,8 +269,8 @@ function Comments({ from }: { from: Promise<Comment[]> }) {
   const comments = use(from);
   return <ul>{comments.map((c) => <li key={c.id}>{c.body}</li>)}</ul>;
 }`,
-          explanation:
-            "This is the shape `use` was designed for. The server starts both queries at once, awaits the one it needs to render, and hands the slow one over the boundary as a promise. Nothing is waterfalled, the client component has no fetching code in it at all, and the promise is owned by something outside the render — the server.",
+            },
+          ],
         },
       ],
     },
@@ -219,7 +312,7 @@ function Comments({ from }: { from: Promise<Comment[]> }) {
     "It may be called conditionally because it stores nothing in the hook list",
     "It must still be called during a render, never in a handler or a timeout",
     "A suspended component re-renders from scratch, so a promise made in the render is a new one each retry",
-    "React 19 warns about an uncached promise — and the screen still works, which is what hides the bug",
+    "React 19 warns about an uncached promise — and the screen usually still works, which is what hides the bug",
     "`useMemo` cannot fix it; the cache has to live outside the tree",
     "The natural shape is a Server Component starting the promise and a Client Component reading it",
   ],

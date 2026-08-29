@@ -36,8 +36,37 @@ export const useDebugValueLesson: Lesson = {
         {
           id: "debug-value",
           title: "Labelling a hook",
-          lang: "tsx",
-          code: `function useSearch(query: string) {
+          lang: "jsx",
+          code: `function useSearch(query) {
+  const [results, setResults] = useState([]);
+  const [status, setStatus] = useState("idle");
+  const lastQuery = useRef(query);
+
+  useEffect(() => { /* … */ }, [query]);
+
+  // Shown beside "useSearch" in the Components panel. Development only.
+  useDebugValue(\`\${status}: "\${query}" → \${results.length} hits\`);
+
+  return { results, status };
+}
+
+/* The second argument is a formatter, called only when the hook is actually
+   being inspected. It exists for values that are expensive to render as a
+   string — and nobody uses it, so most codebases quietly do the work on
+   every render of every component using the hook. */
+function useSelection(nodes) {
+  useDebugValue(nodes, (set) =>
+    // Only runs when somebody opens this hook in DevTools.
+    [...set].map((n) => n.nodeName).join(", "));
+
+  return nodes;
+}`,
+          explanation:
+            "The formatter is the part worth remembering. `useDebugValue(expensiveToString(x))` computes the string on every render whether or not DevTools is open; `useDebugValue(x, expensiveToString)` computes it only when somebody looks. Same information, and no cost in the common case where nobody is looking.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function useSearch(query: string) {
   const [results, setResults] = useState<Hit[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "ready">("idle");
   const lastQuery = useRef(query);
@@ -61,8 +90,8 @@ function useSelection(nodes: Set<Node>) {
 
   return nodes;
 }`,
-          explanation:
-            "The formatter is the part worth remembering. `useDebugValue(expensiveToString(x))` computes the string on every render whether or not DevTools is open; `useDebugValue(x, expensiveToString)` computes it only when somebody looks. Same information, and no cost in the common case where nobody is looking.",
+            },
+          ],
         },
       ],
       pitfalls: [

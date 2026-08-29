@@ -28,8 +28,32 @@ export const suspenseLesson: Lesson = {
         {
           id: "the-flag-version",
           title: "The version this replaces",
-          lang: "tsx",
-          code: `function Profile({ id }: { id: string }) {
+          lang: "jsx",
+          code: `function Profile({ id }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchUser(id)
+      .then((u) => { if (!cancelled) setUser(u); })
+      .catch((e) => { if (!cancelled) setError(e); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (loading) return <Spinner />;
+  if (error) return <Error error={error} />;
+  return <h1>{user.name}</h1>;
+}`,
+          explanation:
+            "Nothing here is wrong. It is the correct version of module 7's four states, and it is also thirteen lines of ceremony around one line of interest — plus a non-null assertion, because the types cannot express that `user` is set exactly when `loading` is false.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Profile({ id }: { id: string }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -48,8 +72,8 @@ export const suspenseLesson: Lesson = {
   if (error) return <Error error={error} />;
   return <h1>{user!.name}</h1>;
 }`,
-          explanation:
-            "Nothing here is wrong. It is the correct version of module 7's four states, and it is also thirteen lines of ceremony around one line of interest — plus a non-null assertion, because the types cannot express that `user` is set exactly when `loading` is false.",
+            },
+          ],
         },
       ],
     },
@@ -61,23 +85,16 @@ export const suspenseLesson: Lesson = {
         "You almost never write the throw. `use(promise)` does it, and so does every data library that supports Suspense. But knowing that it *is* a throw explains three things at once: why the boundary has to be an ancestor, why the component's local state does not survive it, and why an error boundary and a Suspense boundary are the same shape of thing.",
         "React then shows that boundary's `fallback`, keeps everything outside the boundary untouched, and retries the children when the promise settles.",
       ],
-      visual: {
-        id: "suspense-boundary-visual",
-        kind: "react-concurrent",
-        algorithm: "suspense-boundary",
-        title: "Which boundary catches",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "suspense-basic",
           title: "A boundary, a promise, and two renders",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use, act } from "react";
 import { createRoot } from "react-dom/client";
 
-let resolveIt: (value: string) => void;
-const promise = new Promise<string>((resolve) => { resolveIt = resolve; });
+let resolveIt;
+const promise = new Promise((resolve) => { resolveIt = resolve; });
 
 function Name() {
   /* No loading state, no error state, no effect. It reads the value. */
@@ -104,6 +121,38 @@ console.log("after resolve:", container.innerHTML);`,
 after resolve: <p>Ada</p>`,
           explanation:
             "`Name` has no idea it is inside a boundary and no idea a loading state exists. It reads a value; if the value is not there yet the render is unwound and retried later. The whole of the loading behaviour is the one line of JSX in `App`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let resolveIt: (value: string) => void;
+const promise = new Promise<string>((resolve) => { resolveIt = resolve; });
+
+function Name() {
+  /* No loading state, no error state, no effect. It reads the value. */
+  const name = use(promise);
+  return <p>{name}</p>;
+}
+
+function App() {
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <Name />
+    </Suspense>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+console.log("after mount:  ", container.innerHTML);
+
+await act(async () => { resolveIt("Ada"); });
+console.log("after resolve:", container.innerHTML);`,
+            },
+          ],
         },
       ],
     },
@@ -119,8 +168,62 @@ after resolve: <p>Ada</p>`,
         {
           id: "one-against-two",
           title: "The same two components, one boundary and then two",
-          lang: "tsx",
-          code: `import { Suspense, use, act, type ReactNode } from "react";
+          lang: "jsx",
+          code: `import { Suspense, use, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function deferred() {
+  let resolve;
+  const promise = new Promise((r) => { resolve = r; });
+  return { promise, resolve };
+}
+
+function Text({ from }) {
+  return <b>{use(from)}</b>;
+}
+
+/** Both layouts get their own promises, so neither is helped by the other. */
+async function run(
+  label,
+  layout
+) {
+  const post = deferred();
+  const comments = deferred();
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  await act(async () => { createRoot(container).render(layout(post.promise, comments.promise)); });
+  console.log(\`\${label} nothing yet:  \${container.innerHTML}\`);
+  await act(async () => { post.resolve("A post"); });
+  console.log(\`\${label} post arrived: \${container.innerHTML}\`);
+  await act(async () => { comments.resolve("2 comments"); });
+  console.log(\`\${label} both arrived: \${container.innerHTML}\`);
+}
+
+await run("one boundary  |", (post, comments) => (
+  <Suspense fallback={<i>loading…</i>}>
+    <Text from={post} />
+    <Text from={comments} />
+  </Suspense>
+));
+
+await run("two boundaries|", (post, comments) => (
+  <>
+    <Suspense fallback={<i>loading post…</i>}><Text from={post} /></Suspense>
+    <Suspense fallback={<i>loading comments…</i>}><Text from={comments} /></Suspense>
+  </>
+));`,
+          output: `one boundary  | nothing yet:  <i>loading…</i>
+one boundary  | post arrived: <i>loading…</i>
+one boundary  | both arrived: <b>A post</b><b>2 comments</b>
+two boundaries| nothing yet:  <i>loading post…</i><i>loading comments…</i>
+two boundaries| post arrived: <b>A post</b><i>loading comments…</i>
+two boundaries| both arrived: <b>A post</b><b>2 comments</b>`,
+          explanation:
+            "Look at the middle line of each pair. With one boundary the arrival of the post changes nothing on screen — it is held back until its neighbour is ready. With two, it appears the moment it lands. Identical components, identical data, identical timing; the only difference is where the boundary was drawn.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 function deferred() {
@@ -163,14 +266,8 @@ await run("two boundaries|", (post, comments) => (
     <Suspense fallback={<i>loading comments…</i>}><Text from={comments} /></Suspense>
   </>
 ));`,
-          output: `one boundary  | nothing yet:  <i>loading…</i>
-one boundary  | post arrived: <i>loading…</i>
-one boundary  | both arrived: <b>A post</b><b>2 comments</b>
-two boundaries| nothing yet:  <i>loading post…</i><i>loading comments…</i>
-two boundaries| post arrived: <b>A post</b><i>loading comments…</i>
-two boundaries| both arrived: <b>A post</b><b>2 comments</b>`,
-          explanation:
-            "Look at the middle line of each pair. With one boundary the arrival of the post changes nothing on screen — it is held back until its neighbour is ready. With two, it appears the moment it lands. Identical components, identical data, identical timing; the only difference is where the boundary was drawn.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -192,8 +289,63 @@ two boundaries| both arrived: <b>A post</b><b>2 comments</b>`,
         {
           id: "fallback-vs-transition",
           title: "The same navigation, twice",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use, useState, startTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const cache = new Map();
+function load(id) {
+  if (!cache.has(id)) {
+    let resolve;
+    const promise = new Promise((r) => { resolve = r; });
+    cache.set(id, { promise, resolve });
+  }
+  return cache.get(id);
+}
+
+function Page({ id }) {
+  return <b>{use(load(id).promise)}</b>;
+}
+
+let go;
+
+function App() {
+  const [id, setId] = useState("a");
+  go = (next, transition) =>
+    transition ? startTransition(() => setId(next)) : setId(next);
+  return (
+    <Suspense fallback={<i>loading…</i>}>
+      <Page id={id} />
+    </Suspense>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+await act(async () => { load("a").resolve("page A"); });
+console.log("mounted:                    ", container.innerHTML);
+
+await act(async () => { go("b", false); });
+console.log("plain setState to b:        ", container.innerHTML);
+await act(async () => { load("b").resolve("page B"); });
+console.log("  once b arrives:           ", container.innerHTML);
+
+await act(async () => { go("c", true); });
+console.log("startTransition to c:       ", container.innerHTML);
+await act(async () => { load("c").resolve("page C"); });
+console.log("  once c arrives:           ", container.innerHTML);`,
+          output: `mounted:                     <b>page A</b>
+plain setState to b:         <b style="display: none;">page A</b><i>loading…</i>
+  once b arrives:            <b style="">page B</b>
+startTransition to c:        <b style="">page B</b>
+  once c arrives:            <b style="">page C</b>`,
+          explanation:
+            "The plain `setState` hides the old page — you can see React's own `display: none` on it — and puts the fallback on screen. The `startTransition` version leaves page B up, renders page C in the background, and swaps only when it is ready. Same components, same promise, one word of difference.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, useState, startTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const cache = new Map<string, { promise: Promise<string>; resolve: (v: string) => void }>();
@@ -238,13 +390,8 @@ await act(async () => { go("c", true); });
 console.log("startTransition to c:       ", container.innerHTML);
 await act(async () => { load("c").resolve("page C"); });
 console.log("  once c arrives:           ", container.innerHTML);`,
-          output: `mounted:                     <b>page A</b>
-plain setState to b:         <b style="display: none;">page A</b><i>loading…</i>
-  once b arrives:            <b style="">page B</b>
-startTransition to c:        <b style="">page B</b>
-  once c arrives:            <b style="">page C</b>`,
-          explanation:
-            "The plain `setState` hides the old page — you can see React's own `display: none` on it — and puts the fallback on screen. The `startTransition` version leaves page B up, renders page C in the background, and swaps only when it is ready. Same components, same promise, one word of difference.",
+            },
+          ],
         },
       ],
       pitfalls: [

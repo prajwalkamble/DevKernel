@@ -28,7 +28,7 @@ export const functionsAsPropsLesson: Lesson = {
         {
           id: "passing-not-calling",
           title: "Passing, calling, and wrapping",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Button({ label, onPress }) {
   return <button type="button" onClick={onPress}>{label}</button>;
 }
@@ -49,6 +49,30 @@ function App() {
           output: `<button type="button">A</button><button type="button">B</button>`,
           explanation:
             "Neither handler ran during rendering, which is exactly right — the markup contains no trace of them, because event handlers are attached by React at commit time rather than written into HTML. Had either been written `onPress={say(\"A\")}`, the call would have happened while rendering and the console would show it in this output.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Button({ label, onPress }: { label: string; onPress: () => void }) {
+  return <button type="button" onClick={onPress}>{label}</button>;
+}
+
+function App() {
+  const say = (what: string) => console.log("pressed", what);
+
+  return (
+    <>
+      {/* Passed: React calls it when the click happens. */}
+      <Button label="A" onPress={() => say("A")} />
+
+      {/* Also passed — a reference, with no arguments needed. A function that
+          accepts arguments is assignable where one taking none is expected,
+          which is why this type-checks. */}
+      <Button label="B" onPress={console.log} />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -78,17 +102,11 @@ function App() {
         "**Four: pass a function down** to every component that needs to request a change, and let the parent decide what the change means.",
         "The children come out of this simpler than they went in: they now take a value and a callback and hold nothing. A component with no state of its own is easier to test, easier to reuse, and impossible to get out of step with anything else.",
       ],
-      visual: {
-        id: "lifting-state-visual",
-        kind: "react-rendering",
-        algorithm: "lifting-state",
-        title: "The same value, owned twice and then once",
-      },
       examples: [
         {
           id: "lifted",
           title: "After the lift: one owner, two readers",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Neither pane holds state. Both take a value and a way to ask for a change.
 function Pane({ title, amount, onChange }) {
   return (
@@ -118,6 +136,41 @@ function App() {
           output: `<div><section><h3>Celsius</h3><output>20</output><button type="button">more</button></section><section><h3>Fahrenheit</h3><output>40</output><button type="button">more</button></section></div>`,
           explanation:
             "The two panes show different numbers derived from the same single piece of state, which is the property that makes them impossible to desynchronise. Note that `amount * 2` is computed during render rather than stored — a value you can derive from state should never be state itself, which module 4 argues at length.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Neither pane holds state. Both take a value and a way to ask for a change.
+function Pane({ title, amount, onChange }: {
+  title: string;
+  amount: number;
+  onChange: (next: number) => void;
+}) {
+  return (
+    <section>
+      <h3>{title}</h3>
+      <output>{amount}</output>
+      <button type="button" onClick={() => onChange(amount + 1)}>more</button>
+    </section>
+  );
+}
+
+function Converter({ amount }: { amount: number }) {
+  // The owner. In a real component: const [amount, setAmount] = useState(0).
+  const handleChange = (next: number) => console.log("Converter sets amount to", next);
+
+  return (
+    <div>
+      <Pane title="Celsius" amount={amount} onChange={handleChange} />
+      <Pane title="Fahrenheit" amount={amount * 2} onChange={handleChange} />
+    </div>
+  );
+}
+
+function App() {
+  return <Converter amount={20} />;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -24,13 +24,6 @@ export const useClientBoundaryLesson: Lesson = {
         "That is the sentence people get wrong, and it costs whole megabytes. A component with no directive is not \"a Server Component\"; it is a component that runs on **whichever side it was rendered from**. Put it under a client boundary and it is a client component, permanently, with all its imports.",
         "So the mental picture is not a per-file label. It is a line drawn across the tree, with the server above it and the browser below.",
       ],
-      visual: {
-        id: "client-boundary-visual",
-        kind: "react-server",
-        algorithm: "server-components",
-        title: "Where the boundary falls",
-        lockAlgorithm: true,
-      },
       pitfalls: [
         {
           title: "One directive at the top of a shared file pulls everything down with it",
@@ -46,13 +39,6 @@ export const useClientBoundaryLesson: Lesson = {
         "Strings, numbers, booleans, `null`, `undefined`, plain objects and arrays of those. Dates, Maps, Sets, typed arrays, and promises — React's format handles more than JSON does. And JSX, which is the interesting case in the next section.",
         "Not functions. Not class instances. Not symbols other than registered ones.",
       ],
-      visual: {
-        id: "crossing-visual",
-        kind: "react-server",
-        algorithm: "client-boundary",
-        title: "Six props at the boundary",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "the-error",
@@ -87,8 +73,49 @@ If you need interactivity, consider converting part of this to a Client Componen
         {
           id: "children-slot",
           title: "The same tree, two ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- Wrong: Post is rendered *inside* the client component ------------ */
+"use client";
+export function Collapsible({ postId }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button onClick={() => setOpen(!open)}>Toggle</button>
+      {/* Post is now a Client Component. So is everything it imports —
+         including the 40kB markdown parser. */}
+      {open && <Post id={postId} />}
+    </section>
+  );
+}
+
+/* ---- Right: Post is rendered on the server and passed in -------------- */
+"use client";
+export function Collapsible({ children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button onClick={() => setOpen(!open)}>Toggle</button>
+      {open && children}
+    </section>
+  );
+}
+
+/* ---- page.jsx, a Server Component ------------------------------------- */
+export default async function Page({ id }) {
+  return (
+    <Collapsible>
+      {/* Rendered here, on the server. It arrives at Collapsible as
+         finished output — data in the payload, not code in the bundle. */}
+      <Post id={id} />
+    </Collapsible>
+  );
+}`,
+          explanation:
+            "The two `Collapsible`s have identical behaviour and completely different bundles. In the second, `Collapsible` knows nothing about `Post` — it has a slot, and the slot happens to contain something the server made. The interactivity is one `useState` and one button, which is all that needed to be in the browser in the first place.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ---- Wrong: Post is rendered *inside* the client component ------------ */
 "use client";
 export function Collapsible({ postId }: { postId: string }) {
   const [open, setOpen] = useState(false);
@@ -124,8 +151,8 @@ export default async function Page({ id }: { id: string }) {
     </Collapsible>
   );
 }`,
-          explanation:
-            "The two `Collapsible`s have identical behaviour and completely different bundles. In the second, `Collapsible` knows nothing about `Post` — it has a slot, and the slot happens to contain something the server made. The interactivity is one `useState` and one button, which is all that needed to be in the browser in the first place.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -147,8 +174,41 @@ export default async function Page({ id }: { id: string }) {
         {
           id: "leaf",
           title: "Marking the leaf instead of the page",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- like-button.tsx: the only file with the directive --------------- */
+"use client";
+import { useState } from "react";
+
+export function LikeButton({ postId, initial }) {
+  const [likes, setLikes] = useState(initial);
+  return (
+    <button onClick={() => { setLikes(likes + 1); like(postId); }}>
+      ♥ {likes}
+    </button>
+  );
+}
+
+/* ---- page.tsx: no directive, so all of this runs on the server -------- */
+export default async function PostPage({ params }) {
+  const post = await db.posts.find(params.id);
+  const html = await marked.parse(post.body);   // parser stays on the server
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <Byline author={post.author} />           {/* server */}
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <LikeButton postId={post.id} initial={post.likes} />   {/* the only client code */}
+      <Comments postId={post.id} />             {/* server, awaits its own query */}
+    </article>
+  );
+}`,
+          explanation:
+            "One directive, in a file that contains one button. Everything else — the query, the markdown parser, the byline, the comments — runs on the server and reaches the browser as data. The interactive part is genuinely small, which is the usual case once you look.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ---- like-button.tsx: the only file with the directive --------------- */
 "use client";
 import { useState } from "react";
 
@@ -176,8 +236,8 @@ export default async function PostPage({ params }: { params: { id: string } }) {
     </article>
   );
 }`,
-          explanation:
-            "One directive, in a file that contains one button. Everything else — the query, the markdown parser, the byline, the comments — runs on the server and reaches the browser as data. The interactive part is genuinely small, which is the usual case once you look.",
+            },
+          ],
         },
       ],
     },

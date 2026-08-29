@@ -39,7 +39,7 @@ export const componentVsE2ELesson: Lesson = {
         {
           id: "side-by-side",
           title: "The same intent, both tools",
-          lang: "typescript",
+          lang: "jsx",
           code: `/* Testing Library — jsdom, one component, milliseconds. */
 render(<LoginForm onSubmit={fakeSubmit} />);
 await user.type(screen.getByLabelText("Email address"), "ada@example.com");
@@ -53,6 +53,22 @@ await page.getByRole("button", { name: "Sign in" }).click();
 await expect(page.getByRole("status")).toHaveText("Signed in");`,
           explanation:
             "`getByRole` and `getByLabel` are the same idea in both, because Playwright adopted Testing Library's philosophy wholesale. What differs is what is underneath: the first renders one component into jsdom with a fake submit handler; the second navigates a real browser to a real route with a real server behind it. The learning cost of the second tool is close to zero; the running cost is not.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `/* Testing Library — jsdom, one component, milliseconds. */
+render(<LoginForm onSubmit={fakeSubmit} />);
+await user.type(screen.getByLabelText("Email address"), "ada@example.com");
+await user.click(screen.getByRole("button", { name: "Sign in" }));
+expect(await screen.findByRole("status")).toHaveTextContent("Signed in");
+
+/* Playwright — a real browser, the whole app, seconds. */
+await page.goto("/login");
+await page.getByLabel("Email address").fill("ada@example.com");
+await page.getByRole("button", { name: "Sign in" }).click();
+await expect(page.getByRole("status")).toHaveText("Signed in");`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -90,13 +106,6 @@ await expect(page.getByRole("status")).toHaveText("Signed in");`,
         "**Component tests beside their component.** `Button.tsx` and `Button.test.tsx` are adjacent in the listing, so an untested file is a visible gap rather than an absence elsewhere in the tree, and moving or deleting the component takes its test with it.",
         "**End-to-end tests in their own top-level directory.** They are not about a component — they are about a journey across many — so there is nowhere to colocate them. `e2e/checkout.spec.ts` is about the checkout flow, not about any file.",
       ],
-      visual: {
-        id: "test-layout-visual",
-        kind: "react-structure",
-        algorithm: "test-layout",
-        title: "Beside it, or in __tests__",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "layout",

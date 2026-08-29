@@ -1,6 +1,14 @@
 import { LoadingRegion, Skeleton, SkeletonText } from "@/components/skeleton/Skeleton";
 
-/** Mirrors app/practice/page.tsx: the header, four filter rows, then the list. */
+/**
+ * Mirrors app/practice/(index)/page.tsx: the header, four filter rows, then
+ * the list.
+ *
+ * Grouped under `(index)` so it covers only `/practice`. A loading file wraps
+ * every nested segment below it too, so at `app/practice/` this list stood in
+ * for `/practice/[problemSlug]` as well and that route's own skeleton never
+ * appeared.
+ */
 export default function PracticeLoading() {
   return (
     <LoadingRegion label="Loading problems" className="mx-auto max-w-4xl px-5 py-10 sm:px-6">

@@ -28,7 +28,7 @@ export const useDeferredValueLesson: Lesson = {
         {
           id: "the-shape-code",
           title: "Two values from one piece of state",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Search() {
   const [query, setQuery] = useState("");
   const deferred = useDeferredValue(query);
@@ -55,23 +55,16 @@ export const useDeferredValueLesson: Lesson = {
         "On the render where the value changes, `useDeferredValue` returns the **old** value. React then schedules a second, low-priority render with the new one — and if the value changes again before that render commits, it is abandoned and restarted.",
         "So a burst of typing produces a burst of cheap renders and, typically, one expensive one at the end.",
       ],
-      visual: {
-        id: "deferred-visual",
-        kind: "react-concurrent",
-        algorithm: "deferred-value",
-        title: "Five keystrokes, one expensive render",
-        lockAlgorithm: true,
-      },
       examples: [
         {
           id: "two-renders",
           title: "The two renders one change produces",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useDeferredValue, act } from "react";
 import { createRoot } from "react-dom/client";
 
-const log: string[] = [];
-let setText: (value: string) => void;
+const log = [];
+let setText;
 
 function Search() {
   const [text, set] = useState("a");
@@ -93,6 +86,31 @@ render: text=ab deferred=a stale=true
 render: text=ab deferred=ab stale=false`,
           explanation:
             "Two renders. In the first, `text` has already changed and `deferred` has not — that is the frame in which the input is up to date and the list is not. The `stale` flag is worth computing: comparing the two values is how you know to dim the results.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useDeferredValue, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log: string[] = [];
+let setText: (value: string) => void;
+
+function Search() {
+  const [text, set] = useState("a");
+  setText = set;
+  const deferred = useDeferredValue(text);
+  log.push(\`render: text=\${text} deferred=\${deferred} stale=\${text !== deferred}\`);
+  return <p>{deferred}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<Search />); });
+log.push("--- setText('ab') ---");
+await act(async () => { setText("ab"); });
+console.log(log.join("\\n"));`,
+            },
+          ],
         },
       ],
     },
@@ -108,10 +126,10 @@ render: text=ab deferred=ab stale=false`,
         {
           id: "with-memo",
           title: "The two halves of the pattern",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Without this memo the hook is decoration: Results re-renders on every
    keystroke anyway, because its parent did. */
-const Results = memo(function Results({ query }: { query: string }) {
+const Results = memo(function Results({ query }) {
   const matches = useMemo(() => search(rows, query), [query]);
   return <ul>{matches.map((row) => <li key={row.id}>{row.title}</li>)}</ul>;
 });
@@ -133,6 +151,33 @@ function Search() {
 }`,
           explanation:
             "`memo` and `useMemo` are doing different jobs here. `memo` skips the component when `query` has not changed; `useMemo` skips the search when it has not. Remove either and the pattern degrades — remove `memo` and you lose the skipped render, remove `useMemo` and the low-priority render is as expensive as it ever was.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Without this memo the hook is decoration: Results re-renders on every
+   keystroke anyway, because its parent did. */
+const Results = memo(function Results({ query }: { query: string }) {
+  const matches = useMemo(() => search(rows, query), [query]);
+  return <ul>{matches.map((row) => <li key={row.id}>{row.title}</li>)}</ul>;
+});
+
+function Search() {
+  const [query, setQuery] = useState("");
+  const deferred = useDeferredValue(query);
+  /* Comparing the two values is the pending indicator — no extra state. */
+  const stale = query !== deferred;
+
+  return (
+    <>
+      <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      <div style={{ opacity: stale ? 0.6 : 1 }}>
+        <Results query={deferred} />
+      </div>
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -166,11 +211,11 @@ function Search() {
         {
           id: "initial-value",
           title: "The second argument",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useDeferredValue, act } from "react";
 import { createRoot } from "react-dom/client";
 
-const log: string[] = [];
+const log = [];
 
 function Results() {
   const [query] = useState("react");
@@ -192,6 +237,31 @@ render query="react" deferred="react"
 final DOM: <p>react</p>`,
           explanation:
             "With an `initialValue`, the first render gets that instead of the real value, so the expensive subtree can render something cheap immediately and catch up in the background. Without it, mount is the one render where `useDeferredValue` gives you nothing.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useDeferredValue, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log: string[] = [];
+
+function Results() {
+  const [query] = useState("react");
+  /* On the very first render there is no previous value to fall back to, so
+     without this argument the deferred value is simply the current one and
+     the first render is the expensive one. */
+  const deferred = useDeferredValue(query, "");
+  log.push(\`render query="\${query}" deferred="\${deferred}"\`);
+  return <p>{deferred || "…"}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<Results />); });
+console.log(log.join("\\n"));
+console.log("final DOM:", container.innerHTML);`,
+            },
+          ],
         },
       ],
       pitfalls: [

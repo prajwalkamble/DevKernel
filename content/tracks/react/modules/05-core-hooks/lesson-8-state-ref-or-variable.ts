@@ -19,12 +19,6 @@ export const stateRefOrVariableLesson: Lesson = {
     {
       id: "two-questions",
       heading: "Two questions",
-      visual: {
-        id: "ref-or-state-decision-visual",
-        kind: "react-state",
-        algorithm: "ref-vs-state",
-        title: "The one difference the decision turns on",
-      },
       body: [
         "**Does it need to survive a re-render?** If not, a plain variable in the body is correct and costs nothing.",
         "**Must the screen change when it changes?** If yes, state. If no, a ref.",
@@ -38,7 +32,7 @@ export const stateRefOrVariableLesson: Lesson = {
         {
           id: "four-homes",
           title: "The same increment, in four places",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

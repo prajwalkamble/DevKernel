@@ -19,12 +19,6 @@ export const rerenderingIsNotTheProblemLesson: Lesson = {
     {
       id: "counted",
       heading: "A render is not a DOM write",
-      visual: {
-        id: "render-vs-dom-visual",
-        kind: "react-perf",
-        algorithm: "render-vs-dom",
-        title: "Seven components run; one text node changes",
-      },
       body: [
         "The word \"re-render\" sounds like re-drawing. It is not. A render is React calling your function and getting back objects, which it then compares with the previous objects. The DOM is only touched where they differ.",
         "Count both and the gap is obvious.",
@@ -33,8 +27,63 @@ export const rerenderingIsNotTheProblemLesson: Lesson = {
         {
           id: "renders-vs-mutations",
           title: "201 renders, one mutation",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let componentRenders = 0;
+
+function Row({ label }) {
+  componentRenders++;
+  return <li>{label}</li>;
+}
+
+function App() {
+  const [n, setN] = useState(0);
+  const [tick, setTick] = useState(0);
+  componentRenders++;
+  return (
+    <div>
+      {/* Changes state without changing anything on screen. */}
+      <button type="button" id="quiet" onClick={() => setN((x) => x + 1)}>quiet</button>
+      {/* Changes one text node. */}
+      <button type="button" id="loud" onClick={() => setTick((x) => x + 1)}>loud</button>
+      <output>{tick}</output>
+      <ul>{Array.from({ length: 200 }, (_, i) => <Row key={i} label={\`row \${i}\`} />)}</ul>
+      <span hidden>{n > 1000 ? "never" : ""}</span>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+console.log(\`mount: \${componentRenders} component renders\`);
+
+/* Count what React actually writes to the DOM, which is the expensive part. */
+let mutations = 0;
+const observer = new MutationObserver((records) => { mutations += records.length; });
+observer.observe(container, { childList: true, subtree: true, characterData: true, attributes: true });
+
+function click(id, label) {
+  componentRenders = 0;
+  mutations = 0;
+  act(() => { container.querySelector(\`#\${id}\`).click(); });
+  observer.takeRecords().forEach(() => { mutations++; });
+  console.log(\`\${label.padEnd(34)} \${componentRenders} components re-rendered, \${mutations} DOM mutations\`);
+}
+
+click("quiet", "state changed, screen identical:");
+click("loud", "state changed, one number moved:");`,
+          output: `mount: 201 component renders
+state changed, screen identical:   201 components re-rendered, 0 DOM mutations
+state changed, one number moved:   201 components re-rendered, 1 DOM mutations`,
+          explanation:
+            "Two hundred and one components re-rendered and the browser was asked to change **one text node**. That ratio is what reconciliation is for: React does cheap work in JavaScript so it can avoid expensive work in the DOM, and the render count is a measure of the cheap half.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
 let componentRenders = 0;
@@ -81,11 +130,8 @@ function click(id: string, label: string) {
 
 click("quiet", "state changed, screen identical:");
 click("loud", "state changed, one number moved:");`,
-          output: `mount: 201 component renders
-state changed, screen identical:   201 components re-rendered, 0 DOM mutations
-state changed, one number moved:   201 components re-rendered, 1 DOM mutations`,
-          explanation:
-            "Two hundred and one components re-rendered and the browser was asked to change **one text node**. That ratio is what reconciliation is for: React does cheap work in JavaScript so it can avoid expensive work in the DOM, and the render count is a measure of the cheap half.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -19,12 +19,6 @@ export const inputTypesLesson: Lesson = {
     {
       id: "the-table",
       heading: "Which property to read",
-      visual: {
-        id: "input-ownership-visual",
-        kind: "react-forms",
-        algorithm: "input-ownership",
-        title: "Which property React renders, per input",
-      },
       body: [
         "The whole lesson in five lines. Everything else is applying them.",
         "**Text, email, password, number, date, range, textarea:** bind `value`, read `event.target.value`. Always a **string**, including from `type=\"number\"` — `Number(e.target.value)` if you need a number, and note that an empty field gives `\"\"`, which `Number` turns into `0`.",
@@ -38,7 +32,7 @@ export const inputTypesLesson: Lesson = {
         {
           id: "every-control",
           title: "One form, every control, bound correctly",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -134,7 +128,7 @@ after edits:  Ada|true|l|pro|hello`,
         {
           id: "checkbox-group",
           title: "Eight checkboxes, one piece of state",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

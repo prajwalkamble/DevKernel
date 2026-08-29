@@ -38,8 +38,78 @@ export const useIdLesson: Lesson = {
         {
           id: "ids-across-hydration",
           title: "Server HTML, then hydration",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useId, act } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToStaticMarkup } from "react-dom/server";
+
+function Field({ label }) {
+  const id = useId();
+  return (
+    <p>
+      <label htmlFor={id}>{label}</label>
+      <input id={id} />
+    </p>
+  );
+}
+
+/* One useId, several related elements: derive the rest rather than calling
+   the hook again. */
+function Fieldset() {
+  const id = useId();
+  return (
+    <fieldset aria-describedby={\`\${id}-hint\`}>
+      <label htmlFor={\`\${id}-name\`}>Name</label>
+      <input id={\`\${id}-name\`} aria-describedby={\`\${id}-hint\`} />
+      <small id={\`\${id}-hint\`}>As it appears on your card</small>
+    </fieldset>
+  );
+}
+
+function Form() {
+  return <form><Field label="Email" /><Field label="Postcode" /><Fieldset /></form>;
+}
+
+const server = renderToStaticMarkup(<Form />);
+console.log("server-rendered HTML:");
+console.log(server.replace(/></g, ">\\n<"));
+
+/* Hydration: the client attaches to the server's HTML rather than
+   re-rendering it, and useId is what makes the ids line up. */
+const container = document.createElement("div");
+container.innerHTML = server;
+document.body.appendChild(container);
+act(() => { hydrateRoot(container, <Form />); });
+const ids = (html) => [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+console.log("\\nids in the server HTML:  ", ids(server).join(" "));
+console.log("ids after hydrating:     ", ids(container.innerHTML).join(" "));
+console.log("identical:", String(ids(server).join() === ids(container.innerHTML).join()));`,
+          output: `server-rendered HTML:
+<form>
+<p>
+<label for="_R_1_">Email</label>
+<input id="_R_1_"/>
+</p>
+<p>
+<label for="_R_2_">Postcode</label>
+<input id="_R_2_"/>
+</p>
+<fieldset aria-describedby="_R_3_-hint">
+<label for="_R_3_-name">Name</label>
+<input id="_R_3_-name" aria-describedby="_R_3_-hint"/>
+<small id="_R_3_-hint">As it appears on your card</small>
+</fieldset>
+</form>
+
+ids in the server HTML:   _R_1_ _R_2_ _R_3_-name _R_3_-hint
+ids after hydrating:      _R_1_ _R_2_ _R_3_-name _R_3_-hint
+identical: true`,
+          explanation:
+            "Identical, and the format tells you why. `_R_1_` is a compact encoding of a tree position, not a counter — which is what lets a server rendering a hundred concurrent requests and a browser rendering one produce the same string. The surrounding underscores exist so the id is a valid CSS selector, since ids beginning with a digit are not.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useId, act } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -84,28 +154,8 @@ const ids = (html: string) => [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1
 console.log("\\nids in the server HTML:  ", ids(server).join(" "));
 console.log("ids after hydrating:     ", ids(container.innerHTML).join(" "));
 console.log("identical:", String(ids(server).join() === ids(container.innerHTML).join()));`,
-          output: `server-rendered HTML:
-<form>
-<p>
-<label for="_R_1_">Email</label>
-<input id="_R_1_"/>
-</p>
-<p>
-<label for="_R_2_">Postcode</label>
-<input id="_R_2_"/>
-</p>
-<fieldset aria-describedby="_R_3_-hint">
-<label for="_R_3_-name">Name</label>
-<input id="_R_3_-name" aria-describedby="_R_3_-hint"/>
-<small id="_R_3_-hint">As it appears on your card</small>
-</fieldset>
-</form>
-
-ids in the server HTML:   _R_1_ _R_2_ _R_3_-name _R_3_-hint
-ids after hydrating:      _R_1_ _R_2_ _R_3_-name _R_3_-hint
-identical: true`,
-          explanation:
-            "Identical, and the format tells you why. `_R_1_` is a compact encoding of a tree position, not a counter — which is what lets a server rendering a hundred concurrent requests and a browser rendering one produce the same string. The surrounding underscores exist so the id is a valid CSS selector, since ids beginning with a digit are not.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -28,7 +28,7 @@ export const containerPresentationalLesson: Lesson = {
         {
           id: "the-old-shape",
           title: "The shape, as it was written",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* The container: knows about fetching, knows nothing about markup. */
 class UserListContainer extends React.Component {
   state = { users: [], loading: true };
@@ -64,10 +64,10 @@ function UserList({ users, loading }) {
         {
           id: "the-new-shape",
           title: "The same separation, one component",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* The logic, extractable and testable, in no particular component. */
 function useUsers() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -92,6 +92,36 @@ function UserList() {
 }`,
           explanation:
             "Half the code and the same properties. `useUsers` can be tested with a hook-testing helper, used by three screens, or replaced with a TanStack Query call without `UserList` changing a line.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* The logic, extractable and testable, in no particular component. */
+function useUsers() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+    fetchUsers().then((data) => {
+      if (ignore) return;
+      setUsers(data);
+      setLoading(false);
+    });
+    return () => { ignore = true; };
+  }, []);
+
+  return { users, loading };
+}
+
+/* The markup. One component instead of two, and the separation is still
+   there — it is just a line inside the file rather than a file boundary. */
+function UserList() {
+  const { users, loading } = useUsers();
+  if (loading) return <Spinner />;
+  return <ul>{users.map((u) => <li key={u.id}>{u.name}</li>)}</ul>;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -104,12 +134,6 @@ function UserList() {
     {
       id: "render-props",
       heading: "Render props",
-      visual: {
-        id: "render-prop-visual",
-        kind: "react-patterns",
-        algorithm: "compound",
-        title: "Handing behaviour down instead of data",
-      },
       body: [
         "The other pre-hooks answer to sharing logic: a component that holds state and calls a **function child** with it.",
         "Hooks replaced this for logic sharing, and it survives for a different job — a component that owns something the caller must render *around*, particularly when a type parameter is involved. Module 13's generic `List` is a render prop, and it has to be, because there is no other way to hand the caller a value the caller did not create.",
@@ -118,7 +142,7 @@ function UserList() {
         {
           id: "render-prop",
           title: "Then and now",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* 2017: sharing mouse position. */
 <MouseTracker>
   {({ x, y }) => <p>{x}, {y}</p>}
@@ -150,8 +174,35 @@ const { x, y } = useMousePosition();
         {
           id: "hoc",
           title: "Reading one",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* The shape. It takes a component, returns a component, and injects
+   props the wrapped component's own signature never mentions. */
+function withTheme(Component) {
+  return function WithTheme(props) {
+    const theme = useContext(ThemeContext);
+    return <Component {...(props)} theme={theme} />;
+  };
+}
+
+const ThemedButton = withTheme(Button);
+
+/* The same thing today, and the difference is that you can see where the
+   value comes from by reading the component. */
+function Button(props) {
+  const theme = useTheme();
+  // …
+}
+
+/* The one place HOCs are still the right tool: adding behaviour around a
+   component you do not own and cannot edit. React.memo is one. So is a
+   wrapper that adds an error boundary or an analytics identity. */
+const MemoisedRow = memo(Row);`,
+          explanation:
+            "`memo` is a higher-order component, which is a useful thing to notice — the pattern is not dead, it just narrowed to the case it is actually good at: wrapping a component from the outside to add something orthogonal, rather than injecting data into it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* The shape. It takes a component, returns a component, and injects
    props the wrapped component's own signature never mentions. */
 function withTheme<P extends { theme: Theme }>(Component: React.ComponentType<P>) {
   return function WithTheme(props: Omit<P, "theme">) {
@@ -173,8 +224,8 @@ function Button(props: ButtonProps) {
    component you do not own and cannot edit. React.memo is one. So is a
    wrapper that adds an error boundary or an analytics identity. */
 const MemoisedRow = memo(Row);`,
-          explanation:
-            "`memo` is a higher-order component, which is a useful thing to notice — the pattern is not dead, it just narrowed to the case it is actually good at: wrapping a component from the outside to add something orthogonal, rather than injecting data into it.",
+            },
+          ],
         },
       ],
       pitfalls: [

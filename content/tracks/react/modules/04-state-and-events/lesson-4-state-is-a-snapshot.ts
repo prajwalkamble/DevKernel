@@ -19,12 +19,6 @@ export const stateIsASnapshotLesson: Lesson = {
     {
       id: "each-render-its-own",
       heading: "Each render has its own everything",
-      visual: {
-        id: "state-snapshot-visual",
-        kind: "react-state",
-        algorithm: "snapshot",
-        title: "Two renders, two sets of variables",
-      },
       body: [
         "A component function runs once per render. Each run creates its own `const` for every state variable, its own props object, and its own copies of every function defined in the body.",
         "Those functions capture the variables of the render that created them — ordinary JavaScript closures, with no React involvement. A handler defined during the render where `count` was 3 will see `3` forever, however many renders happen afterwards.",
@@ -34,7 +28,7 @@ export const stateIsASnapshotLesson: Lesson = {
         {
           id: "timeout-snapshot",
           title: "The timeout sees the render it was born in",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -67,6 +61,38 @@ console.log("...and the timeout has now run.");`,
 ...and the timeout has now run.`,
           explanation:
             "The screen says `1` and the timeout says `0`, and both are correct. The timeout was created during the render where `count` was `0`, and it kept that value — the later render produced a *different* `count` in a different call, which this closure has never seen. Nothing raced; the callback is simply reading its own snapshot.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Delayed() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(count + 1);
+    // Scheduled during this render, so it closes over this render's \`count\`.
+    setTimeout(() => {
+      console.log("  the timeout sees count =", count);
+    }, 0);
+  }
+
+  return <button id="b" onClick={handleClick}>{count}</button>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Delayed />); });
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+console.log("after the click, the DOM shows:", container.textContent);
+
+await new Promise((resolve) => setTimeout(resolve, 10));
+console.log("...and the timeout has now run.");`,
+            },
+          ],
         },
       ],
     },
@@ -85,7 +111,7 @@ console.log("...and the timeout has now run.");`,
         {
           id: "interval-stuck",
           title: "An interval that never gets past one",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -122,6 +148,45 @@ console.log("three ticks with an updater:       ", container.textContent);`,
 three ticks with an updater:        4`,
           explanation:
             "Three ticks of the captured closure left the count at 1, because every one of them computed `0 + 1` from the render it was created in. Three ticks of the updater moved it 1, 2, 3, 4 — the updater never reads a captured variable, so there is nothing to go stale. This is exactly why an interval set up once must use the functional form.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+// Stands in for an interval: a callback captured once and called repeatedly.
+// The annotation is required — \`let captured = null\` would be \`null\` and
+// nothing else, so the assignment below would not compile.
+let captured: { stale: () => void; fresh: () => void } | null = null;
+
+function Ticker() {
+  const [count, setCount] = useState(0);
+
+  // Captured on the first render only — like a setInterval in an effect with [].
+  if (captured === null) {
+    captured = { stale: () => setCount(count + 1), fresh: () => setCount((c) => c + 1) };
+  }
+
+  return <span id="v">{count}</span>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Ticker />); });
+
+act(() => { captured!.stale(); });
+act(() => { captured!.stale(); });
+act(() => { captured!.stale(); });
+console.log("three ticks with the stale closure:", container.textContent);
+
+act(() => { captured!.fresh(); });
+act(() => { captured!.fresh(); });
+act(() => { captured!.fresh(); });
+console.log("three ticks with an updater:       ", container.textContent);`,
+            },
+          ],
         },
       ],
     },

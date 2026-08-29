@@ -59,12 +59,6 @@ export const clientRenderingLesson: Lesson = {
         "**4. The data.** React renders, an effect fires, and only now does the browser learn what to fetch — because the URL was inside the bundle that just finished executing.",
         "Nothing in that list can start early. The famous consequence is the *loading waterfall*: a component fetches, renders a child, and the child fetches — and each level of the tree is another round trip.",
       ],
-      visual: {
-        id: "csr-timeline-visual",
-        kind: "react-server",
-        algorithm: "csr-timeline",
-        title: "Request to content, client-rendered",
-      },
       pitfalls: [
         {
           title: "The numbers in that visualisation are a model, not a measurement",

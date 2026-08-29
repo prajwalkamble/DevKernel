@@ -28,17 +28,11 @@ export const referentialEqualityLesson: Lesson = {
         "**Store selectors**, deciding whether a subscriber re-renders.",
         "Learn the rule once and all four stop being separate topics. Every \"why does this keep re-rendering / re-firing / recomputing?\" question is the same question.",
       ],
-      visual: {
-        id: "prop-comparison-visual",
-        kind: "react-rendering",
-        algorithm: "prop-comparison",
-        title: "Five props, compared one at a time",
-      },
       examples: [
         {
           id: "object-is-printed",
           title: "The same source, evaluated twice",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Everything React compares — props for memo, dependency arrays, provider
    values, store selectors — goes through Object.is. One rule, four places. */
 
@@ -47,7 +41,7 @@ const render1 = () => ({
   count: 3,
   rows: [1, 2],
   filters: { open: true },
-  onPick: (id: string) => id,
+  onPick: (id) => id,
   nothing: null,
   missing: undefined,
   notANumber: NaN,
@@ -55,7 +49,7 @@ const render1 = () => ({
 const a = render1();
 const b = render1();   // exactly as a second render would produce them
 
-const keys = Object.keys(a) as (keyof typeof a)[];
+const keys = Object.keys(a);
 const width = Math.max(...keys.map((k) => k.length));
 console.log("the same source, evaluated twice:");
 for (const key of keys) {
@@ -97,6 +91,47 @@ looking identical is not being identical:
   Object.is(x, x)                         -> true`,
           explanation:
             "Three of eight fail, and they are the three you write without thinking: an array literal, an object literal, an arrow function. `null` and `undefined` pass because there is only one of each. `NaN` passes because `Object.is` was designed to fix that — which is the practical difference from `===`, and the reason a `NaN` in a dependency array does not fire an effect forever.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Everything React compares — props for memo, dependency arrays, provider
+   values, store selectors — goes through Object.is. One rule, four places. */
+
+const render1 = () => ({
+  title: "Orders",
+  count: 3,
+  rows: [1, 2],
+  filters: { open: true },
+  onPick: (id: string) => id,
+  nothing: null,
+  missing: undefined,
+  notANumber: NaN,
+});
+const a = render1();
+const b = render1();   // exactly as a second render would produce them
+
+const keys = Object.keys(a) as (keyof typeof a)[];
+const width = Math.max(...keys.map((k) => k.length));
+console.log("the same source, evaluated twice:");
+for (const key of keys) {
+  const same = Object.is(a[key], b[key]);
+  console.log(\`  \${key.padEnd(width)}  Object.is -> \${same}\`);
+}
+
+console.log("\\nwhere Object.is differs from ===:");
+console.log(\`  NaN === NaN            -> \${NaN === NaN}\`);
+console.log(\`  Object.is(NaN, NaN)    -> \${Object.is(NaN, NaN)}\`);
+console.log(\`  0 === -0               -> \${0 === -0}\`);
+console.log(\`  Object.is(0, -0)       -> \${Object.is(0, -0)}\`);
+
+console.log("\\nlooking identical is not being identical:");
+const x = { id: 1 };
+const y = { id: 1 };
+console.log(\`  JSON.stringify(x) === JSON.stringify(y) -> \${JSON.stringify(x) === JSON.stringify(y)}\`);
+console.log(\`  Object.is(x, y)                         -> \${Object.is(x, y)}\`);
+console.log(\`  Object.is(x, x)                         -> \${Object.is(x, x)}\`);`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -132,8 +167,30 @@ looking identical is not being identical:
         {
           id: "stabilising",
           title: "The default-value trap",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Broken in the most innocent-looking way. \`items ?? []\` builds a new
+// empty array on every render where \`items\` is undefined, so the effect
+// fires on every render and the memoised child never skips.
+function List({ items }) {
+  const rows = items ?? [];
+  useEffect(() => { report(rows.length); }, [rows]);
+  return <Rows rows={rows} />;
+}
+
+// Fixed by rule 1: one empty array, for the life of the module.
+const EMPTY = [];
+
+function List({ items }) {
+  const rows = items ?? EMPTY;
+  useEffect(() => { report(rows.length); }, [rows]);
+  return <Rows rows={rows} />;
+}`,
+          explanation:
+            "A default parameter has the same problem: `function List({ items = [] })` creates a new array on every call. This is the single most common cause of an effect that fires on every render, and it is invisible unless you are looking for it — the code reads as a default, not as an allocation.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Broken in the most innocent-looking way. \`items ?? []\` builds a new
 // empty array on every render where \`items\` is undefined, so the effect
 // fires on every render and the memoised child never skips.
 function List({ items }: { items?: Item[] }) {
@@ -150,8 +207,8 @@ function List({ items }: { items?: Item[] }) {
   useEffect(() => { report(rows.length); }, [rows]);
   return <Rows rows={rows} />;
 }`,
-          explanation:
-            "A default parameter has the same problem: `function List({ items = [] })` creates a new array on every call. This is the single most common cause of an effect that fires on every render, and it is invisible unless you are looking for it — the code reads as a default, not as an allocation.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -20,10 +20,27 @@ import { useExampleLanguage } from "@/lib/useExampleLanguage";
  * example on the page that has Rust follow — and the ones that do not stay on
  * their own primary language rather than showing nothing.
  */
+/**
+ * Languages that are the same choice wearing two hats.
+ *
+ * A React lesson labels a component `jsx` and a plain module `javascript`, and
+ * their typed counterparts `tsx` and `typescript`. To a reader those are one
+ * decision — "show me this project in JavaScript" — so choosing either member
+ * has to satisfy the other, or picking TSX on a component would leave every
+ * non-component file in the same project showing JavaScript.
+ */
+const SAME_CHOICE: Partial<Record<ExampleLanguage, ExampleLanguage>> = {
+  jsx: "javascript",
+  javascript: "jsx",
+  tsx: "typescript",
+  typescript: "tsx",
+};
+
 export function ExampleLanguagePicker({
   primary,
   blocks,
   outputs,
+  titles,
 }: {
   /** The language the surrounding prose is written against. */
   primary: ExampleLanguage;
@@ -31,6 +48,8 @@ export function ExampleLanguagePicker({
   blocks: Partial<Record<ExampleLanguage, ReactNode>>;
   /** Rendered output panels, keyed by language. */
   outputs?: Partial<Record<ExampleLanguage, ReactNode>>;
+  /** Headings, keyed by language: most of them name a file. */
+  titles?: Partial<Record<ExampleLanguage, string>>;
 }) {
   const { language, setLanguage } = useExampleLanguage();
   const selectId = useId();
@@ -42,11 +61,23 @@ export function ExampleLanguagePicker({
   // Fall back to the primary when the global choice is a language this example
   // does not have. A reader who picked Rust should not be shown a blank panel
   // by an example that only exists in Python.
-  const active = language && available.includes(language) ? language : primary;
+  const sibling = language ? SAME_CHOICE[language] : undefined;
+  const active =
+    language && available.includes(language) ? language
+    : sibling && available.includes(sibling) ? sibling
+    : primary;
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-between gap-3">
+        {titles?.[active] ? (
+          <h4 className="min-w-0 text-sm font-medium break-words text-foreground">
+            {titles[active]}
+          </h4>
+        ) : (
+          <span />
+        )}
+        <div className="flex shrink-0 items-center gap-2">
         <label htmlFor={selectId} className="text-xs font-medium text-muted">
           Language
         </label>
@@ -66,6 +97,7 @@ export function ExampleLanguagePicker({
             </option>
           ))}
         </select>
+        </div>
       </div>
       {blocks[active]}
       {outputs?.[active]}

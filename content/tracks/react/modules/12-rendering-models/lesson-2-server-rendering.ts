@@ -24,12 +24,6 @@ export const serverRenderingLesson: Lesson = {
         "The browser now paints real content on its first paint. The bundle still downloads, still executes, and still builds the same tree — but it does so behind a page the user is already reading.",
         "That is server-side rendering. Two APIs and one idea.",
       ],
-      visual: {
-        id: "ssr-timeline-visual",
-        kind: "react-server",
-        algorithm: "ssr-timeline",
-        title: "Request to content, server-rendered",
-      },
     },
     {
       id: "the-output",
@@ -41,10 +35,10 @@ export const serverRenderingLesson: Lesson = {
         {
           id: "two-renderers",
           title: "The same tree, two server renderers",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToString, renderToStaticMarkup } from "react-dom/server";
 
-function Post({ title, likes }: { title: string; likes: number }) {
+function Post({ title, likes }) {
   return (
     <article className="post">
       <h1>{title}</h1>
@@ -61,6 +55,26 @@ console.log("renderToStaticMarkup:", renderToStaticMarkup(tree));`,
 renderToStaticMarkup: <article class="post"><h1>Hello</h1><p>3 likes</p><button>Like</button></article>`,
           explanation:
             "First: **the `onClick` is not there.** It cannot be — a function has no HTML representation. The server sends the shape of the page; the behaviour arrives in the bundle. That single fact explains everything in the rest of this lesson.\n\nSecond: `<!-- -->` in the `renderToString` output. `{likes}` and `\" likes\"` are two separate text children, and once serialised they would be indistinguishable from one. The empty comment keeps them apart so the client's walk finds the same two nodes the server did. `renderToStaticMarkup` omits it because nothing will hydrate that output.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToString, renderToStaticMarkup } from "react-dom/server";
+
+function Post({ title, likes }: { title: string; likes: number }) {
+  return (
+    <article className="post">
+      <h1>{title}</h1>
+      <p>{likes} likes</p>
+      <button onClick={() => alert("hi")}>Like</button>
+    </article>
+  );
+}
+
+const tree = <Post title="Hello" likes={3} />;
+console.log("renderToString:      ", renderToString(tree));
+console.log("renderToStaticMarkup:", renderToStaticMarkup(tree));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -85,7 +99,7 @@ renderToStaticMarkup: <article class="post"><h1>Hello</h1><p>3 likes</p><button>
         {
           id: "the-server",
           title: "The whole thing, without a framework",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToString } from "react-dom/server";
 
 app.get("/post/:id", async (req, res) => {
@@ -136,8 +150,37 @@ app.get("/post/:id", async (req, res) => {
         {
           id: "browser-only",
           title: "The two shapes for browser-only values",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Wrong: throws on the server, because there is no window. */
+function Width() {
+  return <p>{window.innerWidth}px</p>;
+}
+
+/* Right, version one: render the server's answer, correct after mount.
+   Costs one extra client render and never mismatches. */
+function Width() {
+  const [width, setWidth] = useState(null);
+  useEffect(() => setWidth(window.innerWidth), []);
+  return <p>{width === null ? "…" : \`\${width}px\`}</p>;
+}
+
+/* Right, version two: the same thing declared once, with the server's
+   answer as an explicit argument. Module 10's hook, doing exactly the
+   job it was added for. */
+const subscribe = (onChange) => {
+  window.addEventListener("resize", onChange);
+  return () => window.removeEventListener("resize", onChange);
+};
+function Width() {
+  const width = useSyncExternalStore(subscribe, () => window.innerWidth, () => null);
+  return <p>{width === null ? "…" : \`\${width}px\`}</p>;
+}`,
+          explanation:
+            "Both correct versions have the same shape: the server produces a neutral value, the client corrects it after mounting. What you must not do is have the server guess — a server that renders `1024px` and a client that renders `390px` is the mismatch in lesson 4.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Wrong: throws on the server, because there is no window. */
 function Width() {
   return <p>{window.innerWidth}px</p>;
 }
@@ -161,8 +204,8 @@ function Width() {
   const width = useSyncExternalStore(subscribe, () => window.innerWidth, () => null);
   return <p>{width === null ? "…" : \`\${width}px\`}</p>;
 }`,
-          explanation:
-            "Both correct versions have the same shape: the server produces a neutral value, the client corrects it after mounting. What you must not do is have the server guess — a server that renders `1024px` and a client that renders `390px` is the mismatch in lesson 4.",
+            },
+          ],
         },
       ],
     },

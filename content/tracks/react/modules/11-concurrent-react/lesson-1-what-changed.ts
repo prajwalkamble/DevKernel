@@ -25,12 +25,6 @@ export const whatConcurrentRenderingChangedLesson: Lesson = {
         "React 18 made the render loop able to **stop between components**, hand the thread back, and pick up where it left off — or throw away what it had and start again. That is the whole of it. Everything else in this module is a consequence.",
         "The word for that is *interruptible*, and it buys one thing: React can now find out that something more urgent happened while it was busy, and act on it.",
       ],
-      visual: {
-        id: "blocking-visual",
-        kind: "react-concurrent",
-        algorithm: "blocking-render",
-        title: "One render, one task",
-      },
     },
     {
       id: "interruptible",
@@ -40,12 +34,6 @@ export const whatConcurrentRenderingChangedLesson: Lesson = {
         "The trade is explicit: the interruptible run does **more** total work, because the abandoned units are rendered twice. It is slower by any measure of throughput. It also answers the keyboard in a few milliseconds instead of tens, and a user cannot perceive throughput.",
         "This is why concurrent rendering is not a performance feature and why enabling it will not make a slow app fast. It is a **responsiveness** feature, and the currency it pays in is wasted renders.",
       ],
-      visual: {
-        id: "interruptible-visual",
-        kind: "react-concurrent",
-        algorithm: "interruptible-render",
-        title: "The same render, with yielding",
-      },
       pitfalls: [
         {
           title: "A render can now run and never be committed",
@@ -74,8 +62,61 @@ export const whatConcurrentRenderingChangedLesson: Lesson = {
         {
           id: "automatic-batching",
           title: "Two updates outside an event handler",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
+
+let renders = 0;
+let setA;
+let setB;
+
+function Panel() {
+  const [a, sa] = useState(0);
+  const [b, sb] = useState(0);
+  setA = sa; setB = sb;
+  renders++;
+  return <p>{a}-{b}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const dom = () => container.textContent;
+await act(async () => { createRoot(container).render(<Panel />); });
+
+renders = 0;
+await act(async () => {
+  /* Deliberately not inside a React event handler: before React 18 this was
+     the case that did not batch. */
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  setA(1);
+  console.log(\`  after setA, the DOM says \${dom()}\`);
+  setB(1);
+  console.log(\`  after setB, the DOM says \${dom()}\`);
+});
+console.log(\`batched:   \${renders} render, DOM says \${dom()}\`);
+
+renders = 0;
+await act(async () => {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  flushSync(() => setA(2));
+  console.log(\`  after flushSync(setA), the DOM says \${dom()}\`);
+  flushSync(() => setB(2));
+  console.log(\`  after flushSync(setB), the DOM says \${dom()}\`);
+});
+console.log(\`flushSync: \${renders} renders, DOM says \${dom()}\`);`,
+          output: `  after setA, the DOM says 0-0
+  after setB, the DOM says 0-0
+batched:   1 render, DOM says 1-1
+  after flushSync(setA), the DOM says 2-1
+  after flushSync(setB), the DOM says 2-2
+flushSync: 2 renders, DOM says 2-2`,
+          explanation:
+            "In the batched run the DOM is untouched between the two calls, and one render produces `1-1`. In the `flushSync` run you can see the intermediate state on screen — `2-1` — which is exactly the frame batching exists to avoid. Two renders and two paints for one logical change.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 
@@ -117,14 +158,8 @@ await act(async () => {
   console.log(\`  after flushSync(setB), the DOM says \${dom()}\`);
 });
 console.log(\`flushSync: \${renders} renders, DOM says \${dom()}\`);`,
-          output: `  after setA, the DOM says 0-0
-  after setB, the DOM says 0-0
-batched:   1 render, DOM says 1-1
-  after flushSync(setA), the DOM says 2-1
-  after flushSync(setB), the DOM says 2-2
-flushSync: 2 renders, DOM says 2-2`,
-          explanation:
-            "In the batched run the DOM is untouched between the two calls, and one render produces `1-1`. In the `flushSync` run you can see the intermediate state on screen — `2-1` — which is exactly the frame batching exists to avoid. Two renders and two paints for one logical change.",
+            },
+          ],
         },
       ],
       pitfalls: [

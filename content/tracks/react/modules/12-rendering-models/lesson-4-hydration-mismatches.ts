@@ -27,8 +27,46 @@ export const hydrationMismatchesLesson: Lesson = {
         {
           id: "the-mismatch",
           title: "A mismatch, and its cost",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
+
+/* The classic: a value that legitimately differs between the two machines. */
+let onServer = true;
+function Greeting() {
+  return <p>{onServer ? "Good evening" : "Good morning"}</p>;
+}
+
+const html = renderToString(<Greeting />);
+onServer = false;
+
+const container = document.createElement("div");
+container.innerHTML = html;
+document.body.appendChild(container);
+const before = container.querySelector("p");
+
+await act(async () => {
+  hydrateRoot(container, <Greeting />, {
+    /* The message is long; the first sentence is the identification. */
+    onRecoverableError(error) {
+      console.log("recoverable:", (error).message.split(". ")[0] + ".");
+    },
+  });
+});
+console.log("server said:     ", html);
+console.log("after hydration: ", container.innerHTML);
+console.log("same <p> node:   ", container.querySelector("p") === before);`,
+          output: `recoverable: Hydration failed because the server rendered text didn't match the client.
+server said:      <p>Good evening</p>
+after hydration:  <p>Good morning</p>
+same <p> node:    false`,
+          explanation:
+            "`false`. The `<p>` the server sent is gone and a new one is in its place — and this is a one-element page. On a real page it is every element under that root: the server render wasted, a full client render paid for, the paint the user was already looking at replaced, and any focus, scroll position or text selection inside it destroyed.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -57,12 +95,8 @@ await act(async () => {
 console.log("server said:     ", html);
 console.log("after hydration: ", container.innerHTML);
 console.log("same <p> node:   ", container.querySelector("p") === before);`,
-          output: `recoverable: Hydration failed because the server rendered text didn't match the client.
-server said:      <p>Good evening</p>
-after hydration:  <p>Good morning</p>
-same <p> node:    false`,
-          explanation:
-            "`false`. The `<p>` the server sent is gone and a new one is in its place — and this is a one-element page. On a real page it is every element under that root: the server render wasted, a full client render paid for, the paint the user was already looking at replaced, and any focus, scroll position or text selection inside it destroyed.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -118,12 +152,6 @@ https://react.dev/link/hydration-mismatch
         "**4. Browser-only storage.** `localStorage`, `sessionStorage`, cookies read through `document.cookie`, `matchMedia`. The server has none of them, so it renders the default and the client renders the stored value. Theme switchers are the canonical case, which is why every one of them has a flash-of-wrong-theme story.",
         "**5. Invalid nesting.** This one is different from the others, because your React tree is fine. `<p><div/></p>` is invalid HTML, so the browser's parser *silently restructures the server's markup* before React sees it — and React then compares its tree against a DOM that no longer matches it. The tell is a mismatch you cannot explain from the component code.",
       ],
-      visual: {
-        id: "hydration-mismatch-visual",
-        kind: "react-server",
-        algorithm: "hydration-mismatch",
-        title: "One node differs, the whole tree goes",
-      },
       pitfalls: [
         {
           title: "The nesting one has a fixed list",
@@ -142,8 +170,48 @@ https://react.dev/link/hydration-mismatch
         {
           id: "two-pass",
           title: "Two ways to say 'after mount'",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, useSyncExternalStore, act } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
+
+/* The two-pass pattern: render the server's answer, then correct after mount. */
+function TwoPass() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return <p>{mounted ? "browser" : "server"}</p>;
+}
+
+/* The same thing declared once, with the server's answer as an argument
+   rather than as a state machine. Module 10's hook, doing its actual job. */
+const subscribe = () => () => {};
+function ViaStore() {
+  const isClient = useSyncExternalStore(subscribe, () => true, () => false);
+  return <p>{isClient ? "browser" : "server"}</p>;
+}
+
+async function run(label, tree) {
+  const html = renderToString(tree);
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  let warned = false;
+  await act(async () => {
+    hydrateRoot(container, tree, { onRecoverableError() { warned = true; } });
+  });
+  console.log(\`\${label} server=\${html} after hydration=\${container.innerHTML} warned=\${warned}\`);
+}
+
+await run("two-pass:  ", <TwoPass />);
+await run("via store: ", <ViaStore />);`,
+          output: `two-pass:   server=<p>server</p> after hydration=<p>browser</p> warned=false
+via store:  server=<p>server</p> after hydration=<p>browser</p> warned=false`,
+          explanation:
+            "Both hydrate cleanly and both end up showing the browser's value. The cost is the same in each case and it is real: the first paint shows the server's answer, so the user sees the placeholder before the real thing. That is the trade, and it is why the good version of a theme switcher renders the theme from a cookie the server can read, rather than from `localStorage` that it cannot.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, useSyncExternalStore, act } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -176,10 +244,8 @@ async function run(label: string, tree: React.ReactElement) {
 
 await run("two-pass:  ", <TwoPass />);
 await run("via store: ", <ViaStore />);`,
-          output: `two-pass:   server=<p>server</p> after hydration=<p>browser</p> warned=false
-via store:  server=<p>server</p> after hydration=<p>browser</p> warned=false`,
-          explanation:
-            "Both hydrate cleanly and both end up showing the browser's value. The cost is the same in each case and it is real: the first paint shows the server's answer, so the user sees the placeholder before the real thing. That is the trade, and it is why the good version of a theme switcher renders the theme from a cookie the server can read, rather than from `localStorage` that it cannot.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -200,8 +266,44 @@ via store:  server=<p>server</p> after hydration=<p>browser</p> warned=false`,
         {
           id: "suppressed",
           title: "Suppressed, and what is on screen afterwards",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
+
+let onServer = true;
+const now = () => (onServer ? "12:00:00" : "12:00:07");
+
+function Clock({ suppress }) {
+  return <time suppressHydrationWarning={suppress}>{now()}</time>;
+}
+
+async function run(label, suppress) {
+  onServer = true;
+  const html = renderToString(<Clock suppress={suppress} />);
+  onServer = false;
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  let warned = false;
+  await act(async () => {
+    hydrateRoot(container, <Clock suppress={suppress} />, {
+      onRecoverableError() { warned = true; },
+    });
+  });
+  console.log(\`\${label} warned=\${warned}  server=\${html}  after=\${container.innerHTML}\`);
+}
+
+await run("plain:      ", false);
+await run("suppressed: ", true);`,
+          output: `plain:       warned=true  server=<time>12:00:00</time>  after=<time>12:00:07</time>
+suppressed:  warned=false  server=<time>12:00:00</time>  after=<time>12:00:00</time>`,
+          explanation:
+            "Read the two `after` values. Without suppression React regenerates the tree and the screen ends up with the *client's* time — the right answer, expensively. With suppression the warning goes away and the screen keeps the **server's** time, which is the stale one, and it will stay stale until something re-renders that element.\n\nSo suppressing is not \"ignore this difference\", it is \"keep the server's version\". Legitimate for a timestamp you are about to update in an effect anyway. Wrong for anything you needed to be correct.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -230,10 +332,8 @@ async function run(label: string, suppress: boolean) {
 
 await run("plain:      ", false);
 await run("suppressed: ", true);`,
-          output: `plain:       warned=true  server=<time>12:00:00</time>  after=<time>12:00:07</time>
-suppressed:  warned=false  server=<time>12:00:00</time>  after=<time>12:00:00</time>`,
-          explanation:
-            "Read the two `after` values. Without suppression React regenerates the tree and the screen ends up with the *client's* time — the right answer, expensively. With suppression the warning goes away and the screen keeps the **server's** time, which is the stale one, and it will stay stale until something re-renders that element.\n\nSo suppressing is not \"ignore this difference\", it is \"keep the server's version\". Legitimate for a timestamp you are about to update in an effect anyway. Wrong for anything you needed to be correct.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -24,18 +24,70 @@ export const racesAndCleanupLesson: Lesson = {
         "Nothing in that sentence is wrong. The problem is the assumption hiding under it: that responses come back in the order the requests went out. They do not, and nothing makes them.",
         "Step the animation. The first request is the slow one — a longer query prefix that the server has to work harder on, a cold cache, a request that got unlucky — and it lands after the second.",
       ],
-      visual: {
-        id: "fetch-race-visual",
-        kind: "react-rendering",
-        algorithm: "fetch-race",
-        title: "Two keystrokes, and the response that arrives last",
-      },
       examples: [
         {
           id: "the-race",
           title: "The race, and the four-line fix",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* A fake API where the *first* query is the slow one — which is the whole
+   point, and the reason this never reproduces against localhost. */
+const LATENCY = { ad: 120, ada: 10 };
+function search(query) {
+  return new Promise((resolve) =>
+    setTimeout(() => resolve(\`results for "\${query}"\`), LATENCY[query]),
+  );
+}
+
+function Racy({ query }) {
+  const [results, setResults] = useState("—");
+  useEffect(() => {
+    search(query).then(setResults);
+  }, [query]);
+  return <p>{results}</p>;
+}
+
+function Fixed({ query }) {
+  const [results, setResults] = useState("—");
+  useEffect(() => {
+    let ignore = false;
+    search(query).then((r) => {
+      if (!ignore) setResults(r);
+      else console.log(\`  (dropped a stale response for "\${query}")\`);
+    });
+    return () => { ignore = true; };
+  }, [query]);
+  return <p>{results}</p>;
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function drive(Component, label) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  console.log(label);
+  await act(async () => { root.render(<Component query="ad" />); });
+  await act(async () => { root.render(<Component query="ada" />); });
+  await act(async () => { await sleep(200); });
+  console.log("  on screen:", container.textContent);
+}
+
+await drive(Racy, 'typed "ad" then "ada", no cleanup:');
+await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
+          output: `typed "ad" then "ada", no cleanup:
+  on screen: results for "ad"
+the same two keystrokes, with a cleanup:
+  (dropped a stale response for "ad")
+  on screen: results for "ada"`,
+          explanation:
+            "The user typed `ada` and is looking at results for `ad`. No error, no warning, nothing in the console — the state update was perfectly legitimate, it just came from a request the user had already moved on from. The fixed version drops it, and says so.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* A fake API where the *first* query is the slow one — which is the whole
@@ -83,13 +135,8 @@ async function drive(Component: (p: { query: string }) => React.JSX.Element, lab
 
 await drive(Racy, 'typed "ad" then "ada", no cleanup:');
 await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
-          output: `typed "ad" then "ada", no cleanup:
-  on screen: results for "ad"
-the same two keystrokes, with a cleanup:
-  (dropped a stale response for "ad")
-  on screen: results for "ada"`,
-          explanation:
-            "The user typed `ada` and is looking at results for `ad`. No error, no warning, nothing in the console — the state update was perfectly legitimate, it just came from a request the user had already moved on from. The fixed version drops it, and says so.",
+            },
+          ],
         },
       ],
     },
@@ -101,12 +148,6 @@ the same two keystrokes, with a cleanup:
         "So when the effect re-runs for `ada`, React first calls the previous run's cleanup — the one holding `ad`'s flag — and sets *that* flag to true. `ad`'s `.then` callback closes over the same variable, so when it finally resolves it sees `true` and returns without touching state.",
         "This is the cleanup-before-next-effect ordering from lesson 2 doing real work. The flag belongs to a specific run of the effect, and it is set at exactly the moment that run stops being current.",
       ],
-      visual: {
-        id: "fetch-race-fixed-visual",
-        kind: "react-rendering",
-        algorithm: "fetch-race-fixed",
-        title: "The same two keystrokes, with the flag",
-      },
       pitfalls: [
         {
           title: "A ref does not work here",
@@ -129,8 +170,36 @@ the same two keystrokes, with a cleanup:
         {
           id: "abort-controller",
           title: "Aborting, with the rejection handled",
-          lang: "tsx",
-          code: `function Results({ query }: { query: string }) {
+          lang: "jsx",
+          code: `function Results({ query }) {
+  const [state, setState] = useState({ tag: "loading" });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setState({ tag: "loading" });
+
+    getJSON(\`/api/search?q=\${encodeURIComponent(query)}\`, controller.signal)
+      .then(
+        (hits) => setState({ tag: "ready", hits }),
+        (error) => {
+          // An abort is not a failure — it is this effect's own cleanup
+          // doing its job, and showing the user an error for it is wrong.
+          if (error.name === "AbortError") return;
+          setState({ tag: "error", message: error.message });
+        },
+      );
+
+    return () => controller.abort();
+  }, [query]);
+
+  // …
+}`,
+          explanation:
+            "The `AbortError` check is not optional. Without it, every keystroke that supersedes a request paints an error message on screen for a request you cancelled on purpose — a bug that looks exactly like a flaky backend and is reported as one.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Results({ query }: { query: string }) {
   const [state, setState] = useState<Status>({ tag: "loading" });
 
   useEffect(() => {
@@ -153,8 +222,8 @@ the same two keystrokes, with a cleanup:
 
   // …
 }`,
-          explanation:
-            "The `AbortError` check is not optional. Without it, every keystroke that supersedes a request paints an error message on screen for a request you cancelled on purpose — a bug that looks exactly like a flaky backend and is reported as one.",
+            },
+          ],
         },
       ],
       pitfalls: [

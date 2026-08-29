@@ -24,12 +24,6 @@ export const staticGenerationLesson: Lesson = {
         "So run it once, at build time, and write the result to a file. A request is now a file being served from a CDN edge, which is the cheapest and fastest thing the web does.",
         "The component code is unchanged. `renderToString` is still what runs. The only difference is *when*, and the whole of static generation follows from that one change.",
       ],
-      visual: {
-        id: "ssg-timeline-visual",
-        kind: "react-server",
-        algorithm: "ssg-timeline",
-        title: "Request to content, statically generated",
-      },
     },
     {
       id: "why-fast",
@@ -64,8 +58,33 @@ export const staticGenerationLesson: Lesson = {
         {
           id: "next-shapes",
           title: "The three shapes, as one framework spells them",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Build-time only. Rendered once when you deploy, never again. */
+export const dynamic = "force-static";
+
+/* Time-based: this page may be up to an hour old. The request after the
+   hour is served the stale file and starts the rebuild behind it. */
+export const revalidate = 3600;
+
+/* Which paths to build. Return the ones worth pre-building; the rest are
+   rendered on first request and cached from then on. */
+export async function generateStaticParams() {
+  const posts = await db.posts.mostRead(1000);
+  return posts.map((post) => ({ slug: post.slug }));
+}
+
+/* On-demand, from a webhook route: rebuild exactly this path, now. */
+export async function POST(request) {
+  const { slug } = await request.json();
+  revalidatePath(\`/blog/\${slug}\`);
+  return Response.json({ revalidated: true });
+}`,
+          explanation:
+            "The names are Next.js's; the ideas are not, and Astro, SvelteKit, Nuxt and TanStack Start all have their own spelling of the same four. What is worth carrying between them is the shape: *is this page allowed to be old, and if so, for how long, and what makes it young again?*",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Build-time only. Rendered once when you deploy, never again. */
 export const dynamic = "force-static";
 
 /* Time-based: this page may be up to an hour old. The request after the
@@ -85,8 +104,8 @@ export async function POST(request: Request) {
   revalidatePath(\`/blog/\${slug}\`);
   return Response.json({ revalidated: true });
 }`,
-          explanation:
-            "The names are Next.js's; the ideas are not, and Astro, SvelteKit, Nuxt and TanStack Start all have their own spelling of the same four. What is worth carrying between them is the shape: *is this page allowed to be old, and if so, for how long, and what makes it young again?*",
+            },
+          ],
         },
       ],
       pitfalls: [

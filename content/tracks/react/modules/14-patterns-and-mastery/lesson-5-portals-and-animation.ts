@@ -24,13 +24,6 @@ export const portalsAndAnimationLesson: Lesson = {
         "None of that is a React problem. It is CSS, and the CSS answer is to be somewhere else in the document.",
         "`createPortal(children, domNode)` renders into that other node while leaving the children exactly where they are in the **React** tree.",
       ],
-      visual: {
-        id: "portal-visual",
-        kind: "react-patterns",
-        algorithm: "portal",
-        title: "Two trees, one component",
-        lockAlgorithm: true,
-      },
     },
     {
       id: "what-moves",
@@ -43,8 +36,47 @@ export const portalsAndAnimationLesson: Lesson = {
         {
           id: "bubbling",
           title: "A click outside the card, handled by the card",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { createPortal } from "react-dom";
+import { createRoot } from "react-dom/client";
+
+const modalHost = document.createElement("div");
+modalHost.id = "modal-root";
+document.body.appendChild(modalHost);
+
+function Modal({ children }) {
+  return createPortal(children, modalHost);
+}
+
+function Card() {
+  return (
+    <div className="card" onClick={() => console.log("the card's onClick ran")}>
+      <p>card content</p>
+      <Modal>
+        <button>Inside the portal</button>
+      </Modal>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<Card />); });
+
+const button = modalHost.querySelector("button");
+console.log("DOM parent of the button:  ", button.parentElement.id || button.parentElement.className);
+console.log("is it inside .card?        ", container.contains(button));
+await act(async () => { button.click(); });`,
+          output: `DOM parent of the button:   modal-root
+is it inside .card?         false
+the card's onClick ran`,
+          explanation:
+            "The button is not inside the card — `contains` says so — and clicking it runs the card's `onClick` anyway. React's event system delegates at the root and dispatches along the *React* tree, so a portal changes where an element is painted without changing where its events go.\n\nThat is usually what you want: a form inside a portalled modal still submits to the form logic that rendered it. It is also the reason a click inside a portalled dropdown can close the menu that opened it, if the menu closes on a click anywhere in its parent.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 
@@ -75,11 +107,8 @@ const button = modalHost.querySelector("button")!;
 console.log("DOM parent of the button:  ", button.parentElement!.id || button.parentElement!.className);
 console.log("is it inside .card?        ", container.contains(button));
 await act(async () => { button.click(); });`,
-          output: `DOM parent of the button:   modal-root
-is it inside .card?         false
-the card's onClick ran`,
-          explanation:
-            "The button is not inside the card — `contains` says so — and clicking it runs the card's `onClick` anyway. React's event system delegates at the root and dispatches along the *React* tree, so a portal changes where an element is painted without changing where its events go.\n\nThat is usually what you want: a form inside a portalled modal still submits to the form logic that rendered it. It is also the reason a click inside a portalled dropdown can close the menu that opened it, if the menu closes on a click anywhere in its parent.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -102,9 +131,9 @@ the card's onClick ran`,
         {
           id: "host",
           title: "A portal that survives server rendering",
-          lang: "tsx",
-          code: `function Portal({ children }: { children: ReactNode }) {
-  const [host, setHost] = useState<HTMLElement | null>(null);
+          lang: "jsx",
+          code: `function Portal({ children }) {
+  const [host, setHost] = useState(null);
 
   useEffect(() => {
     const node = document.createElement("div");
@@ -120,6 +149,26 @@ the card's onClick ran`,
 }`,
           explanation:
             "The `useState` holding the node rather than a `useRef` is deliberate: creating the node must cause a re-render, because the first render legitimately had nowhere to portal to. A ref would create the node and never tell React about it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Portal({ children }: { children: ReactNode }) {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const node = document.createElement("div");
+    document.body.appendChild(node);
+    setHost(node);
+    return () => { node.remove(); };
+  }, []);
+
+  /* Null on the server and on the first client render, so the server's
+     HTML and the client's first render agree. The portal appears on the
+     second render, after the effect. */
+  return host ? createPortal(children, host) : null;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -140,8 +189,36 @@ the card's onClick ran`,
         {
           id: "exit",
           title: "Three states, and one line of CSS doing the timing",
-          lang: "tsx",
-          code: `function useExitAnimation(open: boolean, durationMs: number) {
+          lang: "jsx",
+          code: `function useExitAnimation(open, durationMs) {
+  /* Mounted covers both "open" and "still animating out". */
+  const [mounted, setMounted] = useState(open);
+
+  useEffect(() => {
+    if (open) { setMounted(true); return; }
+    const timer = setTimeout(() => setMounted(false), durationMs);
+    return () => clearTimeout(timer);
+  }, [open, durationMs]);
+
+  return mounted;
+}
+
+function Toast({ open, children }) {
+  const mounted = useExitAnimation(open, 200);
+  if (!mounted) return null;
+  /* data-state drives the CSS. The element is still in the DOM while
+     open is false, which is the entire point. */
+  return <div data-state={open ? "open" : "closed"} className="toast">{children}</div>;
+}
+
+/* .toast[data-state="open"]   { animation: slide-in  200ms ease-out; }
+   .toast[data-state="closed"] { animation: slide-out 200ms ease-in;  } */`,
+          explanation:
+            "The duration is in two places, which is the honest weakness of this pattern — a designer changing the CSS to 300ms leaves the element unmounting 100ms early. Listening for `animationend` instead of using a timer removes the duplication and adds its own failure case, since `animationend` never fires if the user has `prefers-reduced-motion` set and your CSS honours it. Pick one and know its edge.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function useExitAnimation(open: boolean, durationMs: number) {
   /* Mounted covers both "open" and "still animating out". */
   const [mounted, setMounted] = useState(open);
 
@@ -164,8 +241,8 @@ function Toast({ open, children }: { open: boolean; children: ReactNode }) {
 
 /* .toast[data-state="open"]   { animation: slide-in  200ms ease-out; }
    .toast[data-state="closed"] { animation: slide-out 200ms ease-in;  } */`,
-          explanation:
-            "The duration is in two places, which is the honest weakness of this pattern — a designer changing the CSS to 300ms leaves the element unmounting 100ms early. Listening for `animationend` instead of using a timer removes the duplication and adds its own failure case, since `animationend` never fires if the user has `prefers-reduced-motion` set and your CSS honours it. Pick one and know its edge.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -188,8 +265,35 @@ function Toast({ open, children }: { open: boolean; children: ReactNode }) {
         {
           id: "reduced-motion",
           title: "The one thing that is not optional",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Some people get motion sickness from parallax and large transitions.
+   The OS setting is available in CSS and in JS, and honouring it is a
+   two-line change that matters a great deal to a small number of users. */
+
+/* @media (prefers-reduced-motion: reduce) {
+     *, *::before, *::after {
+       animation-duration: 0.01ms !important;
+       transition-duration: 0.01ms !important;
+     }
+   } */
+
+/* And in JavaScript, when the animation is not CSS. Module 10's hook,
+   because matchMedia is exactly the external store it was built for. */
+const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+const subscribe = (onChange) => {
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+
+export function useReducedMotion() {
+  return useSyncExternalStore(subscribe, () => query.matches, () => false);
+}`,
+          explanation:
+            "The CSS version uses `0.01ms` rather than `none` deliberately: an animation that is instant still *ends*, so an `animationend` listener still fires and a component waiting for it does not hang. Setting `animation: none` breaks exactly the exit-animation pattern above.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Some people get motion sickness from parallax and large transitions.
    The OS setting is available in CSS and in JS, and honouring it is a
    two-line change that matters a great deal to a small number of users. */
 
@@ -211,8 +315,8 @@ const subscribe = (onChange: () => void) => {
 export function useReducedMotion() {
   return useSyncExternalStore(subscribe, () => query.matches, () => false);
 }`,
-          explanation:
-            "The CSS version uses `0.01ms` rather than `none` deliberately: an animation that is instant still *ends*, so an `animationend` listener still fires and a component waiting for it does not hang. Setting `animation: none` breaks exactly the exit-animation pattern above.",
+            },
+          ],
         },
       ],
     },

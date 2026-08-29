@@ -37,7 +37,7 @@ export const rulesOfHooksLesson: Lesson = {
         {
           id: "order-matters",
           title: "The list, and what a condition does to it",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -69,12 +69,6 @@ third render, middle gone: {"name":"Ada","age":"Grace"}`,
             "Read the third line. `age` is `\"Grace\"`. Skipping one call shifted every later call up by one slot, so the third hook read the second hook's value. Nothing threw — the model has no way to know a call is missing, and neither does React. That is exactly the failure the rule prevents, and it is why it is a rule rather than a suggestion.",
         },
       ],
-      visual: {
-        id: "hook-slots-visual",
-        kind: "react-rendering",
-        algorithm: "hook-slots",
-        title: "Hook calls matched to slots, and what a condition does",
-      },
     },
     {
       id: "what-react-does",
@@ -104,7 +98,7 @@ third render, middle gone: {"name":"Ada","age":"Grace"}`,
         {
           id: "hooks-in-a-loop",
           title: "The shape that looks reasonable and is not",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Wrong: the number of hooks depends on the data.
 //
 //   function Fields({ names }) {

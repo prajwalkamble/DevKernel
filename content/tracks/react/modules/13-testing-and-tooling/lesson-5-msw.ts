@@ -30,12 +30,6 @@ export const mswLesson: Lesson = {
     {
       id: "handlers",
       heading: "Handlers and a server",
-      visual: {
-        id: "handler-matching-visual",
-        kind: "react-misc",
-        algorithm: "handler-matching",
-        title: "Which handler answers, and what falls through",
-      },
       body: [
         "A handler is a method, a path, and a function returning a response. `setupServer` collects them and installs the interception for the test run.",
       ],
@@ -43,11 +37,11 @@ export const mswLesson: Lesson = {
         {
           id: "the-setup",
           title: "The component, the handlers, and two tests",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- UserList.tsx: ordinary fetch, no test-shaped seams ------------- */
 export function UserList() {
-  const [users, setUsers] = useState<User[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -101,6 +95,64 @@ test("reports a failure without touching the component", async () => {
           explanation:
             "Look at what the second test did **not** have to do. It did not mock anything, did not reach into the component, and did not know that it uses `fetch`. It said \"this endpoint returns a 500\" and asserted what the user sees. The `if (!response.ok)` branch ran for real, and so did the `HTTP 500` message built from a real status code.",
           requires: "vitest with Testing Library and MSW (this is the run's summary, not a program's output)",
+          alternates: [
+            {
+              lang: "tsx",
+              requires: "vitest with Testing Library and MSW (this is the run's summary, not a program's output)",
+              code: `/* ---- UserList.tsx: ordinary fetch, no test-shaped seams ------------- */
+export function UserList() {
+  const [users, setUsers] = useState<User[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+    fetch("/api/users")
+      .then((response) => {
+        if (!response.ok) throw new Error(\`HTTP \${response.status}\`);
+        return response.json();
+      })
+      .then((data) => { if (!ignore) setUsers(data); })
+      .catch((e) => { if (!ignore) setError(String(e.message)); });
+    return () => { ignore = true; };
+  }, []);
+
+  if (error) return <p role="alert">Could not load users: {error}</p>;
+  if (users === null) return <p role="status">Loading…</p>;
+  return <ul>{users.map((u) => <li key={u.id}>{u.name}</li>)}</ul>;
+}
+
+/* ---- UserList.test.tsx ---------------------------------------------- */
+import { setupServer } from "msw/node";
+import { http, HttpResponse } from "msw";
+
+const server = setupServer(
+  http.get("/api/users", () =>
+    HttpResponse.json([{ id: 1, name: "Ada" }, { id: 2, name: "Grace" }])
+  )
+);
+
+/* error, not warn: a request with no handler should fail the test rather
+   than silently reach the real network. */
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+/* Undo any per-test override, so tests cannot leak into each other. */
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+test("renders the users the API returns", async () => {
+  render(<UserList />);
+  expect(screen.getByRole("status")).toHaveTextContent("Loading…");
+  expect(await screen.findByText("Ada")).toBeInTheDocument();
+  expect(screen.getByText("Grace")).toBeInTheDocument();
+});
+
+test("reports a failure without touching the component", async () => {
+  /* One handler, one test. resetHandlers puts the default back. */
+  server.use(http.get("/api/users", () => new HttpResponse(null, { status: 500 })));
+  render(<UserList />);
+  expect(await screen.findByRole("alert")).toHaveTextContent("Could not load users: HTTP 500");
+});`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -120,7 +172,7 @@ test("reports a failure without touching the component", async () => {
         {
           id: "shapes",
           title: "Params, query, body, delay and failure",
-          lang: "typescript",
+          lang: "javascript",
           code: `import { http, HttpResponse, delay } from "msw";
 
 export const handlers = [
@@ -172,7 +224,7 @@ export const handlers = [
         {
           id: "browser",
           title: "The same handlers in the browser",
-          lang: "typescript",
+          lang: "jsx",
           code: `// src/mocks/browser.ts
 import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
@@ -186,9 +238,28 @@ if (import.meta.env.DEV) {
   await worker.start({ onUnhandledRequest: "bypass" });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);`,
+createRoot(document.getElementById("root")).render(<App />);`,
           explanation:
             "`bypass` rather than `error` here: in a browser you want unhandled requests — fonts, images, analytics — to go through untouched. It is the opposite choice from the test setup, and for the opposite reason.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// src/mocks/browser.ts
+import { setupWorker } from "msw/browser";
+import { handlers } from "./handlers";
+
+export const worker = setupWorker(...handlers);
+
+// src/main.tsx — development only, and awaited, so the app does not make
+// its first request before the worker is listening.
+if (import.meta.env.DEV) {
+  const { worker } = await import("./mocks/browser");
+  await worker.start({ onUnhandledRequest: "bypass" });
+}
+
+createRoot(document.getElementById("root")!).render(<App />);`,
+            },
+          ],
         },
       ],
       pitfalls: [
