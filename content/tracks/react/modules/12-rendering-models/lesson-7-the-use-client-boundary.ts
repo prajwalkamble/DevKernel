@@ -73,8 +73,49 @@ If you need interactivity, consider converting part of this to a Client Componen
         {
           id: "children-slot",
           title: "The same tree, two ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- Wrong: Post is rendered *inside* the client component ------------ */
+"use client";
+export function Collapsible({ postId }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button onClick={() => setOpen(!open)}>Toggle</button>
+      {/* Post is now a Client Component. So is everything it imports —
+         including the 40kB markdown parser. */}
+      {open && <Post id={postId} />}
+    </section>
+  );
+}
+
+/* ---- Right: Post is rendered on the server and passed in -------------- */
+"use client";
+export function Collapsible({ children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button onClick={() => setOpen(!open)}>Toggle</button>
+      {open && children}
+    </section>
+  );
+}
+
+/* ---- page.jsx, a Server Component ------------------------------------- */
+export default async function Page({ id }) {
+  return (
+    <Collapsible>
+      {/* Rendered here, on the server. It arrives at Collapsible as
+         finished output — data in the payload, not code in the bundle. */}
+      <Post id={id} />
+    </Collapsible>
+  );
+}`,
+          explanation:
+            "The two `Collapsible`s have identical behaviour and completely different bundles. In the second, `Collapsible` knows nothing about `Post` — it has a slot, and the slot happens to contain something the server made. The interactivity is one `useState` and one button, which is all that needed to be in the browser in the first place.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ---- Wrong: Post is rendered *inside* the client component ------------ */
 "use client";
 export function Collapsible({ postId }: { postId: string }) {
   const [open, setOpen] = useState(false);
@@ -110,8 +151,8 @@ export default async function Page({ id }: { id: string }) {
     </Collapsible>
   );
 }`,
-          explanation:
-            "The two `Collapsible`s have identical behaviour and completely different bundles. In the second, `Collapsible` knows nothing about `Post` — it has a slot, and the slot happens to contain something the server made. The interactivity is one `useState` and one button, which is all that needed to be in the browser in the first place.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -110,7 +110,7 @@ export const capstoneBackendLesson: Lesson = {
       id: "shared-schemas",
       heading: "The shared package: one declaration, two outputs",
       body: [
-        "NFR-2 says every shared shape is defined once. This is that file. Each schema produces a runtime validator *and* a TypeScript type, so there is no way for the check and the type to disagree — they are the same object.",
+        "NFR-2 says every shared shape is defined once. This is that file. In both builds the schema is the runtime validator; in the TypeScript one it is *also* the type, inferred from the same object, so there is no way for the check and the type to disagree. That second half is the whole of what the TypeScript version buys you here, and the reason the dropdown above is worth reaching for.",
         "Start with the vocabularies, because everything else refers to them and because they are what the database columns will be built from.",
       ],
       examples: [
@@ -399,7 +399,7 @@ export type ApiError = z.infer<typeof ApiError>;`,
         },
         {
           title: "`z.infer` and `z.input` are different types",
-          body: "`z.infer` is what comes *out* of a parse, after defaults and transforms have run. `z.input` is what may go in. They are the same here because nothing has a default, but the moment you add `.default(\"open\")` to a field, the input type makes it optional and the output type does not — and a form typed with the wrong one will insist on a value the user is not being asked for.",
+          body: "This one only applies to the TypeScript build; in JavaScript the schema is a validator and nothing more. `z.infer` is what comes *out* of a parse, after defaults and transforms have run. `z.input` is what may go in. They are the same here because nothing has a default, but the moment you add `.default(\"open\")` to a field, the input type makes it optional and the output type does not — and a form typed with the wrong one will insist on a value the user is not being asked for.",
         },
       ],
     },

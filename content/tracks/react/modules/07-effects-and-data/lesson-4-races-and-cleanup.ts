@@ -170,8 +170,36 @@ await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
         {
           id: "abort-controller",
           title: "Aborting, with the rejection handled",
-          lang: "tsx",
-          code: `function Results({ query }: { query: string }) {
+          lang: "jsx",
+          code: `function Results({ query }) {
+  const [state, setState] = useState({ tag: "loading" });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setState({ tag: "loading" });
+
+    getJSON(\`/api/search?q=\${encodeURIComponent(query)}\`, controller.signal)
+      .then(
+        (hits) => setState({ tag: "ready", hits }),
+        (error) => {
+          // An abort is not a failure — it is this effect's own cleanup
+          // doing its job, and showing the user an error for it is wrong.
+          if (error.name === "AbortError") return;
+          setState({ tag: "error", message: error.message });
+        },
+      );
+
+    return () => controller.abort();
+  }, [query]);
+
+  // …
+}`,
+          explanation:
+            "The `AbortError` check is not optional. Without it, every keystroke that supersedes a request paints an error message on screen for a request you cancelled on purpose — a bug that looks exactly like a flaky backend and is reported as one.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Results({ query }: { query: string }) {
   const [state, setState] = useState<Status>({ tag: "loading" });
 
   useEffect(() => {
@@ -194,8 +222,8 @@ await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
 
   // …
 }`,
-          explanation:
-            "The `AbortError` check is not optional. Without it, every keystroke that supersedes a request paints an error message on screen for a request you cancelled on purpose — a bug that looks exactly like a flaky backend and is reported as one.",
+            },
+          ],
         },
       ],
       pitfalls: [

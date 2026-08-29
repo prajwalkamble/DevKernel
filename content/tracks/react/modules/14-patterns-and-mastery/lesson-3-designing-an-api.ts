@@ -160,8 +160,23 @@ await drive("controlled, wired |", <Parent />);`,
         {
           id: "boolean-union",
           title: "The same component, before and after",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ✗ Four booleans, sixteen combinations, three of them legal. */
+<Button isPrimary isLarge isLoading isFullWidth />
+
+/* ✓ Two unions and two booleans that really are booleans. */
+<Button variant="primary" size="lg" loading fullWidth />
+
+/* Without a compiler the union lives in the default and the docs:
+     function Button({ variant = "secondary", size = "md", loading, fullWidth })
+   \`variant="primry"\` is then a silent no-op rather than a build error, which
+   is the argument for the TypeScript version of this file. */`,
+          explanation:
+            "The second version also survives contact with a design system: adding a `danger` variant is one entry in a union, while adding `isDanger` is a fifth boolean and another branch in the class-name logic.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ✗ Four booleans, sixteen combinations, three of them legal. */
 <Button isPrimary isLarge isLoading isFullWidth />
 
 /* ✓ Two unions and two booleans that really are booleans. */
@@ -174,8 +189,8 @@ interface ButtonProps {
   loading?: boolean;      // genuinely a state
   fullWidth?: boolean;    // genuinely on or off
 }`,
-          explanation:
-            "The second version also survives contact with a design system: adding a `danger` variant is one entry in a union, while adding `isDanger` is a fifth boolean and another branch in the class-name logic.",
+            },
+          ],
         },
       ],
     },

@@ -240,8 +240,8 @@ tsconfig.app.json(25,5): error TS5101: Option 'baseUrl' is deprecated and will s
         {
           id: "alias-in-use",
           title: "The same import, both ways",
-          lang: "tsx",
-          code: `// From src/features/cart/CartTotal.tsx:
+          lang: "jsx",
+          code: `// From src/features/cart/CartTotal.jsx:
 
 // Fragile. Correct today; wrong the moment this file moves one level.
 import { Button } from "../../shared/components/Button";
@@ -255,6 +255,23 @@ import { Button } from "@/shared/components/Button";
 import { CartLine } from "./CartLine";`,
           explanation:
             "The rule is one line: **alias across boundaries, relative within one.** A path that leaves your feature should say so; a path that stays inside it should stay short and move with the folder when the folder moves.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// From src/features/cart/CartTotal.tsx:
+
+// Fragile. Correct today; wrong the moment this file moves one level.
+import { Button } from "../../shared/components/Button";
+
+// Stable. Says where the module lives, not where you are standing.
+import { Button } from "@/shared/components/Button";
+
+// Sibling inside the same feature: keep it relative. It moves *with*
+// this file, and going out through the alias would route an import
+// through the feature's own barrel and back in.
+import { CartLine } from "./CartLine";`,
+            },
+          ],
         },
       ],
       pitfalls: [

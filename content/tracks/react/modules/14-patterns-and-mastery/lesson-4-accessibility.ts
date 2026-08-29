@@ -113,7 +113,7 @@ for (const el of container.children) {
         {
           id: "tabindex-values",
           title: "The two values worth using",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* 0 — put a non-interactive element into the natural order, at its
    position in the document. For a custom control, and always with a
    role and keyboard handlers to match. */
@@ -280,8 +280,8 @@ function Results({ query, items }: { query: string; items: Item[] }) {
         {
           id: "labels",
           title: "Four labelling cases",
-          lang: "tsx",
-          code: `function Field({ label, error, ...rest }: FieldProps) {
+          lang: "jsx",
+          code: `function Field({ label, error, ...rest }) {
   /* Unique per instance, stable across renders, and identical on the
      server and after hydration — which a counter or a random id is not. */
   const id = useId();
@@ -313,6 +313,41 @@ function Results({ query, items }: { query: string; items: Item[] }) {
 </section>`,
           explanation:
             "`aria-hidden` on the icon matters: without it a screen reader may read the SVG's title as well as the `aria-label`, and the button announces itself twice. Decorative graphics inside a labelled control should always be hidden from the tree.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Field({ label, error, ...rest }: FieldProps) {
+  /* Unique per instance, stable across renders, and identical on the
+     server and after hydration — which a counter or a random id is not. */
+  const id = useId();
+  const errorId = \`\${id}-error\`;
+
+  return (
+    <>
+      <label htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        aria-describedby={error ? errorId : undefined}
+        aria-invalid={error ? true : undefined}
+        {...rest}
+      />
+      {/* Always mounted, so the error is announced when it appears. */}
+      <p id={errorId} role="alert">{error}</p>
+    </>
+  );
+}
+
+/* An icon-only button: the icon is decorative, the button needs a name. */
+<button aria-label="Close" onClick={close}>
+  <XIcon aria-hidden="true" />
+</button>
+
+/* Visible text already exists, so point at it rather than duplicating it. */
+<section aria-labelledby="billing-heading">
+  <h2 id="billing-heading">Billing</h2>
+</section>`,
+            },
+          ],
         },
       ],
       pitfalls: [
