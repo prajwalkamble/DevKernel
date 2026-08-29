@@ -65,6 +65,42 @@ export const attributesAndPropsLesson: Lesson = {
           output: `<div><label class="lbl" for="email">Email</label><input id="email" type="email" tabindex="-1"/><button type="button">A</button><button type="button" disabled="">B</button><p style="margin-top:8px;line-height:2;z-index:3;width:50%">styled</p><div data-testid="box" aria-live="polite" aria-hidden="true"></div><div><b>raw</b></div></div>`,
           explanation:
             "Four things to read off that line. `className`/`htmlFor` came out as `class`/`for`. `disabled={false}` produced **no attribute at all**, which is the correct HTML — a `disabled=\"false\"` attribute would still disable the button. `marginTop: 8` gained a `px` while `lineHeight: 2` and `zIndex: 3` did not. And the `data-` and `aria-` names are untouched.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// The one thing TypeScript adds here is the checking. Every attribute below
+// is looked up on the element's own prop type, so \`classname\`, \`tabindex\` or
+// \`onclick\` are compile errors rather than props React silently ignores —
+// which is exactly the class of mistake this example is about.
+function Naming() {
+  return (
+    <div>
+      {/* The two renames, both forced by JavaScript's reserved words. */}
+      <label className="lbl" htmlFor="email">Email</label>
+
+      {/* camelCase in, lowercase attribute out. */}
+      <input id="email" type="email" tabIndex={-1} />
+
+      {/* Booleans: false removes the attribute, true writes it empty. */}
+      <button type="button" disabled={false}>A</button>
+      <button type="button" disabled={true}>B</button>
+
+      {/* An object, camelCase keys, and \`px\` added only where it applies.
+          The keys are checked against CSSProperties, so \`margin-top\` here
+          would not compile either. */}
+      <p style={{ marginTop: 8, lineHeight: 2, zIndex: 3, width: "50%" }}>styled</p>
+
+      {/* Dashed names pass through unchanged — and are the one place the
+          checking stops, since \`data-\` and \`aria-\` are open-ended. */}
+      <div data-testid="box" aria-live="polite" aria-hidden="true" />
+
+      {/* The deliberately unpleasant name for injecting raw HTML. */}
+      <div dangerouslySetInnerHTML={{ __html: "<b>raw</b>" }} />
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

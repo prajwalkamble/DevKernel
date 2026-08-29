@@ -55,6 +55,36 @@ console.log("frag:", render(<Fragged />));`,
 frag: <span>a</span><span>b</span>`,
           explanation:
             "The fragment version produces exactly the two spans, with nothing around them. That is the whole feature. Note also that the two spans came out flush against each other despite being on separate lines in the source — the whitespace rule from the previous lesson, not anything to do with fragments.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+// Neither component takes props and nothing needs annotating, so this file is
+// the same in both languages. A fragment has no type of its own to declare:
+// \`<>...</>\` is ordinary JSX and produces an element like any other.
+function Wrapped() {
+  return (
+    <div>
+      <span>a</span>
+      <span>b</span>
+    </div>
+  );
+}
+
+function Fragged() {
+  return (
+    <>
+      <span>a</span>
+      <span>b</span>
+    </>
+  );
+}
+
+console.log("div: ", render(<Wrapped />));
+console.log("frag:", render(<Fragged />));`,
+            },
+          ],
         },
       ],
     },
@@ -212,6 +242,41 @@ function App() {
           output: `<dl style="display:grid;grid-template-columns:8rem 1fr"><dt>Term</dt><dd>Definition</dd></dl>`,
           explanation:
             "The `<dt>` and `<dd>` are direct children of the grid, so they land in the two declared columns. Swap in `WrappedPair` and the markup gains a `<div>` between them — the grid then has a single item spanning the first column, and the two-column layout silently stops working.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Returns one element: the grid gets one item.
+function WrappedPair() {
+  return (
+    <div>
+      <dt>Term</dt>
+      <dd>Definition</dd>
+    </div>
+  );
+}
+
+// Returns two elements: the grid gets two items.
+function FraggedPair() {
+  return (
+    <>
+      <dt>Term</dt>
+      <dd>Definition</dd>
+    </>
+  );
+}
+
+function App() {
+  // The style object is checked against CSSProperties: \`gridTemplateColumns\`
+  // has to be spelled in camelCase and take a string, which is the only thing
+  // TypeScript contributes to this file.
+  return (
+    <dl style={{ display: "grid", gridTemplateColumns: "8rem 1fr" }}>
+      <FraggedPair />
+    </dl>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

@@ -53,6 +53,32 @@ rendered: <span>original</span>
 element frozen? true | props frozen? true`,
           explanation:
             "The value never changed, and the component rendered what it was given. Note that this is a development build — the same code in production would not be frozen, the write would succeed, and the component would render `changed` while its parent still believed the label was `original`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+function Probe(props: { label: string }) {
+  console.log("props frozen?", Object.isFrozen(props));
+  try {
+    Object.defineProperty(props, "label", { value: "changed" });
+    console.log("redefining succeeded");
+  } catch (error) {
+    // \`catch\` binds \`unknown\` under strict, so reaching for \`.message\` needs
+    // the cast. The frozen-ness itself is a runtime fact — the type system
+    // arrives at "do not write to props" from a different direction.
+    console.log("redefining ->", (error as Error).message);
+  }
+  return <span>{props.label}</span>;
+}
+
+console.log("rendered:", render(<Probe label="original" />));
+
+// The element itself is frozen too, and so is its props object.
+const el = <p id="x" />;
+console.log("element frozen?", Object.isFrozen(el), "| props frozen?", Object.isFrozen(el.props));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -126,6 +152,55 @@ function App() {
           output: `<ul><li><button type="button">Ada</button></li><li><button type="button">Grace</button></li></ul>`,
           explanation:
             "`onSelect` passed through `List` untouched — a component forwarding a callback it does not use is extremely common, and is the plumbing that context exists to remove when the tree gets deep. `Row` names the prop for the event, so it can be dropped into any parent with any meaning of \"select\".",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Person = { id: string; name: string };
+
+function Row({ person, onSelect }: { person: Person; onSelect: (id: string) => void }) {
+  // Row has no idea what selecting means. It reports; it does not decide —
+  // and the callback's signature is where that contract is written down.
+  return (
+    <li>
+      <button type="button" onClick={() => onSelect(person.id)}>
+        {person.name}
+      </button>
+    </li>
+  );
+}
+
+function List({ people, selectedId, onSelect }: {
+  people: Person[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <ul>
+      {people.map((person) => (
+        <Row
+          key={person.id}
+          person={person}
+          onSelect={onSelect}
+        />
+      ))}
+    </ul>
+  );
+}
+
+const people: Person[] = [
+  { id: "a", name: "Ada" },
+  { id: "g", name: "Grace" },
+];
+
+function App() {
+  // In a real component this would be useState; the ownership is the point.
+  const selectedId = "a";
+  const handleSelect = (id: string) => console.log("App decides what to do with", id);
+
+  return <List people={people} selectedId={selectedId} onSelect={handleSelect} />;
+}`,
+            },
+          ],
         },
       ],
     },

@@ -47,6 +47,26 @@ export const stateAndHooksLesson: Lesson = {
 }`,
           explanation:
             "The console proves the increment works. The screen never updates, because React was never asked to re-render — and if it had been, `count` would have been reset to 0 by the new function call. Both problems, in four lines.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Types do not catch this one. \`count\` is a \`number\` in both languages and
+// every line type-checks; the bug is that the value is recreated on each
+// call, which is a fact about React rather than about the type.
+function BrokenCounter() {
+  let count = 0;               // recreated on every call of this function
+
+  return (
+    <button onClick={() => {
+      count += 1;              // this really does happen…
+      console.log(count);      // …and logs 1, 2, 3 as you click
+    }}>
+      Clicked {count} times    {/* …but this never changes */}
+    </button>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -81,6 +101,32 @@ function Counter() {
 }`,
           explanation:
             "The names are yours; the convention is `[thing, setThing]`. The argument to `useState` is the **initial** value, used only on the first render of this component instance — React ignores it on every subsequent render, because by then it has a value stored.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState } from "react";
+
+function Counter() {
+  // useState returns exactly two things, and array destructuring names them.
+  //   [0] the current value for this render
+  //   [1] a function that asks React to change it and re-render
+  //
+  // The type is inferred from the initial value, so this is \`number\` without
+  // being told. You only reach for \`useState<T>(...)\` when the initial value
+  // does not describe the state — \`useState<User | null>(null)\` being the one
+  // you will write most often.
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>Clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <button onClick={() => setCount(0)}>Reset</button>
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -138,6 +184,47 @@ function Counter() {
 }`,
           explanation:
             "**The rule: when the new value depends on the old one, pass a function.** `setCount(c => c + 1)` is queued as an instruction rather than a value, and React applies each queued instruction in order to the result of the last. This also matters inside timers, promises and event handlers that run later, where the frozen value may be several renders stale.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Another one the compiler cannot see. \`count\` is a \`number\` on every line,
+// including the three that read the same frozen one — staleness is about
+// *when* a value was captured, which no type records.
+function Confusing() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(count + 1);
+    console.log(count);      // logs the OLD value, every time
+  }
+
+  function handleTriple() {
+    // All three read the same frozen \`count\`. If count is 0, all three
+    // compute 1, and the result is 1 — not 3.
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  }
+
+  function handleTripleFixed() {
+    // A functional update receives the latest queued value instead of
+    // the frozen one. 0 -> 1 -> 2 -> 3.
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+  }
+
+  return (
+    <>
+      <p>{count}</p>
+      <button onClick={handleClick}>+1</button>
+      <button onClick={handleTriple}>+3 (broken: adds 1)</button>
+      <button onClick={handleTripleFixed}>+3 (works)</button>
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

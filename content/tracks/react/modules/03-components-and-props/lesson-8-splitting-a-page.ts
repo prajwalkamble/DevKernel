@@ -67,6 +67,50 @@ function App() {
           output: `<article><header><h1>INV-0042</h1><p>Ada Lovelace</p></header><table><tbody><tr><td>Analytical Engine consultancy</td><td>12</td><td>£150</td><td>£1800</td></tr><tr><td>Punch card design</td><td>4</td><td>£90</td><td>£360</td></tr></tbody></table><footer><strong>£2160</strong></footer></article>`,
           explanation:
             "That output is the contract for the rest of this lesson. A refactor that changes it is not a refactor — so it is worth writing down before touching anything, which is exactly what a snapshot test does for you automatically.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// One shape, inferred from the literal — and one component that reaches into
+// all of it. Nothing here needs an annotation, which is part of the point:
+// the problem with this version is not that it fails to type-check.
+const invoice = {
+  number: "INV-0042",
+  customer: "Ada Lovelace",
+  lines: [
+    { id: "a", description: "Analytical Engine consultancy", hours: 12, rate: 150 },
+    { id: "b", description: "Punch card design", hours: 4, rate: 90 },
+  ],
+};
+
+function App() {
+  const total = invoice.lines.reduce((sum, l) => sum + l.hours * l.rate, 0);
+
+  return (
+    <article>
+      <header>
+        <h1>{invoice.number}</h1>
+        <p>{invoice.customer}</p>
+      </header>
+      <table>
+        <tbody>
+          {invoice.lines.map((line) => (
+            <tr key={line.id}>
+              <td>{line.description}</td>
+              <td>{line.hours}</td>
+              <td>{\`£\${line.rate}\`}</td>
+              <td>{\`£\${line.hours * line.rate}\`}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <footer>
+        <strong>{\`£\${total}\`}</strong>
+      </footer>
+    </article>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -154,6 +198,72 @@ function App() {
           output: `<article><header><h1>INV-0042</h1><p>Ada Lovelace</p></header><table><tbody><tr><td>Analytical Engine consultancy</td><td>12</td><td>£150</td><td>£1800</td></tr><tr><td>Punch card design</td><td>4</td><td>£90</td><td>£360</td></tr></tbody></table><footer><strong>£2160</strong></footer></article>`,
           explanation:
             "Byte for byte, the same output as before — which is the only evidence that a refactor was a refactor. Three details are deliberate. The `key` stayed on `LineRow`, the element the `.map()` returns, and moved with the extraction. `{...line}` spreads the row's own fields, and works because `LineRow` names each one it uses. And `total` stayed in `App`, because `App` owns the lines and the total is derived from them — pushing it down would mean passing the lines twice.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Line = { id: string; description: string; hours: number; rate: number };
+
+const invoice: { number: string; customer: string; lines: Line[] } = {
+  number: "INV-0042",
+  customer: "Ada Lovelace",
+  lines: [
+    { id: "a", description: "Analytical Engine consultancy", hours: 12, rate: 150 },
+    { id: "b", description: "Punch card design", hours: 4, rate: 90 },
+  ],
+};
+
+// Not a component: no markup of its own, no identity, nothing React needs.
+const money = (amount: number) => \`£\${amount}\`;
+
+function InvoiceHeader({ number, customer }: { number: string; customer: string }) {
+  return (
+    <header>
+      <h1>{number}</h1>
+      <p>{customer}</p>
+    </header>
+  );
+}
+
+// Takes the fields it displays, not the whole app's data — and now says so.
+// Splitting the page is what gives each piece a signature worth writing.
+function LineRow({ description, hours, rate }: Omit<Line, "id">) {
+  return (
+    <tr>
+      <td>{description}</td>
+      <td>{hours}</td>
+      <td>{money(rate)}</td>
+      <td>{money(hours * rate)}</td>
+    </tr>
+  );
+}
+
+function InvoiceTotal({ amount }: { amount: number }) {
+  return (
+    <footer>
+      <strong>{money(amount)}</strong>
+    </footer>
+  );
+}
+
+function App() {
+  const total = invoice.lines.reduce((sum, l) => sum + l.hours * l.rate, 0);
+
+  return (
+    <article>
+      <InvoiceHeader number={invoice.number} customer={invoice.customer} />
+      <table>
+        <tbody>
+          {invoice.lines.map((line) => (
+            <LineRow key={line.id} {...line} />
+          ))}
+        </tbody>
+      </table>
+      <InvoiceTotal amount={total} />
+    </article>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

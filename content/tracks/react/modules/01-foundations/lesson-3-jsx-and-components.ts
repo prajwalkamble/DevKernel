@@ -46,6 +46,27 @@ console.log(JSON.stringify(element.props) === JSON.stringify(manual.props));`,
 true`,
           explanation:
             "Three things fall out of this. The element's `type` is the string `\"span\"` for a DOM tag — it would be the *function itself* for a component. Everything you pass, including the children, ends up in `props`. And because it is a plain object, you can store an element in a variable, put it in an array, or return it from a function, which is exactly what components do.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactElement } from "react";
+
+// What you write:
+const element: ReactElement = <span id="x">hi</span>;
+
+// What the compiler emits (the modern automatic runtime):
+//   import { jsx } from "react/jsx-runtime";
+//   const element = jsx("span", { id: "x", children: "hi" });
+// The types are erased before this transform runs, so the emit is the same.
+
+// What it is equivalent to, in the older explicit form:
+const manual: ReactElement = React.createElement("span", { id: "x" }, "hi");
+
+console.log(typeof element.type, element.type);
+console.log(Object.keys(element.props));
+console.log(JSON.stringify(element.props) === JSON.stringify(manual.props));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -253,6 +274,43 @@ export default function App() {
 }`,
           explanation:
             "`<Card />` twice produces two independent cards. That independence matters later: each instance of a component gets its own state, so two counters on one page count separately without any effort on your part.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Lowercase: React sees the string "avatar" and looks for an HTML tag.
+// In TypeScript this is the rare case where the compiler catches the mistake
+// for you: writing \`<avatar />\` is an error, because \`avatar\` is not one of
+// the tags in JSX.IntrinsicElements. In JavaScript it fails silently at
+// runtime instead.
+function avatar() {
+  return <img src="/me.png" alt="" />;
+}
+
+// Capitalised: React receives the function.
+function Avatar() {
+  return <img src="/me.png" alt="" />;
+}
+
+function Card() {
+  return (
+    <article className="card">
+      <Avatar />
+      <h3>Ada Lovelace</h3>
+      <p>Wrote the first algorithm intended for a machine.</p>
+    </article>
+  );
+}
+
+export default function App() {
+  return (
+    <main>
+      <Card />
+      <Card />
+    </main>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -182,6 +182,25 @@ export { useCart } from "./useCart";
 // useCart, and ./types, which callers get through the hook's return type.`,
           explanation:
             "Three lines and one comment. A barrel that re-exports every file in the folder has a front door with no walls around it — it is the *selection* that carries the meaning, so a barrel worth writing is one where something has been left out.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// The feature's public surface. Everything not listed here is internal.
+export { CartTotal } from "./CartTotal";
+export { CartLine } from "./CartLine";
+export { useCart } from "./useCart";
+
+// In TypeScript the barrel is also where the feature's types come out, and
+// \`export type\` is worth using rather than a plain re-export: it tells the
+// bundler the binding disappears at build time, so a type never drags its
+// module into the graph.
+export type { Cart, CartItem } from "./types";
+
+// Deliberately not exported: ./api, which is an implementation detail of
+// useCart. The boundary is still a convention — nothing stops a caller
+// importing "../cart/api" directly except a lint rule.`,
+            },
+          ],
         },
       ],
       pitfalls: [

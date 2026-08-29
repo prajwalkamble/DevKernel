@@ -57,6 +57,34 @@ button.addEventListener("click", () => {
 // updates there too. And a "load saved count" path. And an undo.`,
           explanation:
             "Nothing here is wrong, and for a counter it is perfectly readable. The problem is growth: every *source* of change has to know about every *consequence* of change. With four pieces of state and six places that can modify them, you are maintaining twenty-four relationships by hand, and the compiler cannot help you.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// \`querySelector\` returns \`Element | null\`. Neither \`hidden\` nor \`disabled\`
+// exists on \`Element\`, so the type argument is doing real work — and the null
+// check is not optional: TypeScript will not let the listener run without it.
+const button = document.querySelector<HTMLButtonElement>("#increment");
+const output = document.querySelector<HTMLElement>("#count");
+const warning = document.querySelector<HTMLElement>("#warning");
+
+if (!button || !output || !warning) throw new Error("markup is missing an element");
+
+let count = 0;
+
+button.addEventListener("click", () => {
+  count += 1;
+
+  // Every consequence of the change has to be spelled out, here,
+  // at every place the change can happen.
+  output.textContent = String(count);
+  warning.hidden = count <= 10;
+  button.disabled = count >= 20;
+});
+
+// ...and now add a reset button, and remember to repeat all three
+// updates there too. And a "load saved count" path. And an undo.`,
+            },
+          ],
         },
         {
           id: "declarative-react",
@@ -79,6 +107,30 @@ button.addEventListener("click", () => {
 }`,
           explanation:
             "Add a reset button and it calls `setCount(0)`; the warning and the disabled state follow automatically, because they were never separately maintained — they are *expressions of the state*. This is the whole idea. Everything else in React is machinery to make it fast.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Nothing here needs an annotation. \`useState(0)\` infers \`number\` from its
+// initial value, and the component takes no props — so the TypeScript version
+// is the JavaScript one. That is true of most React code, which is why the
+// two tabs on this page are so often identical.
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  // One description of what the UI is, for any value of \`count\`.
+  // There is no code that says "when the count changes, update the warning".
+  return (
+    <div>
+      <p id="count">{count}</p>
+      {count > 10 && <p id="warning">That is quite a lot of clicks.</p>}
+      <button onClick={() => setCount(count + 1)} disabled={count >= 20}>
+        Increment
+      </button>
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

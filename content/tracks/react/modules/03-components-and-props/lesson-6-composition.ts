@@ -72,6 +72,53 @@ function App() {
           output: `<section class="dialog dialog--danger"><h2>Delete project</h2><div><p>All 42 files will be removed.</p></div><button type="button">Delete</button></section>`,
           explanation:
             "No inheritance, no override, no base class — `DangerDialog` renders `Dialog` and supplies two props. It can also add or remove props freely, which a subclass cannot: it deliberately does not expose `tone`, so nobody can create a `DangerDialog` that is not dangerous. Narrowing an interface is much harder in an inheritance hierarchy than in a wrapper.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+type Tone = "neutral" | "danger";
+
+// The general component. Knows nothing about danger.
+function Dialog({ tone = "neutral", heading, children, action }: {
+  tone?: Tone;
+  heading: ReactNode;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <section className={\`dialog dialog--\${tone}\`}>
+      <h2>{heading}</h2>
+      <div>{children}</div>
+      {action}
+    </section>
+  );
+}
+
+// The "subclass": a Dialog with some props decided in advance. Its type is
+// the general one minus what it decides — which is the composition version of
+// "cannot override the parent", written down rather than hoped for.
+function DangerDialog({ heading, children }: { heading: ReactNode; children: ReactNode }) {
+  return (
+    <Dialog
+      tone="danger"
+      heading={heading}
+      action={<button type="button">Delete</button>}
+    >
+      {children}
+    </Dialog>
+  );
+}
+
+function App() {
+  return (
+    <DangerDialog heading="Delete project">
+      <p>All 42 files will be removed.</p>
+    </DangerDialog>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -115,6 +162,39 @@ function App() {
           output: `<span><strong>Ada</strong><sup>new</sup></span>`,
           explanation:
             "`{...props}` is doing the load-bearing work, and it is where these go wrong: forget it and the wrapped component receives nothing. Note also that `NameWithBadge` is created **at module level**. Calling `withBadge(Name, \"new\")` inside a component would produce a new component type on every render, which is the nested-component bug from lesson 1 wearing a different hat.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ComponentType, ReactNode } from "react";
+
+// The generic is what keeps the wrapper honest: whatever props the wrapped
+// component takes, the returned one takes the same, so a missing prop is
+// still an error at the call site.
+function withBadge<P extends object>(Wrapped: ComponentType<P>, badge: ReactNode) {
+  function WithBadge(props: P) {
+    return (
+      <span>
+        <Wrapped {...props} />
+        <sup>{badge}</sup>
+      </span>
+    );
+  }
+  // Without this the DevTools tree shows "WithBadge" for every wrapped component.
+  WithBadge.displayName = \`withBadge(\${Wrapped.displayName ?? Wrapped.name})\`;
+  return WithBadge;
+}
+
+function Name({ children }: { children: ReactNode }) {
+  return <strong>{children}</strong>;
+}
+
+const NameWithBadge = withBadge(Name, "new");
+
+function App() {
+  return <NameWithBadge>Ada</NameWithBadge>;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

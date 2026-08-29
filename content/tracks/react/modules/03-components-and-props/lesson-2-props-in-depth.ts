@@ -53,6 +53,39 @@ function App() {
           output: `<p><label for="name">Name</label><input id="name" type="text"/></p><p><label for="age">Age</label><input id="age" type="number" min="0" max="120" required=""/></p>`,
           explanation:
             "`min`, `max` and `required` were never named by `Field` and still reached the input, through `...rest`. That is the whole mechanism behind components that accept arbitrary DOM attributes. Note `required` with no value: the shorthand passes the boolean `true`, and React writes a present-but-empty attribute, which is what HTML means by a boolean attribute.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ComponentPropsWithoutRef } from "react";
+
+// \`label\` stops being required "by convention" — leaving it off is now an
+// error. Everything an <input> accepts rides along in \`rest\`.
+type FieldProps = ComponentPropsWithoutRef<"input"> & { label: string };
+
+function Field({
+  label,                       // required, and now actually enforced
+  type = "text",               // default when the prop is absent or undefined
+  id: htmlId,                  // renamed, because \`id\` would shadow something
+  ...rest                      // everything the caller passed that we did not name
+}: FieldProps) {
+  return (
+    <p>
+      <label htmlFor={htmlId}>{label}</label>
+      <input id={htmlId} type={type} {...rest} />
+    </p>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Field label="Name" id="name" />
+      <Field label="Age" id="age" type="number" min={0} max={120} required />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -91,6 +124,33 @@ function App() {
           output: `<ul><li>DEFAULT</li><li>DEFAULT</li><li>null</li><li>0</li><li></li><li>false</li></ul>`,
           explanation:
             "Only the first two got the default. `null` printed as the string `\"null\"` here because `String(null)` was called on it — rendered directly it would have shown nothing at all, which is the version of this bug that is genuinely hard to see. When a prop must fall back on `null` too, use `??` in the body rather than a parameter default.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// \`unknown\` rather than a narrower type, because the whole point is to pass
+// null, 0, "" and false and watch which of them replace the default. Marking
+// it optional is what makes the default legal.
+function Show({ value = "DEFAULT" }: { value?: unknown }) {
+  return <li>{String(value)}</li>;
+}
+
+function App() {
+  return (
+    <ul>
+      {/* omitted */}
+      <Show />
+      {/* explicitly undefined */}
+      <Show value={undefined} />
+      {/* null, zero, empty string, false — all values the caller chose */}
+      <Show value={null} />
+      <Show value={0} />
+      <Show value="" />
+      <Show value={false} />
+    </ul>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -134,6 +194,36 @@ function App() {
           output: `<button type="button" class="a">Safe</button><button type="submit" class="b">Open</button>`,
           explanation:
             "The caller asked for `type=\"submit\"` in both cases. `SafeButton` refused — which is the point, since a button inside a form defaults to submitting and that is a classic accidental form submission. `OpenButton` allowed it. Neither is right in general; the choice is the component's contract, and it is worth making deliberately rather than by where the cursor happened to be.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ComponentPropsWithoutRef } from "react";
+
+type ButtonProps = ComponentPropsWithoutRef<"button">;
+
+// Spread first: the component's own type wins, always.
+function SafeButton({ children, ...rest }: ButtonProps) {
+  return <button {...rest} type="button">{children}</button>;
+}
+
+// Spread last: the caller can override anything.
+function OpenButton({ children, ...rest }: ButtonProps) {
+  return <button type="button" {...rest}>{children}</button>;
+}
+
+function App() {
+  // Both calls type-check: \`type\` is a legal button prop either way. The
+  // types cannot tell you which one wins — that is decided by spread order,
+  // and is the reason to know the rule rather than trust the compiler.
+  return (
+    <>
+      <SafeButton type="submit" className="a">Safe</SafeButton>
+      <OpenButton type="submit" className="b">Open</OpenButton>
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
