@@ -192,6 +192,46 @@ function App() {
 </Link>;`,
           explanation:
             "The prefetch line is what makes splitting invisible. A user's pointer reaches a link a few hundred milliseconds before the click does, and a chunk fetched in that window has arrived by the time it is needed — so you get the smaller initial bundle without the loading state.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { lazy, Suspense } from "react";
+
+/* Each of these becomes its own chunk, fetched the first time its route
+   renders. The import must be a real dynamic import() the bundler can see —
+   a variable path defeats the static analysis and produces no chunk.
+
+   \`lazy\` is typed to require a module whose *default* export is a component,
+   so pointing it at a file that only has named exports is a compile error
+   rather than a blank screen. */
+const Dashboard = lazy(() => import("./features/dashboard"));
+const Reports = lazy(() => import("./features/reports"));
+const Settings = lazy(() => import("./features/settings"));
+
+function App() {
+  return (
+    <Layout>
+      {/* One boundary per region that can load independently. A single
+          boundary at the root would blank the whole page on every
+          navigation, which is worse than not splitting. */}
+      <Suspense fallback={<PageSkeleton />}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </Suspense>
+    </Layout>
+  );
+}
+
+/* Prefetch on intent: by the time the click lands the chunk is usually
+   already there, so the fallback never appears. */
+<Link to="/reports" onMouseEnter={() => import("./features/reports")}>
+  Reports
+</Link>;`,
+            },
+          ],
         },
       ],
       pitfalls: [

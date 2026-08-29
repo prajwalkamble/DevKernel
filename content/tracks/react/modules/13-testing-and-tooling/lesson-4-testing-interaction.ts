@@ -57,6 +57,26 @@ test("submits", async () => {
 });`,
           explanation:
             "`setup()` returns an instance carrying pointer and keyboard state, which is what lets a later `user.keyboard(\"{Shift>}\")` mean something. Calling `userEvent.click` directly still works and is the legacy API.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import userEvent from "@testing-library/user-event";
+
+test("submits", async () => {
+  /* setup() once per test. It installs the pointer and keyboard state that
+     makes a sequence coherent — where the pointer is, what is focused.
+     Its return type is \`UserEvent\`, so \`user\` needs no annotation. */
+  const user = userEvent.setup();
+  render(<Form />);
+
+  /* Every method is async and must be awaited. Forgetting is the number
+     one cause of an act() warning — and it is not a type error, because
+     an ignored promise is perfectly legal. */
+  await user.type(screen.getByLabelText("Email address"), "ada@example.com");
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+});`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -188,6 +208,26 @@ await waitForElementToBeRemoved(() => screen.queryByRole("status", { name: "Load
 await new Promise((resolve) => setTimeout(resolve, 500));`,
           explanation:
             "A fixed delay is wrong in both directions at once: it always waits its full time, and it still fails on a slow CI runner. Every one of these three returns as soon as the condition holds and fails with the reason it did not.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Appearing. */
+expect(await screen.findByRole("status")).toHaveTextContent("Saved");
+
+/* Something that is not an element. Keep the callback to one assertion:
+   waitFor retries the whole thing, so a slow first assertion is retried
+   along with the one you are actually waiting on. */
+await waitFor(() => expect(onSave).toHaveBeenCalledWith({ email: "ada@example.com" }));
+
+/* Disappearing. */
+await waitForElementToBeRemoved(() => screen.queryByRole("status", { name: "Loading" }));
+
+/* ✗ Never this. It is slow when the machine is fast, and flaky when the
+   machine is loaded — the two failure modes of a fixed delay. And it type
+   checks perfectly, like every other bad idea on this page. */
+await new Promise<void>((resolve) => setTimeout(resolve, 500));`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -231,6 +271,27 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
 });`,
           explanation:
             "Two easily-missed pieces: `advanceTimers` on the setup, without which `userEvent` hangs forever waiting on a clock that never moves, and restoring real timers afterwards so the next test is not affected.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `test("counts down", async () => {
+  vi.useFakeTimers();
+  /* userEvent schedules its own work on timers, so it must be told to use
+     vitest's advance function rather than the real clock. */
+  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+  render(<Countdown from={3} />);
+  expect(screen.getByRole("timer")).toHaveTextContent("3");
+
+  /* act, because advancing the clock is what causes the state update —
+     and nothing else in the test is holding it. */
+  await act(async () => { vi.advanceTimersByTime(2000); });
+  expect(screen.getByRole("timer")).toHaveTextContent("1");
+
+  vi.useRealTimers();
+});`,
+            },
+          ],
         },
       ],
     },

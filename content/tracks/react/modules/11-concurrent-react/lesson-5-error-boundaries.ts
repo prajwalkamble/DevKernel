@@ -492,6 +492,23 @@ console.log("page:", container.innerHTML);`,
 </ErrorBoundary>`,
           explanation:
             "Inside-out would not work: an error boundary below the Suspense boundary would never see a rejection from a component that suspended, because that component's render was unwound before it could throw the error. The error boundary has to be the outer one.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Error boundary outside, Suspense inside. If the fetch rejects, the
+   promise's throw passes the Suspense boundary — which only handles
+   promises — and lands on the error boundary above it.
+
+   The fallback's signature is worth typing on the boundary itself:
+   \`(error: Error, retry: () => void) => ReactNode\`, so a fallback that
+   forgets to accept \`retry\` is caught where it is written. */
+<ErrorBoundary fallback={(e: Error, retry: () => void) => <Failed error={e} onRetry={retry} />}>
+  <Suspense fallback={<CommentsSkeleton />}>
+    <Comments postId={id} />
+  </Suspense>
+</ErrorBoundary>`,
+            },
+          ],
         },
       ],
     },

@@ -102,6 +102,32 @@ export default function App() {
 }`,
           explanation:
             "The split points worth making are the ones where a lot of code is only needed sometimes: a route the user may never visit, a rich text editor behind a button, a charting library on one tab, an admin section most accounts cannot see. Splitting a 4kB component is churn — you have traded one round trip for a saving smaller than the request's own overhead.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { lazy, Suspense, useState } from "react";
+
+/* The dynamic import is the boundary. Everything reachable from ./Heavy —
+   and not reachable any other way — goes into its own file.
+
+   \`lazy\` requires the imported module to have a *default* export that is a
+   component; pointing it at a file with only named exports is a compile
+   error here rather than a blank screen at runtime. */
+const Heavy = lazy(() => import("./Heavy"));
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  return (
+    <main>
+      <button onClick={() => setShow(true)}>Open</button>
+      {/* The component is not loaded yet, so its render suspends: the same
+          mechanism as data fetching, waiting on a network request for code. */}
+      {show && <Suspense fallback={<p>Loading…</p>}><Heavy /></Suspense>}
+    </main>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -128,7 +154,7 @@ export default function App() {
           id: "visualiser",
           title: "Turning it on",
           lang: "javascript",
-          code: `// vite.config.ts
+          code: `// vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -147,6 +173,28 @@ export default defineConfig({
 });`,
           explanation:
             "Two numbers, two different problems. Gzip size is download time, which a fast connection solves. Raw size is parse and compile time, which nothing solves on a slow phone — so a 500kB bundle that gzips to 120kB is still 500kB of JavaScript for the device to chew through before anything runs.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { visualizer } from "rollup-plugin-visualizer";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    visualizer({
+      /* gzip, because that is what crosses the network. The raw size is
+         still the parse cost, so it is worth looking at both. */
+      gzipSize: true,
+      brotliSize: true,
+      open: true,
+    }),
+  ],
+});`,
+            },
+          ],
         },
       ],
     },

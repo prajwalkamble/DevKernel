@@ -200,6 +200,39 @@ const { pipe } = renderToPipeableStream(<Page />, {
 });`,
           explanation:
             "`bootstrapScripts` matters more than it looks: React adds the script tag itself so it can be sent at the right moment relative to the streamed content, which is what lets hydration begin while later boundaries are still arriving.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `const { pipe } = renderToPipeableStream(<Page />, {
+  bootstrapScripts: ["/main.js"],
+
+  /* Stream. Send the shell now and each boundary as it resolves — the right
+     default for a page a person is waiting on. */
+  onShellReady() {
+    response.statusCode = 200;
+    response.setHeader("Content-Type", "text/html");
+    pipe(response);
+  },
+
+  /* Buffer. Wait for everything, then send it in one piece. The right
+     choice for a crawler that will not run the swap scripts, and the only
+     honest way to set a non-200 status based on something a boundary
+     discovered — the header is long gone by the time it resolves. */
+  // onAllReady() { pipe(response); },
+
+  onShellError() {
+    response.statusCode = 500;
+    response.send("<h1>Something went wrong</h1>");
+  },
+
+  /* Every error from any boundary, including ones a client boundary will
+     later retry. Log here; do not try to change the response. React types
+     this parameter as \`unknown\`, because anything can be thrown — narrow it
+     before reading a \`.message\` off it. */
+  onError(error: unknown) { logger.error(error); },
+});`,
+            },
+          ],
         },
       ],
       pitfalls: [

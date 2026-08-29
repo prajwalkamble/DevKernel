@@ -102,6 +102,68 @@ after leaving field:  error=true shown=true
 after correcting it:  error=false shown=false`,
           explanation:
             "`error` is true on all three of the first lines and `shown` only becomes true on the third. The field was invalid from the very first render and said nothing, because the user had not finished with it; leaving the field is what gave permission to complain. The last line is the part that needs no code: correcting the value made `error` null, and the message vanished because it was derived rather than stored.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Signup() {
+  const [email, setEmail] = useState("");
+  const [touched, setTouched] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Derived: recomputed every render, so it can never lag the value. Its type
+  // is \`string | null\`, which is why the \`show\` line below is narrowed rather
+  // than a bare boolean.
+  const error = email.includes("@") ? null : "Enter a valid email";
+  const show = error && (touched || submitted);
+
+  return (
+    <form
+      id="f"
+      onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+    >
+      <input
+        id="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onBlur={() => setTouched(true)}
+        aria-invalid={show ? true : undefined}
+        aria-describedby={show ? "email-error" : undefined}
+      />
+      {show && <span id="email-error" role="alert">{error}</span>}
+      <output id="state">error={String(Boolean(error))} shown={String(Boolean(show))}</output>
+    </form>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<Signup />); });
+const show = (label: string) => console.log(label, container.querySelector("#state")!.textContent);
+
+show("on first render:     ");
+
+// Typing something still invalid, without leaving the field.
+function type(el: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value")!.set!;
+  setter.call(el, value);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+act(() => { type(container.querySelector<HTMLInputElement>("#email")!, "ada"); });
+show("after typing 'ada':  ");
+
+// React delegates blur as the bubbling \`focusout\` event, so that is what has
+// to be dispatched here; a non-bubbling \`blur\` never reaches the handler.
+act(() => { container.querySelector("#email")!.dispatchEvent(new Event("focusout", { bubbles: true })); });
+show("after leaving field: ");
+
+act(() => { type(container.querySelector<HTMLInputElement>("#email")!, "ada@example.com"); });
+show("after correcting it: ");`,
+            },
+          ],
         },
       ],
       pitfalls: [

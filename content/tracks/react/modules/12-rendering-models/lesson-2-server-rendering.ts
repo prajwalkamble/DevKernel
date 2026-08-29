@@ -126,6 +126,37 @@ app.get("/post/:id", async (req, res) => {
 });`,
           explanation:
             "Around fifteen lines, and every one of them is a decision a framework would have made for you: which routes render on the server, where the data goes, how it is escaped, what the document shell looks like. This is why nobody hand-rolls SSR — not because it is hard to start, but because the list of decisions keeps growing.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToString } from "react-dom/server";
+import type { Request, Response } from "express";
+
+app.get("/post/:id", async (req: Request, res: Response) => {
+  const post = await db.posts.find(req.params.id);
+
+  const html = renderToString(<App post={post} />);
+
+  res.send(\`<!doctype html>
+<html lang="en">
+  <head>
+    <title>\${escapeHtml(post.title)}</title>
+    <script type="module" src="/assets/main.js"></script>
+  </head>
+  <body>
+    <div id="root">\${html}</div>
+    <script>
+      /* The same data, so the client's first render matches the server's
+         without a second request. JSON.stringify is not safe here on its
+         own: a "</script>" inside the data would end this tag. No type
+         catches that — it is a string-escaping problem, not a shape one. */
+      window.__DATA__ = \${serialise(post)};
+    </script>
+  </body>
+</html>\`);
+});`,
+            },
+          ],
         },
       ],
       pitfalls: [

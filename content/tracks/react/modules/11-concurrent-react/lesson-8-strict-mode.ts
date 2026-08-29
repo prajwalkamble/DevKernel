@@ -196,6 +196,41 @@ useEffect(() => { analytics.track("checkout_started"); }, []);  // ✗
 // Put it in the handler that started the checkout instead.`,
           explanation:
             "The first three are the same pattern: acquire, and return the release. The fourth is the case people reach for a `useRef` guard to fix, and the guard is a way of not noticing that the event being tracked is a click, not a mount.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* A subscription: the cleanup is the unsubscriber. */
+useEffect(() => {
+  const connection = createConnection(roomId);
+  connection.connect();
+  return () => connection.disconnect();
+}, [roomId]);
+
+/* A fetch: the cleanup cannot un-send the request, so it invalidates the
+   response instead. Module 7's ignore flag, and it happens to make the
+   doubled run harmless as a side effect of being correct. */
+useEffect(() => {
+  let ignore = false;
+  fetchUser(id).then((user: User) => { if (!ignore) setUser(user); });
+  return () => { ignore = true; };
+}, [id]);
+
+/* A timer, an observer, an event listener — all the same shape. In the
+   browser \`setInterval\` returns a number; under Node's types it is a
+   Timeout object, which is the one place this snippet needs to know where
+   it is running. */
+useEffect(() => {
+  const id = setInterval(tick, 1000);
+  return () => clearInterval(id);
+}, []);
+
+/* And the one that cannot be fixed this way, because it should never have
+   been an effect: something that must happen once per user action rather
+   than once per mount. No type distinguishes the two. */
+useEffect(() => { analytics.track("checkout_started"); }, []);  // ✗
+// Put it in the handler that started the checkout instead.`,
+            },
+          ],
         },
       ],
       pitfalls: [

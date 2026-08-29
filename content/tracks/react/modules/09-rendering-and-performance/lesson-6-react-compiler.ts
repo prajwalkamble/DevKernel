@@ -84,6 +84,22 @@ function _temp(id) {
 }`,
           explanation:
             "`_c(7)` asks React for a seven-slot cache belonging to this component instance. Each slot holds either an input it compared or a value it produced, and each guarded block is a hand-written `useMemo` you did not write. Three things worth noticing: the **predicate** passed to `filter` was memoised on `query`, which nobody does by hand; the **returned element** was memoised, which is what lets the parent skip `Grid`; and `onPick` was hoisted out of the component entirely as `_temp`, because it closes over nothing — the strongest possible stabilisation, and free.",
+          alternates: [
+            {
+              lang: "tsx",
+              requires: "babel-plugin-react-compiler (the output is its emit, not the program's)",
+              code: `type Product = { id: string; name: string };
+
+// The source — no memo, no useMemo, no useCallback. The compiler adds the
+// memoisation; the types add nothing to that decision, and the output it
+// emits is the same either way.
+function ProductList({ products, query }: { products: Product[]; query: string }) {
+  const filtered = products.filter((p) => p.name.includes(query));
+  const onPick = (id: string) => console.log(id);
+  return <Grid rows={filtered} onPick={onPick} />;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -165,6 +181,32 @@ function Fine(t0) {
 }`,
           explanation:
             "The first two came out **byte-for-byte unchanged** — a conditional hook and a ref written during render are both rules violations, so the compiler declined. The third got the full treatment. Nothing in the output says the first two were skipped, which is why the lint rules matter: they are how you find out.",
+          alternates: [
+            {
+              lang: "tsx",
+              requires: "babel-plugin-react-compiler (the output is its emit, not the program's)",
+              code: `function Conditional({ enabled }: { enabled: boolean }) {
+  // A hook behind a condition. TypeScript is happy with it — this is the
+  // eslint plugin's job, and the compiler's reason to bail out.
+  if (enabled) {
+    const [n] = useState(0);
+    return <b>{n}</b>;
+  }
+  return null;
+}
+
+function ReadsRefDuringRender() {
+  const ref = useRef(0);
+  ref.current += 1;
+  return <b>{ref.current}</b>;
+}
+
+function Fine({ items }: { items: { price: number }[] }) {
+  const total = items.reduce((sum, i) => sum + i.price, 0);
+  return <b>{total}</b>;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

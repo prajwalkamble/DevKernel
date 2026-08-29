@@ -95,6 +95,65 @@ run(true);`,
 with key:    edited to "Ada (edited)", then switched to Grace -> "Grace"`,
           explanation:
             "Without the key, the editor is showing `Ada (edited)` while its `record` prop is Grace — the component kept its instance, so `useState` returned the stored value and the initialiser was never consulted again. With the key, React saw a different identity at that position, mounted a new instance, and the initialiser ran against the new record. One prop, and no reset logic anywhere.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+type Record = { id: string; name: string };
+
+function Editor({ record }: { record: Record }) {
+  // Seeded once per instance — module 5's rule. Nothing in the type warns
+  // that later \`record\` values will not reach it.
+  const [name, setName] = useState(record.name);
+  return (
+    <input
+      className="editor"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+    />
+  );
+}
+
+function App({ record, keyed }: { record: Record; keyed: boolean }) {
+  return keyed
+    ? <Editor key={record.id} record={record} />
+    : <Editor record={record} />;
+}
+
+const ada: Record = { id: "a", name: "Ada" };
+const grace: Record = { id: "g", name: "Grace" };
+
+function run(keyed: boolean) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  act(() => { root.render(<App record={ada} keyed={keyed} />); });
+
+  // The user edits Ada's name but does not save.
+  const input = container.querySelector("input")!;
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), "value")!.set!;
+  act(() => {
+    setter.call(input, "Ada (edited)");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  const before = container.querySelector("input")!.value;
+  act(() => { root.render(<App record={grace} keyed={keyed} />); });
+  const after = container.querySelector("input")!.value;
+
+  console.log(
+    keyed ? "with key:   " : "without key:",
+    \`edited to "\${before}", then switched to Grace -> "\${after}"\`
+  );
+}
+
+run(false);
+run(true);`,
+            },
+          ],
         },
       ],
       pitfalls: [

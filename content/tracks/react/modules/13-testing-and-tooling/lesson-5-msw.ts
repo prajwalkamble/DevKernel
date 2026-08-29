@@ -207,6 +207,46 @@ export const handlers = [
 ];`,
           explanation:
             "The last two are the ones a hand-rolled stub never covers. `delay` lets you assert the loading state without controlling a promise by hand, and `HttpResponse.error()` produces the case where `fetch` *rejects* — a dropped connection, a CORS failure — which is a different code path from a 500 and is usually the one that throws an unhandled rejection in production.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `import { http, HttpResponse, delay } from "msw";
+
+export const handlers = [
+  /* Path parameters. \`params.id\` is \`string | readonly string[]\`, because a
+     path can capture repeats — so it is narrowed rather than trusted. */
+  http.get("/api/users/:id", ({ params }) =>
+    HttpResponse.json({ id: String(params.id), name: "Ada" })
+  ),
+
+  /* Query string — useful for asserting that the component built the URL
+     the way you think it does. */
+  http.get("/api/search", ({ request }) => {
+    const q = new URL(request.url).searchParams.get("q");
+    return HttpResponse.json(q === "ada" ? [{ id: 1, name: "Ada" }] : []);
+  }),
+
+  /* Request body, so a test can assert on what was actually sent. This is
+     the line TypeScript changes: \`request.json()\` resolves to \`unknown\`,
+     so the shape has to be stated before a field can be read off it. */
+  http.post("/api/users", async ({ request }) => {
+    const body = (await request.json()) as { email?: string };
+    if (!body.email) return HttpResponse.json({ error: "email required" }, { status: 422 });
+    return HttpResponse.json({ id: 3, ...body }, { status: 201 });
+  }),
+
+  /* A slow response, for testing that the loading state appears at all. */
+  http.get("/api/report", async () => {
+    await delay(100);
+    return HttpResponse.json({ rows: [] });
+  }),
+
+  /* A network failure — not a 500. This is the case where fetch rejects
+     rather than resolving, and almost no suite tests it. */
+  http.get("/api/flaky", () => HttpResponse.error()),
+];`,
+            },
+          ],
         },
       ],
     },
