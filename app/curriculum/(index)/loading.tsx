@@ -1,6 +1,14 @@
 import { LoadingRegion, Skeleton, SkeletonTrackCard } from "@/components/skeleton/Skeleton";
 
-/** Mirrors app/curriculum/page.tsx: a heading, then the two grouped sections. */
+/**
+ * Mirrors app/curriculum/(index)/page.tsx: a heading, then the two grouped
+ * sections.
+ *
+ * Grouped under `(index)` so it covers only `/curriculum`. A loading file
+ * wraps every nested segment below it too, so at `app/curriculum/` this list
+ * stood in for `/curriculum/[trackSlug]` as well and that route's own skeleton
+ * never appeared.
+ */
 export default function CurriculumLoading() {
   return (
     <LoadingRegion label="Loading tracks" className="mx-auto max-w-4xl px-5 py-10 sm:px-6">
