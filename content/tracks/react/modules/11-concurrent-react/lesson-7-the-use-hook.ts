@@ -135,6 +135,19 @@ import { createRoot } from "react-dom/client";
 
 const handedToUse = new Set();
 
+/* React reports the uncached promise through console.error, which is a
+   different pipe from the line below — and a process that exits the moment it
+   is done can lose what is still buffered there. It also reports it on one of
+   the *retries*, so how many a machine gets through decides whether it appears
+   at all. Capture it and print it here, on the same stream and in order. */
+let warning = null;
+const realError = console.error;
+console.error = (...args) => {
+  const text = String(args[0] ?? "");
+  if (text.includes("uncached promise")) { warning ??= text; return; }
+  realError(...args);
+};
+
 /* A new promise on every render — the mistake everyone makes once. */
 function Bad() {
   const promise = new Promise((resolve) => setTimeout(() => resolve("done"), 1));
@@ -148,12 +161,20 @@ const root = createRoot(container);
 await act(async () => {
   root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
-await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+/* Turn the retry loop until React has complained, rather than for a fixed
+   number of milliseconds. The bound means a change in React's behaviour fails
+   loudly instead of hanging here. */
+for (let i = 0; i < 200 && warning === null; i++) {
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 1)); });
+}
+
 /* Stop the retry loop before reading anything. Nothing else stops it: each
    attempt creates the next promise, so the component can suspend for as long
    as you let it run. */
 await act(async () => { root.unmount(); });
-console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
+console.error = realError;
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
+console.log(warning ?? "React did not warn about the uncached promise");`,
           output: `use() was handed a different promise each render
 A component was suspended by an uncached promise. Creating promises inside a Client Component or hook is not yet supported, except via a Suspense-compatible library or framework.`,
           explanation:
@@ -165,6 +186,19 @@ A component was suspended by an uncached promise. Creating promises inside a Cli
 import { createRoot } from "react-dom/client";
 
 const handedToUse = new Set<Promise<string>>();
+
+/* React reports the uncached promise through console.error, which is a
+   different pipe from the line below — and a process that exits the moment it
+   is done can lose what is still buffered there. It also reports it on one of
+   the *retries*, so how many a machine gets through decides whether it appears
+   at all. Capture it and print it here, on the same stream and in order. */
+let warning: string | null = null;
+const realError = console.error;
+console.error = (...args: unknown[]) => {
+  const text = String(args[0] ?? "");
+  if (text.includes("uncached promise")) { warning ??= text; return; }
+  realError(...args);
+};
 
 /* A new promise on every render — the mistake everyone makes once. */
 function Bad() {
@@ -179,12 +213,20 @@ const root = createRoot(container);
 await act(async () => {
   root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
-await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+/* Turn the retry loop until React has complained, rather than for a fixed
+   number of milliseconds. The bound means a change in React's behaviour fails
+   loudly instead of hanging here. */
+for (let i = 0; i < 200 && warning === null; i++) {
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 1)); });
+}
+
 /* Stop the retry loop before reading anything. Nothing else stops it: each
    attempt creates the next promise, so the component can suspend for as long
    as you let it run. */
 await act(async () => { root.unmount(); });
-console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
+console.error = realError;
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
+console.log(warning ?? "React did not warn about the uncached promise");`,
             },
           ],
         },
