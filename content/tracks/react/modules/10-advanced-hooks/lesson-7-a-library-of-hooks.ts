@@ -26,8 +26,77 @@ export const libraryOfHooksLesson: Lesson = {
         {
           id: "small-hooks",
           title: "usePrevious, useToggle and a clamped counter",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useRef, useEffect, useCallback, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* The value this component had on its previous render. A ref written in an
+   effect, so the render itself still sees the old one. */
+function usePrevious(value) {
+  const box = useRef(undefined);
+  useEffect(() => { box.current = value; }, [value]);
+  return box.current;
+}
+
+/* A boolean and a way to flip it. \`toggle\` is stable, so it can be passed
+   to a memoised child without a useCallback at the call site. */
+function useToggle(initial = false) {
+  const [on, setOn] = useState(initial);
+  const toggle = useCallback(() => setOn((v) => !v), []);
+  return [on, toggle, setOn];
+}
+
+/* A counter that clamps, so the rules live in the hook rather than in every
+   caller that increments. */
+function useClampedCounter(min, max, initial = min) {
+  const [n, setN] = useState(initial);
+  const by = useCallback(
+    (delta) => setN((current) => Math.min(max, Math.max(min, current + delta))),
+    [min, max],
+  );
+  return { n, by, atMin: n === min, atMax: n === max };
+}
+
+function Demo() {
+  const [open, toggle] = useToggle();
+  const { n, by, atMin, atMax } = useClampedCounter(0, 3);
+  const previousN = usePrevious(n);
+  return (
+    <output>
+      {\`open=\${open} n=\${n} previous=\${previousN} atMin=\${atMin} atMax=\${atMax}\`}
+      <button type="button" id="t" onClick={toggle}>t</button>
+      <button type="button" id="up" onClick={() => by(1)}>+</button>
+      <button type="button" id="down" onClick={() => by(-1)}>-</button>
+    </output>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<Demo />); });
+const show = () => container.querySelector("output").textContent.replace(/t\\+-$/, "");
+const click = (id) => act(() => { container.querySelector(\`#\${id}\`).click(); });
+
+console.log("mounted:        ", show());
+click("t");
+console.log("toggled:        ", show());
+click("up"); click("up");
+console.log("two increments: ", show());
+click("up"); click("up");
+console.log("clamped at max: ", show());
+click("down"); click("down"); click("down"); click("down");
+console.log("clamped at min: ", show());`,
+          output: `mounted:         open=false n=0 previous=undefined atMin=true atMax=false
+toggled:         open=true n=0 previous=0 atMin=true atMax=false
+two increments:  open=true n=2 previous=1 atMin=false atMax=false
+clamped at max:  open=true n=3 previous=2 atMin=false atMax=true
+clamped at min:  open=true n=0 previous=1 atMin=true atMax=false`,
+          explanation:
+            "Read `previous` on the last two lines. Four `+` clicks left `n` at 3, and `previous` is 2 — the fourth click was clamped, so no render happened and `previous` did not advance. That is the honest behaviour: `usePrevious` reports the previous *render*, not the previous call, and a hook that hid the difference would be lying about what happened.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useRef, useEffect, useCallback, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* The value this component had on its previous render. A ref written in an
@@ -86,13 +155,8 @@ click("up"); click("up");
 console.log("clamped at max: ", show());
 click("down"); click("down"); click("down"); click("down");
 console.log("clamped at min: ", show());`,
-          output: `mounted:         open=false n=0 previous=undefined atMin=true atMax=false
-toggled:         open=true n=0 previous=0 atMin=true atMax=false
-two increments:  open=true n=2 previous=1 atMin=false atMax=false
-clamped at max:  open=true n=3 previous=2 atMin=false atMax=true
-clamped at min:  open=true n=0 previous=1 atMin=true atMax=false`,
-          explanation:
-            "Read `previous` on the last two lines. Four `+` clicks left `n` at 3, and `previous` is 2 — the fourth click was clamped, so no render happened and `previous` did not advance. That is the honest behaviour: `usePrevious` reports the previous *render*, not the previous call, and a hook that hid the difference would be lying about what happened.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -122,8 +186,50 @@ clamped at min:  open=true n=0 previous=1 atMin=true atMax=false`,
         {
           id: "debounce-hooks",
           title: "A settled value, and a delayed call",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Value: returns the input once it has stopped changing for \`ms\`.
+   Composes — anything depending on the result is automatically debounced. */
+export function useDebounced(value, ms = 300) {
+  const [settled, setSettled] = useState(value);
+
+  useEffect(() => {
+    const id = setTimeout(() => setSettled(value), ms);
+    // Each change cancels the previous timer, which is what makes it wait
+    // for a *pause* rather than firing every \`ms\`.
+    return () => clearTimeout(id);
+  }, [value, ms]);
+
+  return settled;
+}
+
+/* Callback: delays the call itself. For side effects with no value —
+   autosaving, sending an analytics event. */
+export function useDebouncedCallback(
+  fn,
+  ms = 300,
+) {
+  // The latest fn, without making the debounced function change identity
+  // every render. Written in an effect, so render stays pure.
+  const latest = useRef(fn);
+  useEffect(() => { latest.current = fn; }, [fn]);
+
+  const timer = useRef(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return useCallback((...args) => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => latest.current(...args), ms);
+  }, [ms]);
+}
+
+// The composing property, in one line:
+const results = useSearch(useDebounced(query));`,
+          explanation:
+            "The `latest` ref in the callback version is the pattern worth learning — it is how you let a callback see the current render's values without making the wrapper change identity. React has a proposed `useEffectEvent` hook for exactly this shape; until it lands, this is the way to write it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Value: returns the input once it has stopped changing for \`ms\`.
    Composes — anything depending on the result is automatically debounced. */
 export function useDebounced<T>(value: T, ms = 300): T {
   const [settled, setSettled] = useState(value);
@@ -160,8 +266,8 @@ export function useDebouncedCallback<A extends unknown[]>(
 
 // The composing property, in one line:
 const results = useSearch(useDebounced(query));`,
-          explanation:
-            "The `latest` ref in the callback version is the pattern worth learning — it is how you let a callback see the current render's values without making the wrapper change identity. React has a proposed `useEffectEvent` hook for exactly this shape; until it lands, this is the way to write it.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -181,8 +287,69 @@ const results = useSearch(useDebounced(query));`,
         {
           id: "browser-hooks",
           title: "A listener, and localStorage",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* An event listener whose handler may change without resubscribing.
+   The naive version puts \`handler\` in the dependency array and removes and
+   re-adds the listener on every render of the caller. */
+export function useEventListener(
+  type,
+  handler,
+  target = window,
+) {
+  const latest = useRef(handler);
+  useEffect(() => { latest.current = handler; }, [handler]);
+
+  useEffect(() => {
+    // Stable across the whole subscription; reads the current handler when
+    // it fires.
+    const listener = (event) => latest.current(event);
+    target.addEventListener(type, listener);
+    return () => target.removeEventListener(type, listener);
+  }, [type, target]);
+}
+
+/* localStorage, with every failure mode handled. All three try/catch blocks
+   are load-bearing: private browsing throws on access, the quota can be
+   full, and the stored value may not be JSON if another version wrote it. */
+export function useLocalStorage(key, fallback) {
+  const [value, setValue] = useState(() => {
+    // Lazy initialiser: reads storage once, not on every render. And it is
+    // never reached on the server, where there is no window.
+    if (typeof window === "undefined") return fallback;
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw === null ? fallback : (JSON.parse(raw));
+    } catch {
+      return fallback;
+    }
+  });
+
+  const set = useCallback((next) => {
+    setValue((previous) => {
+      const resolved = next instanceof Function ? next(previous) : next;
+      try {
+        window.localStorage.setItem(key, JSON.stringify(resolved));
+      } catch { /* quota exceeded, or storage disabled */ }
+      return resolved;
+    });
+  }, [key]);
+
+  // Another tab changed it. The \`storage\` event does not fire in the tab
+  // that made the change, so this cannot loop.
+  useEventListener("storage", (event) => {
+    if (event.key === key && event.newValue !== null) {
+      try { setValue(JSON.parse(event.newValue)); } catch { /* ignore */ }
+    }
+  });
+
+  return [value, set];
+}`,
+          explanation:
+            "`useLocalStorage` composing `useEventListener` is the composition point from the last lesson doing real work — the cross-tab sync is three lines because the subscription problem was already solved. And note that a server-rendered `useLocalStorage` returns the fallback on the first render by construction, which is what keeps hydration consistent.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* An event listener whose handler may change without resubscribing.
    The naive version puts \`handler\` in the dependency array and removes and
    re-adds the listener on every render of the caller. */
 export function useEventListener<K extends keyof WindowEventMap>(
@@ -238,8 +405,8 @@ export function useLocalStorage<T>(key: string, fallback: T) {
 
   return [value, set] as const;
 }`,
-          explanation:
-            "`useLocalStorage` composing `useEventListener` is the composition point from the last lesson doing real work — the cross-tab sync is three lines because the subscription problem was already solved. And note that a server-rendered `useLocalStorage` returns the fallback on the first render by construction, which is what keeps hydration consistent.",
+            },
+          ],
         },
       ],
       pitfalls: [

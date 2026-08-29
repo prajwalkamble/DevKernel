@@ -27,8 +27,45 @@ export const compositionInsteadOfContextLesson: Lesson = {
         {
           id: "drill-vs-compose",
           title: "The same markup, two ways",
-          lang: "tsx",
-          code: `import type { ReactNode } from "react";
+          lang: "jsx",
+          code: `/* Drilling: every layer between the owner and the user mentions the prop. */
+function DrilledAvatar({ user }) { return <img alt={user} />; }
+function DrilledMenu({ user }) { return <nav><DrilledAvatar user={user} /></nav>; }
+function DrilledHeader({ user }) { return <header><DrilledMenu user={user} /></header>; }
+function DrilledPage({ user }) { return <div><DrilledHeader user={user} /></div>; }
+
+/* Composition: the owner builds the element, so nothing in between sees it. */
+function Menu({ children }) { return <nav>{children}</nav>; }
+function Header({ children }) { return <header>{children}</header>; }
+function ComposedPage({ user }) {
+  return (
+    <div>
+      <Header>
+        <Menu>
+          <img alt={user} />
+        </Menu>
+      </Header>
+    </div>
+  );
+}
+
+import { renderToStaticMarkup } from "react-dom/server";
+const a = renderToStaticMarkup(<DrilledPage user="Ada" />);
+const b = renderToStaticMarkup(<ComposedPage user="Ada" />);
+console.log("drilled  ->", a);
+console.log("composed ->", b);
+console.log("identical markup:", a === b);
+console.log("components that name \`user\` but do not use it — drilled:", 3, " composed:", 0);`,
+          output: `drilled  -> <div><header><nav><img alt="Ada"/></nav></header></div>
+composed -> <div><header><nav><img alt="Ada"/></nav></header></div>
+identical markup: true
+components that name \`user\` but do not use it — drilled: 3  composed: 0`,
+          explanation:
+            "Byte-for-byte the same output. `Header` and `Menu` in the second version have no idea a user exists — they take `children` and put it somewhere, which is a genuinely reusable interface, whereas `DrilledHeader` can only ever be used on a page that has a user.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
 
 /* Drilling: every layer between the owner and the user mentions the prop. */
 function DrilledAvatar({ user }: { user: string }) { return <img alt={user} />; }
@@ -58,12 +95,8 @@ console.log("drilled  ->", a);
 console.log("composed ->", b);
 console.log("identical markup:", a === b);
 console.log("components that name \`user\` but do not use it — drilled:", 3, " composed:", 0);`,
-          output: `drilled  -> <div><header><nav><img alt="Ada"/></nav></header></div>
-composed -> <div><header><nav><img alt="Ada"/></nav></header></div>
-identical markup: true
-components that name \`user\` but do not use it — drilled: 3  composed: 0`,
-          explanation:
-            "Byte-for-byte the same output. `Header` and `Menu` in the second version have no idea a user exists — they take `children` and put it somewhere, which is a genuinely reusable interface, whereas `DrilledHeader` can only ever be used on a page that has a user.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -89,8 +122,42 @@ components that name \`user\` but do not use it — drilled: 3  composed: 0`,
         {
           id: "named-slots",
           title: "A layout with four slots",
-          lang: "tsx",
-          code: `type SplitViewProps = {
+          lang: "jsx",
+          code: `/* Knows about arrangement. Knows nothing about content. */
+function SplitView({ sidebar, toolbar, children, footer }) {
+  return (
+    <div className="split">
+      <aside>{sidebar}</aside>
+      <div className="main">
+        <div className="toolbar">{toolbar}</div>
+        {children}
+        {footer && <footer>{footer}</footer>}
+      </div>
+    </div>
+  );
+}
+
+function InboxPage() {
+  const [selected, setSelected] = useState(null);
+  const { data: folders } = useFolders();
+
+  // Everything that needs \`selected\` is built here, where it lives.
+  return (
+    <SplitView
+      sidebar={<FolderList folders={folders} onPick={setSelected} />}
+      toolbar={<MessageActions messageId={selected} />}
+      footer={<StatusBar count={folders?.length ?? 0} />}
+    >
+      {selected ? <Message id={selected} /> : <NothingSelected />}
+    </SplitView>
+  );
+}`,
+          explanation:
+            "`SplitView` takes no data at all. It cannot be broken by a change to what a folder is, it can be used on a page with no folders, and its props are an honest description of what it does: four regions and an arrangement. The state stays exactly where it was, in `InboxPage`, and nothing is drilled anywhere.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type SplitViewProps = {
   sidebar: ReactNode;
   toolbar: ReactNode;
   children: ReactNode;      // the main region
@@ -126,8 +193,8 @@ function InboxPage() {
     </SplitView>
   );
 }`,
-          explanation:
-            "`SplitView` takes no data at all. It cannot be broken by a change to what a folder is, it can be used on a page with no folders, and its props are an honest description of what it does: four regions and an arrangement. The state stays exactly where it was, in `InboxPage`, and nothing is drilled anywhere.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -179,8 +246,40 @@ function InboxPage() {
         {
           id: "render-prop",
           title: "A function as the slot",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* \`Table\` owns iteration and selection. It cannot be given finished rows,
+   because it is the only thing that knows which row is which. */
+function Table({
+  rows,
+  renderRow,
+}) {
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  return (
+    <table><tbody>
+      {rows.map((row, i) => (
+        <tr key={i} onClick={() => setSelectedIndex(i)}>
+          {renderRow(row, { selected: i === selectedIndex })}
+        </tr>
+      ))}
+    </tbody></table>
+  );
+}
+
+<Table
+  rows={invoices}
+  renderRow={(invoice, { selected }) => (
+    <>
+      <td>{invoice.number}</td>
+      <td>{selected ? <Actions id={invoice.id} /> : formatMoney(invoice.total)}</td>
+    </>
+  )}
+/>;`,
+          explanation:
+            "The caller still decides what a row looks like, and `Table` still owns iteration and selection. Neither had to know about the other's concern. A custom hook is the other way to split this — module 10 — and the difference is that a hook returns state while a render prop also owns the loop.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* \`Table\` owns iteration and selection. It cannot be given finished rows,
    because it is the only thing that knows which row is which. */
 function Table<T>({
   rows,
@@ -210,8 +309,8 @@ function Table<T>({
     </>
   )}
 />;`,
-          explanation:
-            "The caller still decides what a row looks like, and `Table` still owns iteration and selection. Neither had to know about the other's concern. A custom hook is the other way to split this — module 10 — and the difference is that a hook returns state while a render prop also owns the loop.",
+            },
+          ],
         },
       ],
       pitfalls: [

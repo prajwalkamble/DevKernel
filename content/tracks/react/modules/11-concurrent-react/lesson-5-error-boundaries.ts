@@ -28,8 +28,32 @@ export const errorBoundariesLesson: Lesson = {
         {
           id: "no-boundary",
           title: "One component throws, and the page is empty",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Boom() { throw new Error("no boundary anywhere"); }
+function App() { return <div><h1>Header</h1><Boom /></div>; }
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+
+try {
+  /* act re-throws whatever React could not handle, which is how a test
+     harness surfaces it. In a browser this goes to window.onerror instead. */
+  await act(async () => { createRoot(container).render(<App />); });
+} catch (error) {
+  console.log("act re-threw it:", (error).message);
+}
+console.log("what is left on the page:", JSON.stringify(container.innerHTML));`,
+          output: `act re-threw it: no boundary anywhere
+what is left on the page: ""`,
+          explanation:
+            "The header never threw and never had a chance to survive. React unmounted the root, and `innerHTML` is the empty string — the blank page every user has met at least once.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
 function Boom() { throw new Error("no boundary anywhere"); }
@@ -46,10 +70,8 @@ try {
   console.log("act re-threw it:", (error as Error).message);
 }
 console.log("what is left on the page:", JSON.stringify(container.innerHTML));`,
-          output: `act re-threw it: no boundary anywhere
-what is left on the page: ""`,
-          explanation:
-            "The header never threw and never had a chance to survive. React unmounted the root, and `innerHTML` is the empty string — the blank page every user has met at least once.",
+            },
+          ],
         },
       ],
     },

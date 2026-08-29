@@ -197,8 +197,30 @@ function Fine(t0) {
         {
           id: "compiler-setup",
           title: "Turning it on with Vite",
-          lang: "typescript",
+          lang: "javascript",
           code: `// vite.config.ts
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          // Start with one directory rather than the whole tree, and
+          // measure before widening it.
+          ["babel-plugin-react-compiler", { sources: (f) => f.includes("/features/cart/") }],
+        ],
+      },
+    }),
+  ],
+});`,
+          explanation:
+            "The `sources` predicate is the incremental-adoption lever. Widen it as you fix the lint errors the compiler's rules surface — which is the real work of adopting it, and the part that improves the codebase whether or not you ever ship the compiler.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// vite.config.ts
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -215,8 +237,8 @@ export default defineConfig({
     }),
   ],
 });`,
-          explanation:
-            "The `sources` predicate is the incremental-adoption lever. Widen it as you fix the lint errors the compiler's rules surface — which is the real work of adopting it, and the part that improves the codebase whether or not you ever ship the compiler.",
+            },
+          ],
         },
       ],
     },

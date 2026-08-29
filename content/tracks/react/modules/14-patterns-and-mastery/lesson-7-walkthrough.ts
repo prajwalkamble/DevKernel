@@ -46,8 +46,33 @@ export const walkthroughLesson: Lesson = {
         {
           id: "reducer",
           title: "The rules, in one place",
-          lang: "tsx",
-          code: `interface State { query: string; open: boolean; activeIndex: number }
+          lang: "jsx",
+          code: `function reducer(state, action) {
+  switch (action.type) {
+    case "query":
+      /* Typing always opens the list and always goes back to the first
+         match. Three fields, one transition, impossible to get wrong at a
+         call site because no call site does it. */
+      return { query: action.value, open: true, activeIndex: 0 };
+    case "move": {
+      if (action.count === 0) return state;
+      /* Modulo, so the ends wrap — which is the behaviour the ARIA
+         pattern specifies and the one people expect from a menu. */
+      const next = (state.activeIndex + action.by + action.count) % action.count;
+      return { ...state, open: true, activeIndex: next };
+    }
+    case "close":
+      return { ...state, open: false, activeIndex: 0 };
+    case "choose":
+      return { ...state, open: false };
+  }
+}`,
+          explanation:
+            "`count` on the `move` action rather than the filtered list in state is the interesting decision. The reducer needs to know how far it may travel; it does not need to know what the options are. Passing the number keeps the derived list out of the state entirely, and keeps the reducer a pure function of things it was handed.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `interface State { query: string; open: boolean; activeIndex: number }
 
 type Action =
   | { type: "query"; value: string }
@@ -75,8 +100,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, open: false };
   }
 }`,
-          explanation:
-            "`count` on the `move` action rather than the filtered list in state is the interesting decision. The reducer needs to know how far it may travel; it does not need to know what the options are. Passing the number keeps the derived list out of the state entirely, and keeps the reducer a pure function of things it was handed.",
+            },
+          ],
         },
       ],
     },
@@ -109,8 +134,123 @@ function reducer(state: State, action: Action): State {
         {
           id: "combobox",
           title: "Typed, arrowed and chosen",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useId, useMemo, useReducer, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* Every rule about what is legal lives here, so no component can produce an
+   impossible combination — an activeIndex pointing past the end, say. */
+function reducer(state, action) {
+  switch (action.type) {
+    case "query":
+      return { query: action.value, open: true, activeIndex: 0 };
+    case "move": {
+      if (action.count === 0) return state;
+      const next = (state.activeIndex + action.by + action.count) % action.count;
+      return { ...state, open: true, activeIndex: next };
+    }
+    case "close":
+      return { ...state, open: false, activeIndex: 0 };
+    case "choose":
+      return { ...state, open: false };
+  }
+}
+
+function Combobox({ options, onChoose }) {
+  const id = useId();
+  const [state, dispatch] = useReducer(reducer, { query: "", open: false, activeIndex: 0 });
+
+  const matches = useMemo(
+    () => options.filter((o) => o.label.toLowerCase().includes(state.query.toLowerCase())),
+    [options, state.query]
+  );
+  const active = matches[state.activeIndex];
+
+  return (
+    <div>
+      <input
+        role="combobox"
+        aria-expanded={state.open}
+        aria-controls={\`\${id}-list\`}
+        aria-activedescendant={state.open && active ? \`\${id}-\${active.id}\` : undefined}
+        value={state.query}
+        onChange={(e) => dispatch({ type: "query", value: e.target.value })}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") dispatch({ type: "move", by: 1, count: matches.length });
+          if (e.key === "ArrowUp") dispatch({ type: "move", by: -1, count: matches.length });
+          if (e.key === "Escape") dispatch({ type: "close" });
+          if (e.key === "Enter" && active) { onChoose(active); dispatch({ type: "choose" }); }
+        }}
+      />
+      {state.open && (
+        <ul role="listbox" id={\`\${id}-list\`}>
+          {matches.length === 0 && <li>No matches</li>}
+          {matches.map((o, i) => (
+            <li key={o.id} id={\`\${id}-\${o.id}\`} role="option" aria-selected={i === state.activeIndex}>
+              {o.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+const OPTIONS = [
+  { id: "au", label: "Australia" },
+  { id: "at", label: "Austria" },
+  { id: "br", label: "Brazil" },
+];
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const chosen = [];
+await act(async () => {
+  createRoot(container).render(<Combobox options={OPTIONS} onChoose={(o) => chosen.push(o.label)} />);
+});
+
+const input = container.querySelector("input");
+const state = () => {
+  const listbox = container.querySelector('[role="listbox"]');
+  const active = container.querySelector('[aria-selected="true"]');
+  return \`expanded=\${input.getAttribute("aria-expanded")} options=\${listbox ? listbox.children.length : 0} active=\${active?.textContent ?? "—"}\`;
+};
+
+console.log("on mount:      ", state());
+
+const type = async (value) => {
+  await act(async () => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+    setter.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+};
+const press = async (key) => {
+  await act(async () => { input.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true })); });
+};
+
+await type("aus");
+console.log('after typing "aus":', state());
+await press("ArrowDown");
+console.log("after ArrowDown:", state());
+await press("ArrowDown");
+console.log("after ArrowDown:", state());
+await press("Enter");
+console.log("after Enter:   ", state(), "| chosen:", JSON.stringify(chosen));
+await type("z");
+console.log('after typing "z": ', state());`,
+          output: `on mount:       expanded=false options=0 active=—
+after typing "aus": expanded=true options=2 active=Australia
+after ArrowDown: expanded=true options=2 active=Austria
+after ArrowDown: expanded=true options=2 active=Australia
+after Enter:    expanded=false options=0 active=— | chosen: ["Australia"]
+after typing "z":  expanded=true options=1 active=Brazil`,
+          explanation:
+            "The third and fourth lines are the wrap-around: two options, two Downs, back to the first. That behaviour is one modulo in the reducer, and it is specified by the ARIA pattern rather than invented.\n\nThe last line is a small illustration of why the filtered list must be derived: `\"z\"` matches *Brazil*, not nothing, and the highlight resets to the first match automatically because `query` and `activeIndex` change in one transition. Nothing had to remember to reset it.\n\nAnd the test driving it never touches the component's state. It types, presses keys, and reads the ARIA attributes — which is lesson 6's argument and module 13's, arriving at the same place: the attributes a screen reader reads are also the ones a test should assert on.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useId, useMemo, useReducer, act } from "react";
 import { createRoot } from "react-dom/client";
 
 interface Option { id: string; label: string }
@@ -223,14 +363,8 @@ await press("Enter");
 console.log("after Enter:   ", state(), "| chosen:", JSON.stringify(chosen));
 await type("z");
 console.log('after typing "z": ', state());`,
-          output: `on mount:       expanded=false options=0 active=—
-after typing "aus": expanded=true options=2 active=Australia
-after ArrowDown: expanded=true options=2 active=Austria
-after ArrowDown: expanded=true options=2 active=Australia
-after Enter:    expanded=false options=0 active=— | chosen: ["Australia"]
-after typing "z":  expanded=true options=1 active=Brazil`,
-          explanation:
-            "The third and fourth lines are the wrap-around: two options, two Downs, back to the first. That behaviour is one modulo in the reducer, and it is specified by the ARIA pattern rather than invented.\n\nThe last line is a small illustration of why the filtered list must be derived: `\"z\"` matches *Brazil*, not nothing, and the highlight resets to the first match automatically because `query` and `activeIndex` change in one transition. Nothing had to remember to reset it.\n\nAnd the test driving it never touches the component's state. It types, presses keys, and reads the ARIA attributes — which is lesson 6's argument and module 13's, arriving at the same place: the attributes a screen reader reads are also the ones a test should assert on.",
+            },
+          ],
         },
       ],
       pitfalls: [

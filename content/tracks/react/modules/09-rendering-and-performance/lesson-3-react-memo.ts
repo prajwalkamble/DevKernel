@@ -47,8 +47,82 @@ export const reactMemoLesson: Lesson = {
         {
           id: "memo-three-ways",
           title: "Hoisted, inline, repaired",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useMemo, memo, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const renders = {};
+const count = (n) => { renders[n] = (renders[n] ?? 0) + 1; };
+const reset = () => { for (const k of Object.keys(renders)) delete renders[k]; };
+const Chart = memo(function Chart({ rows, onPick }) {
+  count("Chart");
+  void onPick;
+  return <svg>{rows.length}</svg>;
+});
+
+/* A constant defined outside the component: the same array forever. */
+const ROWS = [{ id: "a" }, { id: "b" }];
+const noop = (_id) => {};
+
+function Stable() {
+  const [n, setN] = useState(0);
+  count("Stable");
+  return (
+    <div>
+      <button type="button" className="go" onClick={() => setN((x) => x + 1)}>{n}</button>
+      <Chart rows={ROWS} onPick={noop} />
+    </div>
+  );
+}
+
+function Inline() {
+  const [n, setN] = useState(0);
+  count("Inline");
+  return (
+    <div>
+      <button type="button" className="go" onClick={() => setN((x) => x + 1)}>{n}</button>
+      {/* Both props are built fresh here, every render. */}
+      <Chart rows={[{ id: "a" }, { id: "b" }]} onPick={(id) => console.log(id)} />
+    </div>
+  );
+}
+
+function Repaired() {
+  const [n, setN] = useState(0);
+  count("Repaired");
+  const rows = useMemo(() => [{ id: "a" }, { id: "b" }], []);
+  const onPick = useMemo(() => (id) => void id, []);
+  return (
+    <div>
+      <button type="button" className="go" onClick={() => setN((x) => x + 1)}>{n}</button>
+      <Chart rows={rows} onPick={onPick} />
+    </div>
+  );
+}
+
+function drive(Component, label) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  act(() => { createRoot(container).render(<Component />); });
+  reset();
+  for (let i = 0; i < 3; i++) act(() => { container.querySelector(".go").click(); });
+  console.log(\`\${label.padEnd(28)} parent \${renders[Component.name] ?? 0}, Chart \${renders.Chart ?? 0}\`);
+}
+
+console.log("three clicks on the parent's own button:");
+drive(Stable, "  hoisted constants:");
+drive(Inline, "  inline object and arrow:");
+drive(Repaired, "  useMemo'd:");`,
+          output: `three clicks on the parent's own button:
+  hoisted constants:         parent 3, Chart 0
+  inline object and arrow:   parent 3, Chart 3
+  useMemo'd:                 parent 3, Chart 0`,
+          explanation:
+            "The middle line is the version in most codebases: `memo` present, comparison running on every render, and every comparison failing. The component is doing strictly more work than it would with no memo at all — and to the reader it looks optimised.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useMemo, memo, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const renders: Record<string, number> = {};
@@ -115,12 +189,8 @@ console.log("three clicks on the parent's own button:");
 drive(Stable, "  hoisted constants:");
 drive(Inline, "  inline object and arrow:");
 drive(Repaired, "  useMemo'd:");`,
-          output: `three clicks on the parent's own button:
-  hoisted constants:         parent 3, Chart 0
-  inline object and arrow:   parent 3, Chart 3
-  useMemo'd:                 parent 3, Chart 0`,
-          explanation:
-            "The middle line is the version in most codebases: `memo` present, comparison running on every render, and every comparison failing. The component is doing strictly more work than it would with no memo at all — and to the reader it looks optimised.",
+            },
+          ],
         },
       ],
       visual: {
@@ -164,8 +234,25 @@ drive(Repaired, "  useMemo'd:");`,
         {
           id: "custom-comparator",
           title: "The rare acceptable case",
-          lang: "tsx",
-          code: `type Props = { report: Report; onExport: () => void };
+          lang: "jsx",
+          code: `/* Rendering this takes ~80ms, and \`report\` is a large object rebuilt by the
+   server on every poll — so identity changes constantly while the content
+   does not. Comparing one version number is cheap and exact. */
+const HeavyReport = memo(
+  function HeavyReport({ report, onExport }) {
+    return <ExpensiveChart data={report.series} onExport={onExport} />;
+  },
+  (previous, next) =>
+    // true means "equal, skip the render" — the opposite of most such APIs.
+    previous.report.version === next.report.version
+    && previous.onExport === next.onExport,
+);`,
+          explanation:
+            "Note that `onExport` is still compared. Leaving a prop out of the comparison is how a memoised component stops responding to it — and since the comparator is the only place that would say so, nothing warns you. Every prop must appear, which is also why this does not scale past a handful.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Props = { report: Report; onExport: () => void };
 
 /* Rendering this takes ~80ms, and \`report\` is a large object rebuilt by the
    server on every poll — so identity changes constantly while the content
@@ -179,8 +266,8 @@ const HeavyReport = memo(
     previous.report.version === next.report.version
     && previous.onExport === next.onExport,
 );`,
-          explanation:
-            "Note that `onExport` is still compared. Leaving a prop out of the comparison is how a memoised component stops responding to it — and since the comparator is the only place that would say so, nothing warns you. Every prop must appear, which is also why this does not scale past a handful.",
+            },
+          ],
         },
       ],
     },

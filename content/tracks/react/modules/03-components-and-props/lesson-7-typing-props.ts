@@ -27,8 +27,28 @@ export const typingPropsLesson: Lesson = {
         {
           id: "typed-props",
           title: "A typed component, running",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+function Badge({ label, tone = "info", icon = null }) {
+  return (
+    <span className={\`badge badge--\${tone}\`}>
+      {icon}
+      {label}
+    </span>
+  );
+}
+
+console.log(render(<Badge label="Draft" />));
+console.log(render(<Badge label="Late" tone="warn" icon={<b>!</b>} />));`,
+          output: `<span class="badge badge--info">Draft</span>
+<span class="badge badge--warn"><b>!</b>Late</span>`,
+          explanation:
+            "`tone?: \"info\" | \"warn\"` is doing two jobs: it makes the prop optional, and it restricts it to two strings, so a typo is a compile error rather than a class name that silently matches no CSS. A union of string literals is the most useful type in a component's props and the most under-used.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
 import type { ReactNode } from "react";
 
 interface BadgeProps {
@@ -49,10 +69,8 @@ function Badge({ label, tone = "info", icon = null }: BadgeProps) {
 
 console.log(render(<Badge label="Draft" />));
 console.log(render(<Badge label="Late" tone="warn" icon={<b>!</b>} />));`,
-          output: `<span class="badge badge--info">Draft</span>
-<span class="badge badge--warn"><b>!</b>Late</span>`,
-          explanation:
-            "`tone?: \"info\" | \"warn\"` is doing two jobs: it makes the prop optional, and it restricts it to two strings, so a typo is a compile error rather than a class name that silently matches no CSS. A union of string literals is the most useful type in a component's props and the most under-used.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -84,8 +102,29 @@ console.log(render(<Badge label="Late" tone="warn" icon={<b>!</b>} />));`,
         {
           id: "component-props",
           title: "Every button attribute, plus two of your own",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+function Button({ variant = "solid", children, ...rest }) {
+  return (
+    <button type="button" className={\`btn btn--\${variant}\`} {...rest}>
+      {children}
+    </button>
+  );
+}
+
+console.log(render(
+  <Button variant="ghost" id="save" aria-label="Save draft" disabled>
+    Save
+  </Button>
+));`,
+          output: `<button type="button" class="btn btn--ghost" id="save" aria-label="Save draft" disabled="">Save</button>`,
+          explanation:
+            "`id`, `aria-label` and `disabled` were never named in `ButtonProps` and are all fully typed, because `ComponentProps<\"button\">` brought them in. `Omit<…, \"type\">` removes the element's own `type` so callers cannot set it — the component has decided it is always `\"button\"`, and now the type system enforces what the spread order enforces at runtime.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
 import type { ComponentProps, ReactNode } from "react";
 
 // Everything <button> accepts, minus the props we are redefining ourselves.
@@ -107,9 +146,8 @@ console.log(render(
     Save
   </Button>
 ));`,
-          output: `<button type="button" class="btn btn--ghost" id="save" aria-label="Save draft" disabled="">Save</button>`,
-          explanation:
-            "`id`, `aria-label` and `disabled` were never named in `ButtonProps` and are all fully typed, because `ComponentProps<\"button\">` brought them in. `Omit<…, \"type\">` removes the element's own `type` so callers cannot set it — the component has decided it is always `\"button\"`, and now the type system enforces what the spread order enforces at runtime.",
+            },
+          ],
         },
       ],
     },
@@ -125,8 +163,27 @@ console.log(render(
         {
           id: "discriminated",
           title: "Two shapes, one component",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
+
+function Action(props) {
+  // Narrowed by the discriminant: \`href\` exists only in this branch.
+  if (props.as === "link") {
+    return <a href={props.href}>{props.label}</a>;
+  }
+  return <button type="button" onClick={props.onSelect}>{props.label}</button>;
+}
+
+console.log(render(<Action as="link" href="/docs" label="Read the docs" />));
+console.log(render(<Action as="button" onSelect={() => {}} label="Dismiss" />));`,
+          output: `<a href="/docs">Read the docs</a>
+<button type="button">Dismiss</button>`,
+          explanation:
+            "A caller cannot pass `href` alongside `as=\"button\"` — the union has no member allowing it. Inside, `props.as === \"link\"` narrows to the first member, so `props.href` is a `string` rather than a `string | undefined`. Note that the whole `props` object is taken rather than destructured in the parameter list: destructuring separates the discriminant from the fields it discriminates, and narrowing stops working.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 type ActionProps =
   | { as: "link"; href: string; label: string }
@@ -142,10 +199,8 @@ function Action(props: ActionProps) {
 
 console.log(render(<Action as="link" href="/docs" label="Read the docs" />));
 console.log(render(<Action as="button" onSelect={() => {}} label="Dismiss" />));`,
-          output: `<a href="/docs">Read the docs</a>
-<button type="button">Dismiss</button>`,
-          explanation:
-            "A caller cannot pass `href` alongside `as=\"button\"` — the union has no member allowing it. Inside, `props.as === \"link\"` narrows to the first member, so `props.href` is a `string` rather than a `string | undefined`. Note that the whole `props` object is taken rather than destructured in the parameter list: destructuring separates the discriminant from the fields it discriminates, and narrowing stops working.",
+            },
+          ],
         },
       ],
       pitfalls: [

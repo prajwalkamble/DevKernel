@@ -42,8 +42,58 @@ export const virtualisationAndSplittingLesson: Lesson = {
         {
           id: "windowed-list",
           title: "10,000 rows, counted",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+
+const ITEMS = Array.from({ length: 10_000 }, (_, i) => \`row \${i}\`);
+const ROW_HEIGHT = 24;
+const VIEWPORT = 480;
+
+function Plain() {
+  return <ul>{ITEMS.map((item) => <li key={item}>{item}</li>)}</ul>;
+}
+
+/* Windowing: render only the rows the viewport can show, and use a spacer
+   to keep the scrollbar honest. */
+function Windowed({ scrollTop }) {
+  const first = Math.floor(scrollTop / ROW_HEIGHT);
+  const visible = Math.ceil(VIEWPORT / ROW_HEIGHT) + 1;
+  const slice = ITEMS.slice(first, first + visible);
+  return (
+    <div style={{ height: VIEWPORT, overflow: "auto" }}>
+      <div style={{ height: ITEMS.length * ROW_HEIGHT, position: "relative" }}>
+        <ul style={{ position: "absolute", top: first * ROW_HEIGHT }}>
+          {slice.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function measure(node, label) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  act(() => { createRoot(container).render(node()); });
+  const elements = container.querySelectorAll("*").length;
+  const rows = container.querySelectorAll("li").length;
+  console.log(\`\${label.padEnd(14)} \${rows} rows rendered, \${elements} DOM elements total\`);
+}
+
+console.log(\`a list of \${ITEMS.length.toLocaleString("en-GB")} items in a \${VIEWPORT}px viewport:\`);
+measure(() => <Plain />, "  every row:");
+measure(() => <Windowed scrollTop={0} />, "  windowed:");
+measure(() => <Windowed scrollTop={5000} />, "  scrolled:");`,
+          output: `a list of 10,000 items in a 480px viewport:
+  every row:   10000 rows rendered, 10001 DOM elements total
+  windowed:    21 rows rendered, 24 DOM elements total
+  scrolled:    21 rows rendered, 24 DOM elements total`,
+          explanation:
+            "10,000 down to 21, and — the number that matters more — **the same 21 whether you are at the top or five thousand pixels down**. Windowing makes cost independent of list length, which is a different kind of improvement from making each row cheaper.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
 const ITEMS = Array.from({ length: 10_000 }, (_, i) => \`row \${i}\`);
@@ -84,12 +134,8 @@ console.log(\`a list of \${ITEMS.length.toLocaleString("en-GB")} items in a \${V
 measure(() => <Plain />, "  every row:");
 measure(() => <Windowed scrollTop={0} />, "  windowed:");
 measure(() => <Windowed scrollTop={5000} />, "  scrolled:");`,
-          output: `a list of 10,000 items in a 480px viewport:
-  every row:   10000 rows rendered, 10001 DOM elements total
-  windowed:    21 rows rendered, 24 DOM elements total
-  scrolled:    21 rows rendered, 24 DOM elements total`,
-          explanation:
-            "10,000 down to 21, and — the number that matters more — **the same 21 whether you are at the top or five thousand pixels down**. Windowing makes cost independent of list length, which is a different kind of improvement from making each row cheaper.",
+            },
+          ],
         },
       ],
       pitfalls: [

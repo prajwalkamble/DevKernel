@@ -147,8 +147,41 @@ export default async function Page({ id }: { id: string }) {
         {
           id: "leaf",
           title: "Marking the leaf instead of the page",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- like-button.tsx: the only file with the directive --------------- */
+"use client";
+import { useState } from "react";
+
+export function LikeButton({ postId, initial }) {
+  const [likes, setLikes] = useState(initial);
+  return (
+    <button onClick={() => { setLikes(likes + 1); like(postId); }}>
+      ♥ {likes}
+    </button>
+  );
+}
+
+/* ---- page.tsx: no directive, so all of this runs on the server -------- */
+export default async function PostPage({ params }) {
+  const post = await db.posts.find(params.id);
+  const html = await marked.parse(post.body);   // parser stays on the server
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <Byline author={post.author} />           {/* server */}
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <LikeButton postId={post.id} initial={post.likes} />   {/* the only client code */}
+      <Comments postId={post.id} />             {/* server, awaits its own query */}
+    </article>
+  );
+}`,
+          explanation:
+            "One directive, in a file that contains one button. Everything else — the query, the markdown parser, the byline, the comments — runs on the server and reaches the browser as data. The interactive part is genuinely small, which is the usual case once you look.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ---- like-button.tsx: the only file with the directive --------------- */
 "use client";
 import { useState } from "react";
 
@@ -176,8 +209,8 @@ export default async function PostPage({ params }: { params: { id: string } }) {
     </article>
   );
 }`,
-          explanation:
-            "One directive, in a file that contains one button. Everything else — the query, the markdown parser, the byline, the comments — runs on the server and reaches the browser as data. The interactive part is genuinely small, which is the usual case once you look.",
+            },
+          ],
         },
       ],
     },

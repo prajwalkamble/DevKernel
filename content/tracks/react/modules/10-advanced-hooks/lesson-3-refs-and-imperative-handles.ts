@@ -27,8 +27,61 @@ export const refsAndImperativeHandlesLesson: Lesson = {
         {
           id: "refs-two-ways",
           title: "A DOM ref and a handle, side by side",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, useImperativeHandle, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* React 19: \`ref\` is an ordinary prop on a function component.
+   No forwardRef, no second parameter. */
+function TextField({ ref, label }) {
+  return (
+    <p>
+      <label>{label}<input ref={ref} /></label>
+    </p>
+  );
+}
+
+function Editor({ ref }) {
+  const input = useRef(null);
+  const [value, setValue] = useState("");
+  useImperativeHandle(ref, () => ({
+    focus: () => input.current?.focus(),
+    clear: () => setValue(""),
+  }), []);
+  return <input ref={input} value={value} onChange={(e) => setValue(e.target.value)} />;
+}
+
+function App() {
+  const field = useRef(null);
+  const editor = useRef(null);
+  return (
+    <div>
+      <TextField ref={field} label="Name" />
+      <Editor ref={editor} />
+      <button type="button" id="probe" onClick={() => {
+        console.log("  the field ref points at:", field.current?.tagName);
+        console.log("  the editor ref exposes: ", Object.keys(editor.current ?? {}).join(", "));
+        console.log("  and not the DOM node:   ", (editor.current)?.tagName);
+      }}>probe</button>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+console.log("what each ref holds after mount:");
+act(() => { container.querySelector("#probe").click(); });`,
+          output: `what each ref holds after mount:
+  the field ref points at: INPUT
+  the editor ref exposes:  focus, clear
+  and not the DOM node:    undefined`,
+          explanation:
+            "Two different contracts. `TextField` hands the caller the real `<input>` — everything on it, forever, including whatever the caller decides to do with `style` or `value`. `Editor` hands the caller two functions and keeps its DOM node private, so its internals can change without breaking anybody.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useRef, useImperativeHandle, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* React 19: \`ref\` is an ordinary prop on a function component.
@@ -76,12 +129,8 @@ document.body.appendChild(container);
 act(() => { createRoot(container).render(<App />); });
 console.log("what each ref holds after mount:");
 act(() => { container.querySelector<HTMLButtonElement>("#probe")!.click(); });`,
-          output: `what each ref holds after mount:
-  the field ref points at: INPUT
-  the editor ref exposes:  focus, clear
-  and not the DOM node:    undefined`,
-          explanation:
-            "Two different contracts. `TextField` hands the caller the real `<input>` — everything on it, forever, including whatever the caller decides to do with `style` or `value`. `Editor` hands the caller two functions and keeps its DOM node private, so its internals can change without breaking anybody.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -113,8 +162,43 @@ act(() => { container.querySelector<HTMLButtonElement>("#probe")!.click(); });`,
         {
           id: "handle-design",
           title: "A handle that is worth having",
-          lang: "tsx",
-          code: `type ChatHandle = {
+          lang: "jsx",
+          code: `function ChatPanel({ ref, roomId }) {
+  const list = useRef(null);
+  const composer = useRef(null);
+
+  // [] is right: both methods only read refs, whose identity never changes.
+  useImperativeHandle(ref, () => ({
+    scrollToLatest: () => list.current?.scrollTo({ top: list.current.scrollHeight }),
+    focusComposer: () => composer.current?.focus(),
+  }), []);
+
+  return (
+    <section>
+      <div ref={list}>{/* … */}</div>
+      <textarea ref={composer} />
+    </section>
+  );
+}
+
+/* The caller can do exactly two things, both named after intent rather than
+   mechanism — so switching the list to a virtualised one later changes the
+   implementation of scrollToLatest and nothing else. */
+function Room() {
+  const chat = useRef(null);
+  return (
+    <>
+      <ChatPanel ref={chat} roomId="general" />
+      <button type="button" onClick={() => chat.current?.scrollToLatest()}>Jump to latest</button>
+    </>
+  );
+}`,
+          explanation:
+            "`scrollToLatest` rather than `getScrollElement`. The first is a capability the component promises; the second is an implementation detail promoted to an API, and it is the version that breaks when the list becomes virtualised.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type ChatHandle = {
   /** Scrolls to the newest message. */
   scrollToLatest: () => void;
   /** Puts the caret in the composer. */
@@ -151,8 +235,8 @@ function Room() {
     </>
   );
 }`,
-          explanation:
-            "`scrollToLatest` rather than `getScrollElement`. The first is a capability the component promises; the second is an implementation detail promoted to an API, and it is the version that breaks when the list becomes virtualised.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -180,8 +264,8 @@ function Room() {
         {
           id: "ref-cleanup-code",
           title: "A per-node observer, with its teardown next to it",
-          lang: "tsx",
-          code: `function Reveal({ children }: { children: ReactNode }) {
+          lang: "jsx",
+          code: `function Reveal({ children }) {
   return (
     <div
       ref={(node) => {
@@ -199,6 +283,27 @@ function Room() {
 }`,
           explanation:
             "Setup and teardown are two adjacent lines rather than two branches of an `if`. One caution carried over from module 7: an inline arrow is a new function every render, so React detaches and re-attaches on every render of the parent — fine for this, wasteful if the setup is expensive. `useCallback` the ref when it is.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Reveal({ children }: { children: ReactNode }) {
+  return (
+    <div
+      ref={(node) => {
+        const observer = new IntersectionObserver(([entry]) => {
+          entry.target.classList.toggle("visible", entry.isIntersecting);
+        });
+        observer.observe(node);
+        // React 19: returned, and called when this node detaches.
+        return () => observer.disconnect();
+      }}
+    >
+      {children}
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

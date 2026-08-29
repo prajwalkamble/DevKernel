@@ -41,8 +41,57 @@ export const useMemoUseCallbackLesson: Lesson = {
         {
           id: "memo-work",
           title: "What a memo does per render",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* What a useMemo actually does per render, counted rather than timed.
+   Timings vary by machine; the operation count does not. */
+
+let comparisons = 0;
+let computations = 0;
+let allocations = 0;
+
+/* Close to what React does for one useMemo call: hold the previous deps,
+   compare each one with Object.is, recompute when any differs. */
+function makeMemo(compute) {
+  let deps = null;
+  let value;
+  return (next) => {
+    if (deps !== null && deps.length === next.length
+        && next.every((d, i) => (comparisons++, Object.is(deps[i], d)))) {
+      return value;
+    }
+    deps = next;
+    computations++;
+    value = compute();
+    return value;
+  };
+}
+
+const memoised = makeMemo(() => (computations, [1, 2, 3]));
+
+console.log("case A — the dependency is stable across 100 renders:");
+for (let i = 0; i < 100; i++) { allocations++; memoised([42]); }
+console.log(\`  \${comparisons} comparisons, \${computations} computation(s), \${allocations} dep arrays allocated\`);
+console.log("  the memo did its job: 99 computations saved.");
+
+comparisons = 0; computations = 0; allocations = 0;
+const unstable = makeMemo(() => [1, 2, 3]);
+console.log("\\ncase B — the dependency is an object literal, so it is new each render:");
+for (let i = 0; i < 100; i++) { allocations++; unstable([{ id: 42 }]); }
+console.log(\`  \${comparisons} comparisons, \${computations} computation(s), \${allocations} dep arrays allocated\`);
+console.log("  the memo did nothing but add work: every render recomputed anyway.");`,
+          output: `case A — the dependency is stable across 100 renders:
+  99 comparisons, 1 computation(s), 100 dep arrays allocated
+  the memo did its job: 99 computations saved.
+
+case B — the dependency is an object literal, so it is new each render:
+  99 comparisons, 100 computation(s), 100 dep arrays allocated
+  the memo did nothing but add work: every render recomputed anyway.`,
+          explanation:
+            "The number that does not change between the two cases is **100 dependency arrays allocated**. That array is written in your JSX and built on every render whether the memo hits or not — so a memo always costs an allocation and a comparison per dependency, and only sometimes saves anything.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* What a useMemo actually does per render, counted rather than timed.
    Timings vary by machine; the operation count does not. */
 
 let comparisons = 0;
@@ -79,15 +128,8 @@ console.log("\\ncase B — the dependency is an object literal, so it is new eac
 for (let i = 0; i < 100; i++) { allocations++; unstable([{ id: 42 }]); }
 console.log(\`  \${comparisons} comparisons, \${computations} computation(s), \${allocations} dep arrays allocated\`);
 console.log("  the memo did nothing but add work: every render recomputed anyway.");`,
-          output: `case A — the dependency is stable across 100 renders:
-  99 comparisons, 1 computation(s), 100 dep arrays allocated
-  the memo did its job: 99 computations saved.
-
-case B — the dependency is an object literal, so it is new each render:
-  99 comparisons, 100 computation(s), 100 dep arrays allocated
-  the memo did nothing but add work: every render recomputed anyway.`,
-          explanation:
-            "The number that does not change between the two cases is **100 dependency arrays allocated**. That array is written in your JSX and built on every render whether the memo hits or not — so a memo always costs an allocation and a comparison per dependency, and only sometimes saves anything.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -109,8 +151,34 @@ case B — the dependency is an object literal, so it is new each render:
         {
           id: "two-reasons-code",
           title: "The two reasons, side by side",
-          lang: "tsx",
-          code: `function Report({ rows, from, to }: Props) {
+          lang: "jsx",
+          code: `function Report({ rows, from, to }) {
+  // Reason 1: this genuinely costs something. 10k rows, sorted and grouped.
+  // The memo is for *this component*, and it pays for itself on any render
+  // where \`rows\` did not change.
+  const summary = useMemo(
+    () => groupByMonth(rows.filter((r) => r.date >= from && r.date <= to)),
+    [rows, from, to],
+  );
+
+  // Reason 2: this costs nothing to create. The memo exists so that
+  // <Chart> — which is memo()'d — can skip. Delete the memo() on Chart and
+  // this useCallback becomes pure overhead.
+  const onSelect = useCallback((id) => track("select", id), []);
+
+  return (
+    <>
+      <Totals summary={summary} />
+      <Chart summary={summary} onSelect={onSelect} />
+    </>
+  );
+}`,
+          explanation:
+            "Write a comment saying which reason it is. A memo with no downstream consumer and no expensive computation is a memo that somebody added out of habit, and without the comment nobody can tell that from one holding a memo boundary together.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Report({ rows, from, to }: Props) {
   // Reason 1: this genuinely costs something. 10k rows, sorted and grouped.
   // The memo is for *this component*, and it pays for itself on any render
   // where \`rows\` did not change.
@@ -131,8 +199,8 @@ case B — the dependency is an object literal, so it is new each render:
     </>
   );
 }`,
-          explanation:
-            "Write a comment saying which reason it is. A memo with no downstream consumer and no expensive computation is a memo that somebody added out of habit, and without the comment nobody can tell that from one holding a memo boundary together.",
+            },
+          ],
         },
       ],
       pitfalls: [

@@ -42,8 +42,63 @@ export const whatContextCostsLesson: Lesson = {
         {
           id: "context-render-counts",
           title: "Who re-renders when the theme changes",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { createContext, useContext, useState, memo, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const ThemeContext = createContext("light");
+const renders = {};
+const count = (name) => { renders[name] = (renders[name] ?? 0) + 1; };
+
+/* Reads the context — and is memoised, with no props at all. */
+const Themed = memo(function Themed() {
+  count("Themed");
+  useContext(ThemeContext);
+  return <button type="button" />;
+});
+/* Does not read it, and is memoised with no props. */
+const Plain = memo(function Plain() { count("Plain"); return <span />; });
+/* Does not read it, and is not memoised. */
+function Ordinary() { count("Ordinary"); return <i />; }
+/* Between the provider and the leaves; passes children through. */
+const Toolbar = memo(function Toolbar({ children }) {
+  count("Toolbar");
+  return <div>{children}</div>;
+});
+
+function App() {
+  const [theme, setTheme] = useState("light");
+  count("App");
+  return (
+    <ThemeContext.Provider value={theme}>
+      <button type="button" id="toggle" onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}>
+        toggle
+      </button>
+      <Toolbar>
+        <Themed />
+        <Plain />
+        <Ordinary />
+      </Toolbar>
+    </ThemeContext.Provider>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+console.log("after mount: ", JSON.stringify(renders));
+
+for (const key of Object.keys(renders)) renders[key] = 0;
+act(() => { container.querySelector("#toggle").click(); });
+console.log("after toggle:", JSON.stringify(renders));`,
+          output: `after mount:  {"App":1,"Toolbar":1,"Themed":1,"Plain":1,"Ordinary":1}
+after toggle: {"App":1,"Toolbar":1,"Themed":1,"Plain":0,"Ordinary":1}`,
+          explanation:
+            "Four different outcomes from one click. **Themed** re-rendered despite `memo` and despite having no props — rule 2. **Plain**, also memoised with no props, was skipped — rule 1, stopped by memo. **Ordinary** re-rendered because its parent did, and it has no memo. **Toolbar** is memoised and still re-rendered, because its `children` prop is a fresh array of elements every time `App` runs.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, useContext, useState, memo, act } from "react";
 import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -92,10 +147,8 @@ console.log("after mount: ", JSON.stringify(renders));
 for (const key of Object.keys(renders)) renders[key] = 0;
 act(() => { container.querySelector<HTMLButtonElement>("#toggle")!.click(); });
 console.log("after toggle:", JSON.stringify(renders));`,
-          output: `after mount:  {"App":1,"Toolbar":1,"Themed":1,"Plain":1,"Ordinary":1}
-after toggle: {"App":1,"Toolbar":1,"Themed":1,"Plain":0,"Ordinary":1}`,
-          explanation:
-            "Four different outcomes from one click. **Themed** re-rendered despite `memo` and despite having no props — rule 2. **Plain**, also memoised with no props, was skipped — rule 1, stopped by memo. **Ordinary** re-rendered because its parent did, and it has no memo. **Toolbar** is memoised and still re-rendered, because its `children` prop is a fresh array of elements every time `App` runs.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -117,8 +170,38 @@ after toggle: {"App":1,"Toolbar":1,"Themed":1,"Plain":0,"Ordinary":1}`,
         {
           id: "stable-value",
           title: "The one line that matters",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Broken. A new object on every render of AuthProvider — including renders
+// caused by \`route\` changing, which no consumer of AuthContext cares about.
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [route, setRoute] = useState("/");
+
+  return (
+    <AuthContext.Provider value={{ user, signOut: () => setUser(null) }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Fixed. The object's identity now changes only when \`user\` does.
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [route, setRoute] = useState("/");
+
+  const value = useMemo(
+    () => ({ user, signOut: () => setUser(null) }),
+    [user],                       // setUser is stable, so it is not a dependency
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}`,
+          explanation:
+            "`setUser` does not appear in the dependency array because React guarantees a state setter's identity is stable for the life of the component. That guarantee is what makes the memo worth having: without it the dependency would change every render and you would be back where you started.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Broken. A new object on every render of AuthProvider — including renders
 // caused by \`route\` changing, which no consumer of AuthContext cares about.
 function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -143,8 +226,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }`,
-          explanation:
-            "`setUser` does not appear in the dependency array because React guarantees a state setter's identity is stable for the life of the component. That guarantee is what makes the memo worth having: without it the dependency would change every render and you would be back where you started.",
+            },
+          ],
         },
       ],
       pitfalls: [

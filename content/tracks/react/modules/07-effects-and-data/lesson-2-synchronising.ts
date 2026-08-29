@@ -43,8 +43,56 @@ export const synchronisingLesson: Lesson = {
         {
           id: "connect-disconnect",
           title: "One connection, kept in step with a prop",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* An external system: something with a lifecycle React knows nothing about. */
+function createConnection(room) {
+  return {
+    connect() { console.log(\`  [chat] connected to \${room}\`); },
+    disconnect() { console.log(\`  [chat] disconnected from \${room}\`); },
+  };
+}
+
+function ChatRoom({ room }) {
+  useEffect(() => {
+    const connection = createConnection(room);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [room]);
+  return <h1>Welcome to {room}</h1>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+console.log("mount with room=general:");
+act(() => { root.render(<ChatRoom room="general" />); });
+
+console.log("re-render with the same room:");
+act(() => { root.render(<ChatRoom room="general" />); });
+
+console.log("change room to travel:");
+act(() => { root.render(<ChatRoom room="travel" />); });
+
+console.log("unmount:");
+act(() => { root.unmount(); });`,
+          output: `mount with room=general:
+  [chat] connected to general
+re-render with the same room:
+change room to travel:
+  [chat] disconnected from general
+  [chat] connected to travel
+unmount:
+  [chat] disconnected from travel`,
+          explanation:
+            "Four behaviours, one shape. Mount connects. A re-render with the same `room` does nothing at all — the dependency did not change, so the existing synchronisation is still valid. Changing `room` disconnects from the old one **before** connecting to the new one. Unmounting disconnects. You wrote two lines and got all four, because you described the correspondence rather than the four events.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* An external system: something with a lifecycle React knows nothing about. */
@@ -79,16 +127,8 @@ act(() => { root.render(<ChatRoom room="travel" />); });
 
 console.log("unmount:");
 act(() => { root.unmount(); });`,
-          output: `mount with room=general:
-  [chat] connected to general
-re-render with the same room:
-change room to travel:
-  [chat] disconnected from general
-  [chat] connected to travel
-unmount:
-  [chat] disconnected from travel`,
-          explanation:
-            "Four behaviours, one shape. Mount connects. A re-render with the same `room` does nothing at all — the dependency did not change, so the existing synchronisation is still valid. Changing `room` disconnects from the old one **before** connecting to the new one. Unmounting disconnects. You wrote two lines and got all four, because you described the correspondence rather than the four events.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -115,11 +155,11 @@ unmount:
         {
           id: "effect-order",
           title: "The order, printed",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, useLayoutEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
-function Both({ label }: { label: string }) {
+function Both({ label }) {
   console.log(\`  render (\${label})\`);
   useLayoutEffect(() => {
     console.log(\`  useLayoutEffect (\${label})  <- before the browser paints\`);
@@ -176,6 +216,50 @@ unmount:
   cleanup effect (second)`,
           explanation:
             "Three things fall out of the middle block. Refs attach at commit, before any effect. The **layout** cleanup and the layout effect both run before the passive effect's cleanup — the two queues are processed separately, not interleaved by component. And the `<p>` was reused rather than replaced, yet the ref detached and re-attached: the `ref` prop is a new arrow function on every render, so React tears the old one down and installs the new one.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, useLayoutEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Both({ label }: { label: string }) {
+  console.log(\`  render (\${label})\`);
+  useLayoutEffect(() => {
+    console.log(\`  useLayoutEffect (\${label})  <- before the browser paints\`);
+    return () => console.log(\`  cleanup layout (\${label})\`);
+  }, [label]);
+  useEffect(() => {
+    console.log(\`  useEffect (\${label})        <- after the browser paints\`);
+    return () => console.log(\`  cleanup effect (\${label})\`);
+  }, [label]);
+  return (
+    <p
+      ref={(node) => {
+        // React 19: a ref callback may return its own cleanup.
+        console.log(\`  ref attached (\${label})     <- commit: the node is in the DOM\`);
+        void node;
+        return () => console.log(\`  ref detached (\${label})\`);
+      }}
+    >
+      {label}
+    </p>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+console.log("mount:");
+act(() => { root.render(<Both label="first" />); });
+
+console.log("\\nchange the label prop:");
+act(() => { root.render(<Both label="second" />); });
+
+console.log("\\nunmount:");
+act(() => { root.unmount(); });`,
+            },
+          ],
         },
       ],
     },

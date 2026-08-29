@@ -27,8 +27,22 @@ export const typingComponentsLesson: Lesson = {
         {
           id: "basic-props",
           title: "Props, children and an optional callback",
-          lang: "tsx",
-          code: `import type { ReactNode } from "react";
+          lang: "jsx",
+          code: `export function Card({ title, children, onDismiss }) {
+  return (
+    <section>
+      <h2>{title}</h2>
+      {children}
+      {onDismiss && <button onClick={onDismiss}>×</button>}
+    </section>
+  );
+}`,
+          explanation:
+            "Three decisions worth knowing the reason for: `ReactNode` rather than `ReactElement`, because children are usually not elements; `?` rather than a default, because the component branches on absence; and `() => void` rather than `() => unknown`, because `void` is the return type that accepts any function.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
 
 interface CardProps {
   title: string;
@@ -51,8 +65,8 @@ export function Card({ title, children, onDismiss }: CardProps) {
     </section>
   );
 }`,
-          explanation:
-            "Three decisions worth knowing the reason for: `ReactNode` rather than `ReactElement`, because children are usually not elements; `?` rather than a default, because the component branches on absence; and `() => void` rather than `() => unknown`, because `void` is the return type that accepts any function.",
+            },
+          ],
         },
       ],
       pitfalls: [

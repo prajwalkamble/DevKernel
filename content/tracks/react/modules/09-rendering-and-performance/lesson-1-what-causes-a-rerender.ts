@@ -45,8 +45,67 @@ export const whatCausesARerenderLesson: Lesson = {
         {
           id: "who-rerenders",
           title: "Four components, one state change",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const renders = {};
+const count = (n) => { renders[n] = (renders[n] ?? 0) + 1; };
+const reset = () => { for (const k of Object.keys(renders)) renders[k] = 0; };
+
+/* Takes a prop that never changes. */
+function TakesProp({ label }) { count("TakesProp"); return <b>{label}</b>; }
+/* Takes no props at all. */
+function TakesNothing() { count("TakesNothing"); return <i />; }
+/* Has its own state, which nobody touches. */
+function HasOwnState() { count("HasOwnState"); const [n] = useState(0); return <u>{n}</u>; }
+/* A sibling of the component whose state changes. */
+function Sibling() { count("Sibling"); return <s />; }
+
+function Middle() {
+  count("Middle");
+  return <><TakesProp label="fixed" /><TakesNothing /><HasOwnState /></>;
+}
+
+function App() {
+  const [n, setN] = useState(0);
+  count("App");
+  return (
+    <div>
+      <output>{n}</output>
+      <button type="button" id="go" onClick={() => setN((x) => x + 1)}>go</button>
+      <button type="button" id="same" onClick={() => setN((x) => x)}>set same</button>
+      <Middle />
+      <Sibling />
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<App />); });
+
+reset();
+act(() => { container.querySelector("#go").click(); });
+console.log("App's state changed:      ", JSON.stringify(renders));
+
+reset();
+act(() => { container.querySelector("#same").click(); });
+console.log("set to the same value:    ", JSON.stringify(renders));
+
+reset();
+act(() => { container.querySelector("#go").click(); });
+act(() => { container.querySelector("#go").click(); });
+console.log("two more real changes:    ", JSON.stringify(renders));`,
+          output: `App's state changed:       {"App":1,"Middle":1,"TakesProp":1,"TakesNothing":1,"HasOwnState":1,"Sibling":1}
+set to the same value:     {"App":1,"Middle":0,"TakesProp":0,"TakesNothing":0,"HasOwnState":0,"Sibling":0}
+two more real changes:     {"App":2,"Middle":2,"TakesProp":2,"TakesNothing":2,"HasOwnState":2,"Sibling":2}`,
+          explanation:
+            "First line: everything. A fixed prop did not save `TakesProp`; having no props did not save `TakesNothing`; having its own untouched state did not save `HasOwnState`; being off to one side did not save `Sibling`. The cascade goes down from wherever the state changed, unconditionally.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const renders: Record<string, number> = {};
@@ -97,11 +156,8 @@ reset();
 act(() => { container.querySelector<HTMLButtonElement>("#go")!.click(); });
 act(() => { container.querySelector<HTMLButtonElement>("#go")!.click(); });
 console.log("two more real changes:    ", JSON.stringify(renders));`,
-          output: `App's state changed:       {"App":1,"Middle":1,"TakesProp":1,"TakesNothing":1,"HasOwnState":1,"Sibling":1}
-set to the same value:     {"App":1,"Middle":0,"TakesProp":0,"TakesNothing":0,"HasOwnState":0,"Sibling":0}
-two more real changes:     {"App":2,"Middle":2,"TakesProp":2,"TakesNothing":2,"HasOwnState":2,"Sibling":2}`,
-          explanation:
-            "First line: everything. A fixed prop did not save `TakesProp`; having no props did not save `TakesNothing`; having its own untouched state did not save `HasOwnState`; being off to one side did not save `Sibling`. The cascade goes down from wherever the state changed, unconditionally.",
+            },
+          ],
         },
       ],
     },

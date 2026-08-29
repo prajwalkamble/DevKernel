@@ -255,8 +255,10 @@ for (const track of tracks) {
    React example offers to be read in Python". */
 const DROPDOWN_LANGUAGES = new Map<string, ReadonlySet<string>>([
   ["dsa", new Set(["python", "java", "cpp", "rust", "go", "javascript", "typescript", "asm"])],
-  ["react", new Set(["jsx", "tsx"])],
-  ["nextjs", new Set(["jsx", "tsx"])],
+  // jsx/tsx for components, javascript/typescript for the plain modules a
+  // React lesson also carries — a hook file with no JSX in it is not JSX.
+  ["react", new Set(["jsx", "tsx", "javascript", "typescript"])],
+  ["nextjs", new Set(["jsx", "tsx", "javascript", "typescript"])],
   ["angular", new Set(["javascript", "typescript"])],
 ]);
 

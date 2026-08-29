@@ -28,8 +28,32 @@ export const suspenseLesson: Lesson = {
         {
           id: "the-flag-version",
           title: "The version this replaces",
-          lang: "tsx",
-          code: `function Profile({ id }: { id: string }) {
+          lang: "jsx",
+          code: `function Profile({ id }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchUser(id)
+      .then((u) => { if (!cancelled) setUser(u); })
+      .catch((e) => { if (!cancelled) setError(e); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (loading) return <Spinner />;
+  if (error) return <Error error={error} />;
+  return <h1>{user.name}</h1>;
+}`,
+          explanation:
+            "Nothing here is wrong. It is the correct version of module 7's four states, and it is also thirteen lines of ceremony around one line of interest — plus a non-null assertion, because the types cannot express that `user` is set exactly when `loading` is false.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Profile({ id }: { id: string }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -48,8 +72,8 @@ export const suspenseLesson: Lesson = {
   if (error) return <Error error={error} />;
   return <h1>{user!.name}</h1>;
 }`,
-          explanation:
-            "Nothing here is wrong. It is the correct version of module 7's four states, and it is also thirteen lines of ceremony around one line of interest — plus a non-null assertion, because the types cannot express that `user` is set exactly when `loading` is false.",
+            },
+          ],
         },
       ],
     },
@@ -72,12 +96,12 @@ export const suspenseLesson: Lesson = {
         {
           id: "suspense-basic",
           title: "A boundary, a promise, and two renders",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use, act } from "react";
 import { createRoot } from "react-dom/client";
 
-let resolveIt: (value: string) => void;
-const promise = new Promise<string>((resolve) => { resolveIt = resolve; });
+let resolveIt;
+const promise = new Promise((resolve) => { resolveIt = resolve; });
 
 function Name() {
   /* No loading state, no error state, no effect. It reads the value. */
@@ -104,6 +128,38 @@ console.log("after resolve:", container.innerHTML);`,
 after resolve: <p>Ada</p>`,
           explanation:
             "`Name` has no idea it is inside a boundary and no idea a loading state exists. It reads a value; if the value is not there yet the render is unwound and retried later. The whole of the loading behaviour is the one line of JSX in `App`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let resolveIt: (value: string) => void;
+const promise = new Promise<string>((resolve) => { resolveIt = resolve; });
+
+function Name() {
+  /* No loading state, no error state, no effect. It reads the value. */
+  const name = use(promise);
+  return <p>{name}</p>;
+}
+
+function App() {
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <Name />
+    </Suspense>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+console.log("after mount:  ", container.innerHTML);
+
+await act(async () => { resolveIt("Ada"); });
+console.log("after resolve:", container.innerHTML);`,
+            },
+          ],
         },
       ],
     },

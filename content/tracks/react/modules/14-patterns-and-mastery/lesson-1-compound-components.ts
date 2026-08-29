@@ -142,8 +142,29 @@ outside <Tabs>: <Tab> must be used inside <Tabs>`,
         {
           id: "slots-code",
           title: "A slot API",
-          lang: "tsx",
-          code: `interface DialogProps {
+          lang: "jsx",
+          code: `function Dialog({ title, children, footer }) {
+  return (
+    <div role="dialog" aria-modal="true">
+      <header><h2>{title}</h2></header>
+      <div className="body">{children}</div>
+      {footer && <footer>{footer}</footer>}
+    </div>
+  );
+}
+
+<Dialog
+  title={<><WarningIcon /> Delete this project?</>}
+  footer={<><Button variant="ghost">Cancel</Button><Button variant="danger">Delete</Button></>}
+>
+  This cannot be undone.
+</Dialog>`,
+          explanation:
+            "`title` is a `ReactNode` rather than a `string`, which is the small decision that stops this API from growing a `titleIcon` prop next month. Anything a caller might want to decorate should be a node.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `interface DialogProps {
   title: ReactNode;
   children: ReactNode;
   /* Optional, and the component decides where it goes and what happens
@@ -167,8 +188,8 @@ function Dialog({ title, children, footer }: DialogProps) {
 >
   This cannot be undone.
 </Dialog>`,
-          explanation:
-            "`title` is a `ReactNode` rather than a `string`, which is the small decision that stops this API from growing a `titleIcon` prop next month. Anything a caller might want to decorate should be a node.",
+            },
+          ],
         },
       ],
     },

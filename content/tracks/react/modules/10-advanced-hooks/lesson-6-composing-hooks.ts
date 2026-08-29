@@ -43,8 +43,64 @@ export const composingHooksLesson: Lesson = {
         {
           id: "return-shapes",
           title: "Both shapes, at the call site",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* Two shapes for the same hook, and what each costs at the call site. */
+
+/* An array: positional, so the caller names everything. Right when there are
+   at most two or three values and every caller wants all of them. */
+function useToggleArray(initial = false) {
+  const [on, setOn] = useState(initial);
+  return [on, () => setOn((v) => !v)];
+}
+
+/* An object: named, so the caller takes what it needs and the hook can grow
+   a field without touching a single call site. */
+function useFetchLike(id) {
+  const [state, setState] = useState({
+    status: "loading", data: null,
+  });
+  useEffect(() => { setState({ status: "ready", data: \`record \${id}\` }); }, [id]);
+  return { ...state, refetch: () => setState({ status: "loading", data: null }) };
+}
+
+function Demo() {
+  // Positional: two different toggles, named freely, no renaming syntax.
+  const [menuOpen, toggleMenu] = useToggleArray();
+  const [darkMode, toggleDark] = useToggleArray(true);
+
+  // Named: this component wants two of the four fields and says so.
+  const { status, data } = useFetchLike("a1");
+
+  return (
+    <output>
+      {\`menu=\${menuOpen} dark=\${darkMode} status=\${status} data=\${data} \`}
+      <button type="button" id="m" onClick={toggleMenu}>m</button>
+      <button type="button" id="d" onClick={toggleDark}>d</button>
+    </output>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+act(() => { createRoot(container).render(<Demo />); });
+const show = () => container.querySelector("output").textContent.trim();
+console.log("mounted:            ", show());
+act(() => { container.querySelector("#m").click(); });
+console.log("after toggling menu:", show());
+act(() => { container.querySelector("#d").click(); });
+console.log("after toggling dark:", show());`,
+          output: `mounted:             menu=false dark=true status=ready data=record a1 md
+after toggling menu: menu=true dark=true status=ready data=record a1 md
+after toggling dark: menu=true dark=false status=ready data=record a1 md`,
+          explanation:
+            "Two `useToggleArray` calls in one component, named `menuOpen` and `darkMode` with no ceremony. The same with an object would be `const { on: menuOpen, toggle: toggleMenu } = …` twice — which is the cost of an object return when the caller wants everything and wants to rename it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* Two shapes for the same hook, and what each costs at the call site. */
@@ -92,11 +148,8 @@ act(() => { container.querySelector<HTMLButtonElement>("#m")!.click(); });
 console.log("after toggling menu:", show());
 act(() => { container.querySelector<HTMLButtonElement>("#d")!.click(); });
 console.log("after toggling dark:", show());`,
-          output: `mounted:             menu=false dark=true status=ready data=record a1 md
-after toggling menu: menu=true dark=true status=ready data=record a1 md
-after toggling dark: menu=true dark=false status=ready data=record a1 md`,
-          explanation:
-            "Two `useToggleArray` calls in one component, named `menuOpen` and `darkMode` with no ceremony. The same with an object would be `const { on: menuOpen, toggle: toggleMenu } = …` twice — which is the cost of an object return when the caller wants everything and wants to rename it.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -118,8 +171,45 @@ after toggling dark: menu=true dark=false status=ready data=record a1 md`,
         {
           id: "stable-return",
           title: "The same hook, twice",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Unusable downstream. Both fields are new on every render, so a caller's
+// useEffect([reset]) fires forever and a memoised child never skips —
+// and there is nothing the caller can do about it.
+function useForm(initial) {
+  const [values, setValues] = useState(initial);
+  return {
+    values,
+    reset: () => setValues(initial),
+    setField: (k, v) => setValues((s) => ({ ...s, [k]: v })),
+  };
+}
+
+// Usable. \`reset\` and \`setField\` keep their identity, so the object only
+// changes when \`values\` does — and callers can depend on any of it.
+function useForm(initial) {
+  const [values, setValues] = useState(initial);
+
+  const reset = useCallback(() => setValues(initial), [initial]);
+  const setField = useCallback(
+    (k, v) => setValues((s) => ({ ...s, [k]: v })),
+    [],   // the updater form means it needs nothing from this render
+  );
+
+  return useMemo(() => ({ values, reset, setField }), [values, reset, setField]);
+}
+
+// Better still: return them separately, so a caller that only writes never
+// re-renders when \`values\` changes. Same idea as splitting a context.
+function useForm(initial) {
+  // …
+  return [values, useMemo(() => ({ reset, setField }), [reset, setField])];
+}`,
+          explanation:
+            "The `useCallback` on `setField` has an empty dependency array because it uses the updater form of the setter — it needs nothing from the render that created it. That is the shape to aim for: **write the callbacks so their dependency lists are empty**, and the stability comes for free rather than being maintained.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Unusable downstream. Both fields are new on every render, so a caller's
 // useEffect([reset]) fires forever and a memoised child never skips —
 // and there is nothing the caller can do about it.
 function useForm(initial: Values) {
@@ -151,8 +241,8 @@ function useForm(initial: Values) {
   // …
   return [values, useMemo(() => ({ reset, setField }), [reset, setField])] as const;
 }`,
-          explanation:
-            "The `useCallback` on `setField` has an empty dependency array because it uses the updater form of the setter — it needs nothing from the render that created it. That is the shape to aim for: **write the callbacks so their dependency lists are empty**, and the stability comes for free rather than being maintained.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -176,8 +266,41 @@ function useForm(initial: Values) {
         {
           id: "generic-hook",
           title: "Typing a generic hook",
-          lang: "typescript",
+          lang: "javascript",
           code: `/* One type parameter, inferred from the argument, so callers write
+   nothing. \`useLocalStorage("theme", "light")\` gives \`string\`; passing an
+   object gives that object's type. */
+export function useLocalStorage(key, fallback) {
+  const [value, setValue] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw === null ? fallback : (JSON.parse(raw));
+    } catch {
+      // A private window, a full quota, or a value that is not JSON.
+      return fallback;
+    }
+  });
+
+  // Same signature as useState's setter, so it is a drop-in replacement —
+  // including the updater form, which callers will expect.
+  const set = useCallback((next) => {
+    setValue((previous) => {
+      const resolved = next instanceof Function ? next(previous) : next;
+      try {
+        window.localStorage.setItem(key, JSON.stringify(resolved));
+      } catch { /* quota, or storage disabled */ }
+      return resolved;
+    });
+  }, [key]);
+
+  return [value, set];
+}`,
+          explanation:
+            "Two decisions worth copying. The type parameter is inferred from `fallback`, so no caller writes an annotation. And the returned setter matches `useState`'s exactly, updater form included — a hook that looks like the thing it replaces is a hook nobody has to read the source of.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `/* One type parameter, inferred from the argument, so callers write
    nothing. \`useLocalStorage("theme", "light")\` gives \`string\`; passing an
    object gives that object's type. */
 export function useLocalStorage<T>(key: string, fallback: T) {
@@ -205,8 +328,8 @@ export function useLocalStorage<T>(key: string, fallback: T) {
 
   return [value, set] as const;
 }`,
-          explanation:
-            "Two decisions worth copying. The type parameter is inferred from `fallback`, so no caller writes an annotation. And the returned setter matches `useState`'s exactly, updater form included — a hook that looks like the thing it replaces is a hook nobody has to read the source of.",
+            },
+          ],
         },
       ],
     },

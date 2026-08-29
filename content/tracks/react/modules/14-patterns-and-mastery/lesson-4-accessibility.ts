@@ -27,8 +27,43 @@ export const accessibilityLesson: Lesson = {
         {
           id: "focusable",
           title: "Three elements, one of them unreachable",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Both() {
+  return (
+    <>
+      <div onClick={() => {}}>Delete</div>
+      <span role="button" tabIndex={0} onClick={() => {}}>Delete</span>
+      <button onClick={() => {}}>Delete</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<Both />); });
+
+for (const el of container.children) {
+  const node = el;
+  node.focus();
+  console.log(
+    \`<\${node.tagName.toLowerCase()}>\`.padEnd(9) +
+    \`role=\${(node.getAttribute("role") ?? node.tagName.toLowerCase()).padEnd(7)}\` +
+    \` tabIndex=\${String(node.tabIndex).padEnd(3)}\` +
+    \` reachable by keyboard=\${document.activeElement === node}\`
+  );
+}`,
+          output: `<div>    role=div     tabIndex=-1  reachable by keyboard=false
+<span>   role=button  tabIndex=0   reachable by keyboard=true
+<button> role=button  tabIndex=0   reachable by keyboard=true`,
+          explanation:
+            "The first row is the bug: `focus()` was called on it and it did not take focus, so no amount of tabbing will ever reach it. A keyboard user cannot delete anything.\n\nThe middle row is what it costs to fix a `<div>` properly — a role, a `tabIndex`, and (not shown, because jsdom does not implement activation behaviour) a `keydown` handler for both Enter and Space, with Space also needing `preventDefault` so the page does not scroll. The third row is a `<button>`, which has all of it already. This is why the answer is always \"use the element\".",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
 function Both() {
@@ -55,11 +90,8 @@ for (const el of container.children) {
     \` reachable by keyboard=\${document.activeElement === node}\`
   );
 }`,
-          output: `<div>    role=div     tabIndex=-1  reachable by keyboard=false
-<span>   role=button  tabIndex=0   reachable by keyboard=true
-<button> role=button  tabIndex=0   reachable by keyboard=true`,
-          explanation:
-            "The first row is the bug: `focus()` was called on it and it did not take focus, so no amount of tabbing will ever reach it. A keyboard user cannot delete anything.\n\nThe middle row is what it costs to fix a `<div>` properly — a role, a `tabIndex`, and (not shown, because jsdom does not implement activation behaviour) a `keydown` handler for both Enter and Space, with Space also needing `preventDefault` so the page does not scroll. The third row is a `<button>`, which has all of it already. This is why the answer is always \"use the element\".",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -121,8 +153,38 @@ for (const el of container.children) {
         {
           id: "focus-code",
           title: "The two hooks that cover most of it",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* On navigation. The heading is not focusable by default, hence -1. */
+function usePageFocus(pathname) {
+  const heading = useRef(null);
+  useEffect(() => {
+    heading.current?.focus();
+  }, [pathname]);
+  return heading;
+}
+
+function Page({ title }) {
+  const heading = usePageFocus(useLocation().pathname);
+  return <h1 ref={heading} tabIndex={-1}>{title}</h1>;
+}
+
+/* Returning focus to whatever opened a dialog. The ref is captured
+   before focus moves, and the cleanup restores it — which also handles
+   the case where the dialog is unmounted rather than closed. */
+function useReturnFocus(open) {
+  const previous = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    previous.current = document.activeElement;
+    return () => previous.current?.focus();
+  }, [open]);
+}`,
+          explanation:
+            "Both are effects, and both are the legitimate kind: they synchronise something outside React — the document's focus — with React's state. This is what module 7 meant by an effect that is not a data fetch.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* On navigation. The heading is not focusable by default, hence -1. */
 function usePageFocus(pathname: string) {
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -147,8 +209,8 @@ function useReturnFocus(open: boolean) {
     return () => previous.current?.focus();
   }, [open]);
 }`,
-          explanation:
-            "Both are effects, and both are the legitimate kind: they synchronise something outside React — the document's focus — with React's state. This is what module 7 meant by an effect that is not a data fetch.",
+            },
+          ],
         },
       ],
     },
@@ -166,8 +228,31 @@ function useReturnFocus(open: boolean) {
         {
           id: "live",
           title: "The container is always there; only the text changes",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ✗ Nothing to watch until the message exists, and by then it is too
+   late for many screen readers. */
+{message && <p role="status">{message}</p>}
+
+/* ✓ The region is always mounted and usually empty. */
+<p role="status" className="sr-only">{message}</p>
+
+/* A search result count — announced, and the user stays in the input. */
+function Results({ query, items }) {
+  return (
+    <>
+      <p role="status" className="sr-only">
+        {query ? \`\${items.length} results for \${query}\` : ""}
+      </p>
+      <ul>{items.map((item) => <li key={item.id}>{item.title}</li>)}</ul>
+    </>
+  );
+}`,
+          explanation:
+            "`sr-only` is the standard class that hides an element visually while leaving it in the accessibility tree — a clip rectangle rather than `display: none`, because `display: none` removes it from the tree as well and announces nothing. Tailwind ships it; every design system has its own.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* ✗ Nothing to watch until the message exists, and by then it is too
    late for many screen readers. */
 {message && <p role="status">{message}</p>}
 
@@ -185,8 +270,8 @@ function Results({ query, items }: { query: string; items: Item[] }) {
     </>
   );
 }`,
-          explanation:
-            "`sr-only` is the standard class that hides an element visually while leaving it in the accessibility tree — a clip rectangle rather than `display: none`, because `display: none` removes it from the tree as well and announces nothing. Tailwind ships it; every design system has its own.",
+            },
+          ],
         },
       ],
     },

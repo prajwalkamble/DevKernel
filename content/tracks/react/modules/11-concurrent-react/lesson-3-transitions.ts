@@ -48,8 +48,40 @@ export const transitionsLesson: Lesson = {
         {
           id: "two-renders",
           title: "What the component sees",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log = [];
+
+function App() {
+  const [tab, setTab] = useState("home");
+  const [pending, startTransition] = useTransition();
+  log.push(\`render: tab=\${tab} pending=\${pending}\`);
+  return (
+    <div>
+      <span>{tab}</span>
+      <button onClick={() => startTransition(() => setTab("posts"))}>posts</button>
+    </div>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<App />); });
+log.push("--- click ---");
+await act(async () => { container.querySelector("button").click(); });
+console.log(log.join("\\n"));`,
+          output: `render: tab=home pending=false
+--- click ---
+render: tab=home pending=true
+render: tab=posts pending=false`,
+          explanation:
+            "Two renders from one click, and look at the middle one: `tab` is still `home` while `pending` is already true. That is the urgent commit — the screen has not changed yet, but React has told you it is working on it, and that is the frame in which you show a pending indicator.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const log: string[] = [];
@@ -72,12 +104,8 @@ await act(async () => { createRoot(container).render(<App />); });
 log.push("--- click ---");
 await act(async () => { container.querySelector("button")!.click(); });
 console.log(log.join("\\n"));`,
-          output: `render: tab=home pending=false
---- click ---
-render: tab=home pending=true
-render: tab=posts pending=false`,
-          explanation:
-            "Two renders from one click, and look at the middle one: `tab` is still `home` while `pending` is already true. That is the urgent commit — the screen has not changed yet, but React has told you it is working on it, and that is the frame in which you show a pending indicator.",
+            },
+          ],
         },
       ],
     },
@@ -93,13 +121,13 @@ render: tab=posts pending=false`,
         {
           id: "hook-vs-import",
           title: "The same transition, both ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useTransition, startTransition as globalStartTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
-const log: string[] = [];
-let viaHook: () => void;
-let viaImport: () => void;
+const log = [];
+let viaHook;
+let viaImport;
 
 function Tabs() {
   const [tab, setTab] = useState("home");
@@ -129,6 +157,38 @@ render tab=posts isPending=false
 render tab=home isPending=false`,
           explanation:
             "The hook's version produces the extra pending render. The imported one schedules the same low-priority update and produces one render, because there is no `isPending` state for it to set. Same scheduling, different bookkeeping — so if a transition seems not to be working because nothing shows as pending, check which one you imported.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useTransition, startTransition as globalStartTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const log: string[] = [];
+let viaHook: () => void;
+let viaImport: () => void;
+
+function Tabs() {
+  const [tab, setTab] = useState("home");
+  const [pending, startTransition] = useTransition();
+  viaHook = () => startTransition(() => setTab(tab === "home" ? "posts" : "home"));
+  viaImport = () => globalStartTransition(() => setTab(tab === "home" ? "posts" : "home"));
+  log.push(\`render tab=\${tab} isPending=\${pending}\`);
+  return <p>{tab}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => { createRoot(container).render(<Tabs />); });
+
+log.push("--- the startTransition from useTransition ---");
+await act(async () => { viaHook(); });
+
+log.push("--- the startTransition imported from react ---");
+await act(async () => { viaImport(); });
+
+console.log(log.join("\\n"));`,
+            },
+          ],
         },
       ],
     },

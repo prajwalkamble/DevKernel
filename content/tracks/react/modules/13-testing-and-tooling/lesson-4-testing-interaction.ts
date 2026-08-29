@@ -83,8 +83,50 @@ test("submits", async () => {
         {
           id: "form-test",
           title: "The component and its test",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* ---- LoginForm.tsx ---------------------------------------------------- */
+export function LoginForm({ onSubmit }) {
+  const [status, setStatus] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <form
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setBusy(true);
+        const email = new FormData(event.currentTarget).get("email");
+        setStatus(await onSubmit(email));
+        setBusy(false);
+      }}
+    >
+      <label htmlFor="email">Email address</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" />
+      <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+      {status && <p role="status">{status}</p>}
+    </form>
+  );
+}
+
+/* ---- LoginForm.test.tsx ----------------------------------------------- */
+test("signs in and reports the result", async () => {
+  const user = userEvent.setup();
+  render(<LoginForm onSubmit={async (email) => \`Signed in as \${email}\`} />);
+
+  await user.type(screen.getByLabelText("Email address"), "ada@example.com");
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+  expect(await screen.findByRole("status")).toHaveTextContent("Signed in as ada@example.com");
+});`,
+          output: ` Test Files  1 passed (1)
+      Tests  1 passed (1)`,
+          explanation:
+            "Read the test as a sentence and it is one: type an email into the field labelled *Email address*, press the button called *Sign in*, and expect a status message naming that email. Every identifier in it is something a user can see. That is why it will still be correct after the component is rewritten.",
+          requires: "vitest with Testing Library (this is its summary, not a program's output)",
+          alternates: [
+            {
+              lang: "tsx",
+              requires: "vitest with Testing Library (this is its summary, not a program's output)",
+              code: `/* ---- LoginForm.tsx ---------------------------------------------------- */
 export function LoginForm({ onSubmit }: { onSubmit: (email: string) => Promise<string> }) {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -117,11 +159,8 @@ test("signs in and reports the result", async () => {
 
   expect(await screen.findByRole("status")).toHaveTextContent("Signed in as ada@example.com");
 });`,
-          output: ` Test Files  1 passed (1)
-      Tests  1 passed (1)`,
-          explanation:
-            "Read the test as a sentence and it is one: type an email into the field labelled *Email address*, press the button called *Sign in*, and expect a status message naming that email. Every identifier in it is something a user can see. That is why it will still be correct after the component is rewritten.",
-          requires: "vitest with Testing Library (this is its summary, not a program's output)",
+            },
+          ],
         },
       ],
     },

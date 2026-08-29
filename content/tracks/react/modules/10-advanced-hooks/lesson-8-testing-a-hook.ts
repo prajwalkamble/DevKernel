@@ -28,8 +28,74 @@ export const testingAHookLesson: Lesson = {
         {
           id: "render-hook",
           title: "The harness, and a hook tested with it",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useCallback, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* The hook under test. */
+function useUndoable(initial) {
+  const [past, setPast] = useState([]);
+  const [present, setPresent] = useState(initial);
+
+  const set = useCallback((next) => {
+    setPast((p) => [...p, present]);
+    setPresent(next);
+  }, [present]);
+
+  const undo = useCallback(() => {
+    setPast((p) => {
+      if (p.length === 0) return p;
+      setPresent(p[p.length - 1]);
+      return p.slice(0, -1);
+    });
+  }, []);
+
+  return { value: present, set, undo, canUndo: past.length > 0 };
+}
+
+/* Testing a hook means rendering it, because a hook only exists during a
+   render. A four-line harness is all a test framework's renderHook is. */
+function renderHook(useHook) {
+  const result = { current: null };
+  function Probe() {
+    result.current = useHook();
+    return null;
+  }
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  act(() => { createRoot(container).render(<Probe />); });
+  return result;
+}
+
+const hook = renderHook(() => useUndoable("first"));
+console.log("initial:            ", hook.current.value, "canUndo =", hook.current.canUndo);
+
+act(() => { hook.current.set("second"); });
+console.log("after set(second):  ", hook.current.value, "canUndo =", hook.current.canUndo);
+
+act(() => { hook.current.set("third"); });
+console.log("after set(third):   ", hook.current.value, "canUndo =", hook.current.canUndo);
+
+act(() => { hook.current.undo(); });
+console.log("after undo():       ", hook.current.value, "canUndo =", hook.current.canUndo);
+
+act(() => { hook.current.undo(); });
+console.log("after undo() again: ", hook.current.value, "canUndo =", hook.current.canUndo);
+
+act(() => { hook.current.undo(); });
+console.log("undo with no past:  ", hook.current.value, "canUndo =", hook.current.canUndo);`,
+          output: `initial:             first canUndo = false
+after set(second):   second canUndo = true
+after set(third):    third canUndo = true
+after undo():        second canUndo = true
+after undo() again:  first canUndo = false
+undo with no past:   first canUndo = false`,
+          explanation:
+            "`result.current` is reassigned on every render, so it always holds the latest return value — which is why the assertions after each `act` see the new state. The last line is the case worth writing a test for: undoing past the beginning does nothing rather than throwing, and nothing about the hook's source makes that obvious.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useCallback, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* The hook under test. */
@@ -84,14 +150,8 @@ console.log("after undo() again: ", hook.current.value, "canUndo =", hook.curren
 
 act(() => { hook.current.undo(); });
 console.log("undo with no past:  ", hook.current.value, "canUndo =", hook.current.canUndo);`,
-          output: `initial:             first canUndo = false
-after set(second):   second canUndo = true
-after set(third):    third canUndo = true
-after undo():        second canUndo = true
-after undo() again:  first canUndo = false
-undo with no past:   first canUndo = false`,
-          explanation:
-            "`result.current` is reassigned on every render, so it always holds the latest return value — which is why the assertions after each `act` see the new state. The last line is the case worth writing a test for: undoing past the beginning does nothing rather than throwing, and nothing about the hook's source makes that obvious.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -114,8 +174,47 @@ undo with no past:   first canUndo = false`,
         {
           id: "changing-args",
           title: "A hook whose arguments change",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* A harness that can re-render with new arguments — the second half of
+   what renderHook provides, and what you need for any hook taking props. */
+function renderHook(useHook, initial) {
+  const result = { current: null };
+  let root;
+
+  function Probe({ props }) {
+    result.current = useHook(props);
+    return null;
+  }
+
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  act(() => {
+    root = createRoot(container);
+    root.render(<Probe props={initial} />);
+  });
+
+  return {
+    result,
+    rerender: (next) => act(() => { root.render(<Probe props={next} />); }),
+    unmount: () => act(() => { root.unmount(); }),
+  };
+}
+
+// Testing that a debounced value settles, and that changing the input
+// restarts the wait rather than firing at a fixed interval:
+const { result, rerender } = renderHook((v) => useDebounced(v, 300), "a");
+
+expect(result.current).toBe("a");
+rerender("ab");
+expect(result.current).toBe("a");        // not settled yet
+await act(async () => { vi.advanceTimersByTime(300); });
+expect(result.current).toBe("ab");`,
+          explanation:
+            "`rerender` is what makes dependency-array behaviour testable at all: it is how you say \"the prop changed\" without a component. And fake timers rather than real waits — a test that sleeps 300ms is a test suite that takes minutes, and one that sleeps 290ms is a test that fails on a slow machine.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* A harness that can re-render with new arguments — the second half of
    what renderHook provides, and what you need for any hook taking props. */
 function renderHook<P, T>(useHook: (props: P) => T, initial: P) {
   const result = { current: null as unknown as T };
@@ -149,8 +248,8 @@ rerender("ab");
 expect(result.current).toBe("a");        // not settled yet
 await act(async () => { vi.advanceTimersByTime(300); });
 expect(result.current).toBe("ab");`,
-          explanation:
-            "`rerender` is what makes dependency-array behaviour testable at all: it is how you say \"the prop changed\" without a component. And fake timers rather than real waits — a test that sleeps 300ms is a test suite that takes minutes, and one that sleeps 290ms is a test that fails on a slow machine.",
+            },
+          ],
         },
       ],
     },
@@ -165,8 +264,40 @@ expect(result.current).toBe("ab");`,
         {
           id: "cleanup-test",
           title: "Asserting the teardown",
-          lang: "tsx",
+          lang: "jsx",
           code: `test("useChatRoom disconnects on unmount", () => {
+  const connection = { connect: vi.fn(), disconnect: vi.fn() };
+  vi.mocked(createConnection).mockReturnValue(connection);
+
+  const { unmount, rerender } = renderHook(
+    (room) => useChatRoom(room),
+    "general",
+  );
+  expect(connection.connect).toHaveBeenCalledTimes(1);
+
+  // Changing the dependency must disconnect *before* connecting again —
+  // the ordering from module 7, and the reason the hook is correct.
+  rerender("travel");
+  expect(connection.disconnect).toHaveBeenCalledTimes(1);
+  expect(connection.connect).toHaveBeenCalledTimes(2);
+
+  unmount();
+  expect(connection.disconnect).toHaveBeenCalledTimes(2);
+});
+
+test("a resubscribe does not leak a listener", () => {
+  const { rerender, unmount } = renderHook((t) => useEventListener(t, () => {}), "resize");
+  rerender("scroll");
+  unmount();
+  // The strongest assertion available: nothing is still attached.
+  expect(listenerCount(window)).toBe(0);
+});`,
+          explanation:
+            "The middle assertion is the interesting one. Testing that a dependency change disconnects *before* reconnecting is testing the property that makes the hook correct, and it is the one that breaks when somebody \"optimises\" the effect later. A test that only checks the unmount would pass.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `test("useChatRoom disconnects on unmount", () => {
   const connection = { connect: vi.fn(), disconnect: vi.fn() };
   vi.mocked(createConnection).mockReturnValue(connection);
 
@@ -193,8 +324,8 @@ test("a resubscribe does not leak a listener", () => {
   // The strongest assertion available: nothing is still attached.
   expect(listenerCount(window)).toBe(0);
 });`,
-          explanation:
-            "The middle assertion is the interesting one. Testing that a dependency change disconnects *before* reconnecting is testing the property that makes the hook correct, and it is the one that breaks when somebody \"optimises\" the effect later. A test that only checks the unmount would pass.",
+            },
+          ],
         },
       ],
       pitfalls: [

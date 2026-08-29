@@ -36,8 +36,35 @@ export const serverComponentsLesson: Lesson = {
         {
           id: "an-rsc",
           title: "A Server Component",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* No "use client" at the top of the file, so this runs on the server —
+   which in the Server Components model is the default, not the opt-in. */
+import { marked } from "marked";
+
+export default async function Post({ id }) {
+  /* Straight to the database. No API route, no fetch, no auth token to
+     forward: this code is already inside the trust boundary. */
+  const post = await db.posts.find(id);
+
+  /* A 40kB markdown parser, running here. The browser never sees it — it
+     receives the HTML this produced. */
+  const html = await marked.parse(post.body);
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+      {/* A Client Component, referenced by a Server one. */}
+      <LikeButton postId={post.id} initial={post.likes} />
+    </article>
+  );
+}`,
+          explanation:
+            "Three things here are impossible in a client component: the `async` function itself, the direct database access, and the dependency that does not ship. The fourth thing — rendering `<LikeButton>` — is what makes the model usable rather than a curiosity.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* No "use client" at the top of the file, so this runs on the server —
    which in the Server Components model is the default, not the opt-in. */
 import { marked } from "marked";
 
@@ -59,8 +86,8 @@ export default async function Post({ id }: { id: string }) {
     </article>
   );
 }`,
-          explanation:
-            "Three things here are impossible in a client component: the `async` function itself, the direct database access, and the dependency that does not ship. The fourth thing — rendering `<LikeButton>` — is what makes the model usable rather than a curiosity.",
+            },
+          ],
         },
       ],
     },

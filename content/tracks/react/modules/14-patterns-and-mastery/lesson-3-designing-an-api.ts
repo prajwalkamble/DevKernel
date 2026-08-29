@@ -35,8 +35,65 @@ export const designingAnApiLesson: Lesson = {
         {
           id: "controllable",
           title: "One component, both modes, proved",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* One component, both modes. The prop being undefined is what decides. */
+function useControllable(controlled, fallback) {
+  const [internal, setInternal] = useState(fallback);
+  const isControlled = controlled !== undefined;
+  return [isControlled ? controlled : internal, setInternal, isControlled];
+}
+
+function Toggle({ on, defaultOn = false, onChange }) {
+  const [value, setInternal] = useControllable(on, defaultOn);
+  return (
+    <button
+      role="switch"
+      aria-checked={value}
+      onClick={() => { setInternal(!value); onChange?.(!value); }}
+    >
+      {value ? "on" : "off"}
+    </button>
+  );
+}
+
+async function drive(label, tree) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  await act(async () => { createRoot(container).render(tree); });
+  const button = () => container.querySelector("button");
+  console.log(\`\${label} start "\${button().textContent}"\`);
+  await act(async () => { button().click(); });
+  console.log(\`\${label} after a click "\${button().textContent}"\`);
+}
+
+/* Uncontrolled: the component owns the value. */
+await drive("uncontrolled      |", <Toggle defaultOn={false} />);
+
+/* Controlled, and the parent refuses to change it — the toggle must not
+   move on its own, which is the whole contract of a controlled input. */
+await drive("controlled, pinned|", <Toggle on={false} onChange={() => {}} />);
+
+/* Controlled, and the parent stores the value. */
+function Parent() {
+  const [on, setOn] = useState(false);
+  return <Toggle on={on} onChange={setOn} />;
+}
+await drive("controlled, wired |", <Parent />);`,
+          output: `uncontrolled      | start "off"
+uncontrolled      | after a click "on"
+controlled, pinned| start "off"
+controlled, pinned| after a click "off"
+controlled, wired | start "off"
+controlled, wired | after a click "on"`,
+          explanation:
+            "The middle pair is the one that proves the contract. A controlled component whose parent ignores `onChange` **must not move**, because the parent is the source of truth and the parent said no. A component that updates its own state anyway looks like it works and then disagrees with the parent the first time the parent has an opinion.\n\nThe `onChange?.(!value)` call passing the *next* value rather than an event is the other decision worth copying: the caller wants the value, and making them dig it out of `event.target.checked` is a native-input wart there is no reason to reproduce.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* One component, both modes. The prop being undefined is what decides. */
@@ -86,14 +143,8 @@ function Parent() {
   return <Toggle on={on} onChange={setOn} />;
 }
 await drive("controlled, wired |", <Parent />);`,
-          output: `uncontrolled      | start "off"
-uncontrolled      | after a click "on"
-controlled, pinned| start "off"
-controlled, pinned| after a click "off"
-controlled, wired | start "off"
-controlled, wired | after a click "on"`,
-          explanation:
-            "The middle pair is the one that proves the contract. A controlled component whose parent ignores `onChange` **must not move**, because the parent is the source of truth and the parent said no. A component that updates its own state anyway looks like it works and then disagrees with the parent the first time the parent has an opinion.\n\nThe `onChange?.(!value)` call passing the *next* value rather than an event is the other decision worth copying: the caller wants the value, and making them dig it out of `event.target.checked` is a native-input wart there is no reason to reproduce.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -175,8 +226,22 @@ interface ButtonProps {
         {
           id: "deprecating",
           title: "A rename nobody has to do at once",
-          lang: "tsx",
-          code: `interface DialogProps {
+          lang: "jsx",
+          code: `function Dialog({ open, isOpen, ...rest }) {
+  if (process.env.NODE_ENV !== "production" && isOpen !== undefined) {
+    console.warn("<Dialog isOpen> is deprecated; use <Dialog open>. It will be removed in v3.");
+  }
+  /* The new name wins if both are given, so a half-migrated call site
+     behaves the way its author most recently intended. */
+  const isDialogOpen = open ?? isOpen ?? false;
+  // …
+}`,
+          explanation:
+            "Three things doing the work: the `@deprecated` tag, which makes an editor strike the prop out at every call site; the runtime warning, for people who do not read release notes; and the version in the message, so \"when do I have to do this\" has an answer.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `interface DialogProps {
   open?: boolean;
   /** @deprecated Use \`open\`. Removed in v3. */
   isOpen?: boolean;
@@ -191,8 +256,8 @@ function Dialog({ open, isOpen, ...rest }: DialogProps) {
   const isDialogOpen = open ?? isOpen ?? false;
   // …
 }`,
-          explanation:
-            "Three things doing the work: the `@deprecated` tag, which makes an editor strike the prop out at every call site; the runtime warning, for people who do not read release notes; and the version in the message, so \"when do I have to do this\" has an answer.",
+            },
+          ],
         },
       ],
       pitfalls: [

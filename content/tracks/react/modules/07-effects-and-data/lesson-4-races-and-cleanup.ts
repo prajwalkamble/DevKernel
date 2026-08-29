@@ -34,8 +34,66 @@ export const racesAndCleanupLesson: Lesson = {
         {
           id: "the-race",
           title: "The race, and the four-line fix",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+/* A fake API where the *first* query is the slow one — which is the whole
+   point, and the reason this never reproduces against localhost. */
+const LATENCY = { ad: 120, ada: 10 };
+function search(query) {
+  return new Promise((resolve) =>
+    setTimeout(() => resolve(\`results for "\${query}"\`), LATENCY[query]),
+  );
+}
+
+function Racy({ query }) {
+  const [results, setResults] = useState("—");
+  useEffect(() => {
+    search(query).then(setResults);
+  }, [query]);
+  return <p>{results}</p>;
+}
+
+function Fixed({ query }) {
+  const [results, setResults] = useState("—");
+  useEffect(() => {
+    let ignore = false;
+    search(query).then((r) => {
+      if (!ignore) setResults(r);
+      else console.log(\`  (dropped a stale response for "\${query}")\`);
+    });
+    return () => { ignore = true; };
+  }, [query]);
+  return <p>{results}</p>;
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function drive(Component, label) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  console.log(label);
+  await act(async () => { root.render(<Component query="ad" />); });
+  await act(async () => { root.render(<Component query="ada" />); });
+  await act(async () => { await sleep(200); });
+  console.log("  on screen:", container.textContent);
+}
+
+await drive(Racy, 'typed "ad" then "ada", no cleanup:');
+await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
+          output: `typed "ad" then "ada", no cleanup:
+  on screen: results for "ad"
+the same two keystrokes, with a cleanup:
+  (dropped a stale response for "ad")
+  on screen: results for "ada"`,
+          explanation:
+            "The user typed `ada` and is looking at results for `ad`. No error, no warning, nothing in the console — the state update was perfectly legitimate, it just came from a request the user had already moved on from. The fixed version drops it, and says so.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
 /* A fake API where the *first* query is the slow one — which is the whole
@@ -83,13 +141,8 @@ async function drive(Component: (p: { query: string }) => React.JSX.Element, lab
 
 await drive(Racy, 'typed "ad" then "ada", no cleanup:');
 await drive(Fixed, 'the same two keystrokes, with a cleanup:');`,
-          output: `typed "ad" then "ada", no cleanup:
-  on screen: results for "ad"
-the same two keystrokes, with a cleanup:
-  (dropped a stale response for "ad")
-  on screen: results for "ada"`,
-          explanation:
-            "The user typed `ada` and is looking at results for `ad`. No error, no warning, nothing in the console — the state update was perfectly legitimate, it just came from a request the user had already moved on from. The fixed version drops it, and says so.",
+            },
+          ],
         },
       ],
     },

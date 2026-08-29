@@ -111,8 +111,23 @@ const List = <T extends unknown>(props: ListProps<T>) => { /* … */ };`,
         {
           id: "constraint",
           title: "The trade",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Constrained: simpler to call, and only for things with an id. */
+function List({ items, children }) {
+  return <ul>{items.map((item) => <li key={item.id}>{children(item)}</li>)}</ul>;
+}
+
+/* Unconstrained: one more prop, and it works for string[], number[],
+   a tuple, a row from a table with a composite key — anything. */
+function List({ items, getKey, children }) {
+  return <ul>{items.map((item) => <li key={getKey(item)}>{children(item)}</li>)}</ul>;
+}`,
+          explanation:
+            "Neither is right in general. The question is whether the things this list will hold always have an id, and the honest answer for a component in a design system is usually no.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Constrained: simpler to call, and only for things with an id. */
 function List<T extends { id: string }>({ items, children }: {
   items: T[];
   children: (item: T) => ReactNode;
@@ -129,8 +144,8 @@ function List<T>({ items, getKey, children }: {
 }) {
   return <ul>{items.map((item) => <li key={getKey(item)}>{children(item)}</li>)}</ul>;
 }`,
-          explanation:
-            "Neither is right in general. The question is whether the things this list will hold always have an id, and the honest answer for a component in a design system is usually no.",
+            },
+          ],
         },
       ],
     },
@@ -192,8 +207,26 @@ export function Tight() {
         {
           id: "context-hook-code",
           title: "Throwing to narrow",
-          lang: "tsx",
-          code: `interface TabsValue {
+          lang: "jsx",
+          code: `/* null is the only honest default — there is no meaningful "no tabs" value. */
+const TabsContext = createContext(null);
+
+export function useTabs() {
+  const value = useContext(TabsContext);
+  /* The throw is a type guard as well as a runtime check: after it,
+     TypeScript knows value is TabsValue, so every caller gets a
+     non-nullable type and writes no null check of its own. */
+  if (value === null) {
+    throw new Error("useTabs must be used inside <Tabs>. Wrap the component in one.");
+  }
+  return value;
+}`,
+          explanation:
+            "Two things for the price of one line. The runtime error names both components and says what to do, which is the whole error-handling story of a compound component. And the return type is non-nullable, so a hundred call sites stop writing `if (!tabs) return null` for a situation that cannot legally occur.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `interface TabsValue {
   active: string;
   select: (id: string) => void;
 }
@@ -211,8 +244,8 @@ export function useTabs(): TabsValue {
   }
   return value;
 }`,
-          explanation:
-            "Two things for the price of one line. The runtime error names both components and says what to do, which is the whole error-handling story of a compound component. And the return type is non-nullable, so a hundred call sites stop writing `if (!tabs) return null` for a situation that cannot legally occur.",
+            },
+          ],
         },
       ],
       pitfalls: [
