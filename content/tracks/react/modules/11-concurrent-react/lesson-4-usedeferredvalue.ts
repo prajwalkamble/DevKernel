@@ -45,6 +45,28 @@ export const useDeferredValueLesson: Lesson = {
 }`,
           explanation:
             "One `useState`, two values. `query` is always current; `deferred` catches up when React has time. The input is driven by the first and the expensive list by the second, which is the entire pattern.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Search() {
+  const [query, setQuery] = useState("");
+  // \`useDeferredValue\` returns the same type it was given, so \`deferred\` is
+  // a string without being told — and passing it where \`query\` is expected
+  // stays checked.
+  const deferred = useDeferredValue(query);
+
+  return (
+    <>
+      {/* Urgent. Every keystroke commits immediately. */}
+      <input value={query} onChange={(e) => setQuery(e.target.value)} />
+
+      {/* Not urgent, and reading a value that may be a keystroke behind. */}
+      <Results query={deferred} />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

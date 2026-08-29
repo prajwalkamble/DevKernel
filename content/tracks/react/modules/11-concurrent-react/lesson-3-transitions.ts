@@ -193,7 +193,7 @@ console.log(log.join("\\n"));`,
           title: "The shape that works",
           lang: "jsx",
           code: `function Tabs() {
-  const [tab, setTab] = useState<Tab>("home");
+  const [tab, setTab] = useState("home");
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -221,6 +221,38 @@ console.log(log.join("\\n"));`,
 }`,
           explanation:
             "The nav updates on the first commit and the panel on the second. Between them the panel is dimmed and marked `aria-busy`, which is honest — the content is real, it is simply out of date — and it is a much smaller visual change than a spinner replacing a screenful of text.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Tabs() {
+  const [tab, setTab] = useState<Tab>("home");
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <>
+      <nav>
+        {TABS.map((t) => (
+          <button
+            key={t}
+            /* The highlight is urgent and lands on the first commit, so this
+               is already correct while the panel is still catching up. */
+            aria-current={t === tab}
+            onClick={() => startTransition(() => setTab(t))}
+          >
+            {t}
+          </button>
+        ))}
+      </nav>
+
+      {/* Still the old panel, just visibly stale. Not a spinner. */}
+      <div aria-busy={isPending} style={{ opacity: isPending ? 0.6 : 1 }}>
+        <Panel tab={tab} />
+      </div>
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -253,6 +285,28 @@ const results = await search(query);
 startTransition(() => setResults(results));`,
           explanation:
             "The test is simple: by the time `startTransition`'s callback returns, has the state been set? If not, nothing was marked. This is also why a transition is not a way to make a fetch non-blocking — a fetch was never blocking rendering in the first place.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Wrong: the only thing inside the callback is a promise being created. */
+startTransition(() => {
+  fetch(url).then((r) => r.json()).then(setResults);
+});
+
+/* Wrong for the same reason, and easier to talk yourself into. Note that
+   TypeScript accepts both: \`startTransition\` takes \`() => void\`, and an
+   async function returning a promise is assignable to it. Nothing here is
+   a type error — which is exactly why the trap is worth a lesson. */
+startTransition(async () => {
+  const results = await search(query);
+  setResults(results);   // ← a new task; nothing marked it
+});
+
+/* Right: do the awaiting outside, and mark the update itself. */
+const results: Result[] = await search(query);
+startTransition(() => setResults(results));`,
+            },
+          ],
         },
         {
           id: "ispending-is-not-proof",

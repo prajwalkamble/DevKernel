@@ -76,6 +76,39 @@ unmount:
   cleanup A`,
           explanation:
             "Render first, then the layout effect, then the passive effect — and on the way out, cleanup in the same order the effects were declared. The gap this output cannot show is the paint: in a browser it happens between `layout effect` and `effect`, which is exactly why a measurement belongs in the first and a subscription in the second.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, useLayoutEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Probe({ label }: { label: string }) {
+  console.log("  render", label);
+
+  useLayoutEffect(() => {
+    console.log("  layout effect", label);
+    return () => console.log("  layout cleanup", label);
+  }, []);
+
+  useEffect(() => {
+    console.log("  effect", label);
+    return () => console.log("  cleanup", label);
+  }, []);
+
+  return <p>{label}</p>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+console.log("mount:");
+act(() => { root.render(<Probe label="A" />); });
+
+console.log("unmount:");
+act(() => { root.unmount(); });`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -155,6 +188,53 @@ updated:  derived = 6 | synced = 6
 renders:  derived = 2 | synced = 4`,
           explanation:
             "Both end up showing the right number, so the bug is invisible in the final state — and the render counts give it away: two renders for every one. The first of each pair painted the *old* total, because the effect had not run yet. On a fast machine that is a flicker; on a slow one it is a visible wrong number. And the effect version needs `items` to be referentially stable, which the next lesson shows is its own problem.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let derivedRenders = 0;
+let effectRenders = 0;
+
+// Derived during render: one render per change, never stale.
+function Derived({ items }: { items: number[] }) {
+  derivedRenders++;
+  const total = items.reduce((sum, n) => sum + n, 0);
+  return <span id="d">{total}</span>;
+}
+
+// Synchronised with an effect: two renders per change, and the first is wrong.
+// Both versions type-check identically — the extra render and the stale first
+// paint are behaviour, not shape.
+function Synced({ items }: { items: number[] }) {
+  effectRenders++;
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    setTotal(items.reduce((sum, n) => sum + n, 0));
+  }, [items]);
+  return <span id="s">{total}</span>;
+}
+
+function App({ items }: { items: number[] }) {
+  return <><Derived items={items} /><Synced items={items} /></>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<App items={[1, 2]} />); });
+console.log("mounted:  derived =", container.querySelector("#d")!.textContent,
+            "| synced =", container.querySelector("#s")!.textContent);
+console.log("renders:  derived =", derivedRenders, "| synced =", effectRenders);
+
+act(() => { root.render(<App items={[1, 2, 3]} />); });
+console.log("updated:  derived =", container.querySelector("#d")!.textContent,
+            "| synced =", container.querySelector("#s")!.textContent);
+console.log("renders:  derived =", derivedRenders, "| synced =", effectRenders);`,
+            },
+          ],
         },
       ],
     },

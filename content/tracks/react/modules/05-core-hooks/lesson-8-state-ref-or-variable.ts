@@ -77,6 +77,51 @@ after clicking a twice:
    a: state=2 ref=2 plain=0 shared=2b: state=0 ref=0 plain=0 shared=0`,
           explanation:
             "Four values incremented identically, four different outcomes. `state` and `ref` both reached 2 for `a` and stayed 0 for `b` — per instance, as expected. `plain` never left 0, because each render made a new one. And `shared` reads 2 in `a` and **0 in `b`** — not because `b` has its own copy, but because `b` never re-rendered, so it is still displaying the value from mount. That last one is the whole danger of module scope: the data is shared and the display is not.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useRef, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+// Module scope: one value shared by every instance of the component.
+let shared = 0;
+
+function Box({ name }: { name: string }) {
+  const [stateCount, setStateCount] = useState(0);
+  const refCount = useRef(0);
+  let plain = 0;
+
+  // All four are \`number\`. The type says nothing about lifetime, which is the
+  // only thing that differs between them — that is what this example is for.
+  function bumpAll() {
+    plain++;            // gone the moment this render's variables are discarded
+    refCount.current++; // survives, changes nothing on screen
+    shared++;           // survives, and every Box shares it
+    setStateCount((n) => n + 1);
+  }
+
+  return (
+    <button id={name} onClick={bumpAll}>
+      {name}: state={stateCount} ref={refCount.current} plain={plain} shared={shared}
+    </button>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+const show = () => console.log("  ", container.textContent);
+
+act(() => { root.render(<><Box name="a" /><Box name="b" /></>); });
+console.log("mounted:");
+show();
+
+act(() => { container.querySelector<HTMLButtonElement>("#a")!.click(); });
+act(() => { container.querySelector<HTMLButtonElement>("#a")!.click(); });
+console.log("after clicking a twice:");
+show();`,
+            },
+          ],
         },
       ],
     },

@@ -234,6 +234,25 @@ hydrateRoot(document.getElementById("root"), <App />);
 requestIdleCallback(() => performance.mark("hydrated"));`,
           explanation:
             "`first-contentful-paint` against your own `hydrated` mark is the number worth watching, and it is the one a Lighthouse score on a fast laptop will flatter. Total Blocking Time in a throttled run is the closest standard proxy.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Paste into the console on a server-rendered page. FCP is when the
+   content appeared; the hydration mark is when it started working. The
+   distance between them is the window where the page lied. */
+new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    console.log(entry.name, Math.round(entry.startTime), "ms");
+  }
+}).observe({ type: "paint", buffered: true });
+
+/* In the app, once, at the end of the entry module. \`getElementById\` returns
+   \`HTMLElement | null\` and hydrateRoot will not take null, so the assertion
+   is where you promise the element is in the HTML the server sent. */
+hydrateRoot(document.getElementById("root")!, <App />);
+requestIdleCallback(() => performance.mark("hydrated"));`,
+            },
+          ],
         },
       ],
     },

@@ -69,6 +69,52 @@ function App() {
           output: `<div><ul><li>Ada</li><li>Grace</li></ul><ul><li>Ada</li><li>Grace</li></ul><dl><dt>Ada</dt><dd>Analyst</dd><dt>Grace</dt><dd>Admiral</dd></dl></div>`,
           explanation:
             "No key appears in the output — they are consumed by the reconciler and never reach the DOM. Note the `<li>` inside `Row` has no key and needs none: it is an only child of that component, not a member of a dynamic list.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Fragment } from "react";
+
+type Person = { id: string; name: string; role: string };
+
+const people: Person[] = [
+  { id: "a", name: "Ada", role: "Analyst" },
+  { id: "g", name: "Grace", role: "Admiral" },
+];
+
+// 1. Inline: the key is on the <li> the callback returns.
+function Inline() {
+  return <ul>{people.map((p) => <li key={p.id}>{p.name}</li>)}</ul>;
+}
+
+// 2. Extracted: the key moved with the element the callback returns. Note the
+// prop type has no \`key\` in it — \`key\` is never a prop, so it is not part of
+// the component's signature.
+function Row({ person }: { person: Person }) {
+  return <li>{person.name}</li>;   // no key here — this is an only child
+}
+function Extracted() {
+  return <ul>{people.map((p) => <Row key={p.id} person={p} />)}</ul>;
+}
+
+// 3. Several siblings per item: a keyed Fragment, which <> cannot be.
+function Paired() {
+  return (
+    <dl>
+      {people.map((p) => (
+        <Fragment key={p.id}>
+          <dt>{p.name}</dt>
+          <dd>{p.role}</dd>
+        </Fragment>
+      ))}
+    </dl>
+  );
+}
+
+function App() {
+  return <div><Inline /><Extracted /><Paired /></div>;
+}`,
+            },
+          ],
         },
       ],
     },
@@ -131,6 +177,57 @@ function App() {
           output: `<div><table><tbody><tr><td>a</td><td>b</td></tr><tr><td>c</td><td>d</td></tr></tbody></table><ul><li>Alpha<ul><li>Ada</li><li>Grace</li></ul></li><li>Beta<ul><li>Alan</li></ul></li></ul></div>`,
           explanation:
             "`m1` is used as a key in both teams and nothing complains, because sibling scope is all React checks. Prefixing inner keys with the team id — `` `${team.id}-${m.id}` `` — is a common habit that adds noise and buys nothing, since the two lists are never compared with each other.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Member = { id: string; name: string };
+type Team = { id: string; name: string; members: Member[] };
+
+const grid: string[][] = [["a", "b"], ["c", "d"]];
+
+const teams: Team[] = [
+  { id: "t1", name: "Alpha", members: [{ id: "m1", name: "Ada" }, { id: "m2", name: "Grace" }] },
+  { id: "t2", name: "Beta", members: [{ id: "m1", name: "Alan" }] },
+];
+
+function Grid() {
+  return (
+    <table>
+      <tbody>
+        {grid.map((row, r) => (
+          // The row index is a fine key here: this grid is never reordered.
+          // A key may be a string or a number, and neither is checked for
+          // uniqueness — that part is on you in both languages.
+          <tr key={r}>
+            {row.map((cell, c) => <td key={\`\${r}-\${c}\`}>{cell}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function Teams() {
+  return (
+    <ul>
+      {teams.map((team) => (
+        <li key={team.id}>
+          {team.name}
+          <ul>
+            {/* Only unique among siblings — so m1 appearing in both teams is fine. */}
+            {team.members.map((m) => <li key={m.id}>{m.name}</li>)}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function App() {
+  return <div><Grid /><Teams /></div>;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

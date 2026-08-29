@@ -184,6 +184,48 @@ function usePrefersDark() {
 }`,
           explanation:
             "Both call the handler once immediately after subscribing. Between the first render computing the initial state and the effect running, the value can already have changed — a window resized during load, a system theme that switched. Subscribing without reading leaves you displaying a value that was true a moment ago and will not update until the next event.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// The return type of a custom hook is worth stating: it is this hook's
+// public contract, and inference would happily let a refactor change it.
+function useWindowWidth(): number {
+  const [width, setWidth] = useState(() => window.innerWidth);
+
+  useEffect(() => {
+    // Named, and referenced twice. This is the whole discipline.
+    const onResize = () => setWidth(window.innerWidth);
+
+    window.addEventListener("resize", onResize);
+    // The size may already have changed between the initial state and here.
+    onResize();
+
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return width;
+}
+
+/* The same for a media query, which has the identical shape and one extra
+   trap: the initial value must be read, not assumed. \`matchMedia\` returns a
+   MediaQueryList, so \`addEventListener("change", ...)\` is checked against
+   that element's own event map rather than the window's. */
+function usePrefersDark(): boolean {
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => setDark(query.matches);
+
+    setDark(query.matches);                  // read it now
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  return dark;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

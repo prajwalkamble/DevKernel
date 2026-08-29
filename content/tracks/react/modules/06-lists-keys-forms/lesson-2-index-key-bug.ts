@@ -80,6 +80,60 @@ id keys,    before: Ada="typed for Ada"  Grace=""
 id keys,    after:  Alan=""  Ada="typed for Ada"  Grace=""`,
           explanation:
             "Read the second line. The text typed for Ada is now sitting next to **Alan**, and Ada's box is empty. Nothing errored, nothing warned, and the list looks perfectly correct until you notice whose text that is. The fourth line is the same operation keyed by id: the text stayed with Ada, and Alan arrived with an empty box.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+type Row = { id: string; name: string };
+
+const START: Row[] = [{ id: "a", name: "Ada" }, { id: "g", name: "Grace" }];
+
+function List({ byIndex }: { byIndex: boolean }) {
+  const [rows, setRows] = useState<Row[]>(START);
+  return (
+    <div>
+      <button id="add" onClick={() => setRows((r) => [{ id: "l", name: "Alan" }, ...r])}>
+        add
+      </button>
+      <ul>
+        {rows.map((row, i) => (
+          <li key={byIndex ? i : row.id}>
+            <span>{row.name}</span>
+            {/* Uncontrolled: the text is DOM state, owned by this node. */}
+            <input defaultValue="" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function run(byIndex: boolean) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => { root.render(<List byIndex={byIndex} />); });
+
+  // \`querySelectorAll<T>\` is the typed form; without it these are Elements
+  // and neither \`.value\` nor \`.textContent\` narrowing is available.
+  container.querySelectorAll("input")[0].value = "typed for Ada";
+
+  const read = () =>
+    [...container.querySelectorAll("li")]
+      .map((li) => \`\${li.querySelector("span")!.textContent}="\${li.querySelector("input")!.value}"\`)
+      .join("  ");
+
+  console.log(byIndex ? "index keys, before:" : "id keys,    before:", read());
+  act(() => { container.querySelector<HTMLButtonElement>("#add")!.click(); });
+  console.log(byIndex ? "index keys, after: " : "id keys,    after: ", read());
+}
+
+run(true);
+run(false);`,
+            },
+          ],
         },
       ],
       pitfalls: [

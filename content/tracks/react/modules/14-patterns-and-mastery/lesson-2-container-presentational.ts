@@ -49,6 +49,35 @@ function UserList({ users, loading }) {
 }`,
           explanation:
             "Notice what the container is: a class whose entire `render` is one element. It exists solely because the data logic had nowhere else to live. That is the piece hooks deleted.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type User = { id: string; name: string };
+type State = { users: User[]; loading: boolean };
+
+/* The container: knows about fetching, knows nothing about markup. A class
+   component takes its props and state as type arguments, which is the one
+   place TypeScript and the old React API fit together neatly — \`this.state\`
+   is then checked like anything else. */
+class UserListContainer extends React.Component<Record<string, never>, State> {
+  state: State = { users: [], loading: true };
+
+  componentDidMount() {
+    fetchUsers().then((users: User[]) => this.setState({ users, loading: false }));
+  }
+
+  render() {
+    return <UserList users={this.state.users} loading={this.state.loading} />;
+  }
+}
+
+/* The presentational component: knows about markup, knows nothing else. */
+function UserList({ users, loading }: { users: User[]; loading: boolean }) {
+  if (loading) return <Spinner />;
+  return <ul>{users.map((u) => <li key={u.id}>{u.name}</li>)}</ul>;
+}`,
+            },
+          ],
         },
       ],
     },
@@ -159,6 +188,29 @@ const { x, y } = useMousePosition();
 </List>`,
           explanation:
             "The distinction: a hook gives the caller a value **once**, in their own component body. A render prop gives them a value **per invocation**, from inside a loop or a boundary they do not control. When the second is what you need, a render prop is not a legacy pattern — it is the only pattern.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* 2017: sharing mouse position. */
+<MouseTracker>
+  {({ x, y }: { x: number; y: number }) => <p>{x}, {y}</p>}
+</MouseTracker>
+
+/* Today: the same thing, and it composes with other hooks. */
+const { x, y } = useMousePosition();
+
+/* Still a render prop, and rightly so: the value is produced per item by
+   a component the caller does not control. A hook cannot express this,
+   because the caller is not the one iterating.
+
+   In TypeScript this is also where the pattern pays: List is generic over
+   its item, so \`user\` below is a User inside the callback without anyone
+   annotating it, and \`getKey\` is checked against the same type. */
+<List<User> items={users} getKey={(u) => u.id}>
+  {(user) => <UserCard user={user} />}
+</List>`,
+            },
+          ],
         },
       ],
     },

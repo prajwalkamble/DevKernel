@@ -36,7 +36,30 @@ export const testingLibraryLesson: Lesson = {
           id: "config",
           title: "The whole setup",
           lang: "javascript",
-          code: `// vitest.config.ts
+          code: `// vitest.config.js
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    /* A DOM implementation in Node. Not a browser: no layout, no real
+       paint, and getBoundingClientRect returns zeros — which matters for
+       anything that measures. */
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./vitest.setup.js"],
+  },
+});
+
+// vitest.setup.js — adds toBeInTheDocument, toHaveTextContent and the rest.
+import "@testing-library/jest-dom/vitest";`,
+          explanation:
+            "The `environment: \"jsdom\"` line is the one worth understanding. jsdom implements the DOM API in Node without a rendering engine, so everything about structure and events works and everything about geometry does not. A component that reads `offsetWidth` will see `0` and must be tested elsewhere.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// vitest.config.ts
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
@@ -54,8 +77,8 @@ export default defineConfig({
 
 // vitest.setup.ts — adds toBeInTheDocument, toHaveTextContent and the rest.
 import "@testing-library/jest-dom/vitest";`,
-          explanation:
-            "The `environment: \"jsdom\"` line is the one worth understanding. jsdom implements the DOM API in Node without a rendering engine, so everything about structure and events works and everything about geometry does not. A component that reads `offsetWidth` will see `0` and must be tested elsewhere.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -105,6 +128,42 @@ screen.getByAltText("Ada Lovelace");
 screen.getByTestId("toast-container");`,
           explanation:
             "`getByRole` covers most of a real page because most of a real page is buttons, links, headings, fields and landmarks — all of which have roles, and all of which have accessible names if the markup is any good. When it does not work, the usual reason is that the markup has no name to find, and the fix is to the markup.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `/* Identical calls in both languages; what TypeScript adds is the return
+   type. Every query resolves to \`HTMLElement\`, so reading \`.value\` off one
+   needs narrowing — \`getByRole<HTMLInputElement>("textbox")\` or a cast —
+   which is the one piece of friction in a typed suite. */
+
+/* 1. Role and accessible name. The default for nearly everything. */
+screen.getByRole("button", { name: "Sign in" });
+screen.getByRole<HTMLInputElement>("textbox", { name: "Email address" });
+screen.getByRole("heading", { level: 1 });
+screen.getByRole("alert");
+
+/* 2. Label text. For form fields, and it fails when there is no label —
+      which is a bug the test is entitled to notice. */
+screen.getByLabelText("Email address");
+
+/* 3. Placeholder. A fallback for a field with no label. Accepting it
+      concedes that the field has no label, since a placeholder vanishes
+      as soon as the user types. */
+screen.getByPlaceholderText("you@example.com");
+
+/* 4. Text. For content: paragraphs, messages, headings you are asserting
+      the words of rather than the structure. */
+screen.getByText("3 results");
+screen.getByText(/\\d+ results/);
+
+/* 5. Display value, alt text, title. Narrow cases the rungs above miss. */
+screen.getByDisplayValue("ada@example.com");
+screen.getByAltText("Ada Lovelace");
+
+/* 6. Test id. The last rung, and invisible to every user. */
+screen.getByTestId("toast-container");`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -147,6 +206,31 @@ expect(await screen.findByRole("status")).toHaveTextContent("Saved");
 expect(screen.queryByRole("alert")).not.toBeInTheDocument();`,
           explanation:
             "The second case is the dangerous one, because it is green. A `queryBy` used for a positive assertion, or a negative assertion made before the thing has had a chance to appear, is a test that will keep passing after the feature is deleted.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `await user.click(screen.getByRole("button", { name: "Save" }));
+
+/* ✗ Fails, and looks like a bug in the component. The save is async, so
+   the message is not in the DOM in the same tick as the click. */
+expect(screen.getByRole("status")).toHaveTextContent("Saved");
+
+/* ✗ Worse: passes today, and passes tomorrow when the component is broken.
+   queryBy returns null, and null is not in the document, so the negative
+   assertion is trivially true and the test asserts nothing.
+
+   The types do give you one hint here that JavaScript does not: getBy
+   returns \`HTMLElement\` and queryBy returns \`HTMLElement | null\`, so the
+   null is at least visible in the signature. */
+expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+/* ✓ Waits for it to appear, with a real timeout and a real failure. */
+expect(await screen.findByRole("status")).toHaveTextContent("Saved");
+
+/* ✓ And the one thing queryBy is for. */
+expect(screen.queryByRole("alert")).not.toBeInTheDocument();`,
+            },
+          ],
         },
       ],
       pitfalls: [

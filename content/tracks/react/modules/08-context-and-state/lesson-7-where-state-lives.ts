@@ -124,6 +124,50 @@ export const whereStateLivesLesson: Lesson = {
 }`,
           explanation:
             "Count what is left in React state: one boolean. Everything else is in the URL, in the cache, computed, or in a context that was already there for a reason. That ratio is normal for a well-placed screen, and it is the reason \"which state manager?\" is a smaller question than it looks.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Product = { id: string; name: string; inStock: boolean };
+
+function ProductsRoute() {
+  // 3. Shareable and survives refresh -> the URL.
+  //    Bookmarkable, back-button works, no code for either. Everything read
+  //    out of a URL is \`string | null\`, which is why each line below has a
+  //    fallback rather than trusting what is there.
+  const [params, setParams] = useSearchParams();
+  const category = params.get("category") ?? "all";
+  const sort = params.get("sort") ?? "popular";
+  const openId = params.get("open");          // which modal is open: also the URL
+
+  // 2. Owned by the server -> the data cache. Keyed by the URL state, so
+  //    changing a filter refetches and a repeat visit is instant. \`data\` is
+  //    optional until it arrives, which is what forces the \`?? []\` below.
+  const { data: products, isPending } = useProducts<Product[]>({ category, sort });
+
+  // 1. Derived -> computed, not stored.
+  const visible = useMemo<Product[]>(
+    () => products?.filter((p) => p.inStock) ?? [],
+    [products],
+  );
+
+  // 4. Only this component uses it -> useState, right here.
+  const [showOutOfStock, setShowOutOfStock] = useState(false);
+
+  // 6/7. The cart is read across the tree and lives above this route.
+  //      A context is enough; it changes a few times per session.
+  const cart = useCart();
+
+  return (
+    <Layout>
+      <Filters category={category} sort={sort} onChange={setParams} />
+      <ProductGrid products={showOutOfStock ? products ?? [] : visible} />
+      {openId && <ProductModal id={openId} onClose={() => setParams({})} />}
+      <CartBadge count={cart.items.length} />
+    </Layout>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [

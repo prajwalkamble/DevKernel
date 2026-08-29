@@ -47,6 +47,29 @@ export default defineConfig([
 ]);`,
           explanation:
             "In flat config `plugins` is an object mapping a name to the imported plugin, not an array of strings — passing the old shape produces a long, specific ESLint error telling you so. If you are on `eslint-config-next`, all of this is already configured and you can skip to the next section.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// eslint.config.ts — the flat config may be written in TypeScript, which
+// buys completion on the rule names and catches a plugin key that does not
+// match what the plugin exports. ESLint needs jiti installed to load it.
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
+import reactHooks from "eslint-plugin-react-hooks";
+
+export default defineConfig([
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: { "react-hooks": reactHooks },
+    rules: reactHooks.configs.recommended.rules,
+  },
+]);`,
+            },
+          ],
         },
       ],
     },

@@ -72,6 +72,32 @@ inside StrictMode:
   effect B`,
           explanation:
             "`render B` twice is the purity check from module 2. The `effect → cleanup → effect` sequence is the new part: React set the effect up, tore it down, and set it up again, all before anything else happened. An effect whose cleanup is complete ends in exactly the state it would have reached without the extra cycle. An effect with no cleanup ends up having done its work twice.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { StrictMode, useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Probe({ label }: { label: string }) {
+  console.log("  render", label);
+  useEffect(() => {
+    console.log("  effect", label);
+    return () => console.log("  cleanup", label);
+  }, []);
+  return <p>{label}</p>;
+}
+
+const plain = document.createElement("div");
+document.body.appendChild(plain);
+console.log("without StrictMode:");
+act(() => { createRoot(plain).render(<Probe label="A" />); });
+
+const strict = document.createElement("div");
+document.body.appendChild(strict);
+console.log("inside StrictMode:");
+act(() => { createRoot(strict).render(<StrictMode><Probe label="B" /></StrictMode>); });`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -134,6 +160,48 @@ after two changes: live listeners: 4
 after unmount:     live listeners: 3`,
           explanation:
             "Both started with one listener each. After two `id` changes, `Leaky` had accumulated three — one per run, none removed — while `Tidy` still had one, because each re-run cleaned up the previous. After unmount `Tidy` removed its last and `Leaky` left all three behind forever. Each of those closures also holds the `id` from the render that created it, so this is a memory leak and a source of stale callbacks at once.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+// \`new Set()\` on its own is \`Set<unknown>\`, and \`subscribe\` would then accept
+// anything — so the element type is worth stating even in a throwaway model.
+type Listener = () => unknown;
+const listeners = new Set<Listener>();
+function subscribe(fn: Listener) { listeners.add(fn); return () => listeners.delete(fn); }
+
+function Leaky({ id }: { id: number }) {
+  useEffect(() => {
+    subscribe(() => id);          // subscribes, never unsubscribes
+  }, [id]);
+  return null;
+}
+
+function Tidy({ id }: { id: number }) {
+  useEffect(() => {
+    const unsubscribe = subscribe(() => id);
+    return unsubscribe;           // torn down before each re-run, and on unmount
+  }, [id]);
+  return null;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+const show = (label: string) => console.log(label, "live listeners:", listeners.size);
+
+act(() => { root.render(<><Leaky id={1} /><Tidy id={1} /></>); });
+show("after mount:      ");
+act(() => { root.render(<><Leaky id={2} /><Tidy id={2} /></>); });
+act(() => { root.render(<><Leaky id={3} /><Tidy id={3} /></>); });
+show("after two changes:");
+act(() => { root.unmount(); });
+show("after unmount:    ");`,
+            },
+          ],
         },
       ],
     },
