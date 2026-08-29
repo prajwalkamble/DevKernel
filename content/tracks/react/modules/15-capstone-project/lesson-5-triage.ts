@@ -44,7 +44,7 @@ export const capstoneTriageLesson: Lesson = {
       examples: [
         {
           id: "severity-order",
-          title: "server/src/routes/bugs.ts — the ranking",
+          title: "server/src/routes/bugs.js — the ranking",
           lang: "javascript",
           code: `/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
    trivial happens to be right by luck, and would stop being right the moment
@@ -64,6 +64,28 @@ bugRoutes.get("/projects/:projectId/triage", async (c) => {
           explanation:
             "The `ELSE 3` rather than a fourth `WHEN` is a small deliberate choice: an unranked severity sorts last rather than crashing the query, so adding a value to the shared vocabulary and forgetting this `CASE` degrades the ordering instead of breaking the screen. The better version of this — and the right one once there are more than four — is a rank column on a severities table, so the order is data rather than code.",
           requires: "tsc (imports elided; see the repository for the full file)",
+          alternates: [
+            {
+              lang: "typescript",
+              title: "server/src/routes/bugs.ts — the ranking",
+              requires: "tsc (imports elided; see the repository for the full file)",
+              code: `/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
+   trivial happens to be right by luck, and would stop being right the moment
+   anyone adds "critical". Rank it explicitly instead. */
+const severityOrder = sql\`CASE \${bugs.severity}
+  WHEN 'blocker' THEN 0 WHEN 'major' THEN 1 WHEN 'minor' THEN 2 ELSE 3 END\`;
+
+bugRoutes.get("/projects/:projectId/triage", async (c) => {
+  return c.json(
+    await db
+      .select()
+      .from(bugs)
+      .where(and(eq(bugs.projectId, c.req.param("projectId")), eq(bugs.status, "open")))
+      .orderBy(severityOrder, asc(bugs.createdAt)),
+  );
+});`,
+            },
+          ],
         },
         {
           id: "queue-transcript",
@@ -89,9 +111,74 @@ bugRoutes.get("/projects/:projectId/triage", async (c) => {
       examples: [
         {
           id: "triage-queue",
-          title: "web/src/features/triage/TriageQueue.tsx",
-          lang: "tsx",
-          code: `export interface TriageQueueProps {
+          title: "web/src/features/triage/TriageQueue.jsx",
+          lang: "jsx",
+          code: `/* FR-11 and FR-12. The queue is the screen a maintainer opens first: every
+   report nobody has looked at, worst first, then oldest. Two buttons, because
+   triage has exactly two answers — this is real, or it is not. */
+export function TriageQueue({ projectId, projectKey }) {
+  const queue = useTriageQueue(projectId);
+  const triage = useTriage(projectId);
+
+  return (
+    <section>
+      <h1>Triage</h1>
+      <p>{(queue.data ?? []).length} waiting</p>
+
+      <AsyncBoundary
+        isPending={queue.isPending}
+        error={queue.error}
+        isEmpty={(queue.data ?? []).length === 0}
+        onRetry={() => void queue.refetch()}
+        empty={<p>Nothing to triage. Every report has been looked at.</p>}
+      >
+        <ol>
+          {(queue.data ?? []).map((bug) => (
+            <li key={bug.id}>
+              <h2>{\`\${projectKey}-\${bug.number} \${bug.title}\`}</h2>
+              <p>{bug.severity}</p>
+              <dl>
+                <dt>Steps</dt>
+                <dd>{bug.stepsToReproduce}</dd>
+                <dt>Expected</dt>
+                <dd>{bug.expected}</dd>
+                <dt>Actual</dt>
+                <dd>{bug.actual}</dd>
+                <dt>Environment</dt>
+                <dd>{bug.environment}</dd>
+              </dl>
+              <button
+                type="button"
+                disabled={triage.isPending}
+                onClick={() => triage.mutate({ bugId: bug.id, outcome: "confirmed" })}
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                disabled={triage.isPending}
+                onClick={() => triage.mutate({ bugId: bug.id, outcome: "wontfix" })}
+              >
+                Won't fix
+              </button>
+            </li>
+          ))}
+        </ol>
+      </AsyncBoundary>
+
+      {triage.error && <p role="alert">{triage.error.message}</p>}
+    </section>
+  );
+}`,
+          explanation:
+            "Three details are load-bearing. It is an `<ol>` rather than a `<ul>`, because the order is the meaning — this is a ranked queue, and a screen reader should say so. The empty state is the good one, so it says so rather than apologising. And the error is rendered *outside* the boundary: a failed triage decision must not blank the queue, because the user still needs to see the row that came back.",
+          requires: "tsc and a React renderer (imports elided; see the repository)",
+          alternates: [
+            {
+              lang: "tsx",
+              title: "web/src/features/triage/TriageQueue.tsx",
+              requires: "tsc and a React renderer (imports elided; see the repository)",
+              code: `export interface TriageQueueProps {
   projectId: string;
   projectKey: string;
 }
@@ -153,9 +240,8 @@ export function TriageQueue({ projectId, projectKey }: TriageQueueProps) {
     </section>
   );
 }`,
-          explanation:
-            "Three details are load-bearing. It is an `<ol>` rather than a `<ul>`, because the order is the meaning — this is a ranked queue, and a screen reader should say so. The empty state is the good one, so it says so rather than apologising. And the error is rendered *outside* the boundary: a failed triage decision must not blank the queue, because the user still needs to see the row that came back.",
-          requires: "tsc and a React renderer (imports elided; see the repository)",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -175,7 +261,7 @@ export function TriageQueue({ projectId, projectKey }: TriageQueueProps) {
       examples: [
         {
           id: "rollback-test",
-          title: "web/src/features/triage/TriageQueue.test.tsx",
+          title: "web/src/features/triage/TriageQueue.test.jsx",
           lang: "jsx",
           code: `it("removes a bug from the queue as soon as it is confirmed", async () => {
   /* The fake keeps state, because the real server does. Without this the
@@ -225,6 +311,56 @@ it("puts the bug back when the server rejects the decision", async () => {
             "The first test failed on the first attempt, and the failure was worth more than the fix. The handler was stateless, so the invalidation in `onSettled` refetched the queue and got the bug back — the screen went to zero and then to one again. That is not a test bug; it is the test correctly reporting that a server which forgets is indistinguishable from a rollback. Making the fake stateful is what lets the second test mean something, because now \"the row came back\" can only be the rollback.",
           requires:
             "vitest with Testing Library and MSW (this is the source; the run is in the previous lesson)",
+          alternates: [
+            {
+              lang: "tsx",
+              title: "web/src/features/triage/TriageQueue.test.tsx",
+              code: `it("removes a bug from the queue as soon as it is confirmed", async () => {
+  /* The fake keeps state, because the real server does. Without this the
+     refetch that follows the mutation hands the bug straight back and the
+     test would be asserting against a server that forgot what it was told. */
+  let triaged = false;
+  server.use(
+    http.get(\`\${API}/projects/:projectId/triage\`, () =>
+      HttpResponse.json(triaged ? [] : bugs.filter((bug) => bug.status === "open")),
+    ),
+    http.post(\`\${API}/bugs/:id/triage\`, () => {
+      triaged = true;
+      return HttpResponse.json({ ...bugs[0], status: "confirmed" });
+    }),
+  );
+
+  renderApp(<TriageQueue projectId="p_web" projectKey="WEB" />);
+  await screen.findByRole("list");
+  expect(screen.getByText("1 waiting")).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+  expect(await screen.findByText("0 waiting")).toBeInTheDocument();
+});
+
+it("puts the bug back when the server rejects the decision", async () => {
+  server.use(
+    http.post(\`\${API}/bugs/:id/triage\`, () =>
+      HttpResponse.json({ error: "Already triaged: this bug is wontfix" }, { status: 409 }),
+    ),
+  );
+
+  renderApp(<TriageQueue projectId="p_web" projectKey="WEB" />);
+  await screen.findByRole("list");
+
+  await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+  /* The optimistic removal must be undone, visibly, and the reason shown.
+     An optimistic update without a rollback is a lie that survives until
+     the next refetch. */
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Already triaged: this bug is wontfix",
+  );
+  expect(await screen.findByText("1 waiting")).toBeInTheDocument();
+});`,
+            },
+          ],
         },
       ],
       pitfalls: [

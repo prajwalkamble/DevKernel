@@ -39,20 +39,27 @@ export function ComparisonPanel({ example }: { example: CodeExample }) {
     };
     const outputs: Partial<Record<ExampleLanguage, ReactNode>> = {};
     if (example.output) outputs[primary] = <OutputPanel output={example.output} />;
+    // Titles travel with the language, because most of them name a file.
+    const titles: Partial<Record<ExampleLanguage, string>> = {};
+    if (example.title) titles[primary] = example.title;
 
     for (const variant of translated) {
       if (!isExampleLanguage(variant.lang)) continue;
       blocks[variant.lang] = <CodeBlock code={variant.code} language={variant.lang} />;
       const out = variant.output ?? example.output;
       if (out) outputs[variant.lang] = <OutputPanel output={out} />;
+      const title = variant.title ?? example.title;
+      if (title) titles[variant.lang] = title;
     }
 
     return (
       <div className="space-y-3">
-        {example.title && (
-          <h4 className="text-sm font-medium text-foreground">{example.title}</h4>
-        )}
-        <ExampleLanguagePicker primary={primary} blocks={blocks} outputs={outputs} />
+        <ExampleLanguagePicker
+          primary={primary}
+          blocks={blocks}
+          outputs={outputs}
+          titles={titles}
+        />
         {example.explanation && (
           <p className="text-sm leading-relaxed text-foreground/80">
             <ProseInline text={example.explanation} />

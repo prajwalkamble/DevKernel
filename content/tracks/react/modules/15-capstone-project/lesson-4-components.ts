@@ -25,9 +25,41 @@ export const capstoneComponentsLesson: Lesson = {
       examples: [
         {
           id: "async-boundary",
-          title: "web/src/components/AsyncBoundary.tsx",
-          lang: "tsx",
-          code: `import type { ReactNode } from "react";
+          title: "web/src/components/AsyncBoundary.jsx",
+          lang: "jsx",
+          code: `export function AsyncBoundary({
+  isPending,
+  error,
+  isEmpty,
+  onRetry,
+  empty,
+  children,
+}) {
+  if (isPending) return <p role="status">Loading…</p>;
+
+  if (error) {
+    return (
+      <div role="alert">
+        <p>{error.message}</p>
+        <button type="button" onClick={onRetry}>
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (isEmpty) return <>{empty}</>;
+  return <>{children}</>;
+}`,
+          explanation:
+            "The exception is `isEmpty`, and it is worth defending. The component could compute emptiness itself by inspecting `children`, and that would be shorter and wrong: \"no bugs match these filters\" and \"no bugs reported yet\" are different sentences, and only the caller knows which one applies because only the caller knows whether a filter is set. Pushing the *decision* out while keeping the *layout* in is the split that makes a shared component worth having. The `role=\"status\"` and `role=\"alert\"` are NFR-7: a screen reader announces both without the user having to go looking.",
+          requires: "tsc and a React renderer (this component only declares markup)",
+          alternates: [
+            {
+              lang: "tsx",
+              title: "web/src/components/AsyncBoundary.tsx",
+              requires: "tsc and a React renderer (this component only declares markup)",
+              code: `import type { ReactNode } from "react";
 
 /* FR-13. Four states, in one place, because the empty state is the one that
    gets forgotten and a numbered requirement is easier to keep than a habit.
@@ -67,9 +99,8 @@ export function AsyncBoundary({
   if (isEmpty) return <>{empty}</>;
   return <>{children}</>;
 }`,
-          explanation:
-            "The exception is `isEmpty`, and it is worth defending. The component could compute emptiness itself by inspecting `children`, and that would be shorter and wrong: \"no bugs match these filters\" and \"no bugs reported yet\" are different sentences, and only the caller knows which one applies because only the caller knows whether a filter is set. Pushing the *decision* out while keeping the *layout* in is the split that makes a shared component worth having. The `role=\"status\"` and `role=\"alert\"` are NFR-7: a screen reader announces both without the user having to go looking.",
-          requires: "tsc and a React renderer (this component only declares markup)",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -88,9 +119,57 @@ export function AsyncBoundary({
       examples: [
         {
           id: "bug-list",
-          title: "web/src/features/bugs/BugList.tsx",
-          lang: "tsx",
-          code: `export interface BugListProps {
+          title: "web/src/features/bugs/BugList.jsx",
+          lang: "jsx",
+          code: `export function BugList({ projectId, projectKey }) {
+  const { filters, setFilter } = useBugFilters();
+  const bugs = useBugs(projectId, filters);
+  const users = useUsers();
+
+  const byId = new Map((users.data ?? []).map((user) => [user.id, user]));
+  const hasFilter = Object.values(filters).some(Boolean);
+
+  return (
+    <section>
+      <h1>Bugs</h1>
+      <BugFilters filters={filters} users={users.data ?? []} onChange={setFilter} />
+
+      <AsyncBoundary
+        isPending={bugs.isPending}
+        error={bugs.error}
+        isEmpty={(bugs.data ?? []).length === 0}
+        onRetry={() => void bugs.refetch()}
+        empty={
+          hasFilter ? (
+            <p>No bugs match these filters.</p>
+          ) : (
+            <p>No bugs reported yet. That is either very good news or very bad news.</p>
+          )
+        }
+      >
+        <ul>
+          {(bugs.data ?? []).map((bug) => (
+            <BugRow
+              key={bug.id}
+              bug={bug}
+              projectKey={projectKey}
+              assignee={bug.assigneeId ? byId.get(bug.assigneeId) : undefined}
+            />
+          ))}
+        </ul>
+      </AsyncBoundary>
+    </section>
+  );
+}`,
+          explanation:
+            "`hasFilter` is the whole reason `isEmpty` is a prop rather than a computation. The user map is rebuilt on every render, which is fine and deliberate: it is three entries, and `useMemo` here would cost more in reading time than it saves in execution. That is a judgement about *this* data, not a general rule — the same code over four thousand users is a different decision, and the way to know is to measure rather than to memoise reflexively.",
+          requires: "tsc and a React renderer (imports elided; see the repository)",
+          alternates: [
+            {
+              lang: "tsx",
+              title: "web/src/features/bugs/BugList.tsx",
+              requires: "tsc and a React renderer (imports elided; see the repository)",
+              code: `export interface BugListProps {
   projectId: string;
   projectKey: string;
 }
@@ -135,9 +214,8 @@ export function BugList({ projectId, projectKey }: BugListProps) {
     </section>
   );
 }`,
-          explanation:
-            "`hasFilter` is the whole reason `isEmpty` is a prop rather than a computation. The user map is rebuilt on every render, which is fine and deliberate: it is three entries, and `useMemo` here would cost more in reading time than it saves in execution. That is a judgement about *this* data, not a general rule — the same code over four thousand users is a different decision, and the way to know is to measure rather than to memoise reflexively.",
-          requires: "tsc and a React renderer (imports elided; see the repository)",
+            },
+          ],
         },
       ],
     },
@@ -150,9 +228,64 @@ export function BugList({ projectId, projectKey }: BugListProps) {
       examples: [
         {
           id: "new-bug-form",
-          title: "web/src/features/bugs/NewBugForm.tsx — the validation half",
-          lang: "tsx",
-          code: `export function NewBugForm({ projectId, reporterId, onCreated }: NewBugFormProps) {
+          title: "web/src/features/bugs/NewBugForm.jsx — the validation half",
+          lang: "jsx",
+          code: `export function NewBugForm({ projectId, reporterId, onCreated }) {
+  const [form, setForm] = useState(empty);
+  const [clientErrors, setClientErrors] = useState({});
+  const create = useCreateBug(projectId);
+
+  /* NFR-3. The client's check saves a round trip; the server's exists because
+     this one can be bypassed with a single curl. Both run the same schema. */
+  const serverErrors = create.error instanceof ApiFailure ? create.error.fieldErrors : undefined;
+  const errors = { ...clientErrors, ...serverErrors };
+  const field = (name) => errors[name]?.[0];
+
+  return (
+    <form
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        const parsed = CreateBug.safeParse({ ...form, reporterId });
+        if (!parsed.success) {
+          const next = {};
+          for (const issue of parsed.error.issues) {
+            (next[issue.path.join(".")] ??= []).push(issue.message);
+          }
+          setClientErrors(next);
+          return;
+        }
+        setClientErrors({});
+        create.mutate(parsed.data, {
+          onSuccess: (bug) => {
+            setForm(empty);
+            onCreated?.(bug.id);
+          },
+        });
+      }}
+    >
+      {/* one of six fields; the rest follow the same shape */}
+      <label>
+        Steps to reproduce
+        <textarea
+          value={form.stepsToReproduce}
+          aria-invalid={Boolean(field("stepsToReproduce"))}
+          onChange={(event) => setForm({ ...form, stepsToReproduce: event.target.value })}
+        />
+      </label>
+      {field("stepsToReproduce") && <p role="alert">{field("stepsToReproduce")}</p>}
+    </form>
+  );
+}`,
+          explanation:
+            "The spread order in `{ ...clientErrors, ...serverErrors }` is a decision, not a formatting accident: the server's opinion wins, because the server is the one that refused. The messages the reader sees are the strings written back in the shared schema, so \"Say what you did, in enough detail to repeat it\" appears in the form without the form knowing what the rule was. `noValidate` turns off the browser's own bubbles, which cannot be styled, are not announced consistently, and would fire before this code ever runs.",
+          requires: "tsc and a React renderer (imports and four fields elided)",
+          alternates: [
+            {
+              lang: "tsx",
+              title: "web/src/features/bugs/NewBugForm.tsx — the validation half",
+              requires: "tsc and a React renderer (imports and four fields elided)",
+              code: `export function NewBugForm({ projectId, reporterId, onCreated }: NewBugFormProps) {
   const [form, setForm] = useState(empty);
   const [clientErrors, setClientErrors] = useState<Record<string, string[]>>({});
   const create = useCreateBug(projectId);
@@ -199,9 +332,8 @@ export function BugList({ projectId, projectKey }: BugListProps) {
     </form>
   );
 }`,
-          explanation:
-            "The spread order in `{ ...clientErrors, ...serverErrors }` is a decision, not a formatting accident: the server's opinion wins, because the server is the one that refused. The messages the reader sees are the strings written back in the shared schema, so \"Say what you did, in enough detail to repeat it\" appears in the form without the form knowing what the rule was. `noValidate` turns off the browser's own bubbles, which cannot be styled, are not announced consistently, and would fire before this code ever runs.",
-          requires: "tsc and a React renderer (imports and four fields elided)",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -220,7 +352,7 @@ export function BugList({ projectId, projectKey }: BugListProps) {
       examples: [
         {
           id: "list-test",
-          title: "web/src/features/bugs/BugList.test.tsx",
+          title: "web/src/features/bugs/BugList.test.jsx",
           lang: "jsx",
           code: `describe("BugList", () => {
   it("lists the bugs with their key, severity and assignee", async () => {
@@ -273,6 +405,59 @@ export function BugList({ projectId, projectKey }: BugListProps) {
             "The second test is the one that earns its keep. It asserts on what came *back*, which can only be right if the component put `status=open` in the query string — because the MSW handler applies the filter itself rather than ignoring it. A handler that returned the same array whatever the query would let this test pass while the component sent nothing, which is the most common way a network-level fake becomes decorative.",
           requires:
             "vitest with Testing Library and MSW (this is the source; its run appears below)",
+          alternates: [
+            {
+              lang: "tsx",
+              title: "web/src/features/bugs/BugList.test.tsx",
+              code: `describe("BugList", () => {
+  it("lists the bugs with their key, severity and assignee", async () => {
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+
+    const list = await screen.findByRole("list");
+    /* Scoped to the list on purpose: "Ada Lovelace" also appears in the
+       assignee <select>, and getAllByText(...)[0] would have been the bug. */
+    expect(within(list).getByText("WEB-1")).toBeInTheDocument();
+    expect(within(list).getByText("blocker")).toBeInTheDocument();
+    expect(within(list).getByText("Unassigned")).toBeInTheDocument();
+    expect(within(list).getByText("Ada Lovelace")).toBeInTheDocument();
+  });
+
+  it("sends the status filter to the server rather than filtering locally", async () => {
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+    await screen.findByRole("list");
+
+    await userEvent.selectOptions(screen.getByLabelText("Status"), "open");
+
+    const list = await screen.findByRole("list");
+    expect(within(list).getByText("WEB-1")).toBeInTheDocument();
+    expect(within(list).queryByText("WEB-2")).not.toBeInTheDocument();
+  });
+
+  it("distinguishes an empty result from an empty project", async () => {
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+    await screen.findByRole("list");
+
+    await userEvent.selectOptions(screen.getByLabelText("Status"), "closed");
+
+    expect(await screen.findByText("No bugs match these filters.")).toBeInTheDocument();
+  });
+
+  it("offers a retry when the request fails", async () => {
+    server.use(
+      http.get(\`\${API}/projects/:projectId/bugs\`, () =>
+        HttpResponse.json({ error: "Database is asleep" }, { status: 500 }),
+      ),
+    );
+
+    renderApp(<BugList projectId="p_web" projectKey="WEB" />);
+
+    const alert = await screen.findByRole("alert");
+    expect(within(alert).getByText("Database is asleep")).toBeInTheDocument();
+    expect(within(alert).getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  });
+});`,
+            },
+          ],
         },
         {
           id: "test-run",
