@@ -253,8 +253,30 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
         {
           id: "controlled-promise",
           title: "Holding the promise open",
-          lang: "tsx",
+          lang: "jsx",
           code: `test("shows a loading state while the save is in flight", async () => {
+  const user = userEvent.setup();
+
+  /* A promise this test controls. Nothing resolves until it says so. */
+  let finish;
+  const pending = new Promise((resolve) => { finish = resolve; });
+
+  render(<LoginForm onSubmit={() => pending} />);
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+  /* Now, with the request deliberately still open. */
+  expect(screen.getByRole("button")).toBeDisabled();
+  expect(screen.getByRole("button")).toHaveTextContent("Signing in…");
+
+  await act(async () => { finish("Signed in"); });
+  expect(await screen.findByRole("status")).toHaveTextContent("Signed in");
+});`,
+          explanation:
+            "This pattern is worth internalising, because it is the only reliable way to test a transient state. A `setTimeout` would be a race; a resolver you hold is not — the loading assertions run at a moment you chose.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `test("shows a loading state while the save is in flight", async () => {
   const user = userEvent.setup();
 
   /* A promise this test controls. Nothing resolves until it says so. */
@@ -271,8 +293,8 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
   await act(async () => { finish("Signed in"); });
   expect(await screen.findByRole("status")).toHaveTextContent("Signed in");
 });`,
-          explanation:
-            "This pattern is worth internalising, because it is the only reliable way to test a transient state. A `setTimeout` would be a race; a resolver you hold is not — the loading assertions run at a moment you chose.",
+            },
+          ],
         },
       ],
     },

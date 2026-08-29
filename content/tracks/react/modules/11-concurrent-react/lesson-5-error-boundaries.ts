@@ -87,8 +87,36 @@ console.log("what is left on the page:", JSON.stringify(container.innerHTML));`,
         {
           id: "the-class",
           title: "The whole of it",
-          lang: "tsx",
-          code: `import { Component, type ErrorInfo, type ReactNode } from "react";
+          lang: "jsx",
+          code: `import { Component } from "react";
+
+export class ErrorBoundary extends Component {
+  state = { error: null };
+
+  /* Render phase: pure, and may be called for a render that is discarded.
+     Turn the error into state and do nothing else. */
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  /* Commit phase: this ran for real. Log here. */
+  componentDidCatch(error, info) {
+    reportError(error, { componentStack: info.componentStack });
+  }
+
+  render() {
+    if (this.state.error) {
+      return this.props.fallback(this.state.error, () => this.setState({ error: null }));
+    }
+    return this.props.children;
+  }
+}`,
+          explanation:
+            "A render-prop fallback rather than a fixed element, so the caller can show the message, offer a retry, or ignore both. Note that `retry` only clears the boundary's own state — whether that is enough is the subject of a later section.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -116,8 +144,8 @@ export class ErrorBoundary extends Component<Props, { error: Error | null }> {
     return this.props.children;
   }
 }`,
-          explanation:
-            "A render-prop fallback rather than a fixed element, so the caller can show the message, offer a retry, or ignore both. Note that `retry` only clears the boundary's own state — whether that is enough is the subject of a later section.",
+            },
+          ],
         },
       ],
     },
@@ -140,8 +168,56 @@ export class ErrorBoundary extends Component<Props, { error: Error | null }> {
         {
           id: "caught-and-not",
           title: "Two throws, one boundary",
-          lang: "tsx",
-          code: `import { Component, act, type ReactNode } from "react";
+          lang: "jsx",
+          code: `import { Component, act } from "react";
+import { createRoot } from "react-dom/client";
+
+class Boundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) return <p>caught: {this.state.error.message}</p>;
+    return this.props.children;
+  }
+}
+
+/* In a browser an unhandled handler error ends up here. Listening for it is
+   how this example can show that it got out, rather than crashing. */
+window.addEventListener("error", (event) => {
+  event.preventDefault();
+  console.log("reached window.onerror:", event.message);
+});
+
+function Boom({ where }) {
+  if (where === "render") throw new Error("thrown while rendering");
+  return <button onClick={() => { throw new Error("thrown in a handler"); }}>go</button>;
+}
+
+function mount() {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  /* React 19 root options, so this example prints its own output rather than
+     React's console.error. They are the subject of a later section. */
+  return { container, root: createRoot(container, { onCaughtError() {}, onUncaughtError() {} }) };
+}
+
+const a = mount();
+await act(async () => { a.root.render(<Boundary><Boom where="render" /></Boundary>); });
+console.log("render error  ->", a.container.innerHTML);
+
+const b = mount();
+await act(async () => { b.root.render(<Boundary><Boom where="click" /></Boundary>); });
+await act(async () => { b.container.querySelector("button").click(); });
+console.log("handler error ->", b.container.innerHTML);`,
+          output: `render error  -> <p>caught: thrown while rendering</p>
+reached window.onerror: thrown in a handler
+handler error -> <button>go</button>`,
+          explanation:
+            "Identical error, identical boundary, identical component. The render throw is caught and the fallback appears. The click throw travels straight past the boundary to `window.onerror`, and the button is still sitting there as though nothing happened — which, from React's point of view, is true: it never knew.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Component, act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 class Boundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -181,11 +257,8 @@ const b = mount();
 await act(async () => { b.root.render(<Boundary><Boom where="click" /></Boundary>); });
 await act(async () => { b.container.querySelector("button")!.click(); });
 console.log("handler error ->", b.container.innerHTML);`,
-          output: `render error  -> <p>caught: thrown while rendering</p>
-reached window.onerror: thrown in a handler
-handler error -> <button>go</button>`,
-          explanation:
-            "Identical error, identical boundary, identical component. The render throw is caught and the fallback appears. The click throw travels straight past the boundary to `window.onerror`, and the button is still sitting there as though nothing happened — which, from React's point of view, is true: it never knew.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -210,8 +283,63 @@ handler error -> <button>go</button>`,
         {
           id: "retry",
           title: "A retry that actually retries",
-          lang: "tsx",
-          code: `import { Component, useState, act, type ReactNode } from "react";
+          lang: "jsx",
+          code: `import { Component, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+class Boundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div>
+          <p>{this.state.error.message}</p>
+          <button onClick={() => { this.setState({ error: null }); this.props.onReset(); }}>
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+let failing = true;
+function Chart() {
+  if (failing) throw new Error("chart failed");
+  return <b>the chart</b>;
+}
+
+function App() {
+  /* The key is what actually resets the subtree: changing it unmounts the old
+     Chart and mounts a fresh one, so nothing of the failed render survives. */
+  const [attempt, setAttempt] = useState(0);
+  return (
+    <Boundary key={attempt} onReset={() => setAttempt(attempt + 1)}>
+      <Chart />
+    </Boundary>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+await act(async () => {
+  createRoot(container, { onCaughtError() {}, onUncaughtError() {} }).render(<App />);
+});
+console.log("first render: ", container.textContent);
+
+failing = false;
+await act(async () => { container.querySelector("button").click(); });
+console.log("after retry:  ", container.textContent);`,
+          output: `first render:  chart failedTry again
+after retry:   the chart`,
+          explanation:
+            "The retry works because `failing` changed between the two attempts. In a real app that is a refetch, a cache invalidation, or a route change — and the key bump is what guarantees the second attempt starts from nothing rather than from the wreckage of the first.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Component, useState, act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 class Boundary extends Component<
@@ -262,10 +390,8 @@ console.log("first render: ", container.textContent);
 failing = false;
 await act(async () => { container.querySelector("button")!.click(); });
 console.log("after retry:  ", container.textContent);`,
-          output: `first render:  chart failedTry again
-after retry:   the chart`,
-          explanation:
-            "The retry works because `failing` changed between the two attempts. In a real app that is a refetch, a cache invalidation, or a route change — and the key bump is what guarantees the second attempt starts from nothing rather than from the wreckage of the first.",
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -289,8 +415,39 @@ after retry:   the chart`,
         {
           id: "on-caught",
           title: "One place for every caught error",
-          lang: "tsx",
-          code: `import { Component, act, type ReactNode } from "react";
+          lang: "jsx",
+          code: `import { Component, act } from "react";
+import { createRoot } from "react-dom/client";
+
+class Boundary extends Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? <p>sorry</p> : this.props.children; }
+}
+
+function Boom() { throw new Error("bad response shape"); }
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container, {
+  /* React 19: one place to send every caught error, instead of a
+     componentDidCatch in each boundary. */
+  onCaughtError(error, info) {
+    console.log("onCaughtError →", (error).message);
+    console.log("  the boundary that caught it:", info.errorBoundary?.constructor?.name ?? "(not given)");
+  },
+});
+await act(async () => { root.render(<Boundary><Boom /></Boundary>); });
+console.log("page:", container.innerHTML);`,
+          output: `onCaughtError → bad response shape
+  the boundary that caught it: Boundary
+page: <p>sorry</p>`,
+          explanation:
+            "The boundary still decides what to render; the root decides what to report. `info.errorBoundary` gives you the instance that caught it, which is how a report can say *which* boundary failed rather than just that one did.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Component, act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -313,11 +470,8 @@ const root = createRoot(container, {
 });
 await act(async () => { root.render(<Boundary><Boom /></Boundary>); });
 console.log("page:", container.innerHTML);`,
-          output: `onCaughtError → bad response shape
-  the boundary that caught it: Boundary
-page: <p>sorry</p>`,
-          explanation:
-            "The boundary still decides what to render; the root decides what to report. `info.errorBoundary` gives you the instance that caught it, which is how a report can say *which* boundary failed rather than just that one did.",
+            },
+          ],
         },
       ],
     },

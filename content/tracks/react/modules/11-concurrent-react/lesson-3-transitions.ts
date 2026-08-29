@@ -269,8 +269,65 @@ startTransition(() => setResults(results));`,
         {
           id: "ispending-is-not-proof",
           title: "The same flag, two different schedules",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Suspense, use, useState, useTransition, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const cache = new Map();
+function load(id) {
+  if (!cache.has(id)) {
+    let resolve;
+    cache.set(id, { promise: new Promise((r) => { resolve = r; }), resolve });
+  }
+  return cache.get(id);
+}
+
+function Page({ id }) {
+  return <b>{use(load(id).promise)}</b>;
+}
+
+let goSync;
+let goAsync;
+
+function App() {
+  const [id, setId] = useState("a");
+  const [pending, startTransition] = useTransition();
+  goSync = () => startTransition(() => setId("b"));
+  goAsync = () => startTransition(async () => {
+    await Promise.resolve();
+    setId("c");
+  });
+  return (
+    <Suspense fallback={<i>fallback</i>}>
+      <span data-pending={pending} />
+      <Page id={id} />
+    </Suspense>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const show = (label) => console.log(\`\${label} \${container.innerHTML}\`);
+
+await act(async () => { createRoot(container).render(<App />); });
+await act(async () => { load("a").resolve("page A"); });
+show("mounted:                     ");
+
+await act(async () => { goSync(); });
+show("set inside the callback:     ");
+await act(async () => { load("b").resolve("page B"); });
+
+await act(async () => { goAsync(); await new Promise((r) => setTimeout(r, 10)); });
+show("set after an await:          ");`,
+          output: `mounted:                      <span data-pending="false"></span><b>page A</b>
+set inside the callback:      <span data-pending="true"></span><b>page A</b>
+set after an await:           <span data-pending="true" style="display: none;"></span><b style="display: none;">page B</b><i>fallback</i>`,
+          explanation:
+            "`data-pending` is `true` on both of the last two lines. Only the middle one is a transition: page A is still on screen while page B renders. In the last line React has hidden the old content and put the fallback up, which is precisely the behaviour a transition prevents — so the update made after the `await` was an ordinary urgent one, whatever the flag said.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { Suspense, use, useState, useTransition, act } from "react";
 import { createRoot } from "react-dom/client";
 
 const cache = new Map<string, { promise: Promise<string>; resolve: (v: string) => void }>();
@@ -319,11 +376,8 @@ await act(async () => { load("b").resolve("page B"); });
 
 await act(async () => { goAsync(); await new Promise((r) => setTimeout(r, 10)); });
 show("set after an await:          ");`,
-          output: `mounted:                      <span data-pending="false"></span><b>page A</b>
-set inside the callback:      <span data-pending="true"></span><b>page A</b>
-set after an await:           <span data-pending="true" style="display: none;"></span><b style="display: none;">page B</b><i>fallback</i>`,
-          explanation:
-            "`data-pending` is `true` on both of the last two lines. Only the middle one is a transition: page A is still on screen while page B renders. In the last line React has hidden the old content and put the fallback up, which is precisely the behaviour a transition prevents — so the update made after the `await` was an ordinary urgent one, whatever the flag said.",
+            },
+          ],
         },
       ],
       pitfalls: [

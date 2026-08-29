@@ -230,7 +230,7 @@ export const handlers = [
         {
           id: "browser",
           title: "The same handlers in the browser",
-          lang: "typescript",
+          lang: "jsx",
           code: `// src/mocks/browser.ts
 import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
@@ -244,9 +244,28 @@ if (import.meta.env.DEV) {
   await worker.start({ onUnhandledRequest: "bypass" });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);`,
+createRoot(document.getElementById("root")).render(<App />);`,
           explanation:
             "`bypass` rather than `error` here: in a browser you want unhandled requests — fonts, images, analytics — to go through untouched. It is the opposite choice from the test setup, and for the opposite reason.",
+          alternates: [
+            {
+              lang: "typescript",
+              code: `// src/mocks/browser.ts
+import { setupWorker } from "msw/browser";
+import { handlers } from "./handlers";
+
+export const worker = setupWorker(...handlers);
+
+// src/main.tsx — development only, and awaited, so the app does not make
+// its first request before the worker is listening.
+if (import.meta.env.DEV) {
+  const { worker } = await import("./mocks/browser");
+  await worker.start({ onUnhandledRequest: "bypass" });
+}
+
+createRoot(document.getElementById("root")!).render(<App />);`,
+            },
+          ],
         },
       ],
       pitfalls: [
