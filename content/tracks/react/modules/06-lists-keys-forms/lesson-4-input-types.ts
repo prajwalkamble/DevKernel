@@ -95,6 +95,74 @@ show("after edits: ");`,
 after edits:  Ada|true|l|pro|hello`,
           explanation:
             "Five controls, five bindings, one shape each. The two that catch people are the checkbox — `checked` and `e.target.checked`, because binding `value` gives you the string `\"on\"` — and the radio group, which is one piece of state with `checked` derived from it rather than one boolean per button.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Everything() {
+  const [name, setName] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [size, setSize] = useState("m");
+  const [plan, setPlan] = useState("free");
+  const [notes, setNotes] = useState("");
+
+  return (
+    <form>
+      <input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+
+      {/* checked, not value — and \`e.target.checked\` only exists because the
+          event is typed from the input it is attached to */}
+      <input id="agree" type="checkbox" checked={agreed}
+             onChange={(e) => setAgreed(e.target.checked)} />
+
+      {/* value on the select itself — not \`selected\` on an option */}
+      <select id="size" value={size} onChange={(e) => setSize(e.target.value)}>
+        <option value="s">Small</option>
+        <option value="m">Medium</option>
+        <option value="l">Large</option>
+      </select>
+
+      {/* one state variable for the group; checked is derived */}
+      <input id="free" type="radio" name="plan" value="free"
+             checked={plan === "free"} onChange={(e) => setPlan(e.target.value)} />
+      <input id="pro" type="radio" name="plan" value="pro"
+             checked={plan === "pro"} onChange={(e) => setPlan(e.target.value)} />
+
+      {/* value, not children */}
+      <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+
+      <output id="out">{name}|{String(agreed)}|{size}|{plan}|{notes}</output>
+    </form>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<Everything />); });
+const show = (label: string) => console.log(label, container.querySelector("#out")!.textContent);
+
+// One helper for three element types, so the parameter is their union — the
+// three that carry a \`value\` setter on their prototype.
+type Valued = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+function set(el: Valued, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value")!.set!;
+  setter.call(el, value);
+  el.dispatchEvent(new Event(el.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
+}
+
+show("initial:     ");
+act(() => { set(container.querySelector<HTMLInputElement>("#name")!, "Ada"); });
+act(() => { container.querySelector<HTMLInputElement>("#agree")!.click(); });
+act(() => { set(container.querySelector<HTMLSelectElement>("#size")!, "l"); });
+act(() => { container.querySelector<HTMLInputElement>("#pro")!.click(); });
+act(() => { set(container.querySelector<HTMLTextAreaElement>("#notes")!, "hello"); });
+show("after edits: ");`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -180,6 +248,59 @@ added two:     react,rust,go
 removed react: rust,go`,
           explanation:
             "One state value for the whole group, and the list of topics can grow without touching the component. Note the copy inside the updater: `new Set(prev)` rather than mutating and returning `prev`, because module 4 measured what returning the same reference does — React compares, sees no change, and skips the render.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+const TOPICS = ["react", "rust", "go"];
+
+function Topics() {
+  // A Set of ids: no state variable per option, and adding an option to the
+  // list above needs no change here at all. The type argument is required —
+  // \`new Set(["react"])\` alone would infer Set<string>, but the initialiser
+  // is a function, so the state type has to be stated.
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(["react"]));
+
+  function toggle(topic: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);         // copy — never mutate state
+      if (checked) next.add(topic); else next.delete(topic);
+      return next;
+    });
+  }
+
+  return (
+    <>
+      {TOPICS.map((topic) => (
+        <input
+          key={topic}
+          id={topic}
+          type="checkbox"
+          checked={selected.has(topic)}
+          onChange={(e) => toggle(topic, e.target.checked)}
+        />
+      ))}
+      <output id="out">{[...selected].join(",") || "none"}</output>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<Topics />); });
+const show = (label: string) => console.log(label, container.querySelector("#out")!.textContent);
+
+show("initial:      ");
+act(() => { container.querySelector<HTMLInputElement>("#rust")!.click(); });
+act(() => { container.querySelector<HTMLInputElement>("#go")!.click(); });
+show("added two:    ");
+act(() => { container.querySelector<HTMLInputElement>("#react")!.click(); });
+show("removed react:");`,
+            },
+          ],
         },
       ],
     },

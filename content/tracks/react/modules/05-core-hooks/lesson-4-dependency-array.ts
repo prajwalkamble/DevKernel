@@ -70,6 +70,37 @@ re-render, nothing changed:
     [{ a }]   -> ran`,
           explanation:
             "The fourth line of every block is the one to notice. `[{ a }]` ran on all four renders, including the last, where **nothing changed at all**. The object's contents were identical every time; the object was a different one every time. That is the trap, and it is the next section.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Deps({ a, b }: { a: number; b: number }) {
+  useEffect(() => { console.log("    no array  -> ran (a=" + a + " b=" + b + ")"); });
+  useEffect(() => { console.log("    []        -> ran"); }, []);
+  useEffect(() => { console.log("    [a]       -> ran (a=" + a + ")"); }, [a]);
+  // An object literal: a new reference on every render, so never equal. The
+  // dependency array is \`unknown[]\` to TypeScript, so it has nothing to say
+  // about this — the eslint rule is what catches it.
+  useEffect(() => { console.log("    [{ a }]   -> ran"); }, [{ a }]);
+  return <span>{a}/{b}</span>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+console.log("mount a=1 b=1:");
+act(() => { root.render(<Deps a={1} b={1} />); });
+console.log("re-render, b changed:");
+act(() => { root.render(<Deps a={1} b={2} />); });
+console.log("re-render, a changed:");
+act(() => { root.render(<Deps a={2} b={2} />); });
+console.log("re-render, nothing changed:");
+act(() => { root.render(<Deps a={2} b={2} />); });`,
+            },
+          ],
         },
       ],
     },
@@ -144,6 +175,48 @@ console.log("fourth render, userId changed   →  runaway:", runaway, " stable:"
 fourth render, userId changed   →  runaway: 4  stable: 2`,
           explanation:
             "Both effects use an options object and both depend on `userId`. `Runaway` ran four times — once per render, including the two where nothing it cares about changed — because its `options` was a new object each time. `Stable` ran exactly twice: once on mount, and once when `userId` actually changed. Hoisting the object did not merely stabilise a reference; it removed the value from the dependency array altogether, because something declared outside the component is not reactive and there is nothing to list.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useEffect, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let runaway = 0;
+let stable = 0;
+
+// The options object is rebuilt every render, so this effect never settles.
+function Runaway({ userId }: { userId: string }) {
+  const options = { retries: 3 };
+  useEffect(() => { runaway += options.retries > 0 ? 1 : 0; }, [userId, options]);
+  return null;
+}
+
+// Hoisted out of the component: one reference forever, so it is not reactive
+// and leaves the dependency array entirely.
+const OPTIONS = { retries: 3 };
+
+function Stable({ userId }: { userId: string }) {
+  useEffect(() => { stable += OPTIONS.retries > 0 ? 1 : 0; }, [userId]);
+  return null;
+}
+
+function App({ userId, tick }: { userId: string; tick: number }) {
+  return <><Runaway userId={userId} /><Stable userId={userId} /><span>{tick}</span></>;
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<App userId="a" tick={1} />); });
+act(() => { root.render(<App userId="a" tick={2} />); });
+act(() => { root.render(<App userId="a" tick={3} />); });
+console.log("three renders, userId unchanged →  runaway:", runaway, " stable:", stable);
+
+act(() => { root.render(<App userId="b" tick={4} />); });
+console.log("fourth render, userId changed   →  runaway:", runaway, " stable:", stable);`,
+            },
+          ],
         },
       ],
     },

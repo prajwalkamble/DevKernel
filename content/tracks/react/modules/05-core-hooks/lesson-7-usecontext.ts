@@ -67,6 +67,40 @@ function App() {
           output: `<div><button type="button" class="dark">in toolbar</button></div><button type="button" class="high-contrast">in override</button>`,
           explanation:
             "`Toolbar` passes no props and does not mention the theme, and the button inside it is still dark. The second button sits under a nearer provider and gets that value instead. Nothing about this is global — it is scoped to a subtree, which is what makes context safe to use more than once.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, useContext } from "react";
+
+type Theme = "light" | "dark" | "high-contrast";
+
+// The default value is what gives the context its type, so a union here means
+// a misspelled theme is caught at the provider rather than in a class name.
+const ThemeContext = createContext<Theme>("light");
+
+function Button({ label }: { label: string }) {
+  const theme = useContext(ThemeContext);
+  return <button type="button" className={theme}>{label}</button>;
+}
+
+// No provider between App and this one, so it reads the outer value.
+function Toolbar() {
+  return <div><Button label="in toolbar" /></div>;
+}
+
+function App() {
+  return (
+    <ThemeContext value="dark">
+      <Toolbar />
+      {/* A nearer provider overrides it for its own subtree. */}
+      <ThemeContext value="high-contrast">
+        <Button label="in override" />
+      </ThemeContext>
+    </ThemeContext>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -135,6 +169,54 @@ console.log("after bump:", JSON.stringify(counts));`,
 after bump: {"reader":2,"bystander":2,"middle":4}`,
           explanation:
             "Everything re-rendered, including `Bystander`, which reads nothing. That is not context's doing — the state lives in `App`, so `App` re-rendered and re-created its whole subtree, exactly as module 4 described. Context did not cause those re-renders and does not prevent them. The way to stop a bystander re-rendering is to pass it as `children` from a component that does not re-render, or to memoise it; module 9 covers both.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { createContext, useContext, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+import type { ReactNode } from "react";
+
+const CountContext = createContext(0);
+const counts = { reader: 0, bystander: 0, middle: 0 };
+
+function Reader() {
+  counts.reader++;
+  const value = useContext(CountContext);
+  return <span id="v">{value}</span>;
+}
+
+function Bystander() {
+  counts.bystander++;
+  return <span>-</span>;
+}
+
+// Passes children through and reads nothing.
+function Middle({ children }: { children: ReactNode }) {
+  counts.middle++;
+  return <div>{children}</div>;
+}
+
+function App() {
+  const [count, setCount] = useState(0);
+  return (
+    <CountContext value={count}>
+      <Middle><Reader /></Middle>
+      <Middle><Bystander /></Middle>
+      <button id="b" onClick={() => setCount((c) => c + 1)}>bump</button>
+    </CountContext>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<App />); });
+console.log("mounted: ", JSON.stringify(counts));
+act(() => { container.querySelector<HTMLButtonElement>("#b")!.click(); });
+console.log("after bump:", JSON.stringify(counts));`,
+            },
+          ],
         },
       ],
     },

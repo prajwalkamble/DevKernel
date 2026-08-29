@@ -75,6 +75,45 @@ after focus click, focused id: field
   tag: INPUT`,
           explanation:
             "`inputRef.current` is the real `<input>` element — the same object `document.querySelector` would return — so every DOM API is available on it. Note that both uses are inside event handlers. That is the normal case: something happened, and now the node needs to be told about it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useRef, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Form() {
+  // The type argument is what makes the ref useful: \`useRef(null)\` on its own
+  // is a ref to \`null\` and nothing else. With it, \`current\` is
+  // \`HTMLInputElement | null\` — null until React attaches it, which is why
+  // every read through it needs \`?.\` or \`!\`.
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      <input id="field" ref={inputRef} defaultValue="" />
+      <button id="focus" type="button" onClick={() => inputRef.current?.focus()}>
+        focus
+      </button>
+      <button id="read" type="button" onClick={() => console.log("  tag:", inputRef.current?.tagName)}>
+        read
+      </button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+
+act(() => { root.render(<Form />); });
+console.log("before clicking, focused:", document.activeElement!.tagName);
+
+act(() => { container.querySelector<HTMLButtonElement>("#focus")!.click(); });
+console.log("after focus click, focused id:", document.activeElement!.id);
+
+act(() => { container.querySelector<HTMLButtonElement>("#read")!.click(); });`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -136,6 +175,48 @@ two ref bumps:  state=0 ref=0 plain=0 | renders: 1
 one state bump: state=1 ref=2 plain=0 | renders: 2`,
           explanation:
             "The middle line is the point: two ref bumps changed nothing on screen and caused no render — the count stayed at 1. The ref had been counting the whole time, which the third line proves: a single state bump forced a render, and that render read `refCount.current` and found **2**. The plain variable never got past 0, because each render created a fresh one. Three ways to hold a number, and only one of them both persists and shows.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useRef, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let renders = 0;
+
+function Counters() {
+  renders++;
+  const [stateCount, setStateCount] = useState(0);
+  // A ref to a number needs no type argument — the initial value is enough,
+  // unlike the DOM case where it starts as null.
+  const refCount = useRef(0);
+  let plain = 0;                       // a fresh variable every render
+
+  return (
+    <>
+      <span id="v">state={stateCount} ref={refCount.current} plain={plain}</span>
+      <button id="bump-ref" onClick={() => { refCount.current++; plain++; }}>ref</button>
+      <button id="bump-state" onClick={() => setStateCount((n) => n + 1)}>state</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+const show = (label: string) =>
+  console.log(label, container.querySelector("#v")!.textContent, "| renders:", renders);
+
+act(() => { root.render(<Counters />); });
+show("mounted:       ");
+
+act(() => { container.querySelector<HTMLButtonElement>("#bump-ref")!.click(); });
+act(() => { container.querySelector<HTMLButtonElement>("#bump-ref")!.click(); });
+show("two ref bumps: ");
+
+act(() => { container.querySelector<HTMLButtonElement>("#bump-state")!.click(); });
+show("one state bump:");`,
+            },
+          ],
         },
       ],
     },

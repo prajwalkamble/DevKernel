@@ -93,6 +93,49 @@ act(() => { container.querySelector("#f").requestSubmit(); });`,
   `,
           explanation:
             "Three of the six fields made it. `nickname` was dropped for having no `name`, `referrer` for being disabled, and `marketing` for being unticked — and note that an unticked checkbox comes back as `null` rather than `false`, so `data.get(\"marketing\") === \"on\"` is the way to read it as a boolean. Every value is a string.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+import type { FormEvent } from "react";
+
+function Signup() {
+  // The element type on FormEvent is what makes \`currentTarget\` a form, and
+  // therefore what makes \`new FormData(...)\` legal — with a bare FormEvent it
+  // would only be an Element.
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    console.log("  entries:", [...data].map(([k, v]) => \`\${k}=\${v}\`).join("  "));
+    console.log("  as object:", JSON.stringify(Object.fromEntries(data)));
+    // \`get\` returns \`FormDataEntryValue | null\` — a File is possible, which
+    // is why this is not just a string.
+    console.log("  unticked checkbox is:", JSON.stringify(data.get("marketing")));
+  }
+
+  return (
+    <form id="f" onSubmit={handleSubmit}>
+      <input name="email" defaultValue="ada@example.com" />
+      {/* No name: invisible to FormData however it is styled or labelled. */}
+      <input id="nickname" defaultValue="ada" />
+      {/* Disabled: excluded by the platform, not by React. */}
+      <input name="referrer" defaultValue="google" disabled />
+      <input name="agreed" type="checkbox" defaultChecked />
+      <input name="marketing" type="checkbox" />
+      <input name="plan" type="radio" value="pro" defaultChecked />
+      <button type="submit">Sign up</button>
+    </form>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<Signup />); });
+act(() => { container.querySelector<HTMLFormElement>("#f")!.requestSubmit(); });`,
+            },
+          ],
         },
       ],
     },
@@ -154,6 +197,52 @@ console.log("after:  action-form =", field("a").value, "| onSubmit-form =", fiel
 after:  action-form = start | onSubmit-form = typed-s`,
           explanation:
             "Both handlers received what the user typed. Afterwards the `action` form is back to `start` and the `onSubmit` form still holds `typed-s`. React reset the first one — a genuine difference in behaviour between two things that look interchangeable, and the reason an edit form built with `action` appears to throw away the user's work when saving fails.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { act } from "react";
+import { createRoot } from "react-dom/client";
+import type { FormEvent } from "react";
+
+// React calls this with the FormData; no event, no preventDefault — and the
+// parameter types itself, since \`action\` on a form is declared to take one.
+function WithAction() {
+  return (
+    <form id="a" action={(data: FormData) => console.log("  action received:", data.get("q"))}>
+      <input name="q" defaultValue="start" />
+      <button type="submit">go</button>
+    </form>
+  );
+}
+
+function WithOnSubmit() {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    console.log("  onSubmit received:", new FormData(event.currentTarget).get("q"));
+  }
+  return (
+    <form id="s" onSubmit={handleSubmit}>
+      <input name="q" defaultValue="start" />
+      <button type="submit">go</button>
+    </form>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<><WithAction /><WithOnSubmit /></>); });
+
+const field = (form: string) => container.querySelector<HTMLInputElement>(\`#\${form} input\`)!;
+field("a").value = "typed-a";
+field("s").value = "typed-s";
+console.log("before: action-form =", field("a").value, "| onSubmit-form =", field("s").value);
+
+act(() => { container.querySelector<HTMLFormElement>("#a")!.requestSubmit(); });
+act(() => { container.querySelector<HTMLFormElement>("#s")!.requestSubmit(); });
+console.log("after:  action-form =", field("a").value, "| onSubmit-form =", field("s").value);`,
+            },
+          ],
         },
       ],
       pitfalls: [

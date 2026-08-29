@@ -67,6 +67,38 @@ second render, same:       {"name":"Ada","middle":"Grace","age":36}
 third render, middle gone: {"name":"Ada","age":"Grace"}`,
           explanation:
             "Read the third line. `age` is `\"Grace\"`. Skipping one call shifted every later call up by one slot, so the third hook read the second hook's value. Nothing threw — the model has no way to know a call is missing, and neither does React. That is exactly the failure the rule prevents, and it is why it is a rule rather than a suggestion.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+// A model of what React stores: one list per instance, read in call order.
+// \`const slots = []\` on its own would be \`never[]\` and reject the push, so
+// the annotation is required — and the generic is what lets one slot hold a
+// string and the next a number while each caller still gets its own type back.
+const slots: unknown[] = [];
+let cursor = 0;
+
+function useSlot<T>(initial: T): T {
+  const i = cursor++;
+  if (slots.length === i) slots.push(initial);   // first render of this slot
+  return slots[i] as T;
+}
+
+function renderComponent(includeMiddle: boolean) {
+  cursor = 0;
+  const name = useSlot("Ada");
+  const middle = includeMiddle ? useSlot("Grace") : undefined;
+  const age = useSlot(36);
+  return { name, middle, age };
+}
+
+console.log("first render, all three:  ", JSON.stringify(renderComponent(true)));
+console.log("second render, same:      ", JSON.stringify(renderComponent(true)));
+console.log("third render, middle gone:", JSON.stringify(renderComponent(false)));`,
+            },
+          ],
         },
       ],
     },
@@ -128,6 +160,40 @@ function Fields({ names }) {
 }`,
           explanation:
             "The fix for \"I need a hook per item\" is almost always one hook holding a structure keyed by item. The other fix, when each item genuinely needs its own state and effects, is to extract a component — because a component *instance* is the thing React gives an independent hook list to.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// Wrong: the number of hooks depends on the data.
+//
+//   function Fields({ names }: { names: string[] }) {
+//     const values = names.map((n) => useState(""));   // hooks in a loop
+//     …
+//   }
+//
+// When \`names\` grows or shrinks, the list length changes and React throws.
+// Nothing in the type system objects to it — the rule of hooks is enforced by
+// the eslint plugin, not the compiler.
+
+// Right: one hook holding a collection.
+function Fields({ names }: { names: string[] }) {
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(names.map((n) => [n, ""]))
+  );
+
+  return (
+    <>
+      {names.map((name) => (
+        <input
+          key={name}
+          value={values[name] ?? ""}
+          onChange={(e) => setValues((prev) => ({ ...prev, [name]: e.target.value }))}
+        />
+      ))}
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

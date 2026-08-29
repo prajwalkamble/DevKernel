@@ -65,6 +65,45 @@ console.log("typed more  ->", container.querySelector("#in").value, "|", contain
 typed more  -> ADA LOVELACE | 12 characters`,
           explanation:
             "Lowercase went in and uppercase came out, because the state decided what the input shows. The character count is in step for free — it reads the same state, in the same render, so there is no possibility of the two disagreeing. That is the argument for controlled inputs in one line.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+function Upper() {
+  const [text, setText] = useState("");
+  return (
+    <>
+      {/* \`e\` is inferred as ChangeEvent<HTMLInputElement> from the element it
+          is attached to, so \`e.target.value\` is a string without annotation. */}
+      <input id="in" value={text} onChange={(e) => setText(e.target.value.toUpperCase())} />
+      <span id="len">{text.length} characters</span>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<Upper />); });
+
+// React replaces the value setter, so a native write must be dispatched.
+// Reaching through the prototype is where the types run out: the descriptor
+// may be undefined and its \`set\` may be missing, so both need asserting.
+function type(el: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value")!.set!;
+  setter.call(el, value);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+act(() => { type(container.querySelector<HTMLInputElement>("#in")!, "ada"); });
+console.log("typed 'ada' ->", container.querySelector<HTMLInputElement>("#in")!.value, "|", container.querySelector("#len")!.textContent);
+
+act(() => { type(container.querySelector<HTMLInputElement>("#in")!, "ada lovelace"); });
+console.log("typed more  ->", container.querySelector<HTMLInputElement>("#in")!.value, "|", container.querySelector("#len")!.textContent);`,
+            },
+          ],
         },
       ],
     },
@@ -162,6 +201,63 @@ act(() => { container.querySelector("#read").click(); });`,
   read at submit: Grace`,
           explanation:
             "Four renders against one. The controlled version re-rendered per keystroke, which is what let it show a live character count; the uncontrolled one never re-rendered at all and still produced the right value when asked. Neither number is a verdict — it is the trade, stated in renders.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useRef, useState, act } from "react";
+import { createRoot } from "react-dom/client";
+
+let controlledRenders = 0;
+let uncontrolledRenders = 0;
+
+function Controlled() {
+  controlledRenders++;
+  const [name, setName] = useState("");
+  return (
+    <>
+      <input id="c" value={name} onChange={(e) => setName(e.target.value)} />
+      <span id="cv">{name.length}</span>
+    </>
+  );
+}
+
+function Uncontrolled() {
+  uncontrolledRenders++;
+  // The uncontrolled model is where the DOM types show up: the ref needs its
+  // element type, and \`current\` is null until React attaches it.
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <input id="u" defaultValue="" ref={ref} />
+      <button id="read" onClick={() => console.log("  read at submit:", ref.current?.value)}>read</button>
+    </>
+  );
+}
+
+const container = document.createElement("div");
+document.body.appendChild(container);
+const root = createRoot(container);
+act(() => { root.render(<><Controlled /><Uncontrolled /></>); });
+
+function type(el: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value")!.set!;
+  setter.call(el, value);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+act(() => { type(container.querySelector<HTMLInputElement>("#c")!, "A"); });
+act(() => { type(container.querySelector<HTMLInputElement>("#c")!, "Ad"); });
+act(() => { type(container.querySelector<HTMLInputElement>("#c")!, "Ada"); });
+
+// The uncontrolled one is typed into without React hearing about it at all.
+container.querySelector<HTMLInputElement>("#u")!.value = "Grace";
+
+console.log("after three keystrokes each:");
+console.log("  controlled renders:  ", controlledRenders);
+console.log("  uncontrolled renders:", uncontrolledRenders);
+act(() => { container.querySelector<HTMLButtonElement>("#read")!.click(); });`,
+            },
+          ],
         },
       ],
     },

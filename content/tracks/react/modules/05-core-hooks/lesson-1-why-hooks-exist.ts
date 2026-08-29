@@ -66,6 +66,37 @@ function Room({ roomId }) {
 }`,
           explanation:
             "Setup and cleanup are adjacent, so it is hard to write one without the other. And `[roomId]` states the re-run condition as data rather than as an `if` in a second method — which is the whole of what `componentDidUpdate` was doing by hand, correctly, once you remembered to.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// The class version: one concern, three methods, two chances to forget.
+//
+//   class Room extends React.Component<{ roomId: string }> {
+//     componentDidMount() {
+//       this.conn = connect(this.props.roomId);
+//     }
+//     componentDidUpdate(prev: { roomId: string }) {
+//       if (prev.roomId !== this.props.roomId) {   // forgotten constantly
+//         this.conn.close();
+//         this.conn = connect(this.props.roomId);
+//       }
+//     }
+//     componentWillUnmount() {
+//       this.conn.close();
+//     }
+//   }
+
+// The hook version: one concern, one place, and the re-run is declared.
+function Room({ roomId }: { roomId: string }) {
+  useEffect(() => {
+    const connection = connect(roomId);
+    return () => connection.close();
+  }, [roomId]);
+
+  return <h1>Room {roomId}</h1>;
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
