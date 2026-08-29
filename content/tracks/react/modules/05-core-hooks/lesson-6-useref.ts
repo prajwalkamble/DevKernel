@@ -39,7 +39,7 @@ export const useRefLesson: Lesson = {
         {
           id: "dom-ref",
           title: "Focusing and measuring a real node",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -102,7 +102,7 @@ after focus click, focused id: field
         {
           id: "ref-vs-state",
           title: "Three ways to hold a number",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

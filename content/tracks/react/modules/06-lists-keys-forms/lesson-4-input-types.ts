@@ -38,7 +38,7 @@ export const inputTypesLesson: Lesson = {
         {
           id: "every-control",
           title: "One form, every control, bound correctly",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -134,7 +134,7 @@ after edits:  Ada|true|l|pro|hello`,
         {
           id: "checkbox-group",
           title: "Eight checkboxes, one piece of state",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

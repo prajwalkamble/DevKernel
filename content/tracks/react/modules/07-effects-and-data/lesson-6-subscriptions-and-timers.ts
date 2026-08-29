@@ -106,7 +106,7 @@ setN(c => c + 1)  listeners left after unmount: 0`,
         {
           id: "listener-effect",
           title: "A window listener, added and removed",
-          lang: "tsx",
+          lang: "jsx",
           code: `function useWindowWidth() {
   const [width, setWidth] = useState(() => window.innerWidth);
 

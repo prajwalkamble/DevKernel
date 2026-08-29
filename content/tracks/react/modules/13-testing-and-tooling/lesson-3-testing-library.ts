@@ -35,7 +35,7 @@ export const testingLibraryLesson: Lesson = {
         {
           id: "config",
           title: "The whole setup",
-          lang: "typescript",
+          lang: "javascript",
           code: `// vitest.config.ts
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
@@ -83,7 +83,7 @@ import "@testing-library/jest-dom/vitest";`,
         {
           id: "the-queries",
           title: "The rungs, in order",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* 1. Role and accessible name. The default for nearly everything. */
 screen.getByRole("button", { name: "Sign in" });
 screen.getByRole("textbox", { name: "Email address" });
@@ -135,7 +135,7 @@ screen.getByTestId("toast-container");`,
         {
           id: "prefix-choice",
           title: "The same assertion, three ways, two of them wrong",
-          lang: "tsx",
+          lang: "jsx",
           code: `await user.click(screen.getByRole("button", { name: "Save" }));
 
 /* ✗ Fails, and looks like a bug in the component. The save is async, so

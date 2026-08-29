@@ -45,7 +45,7 @@ export const cleanupAndStrictModeLesson: Lesson = {
         {
           id: "double-mount",
           title: "The same component, with and without Strict Mode",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { StrictMode, useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -100,7 +100,7 @@ inside StrictMode:
         {
           id: "cleanup-symmetry",
           title: "Setup and teardown, and what happens without them",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 

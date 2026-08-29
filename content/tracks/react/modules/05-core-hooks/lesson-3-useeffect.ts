@@ -44,7 +44,7 @@ export const useEffectLesson: Lesson = {
         {
           id: "effect-order",
           title: "Render, layout effect, effect, cleanup",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, useLayoutEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -114,7 +114,7 @@ unmount:
         {
           id: "unnecessary-effect",
           title: "The same value, derived and synchronised",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

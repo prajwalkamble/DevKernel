@@ -93,7 +93,7 @@ export const whereStateLivesLesson: Lesson = {
         {
           id: "placement",
           title: "Where each piece goes, and why",
-          lang: "tsx",
+          lang: "jsx",
           code: `function ProductsRoute() {
   // 3. Shareable and survives refresh -> the URL.
   //    Bookmarkable, back-button works, no code for either.

@@ -33,7 +33,7 @@ export const indexKeyBugLesson: Lesson = {
         {
           id: "state-follows-the-key",
           title: "Where the typed text ends up",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

@@ -35,7 +35,7 @@ export const functionalUpdatesLesson: Lesson = {
         {
           id: "three-updaters",
           title: "The same example as the last lesson, with one change",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -114,7 +114,7 @@ three updaters:      4 | renders: 3`,
         {
           id: "bailout-on-mutation",
           title: "The render that never happens",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

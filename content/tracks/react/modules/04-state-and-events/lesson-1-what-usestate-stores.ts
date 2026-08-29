@@ -27,7 +27,7 @@ export const whatUseStateStoresLesson: Lesson = {
         {
           id: "two-instances",
           title: "One component, two instances, two counts",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -93,7 +93,7 @@ clicked a twice: a:2b:0`,
         {
           id: "initial-ignored",
           title: "The argument after the first render",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -142,7 +142,7 @@ with a new key:      prop=99 state=99`,
         {
           id: "lazy",
           title: "How many times the initialiser runs",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

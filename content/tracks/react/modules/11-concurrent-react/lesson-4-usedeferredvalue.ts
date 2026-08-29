@@ -28,7 +28,7 @@ export const useDeferredValueLesson: Lesson = {
         {
           id: "the-shape-code",
           title: "Two values from one piece of state",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Search() {
   const [query, setQuery] = useState("");
   const deferred = useDeferredValue(query);

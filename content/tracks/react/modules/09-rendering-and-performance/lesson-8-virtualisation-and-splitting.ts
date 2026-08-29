@@ -118,7 +118,7 @@ measure(() => <Windowed scrollTop={5000} />, "  scrolled:");`,
         {
           id: "lazy-routes",
           title: "Splitting at the route",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { lazy, Suspense } from "react";
 
 /* Each of these becomes its own chunk, fetched the first time its route

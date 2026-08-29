@@ -85,7 +85,7 @@ renderToStaticMarkup: <article class="post"><h1>Hello</h1><p>3 likes</p><button>
         {
           id: "the-server",
           title: "The whole thing, without a framework",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToString } from "react-dom/server";
 
 app.get("/post/:id", async (req, res) => {

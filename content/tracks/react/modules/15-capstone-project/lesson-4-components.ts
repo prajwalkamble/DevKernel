@@ -221,7 +221,7 @@ export function BugList({ projectId, projectKey }: BugListProps) {
         {
           id: "list-test",
           title: "web/src/features/bugs/BugList.test.tsx",
-          lang: "tsx",
+          lang: "jsx",
           code: `describe("BugList", () => {
   it("lists the bugs with their key, severity and assignee", async () => {
     renderApp(<BugList projectId="p_web" projectKey="WEB" />);

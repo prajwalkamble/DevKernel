@@ -35,7 +35,7 @@ export const stateShapeLesson: Lesson = {
         {
           id: "derived-vs-stored",
           title: "The total that lags, and the total that cannot",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -99,7 +99,7 @@ after two adds: stored=29 derived=29`,
         {
           id: "status-union",
           title: "Four flags, or one status",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

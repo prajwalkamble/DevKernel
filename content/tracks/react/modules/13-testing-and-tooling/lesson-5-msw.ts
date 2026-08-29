@@ -120,7 +120,7 @@ test("reports a failure without touching the component", async () => {
         {
           id: "shapes",
           title: "Params, query, body, delay and failure",
-          lang: "typescript",
+          lang: "javascript",
           code: `import { http, HttpResponse, delay } from "msw";
 
 export const handlers = [

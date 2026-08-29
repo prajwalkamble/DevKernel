@@ -27,7 +27,7 @@ export const propsInDepthLesson: Lesson = {
         {
           id: "destructuring-forms",
           title: "Defaults, renaming, and the rest",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Field({
   label,                       // required, by convention rather than enforcement
   type = "text",               // default when the prop is absent or undefined
@@ -68,7 +68,7 @@ function App() {
         {
           id: "default-firing",
           title: "Which of these get the default",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Show({ value = "DEFAULT" }) {
   return <li>{String(value)}</li>;
 }
@@ -118,7 +118,7 @@ function App() {
         {
           id: "spread-position",
           title: "The same component, two spread positions",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Spread first: the component's own type wins, always.
 function SafeButton({ children, ...rest }) {
   return <button {...rest} type="button">{children}</button>;

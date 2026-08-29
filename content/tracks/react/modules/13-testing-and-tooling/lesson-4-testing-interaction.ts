@@ -48,7 +48,7 @@ userEvent.click:  ["pointerover","pointerenter","mouseover","mouseenter",
         {
           id: "setup-call",
           title: "The two lines it needs",
-          lang: "tsx",
+          lang: "jsx",
           code: `import userEvent from "@testing-library/user-event";
 
 test("submits", async () => {
@@ -139,7 +139,7 @@ test("signs in and reports the result", async () => {
         {
           id: "waiting-code",
           title: "The three, and the thing that is not one of them",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Appearing. */
 expect(await screen.findByRole("status")).toHaveTextContent("Saved");
 
@@ -180,7 +180,7 @@ await new Promise((resolve) => setTimeout(resolve, 500));`,
         {
           id: "fake-timers",
           title: "The timer case",
-          lang: "tsx",
+          lang: "jsx",
           code: `test("counts down", async () => {
   vi.useFakeTimers();
   /* userEvent schedules its own work on timers, so it must be told to use

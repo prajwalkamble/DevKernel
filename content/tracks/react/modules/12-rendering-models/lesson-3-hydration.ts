@@ -158,7 +158,7 @@ same <span> node: true | recoverable errors: 0`,
         {
           id: "measuring",
           title: "Measuring your own gap",
-          lang: "javascript",
+          lang: "jsx",
           code: `/* Paste into the console on a server-rendered page. FCP is when the
    content appeared; the hydration mark is when it started working. The
    distance between them is the window where the page lied. */

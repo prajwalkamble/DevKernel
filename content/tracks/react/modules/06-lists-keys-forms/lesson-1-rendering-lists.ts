@@ -28,7 +28,7 @@ export const renderingListsLesson: Lesson = {
         {
           id: "key-placement",
           title: "Three shapes, one rule",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { Fragment } from "react";
 
 const people = [
@@ -92,7 +92,7 @@ function App() {
         {
           id: "composite-and-nested",
           title: "A grid, and a list inside a list",
-          lang: "tsx",
+          lang: "jsx",
           code: `const grid = [["a", "b"], ["c", "d"]];
 
 const teams = [

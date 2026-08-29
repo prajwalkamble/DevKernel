@@ -44,7 +44,7 @@ export const objectsAndArraysLesson: Lesson = {
         {
           id: "object-updates",
           title: "One handler for every field",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -104,7 +104,7 @@ filled:  {"name":"Ada","email":"ada@example.com","subscribed":true}`,
         {
           id: "array-updates",
           title: "Add, replace, remove, sort — all without mutating",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

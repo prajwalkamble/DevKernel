@@ -136,7 +136,7 @@ connect(1)`,
         {
           id: "the-fixes",
           title: "The three shapes",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* A subscription: the cleanup is the unsubscriber. */
 useEffect(() => {
   const connection = createConnection(roomId);

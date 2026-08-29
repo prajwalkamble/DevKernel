@@ -38,7 +38,7 @@ export const stateRefOrVariableLesson: Lesson = {
         {
           id: "four-homes",
           title: "The same increment, in four places",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

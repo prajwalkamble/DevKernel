@@ -28,7 +28,7 @@ export const dependencyArrayLesson: Lesson = {
         {
           id: "three-arrays",
           title: "Four effects, four different schedules",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -108,7 +108,7 @@ re-render, nothing changed:
         {
           id: "stabilising",
           title: "The same effect, made to run only when it should",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useEffect, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

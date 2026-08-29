@@ -28,7 +28,7 @@ export const functionsAsPropsLesson: Lesson = {
         {
           id: "passing-not-calling",
           title: "Passing, calling, and wrapping",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Button({ label, onPress }) {
   return <button type="button" onClick={onPress}>{label}</button>;
 }
@@ -88,7 +88,7 @@ function App() {
         {
           id: "lifted",
           title: "After the lift: one owner, two readers",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Neither pane holds state. Both take a value and a way to ask for a change.
 function Pane({ title, amount, onChange }) {
   return (

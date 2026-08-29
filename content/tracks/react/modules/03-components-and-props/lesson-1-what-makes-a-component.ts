@@ -30,7 +30,7 @@ export const whatMakesAComponentLesson: Lesson = {
         {
           id: "capitalisation",
           title: "What the case actually changes",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 // Lowercase: the compiler passes the string "avatar".
@@ -82,7 +82,7 @@ capitalised renders: <div><img alt=""/></div>`,
         {
           id: "return-values",
           title: "Four returns, all legal",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Nothing() { return null; }
@@ -121,7 +121,7 @@ array:    "<div><b>a</b><i>b</i></div>"`,
         {
           id: "nested-identity",
           title: "The identity a nested component has",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Stands in for two renders of a parent that defines a component inside itself.
 function renderParent() {
   function Row() { return <li />; }

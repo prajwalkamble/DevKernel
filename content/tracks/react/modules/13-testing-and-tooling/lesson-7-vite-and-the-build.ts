@@ -96,7 +96,7 @@ dist/assets/index-CP7Zf5UC.js   191.83 kB │ gzip: 60.53 kB
         {
           id: "lazy",
           title: "What produced that second chunk",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { lazy, Suspense, useState } from "react";
 
 /* The dynamic import is the boundary. Everything reachable from ./Heavy —
@@ -141,7 +141,7 @@ export default function App() {
         {
           id: "visualiser",
           title: "Turning it on",
-          lang: "typescript",
+          lang: "javascript",
           code: `// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";

@@ -295,7 +295,7 @@ export type ApiError = z.infer<typeof ApiError>;`,
         {
           id: "schema",
           title: "server/src/db/schema.ts",
-          lang: "typescript",
+          lang: "javascript",
           code: `import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { bugSeverities, bugStatuses } from "@bug-tracker/shared";
@@ -391,7 +391,7 @@ export const now = sql\`(datetime('now'))\`;`,
         {
           id: "routes-read",
           title: "server/src/routes/bugs.ts — reading",
-          lang: "typescript",
+          lang: "javascript",
           code: `const id = () => \`b_\${crypto.randomUUID().slice(0, 8)}\`;
 const stamp = () => new Date().toISOString();
 

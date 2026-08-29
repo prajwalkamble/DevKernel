@@ -28,7 +28,7 @@ export const containerPresentationalLesson: Lesson = {
         {
           id: "the-old-shape",
           title: "The shape, as it was written",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* The container: knows about fetching, knows nothing about markup. */
 class UserListContainer extends React.Component {
   state = { users: [], loading: true };
@@ -118,7 +118,7 @@ function UserList() {
         {
           id: "render-prop",
           title: "Then and now",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* 2017: sharing mouse position. */
 <MouseTracker>
   {({ x, y }) => <p>{x}, {y}</p>}

@@ -129,7 +129,7 @@ chunk 2: <div hidden id="S:0"><p>Two comments</p></div><script>…862 bytes…</
         {
           id: "on-all-ready",
           title: "The two moments you can start sending",
-          lang: "tsx",
+          lang: "jsx",
           code: `const { pipe } = renderToPipeableStream(<Page />, {
   bootstrapScripts: ["/main.js"],
 

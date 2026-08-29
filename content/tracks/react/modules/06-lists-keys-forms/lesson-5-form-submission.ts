@@ -60,7 +60,7 @@ export const formSubmissionLesson: Lesson = {
         {
           id: "formdata-shape",
           title: "What ends up in the FormData, and what does not",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -114,7 +114,7 @@ act(() => { container.querySelector("#f").requestSubmit(); });`,
         {
           id: "action-resets",
           title: "The reset that `action` performs",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 

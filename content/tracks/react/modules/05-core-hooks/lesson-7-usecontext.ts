@@ -38,7 +38,7 @@ export const useContextLesson: Lesson = {
         {
           id: "context-basics",
           title: "Nearest provider wins",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { createContext, useContext } from "react";
 
 const ThemeContext = createContext("light");
@@ -94,7 +94,7 @@ function App() {
         {
           id: "context-updates",
           title: "Who re-renders, and who does not",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { createContext, useContext, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

@@ -34,7 +34,7 @@ export const batchingLesson: Lesson = {
         {
           id: "batched",
           title: "Three pieces of state, one render",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -90,7 +90,7 @@ state: Ada|ada@example.com|true`,
         {
           id: "auto-batching",
           title: "In a handler, and in a promise",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

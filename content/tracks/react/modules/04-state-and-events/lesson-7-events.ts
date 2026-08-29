@@ -34,7 +34,7 @@ export const eventsLesson: Lesson = {
         {
           id: "delegation-order",
           title: "Handler order, and where the native listener sits",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -84,7 +84,7 @@ act(() => { container.querySelector("#b").click(); });`,
         {
           id: "synthetic-shape",
           title: "What is in your hand",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { act } from "react";
 import { createRoot } from "react-dom/client";
 

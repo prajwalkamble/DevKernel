@@ -37,7 +37,7 @@ export const whyHooksExistLesson: Lesson = {
         {
           id: "lifecycle-to-effect",
           title: "The same subscription, both ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `// The class version: one concern, three methods, two chances to forget.
 //
 //   class Room extends React.Component {

@@ -37,7 +37,7 @@ export const compositionLesson: Lesson = {
         {
           id: "specialisation",
           title: "A specialised component is a component that renders the general one",
-          lang: "tsx",
+          lang: "jsx",
           code: `// The general component. Knows nothing about danger.
 function Dialog({ tone = "neutral", heading, children, action }) {
   return (
@@ -87,7 +87,7 @@ function App() {
         {
           id: "hoc",
           title: "A higher-order component, read rather than written",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Takes a component, returns a component that renders it with an extra prop.
 function withBadge(Wrapped, badge) {
   function WithBadge(props) {

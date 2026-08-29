@@ -189,7 +189,7 @@ export const projectStructureLesson: Lesson = {
         {
           id: "barrel-file",
           title: "features/cart/index.ts",
-          lang: "typescript",
+          lang: "javascript",
           code: `// The feature's public surface. Everything not listed here is internal,
 // and that is enforced by convention rather than by the compiler.
 export { CartTotal } from "./CartTotal";

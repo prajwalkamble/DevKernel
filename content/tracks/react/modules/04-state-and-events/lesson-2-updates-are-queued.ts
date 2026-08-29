@@ -28,7 +28,7 @@ export const updatesAreQueuedLesson: Lesson = {
         {
           id: "not-immediate",
           title: "Reading the value straight after setting it",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -82,7 +82,7 @@ after the click, DOM shows: 1`,
         {
           id: "three-setters",
           title: "Three setters, one increment",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

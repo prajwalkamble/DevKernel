@@ -37,21 +37,25 @@ export const firstAppLesson: Lesson = {
 ];
 
 // Fine: a stable id that belongs to the item.
-<ul>
-  {todos.map((todo) => (
-    <li key={todo.id}>{todo.text}</li>
-  ))}
-</ul>
+const keyedById = (
+  <ul>
+    {todos.map((todo) => (
+      <li key={todo.id}>{todo.text}</li>
+    ))}
+  </ul>
+);
 
 // Risky: the key is the position, not the item.
-<ul>
-  {todos.map((todo, index) => (
-    <li key={index}>
-      {todo.text}
-      <input defaultValue="" />
-    </li>
-  ))}
-</ul>
+const keyedByIndex = (
+  <ul>
+    {todos.map((todo, index) => (
+      <li key={index}>
+        {todo.text}
+        <input defaultValue="" />
+      </li>
+    ))}
+  </ul>
+);
 
 // Delete the FIRST item and React reasons:
 //   key 0 used to be "Learn JSX", now it is "Learn props"  -> same key, just update the text
@@ -74,21 +78,25 @@ const todos: Todo[] = [
 ];
 
 // Fine: a stable id that belongs to the item.
-<ul>
-  {todos.map((todo) => (
-    <li key={todo.id}>{todo.text}</li>
-  ))}
-</ul>
+const keyedById = (
+  <ul>
+    {todos.map((todo) => (
+      <li key={todo.id}>{todo.text}</li>
+    ))}
+  </ul>
+);
 
 // Risky: the key is the position, not the item.
-<ul>
-  {todos.map((todo, index) => (
-    <li key={index}>
-      {todo.text}
-      <input defaultValue="" />
-    </li>
-  ))}
-</ul>
+const keyedByIndex = (
+  <ul>
+    {todos.map((todo, index) => (
+      <li key={index}>
+        {todo.text}
+        <input defaultValue="" />
+      </li>
+    ))}
+  </ul>
+);
 
 // Delete the FIRST item and React reasons:
 //   key 0 used to be "Learn JSX", now it is "Learn props"  -> same key, just update the text

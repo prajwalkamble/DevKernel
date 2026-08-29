@@ -28,7 +28,7 @@ export const childrenLesson: Lesson = {
         {
           id: "children-is-a-prop",
           title: "Three spellings of the same thing",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Note({ children }) {
@@ -83,7 +83,7 @@ same output? true`,
         {
           id: "named-slots",
           title: "One `children`, two named slots",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Dialog({ heading, children, footer = null }) {
   return (
     <section className="dialog">
@@ -123,7 +123,7 @@ function App() {
         {
           id: "render-prop",
           title: "The component owns the data; the caller owns the markup",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Knows how to pick a row; knows nothing about how a row looks.
 function Table({ rows, children }) {
   return (

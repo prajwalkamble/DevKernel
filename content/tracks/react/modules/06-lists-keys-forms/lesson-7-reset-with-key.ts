@@ -45,7 +45,7 @@ export const resetWithKeyLesson: Lesson = {
         {
           id: "key-resets-editor",
           title: "The same editor, with and without a key",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

@@ -143,7 +143,7 @@ render tab=home isPending=false`,
         {
           id: "pending-styling",
           title: "The shape that works",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Tabs() {
   const [tab, setTab] = useState<Tab>("home");
   const [isPending, startTransition] = useTransition();
@@ -188,7 +188,7 @@ render tab=home isPending=false`,
         {
           id: "async-trap",
           title: "The version that quietly does nothing",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Wrong: the only thing inside the callback is a promise being created. */
 startTransition(() => {
   fetch(url).then((r) => r.json()).then(setResults);

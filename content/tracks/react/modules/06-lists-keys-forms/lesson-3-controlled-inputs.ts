@@ -35,7 +35,7 @@ export const controlledInputsLesson: Lesson = {
         {
           id: "controlled-loop",
           title: "The value passing through state",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -111,7 +111,7 @@ typed more  -> ADA LOVELACE | 12 characters`,
         {
           id: "both-models",
           title: "The same field, both ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useRef, useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

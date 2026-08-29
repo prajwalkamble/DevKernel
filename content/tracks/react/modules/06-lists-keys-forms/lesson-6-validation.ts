@@ -46,7 +46,7 @@ export const validationLesson: Lesson = {
         {
           id: "touched-and-submitted",
           title: "The same error, appearing at three different moments",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

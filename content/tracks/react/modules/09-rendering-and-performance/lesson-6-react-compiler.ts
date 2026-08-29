@@ -41,7 +41,7 @@ export const reactCompilerLesson: Lesson = {
         {
           id: "compiled-output",
           title: "In, and out",
-          lang: "tsx",
+          lang: "jsx",
           requires: "babel-plugin-react-compiler (the output is its emit, not the program's)",
           code: `// The source — no memo, no useMemo, no useCallback.
 function ProductList({ products, query }) {
@@ -110,7 +110,7 @@ function _temp(id) {
         {
           id: "compiler-bailout",
           title: "Two bail-outs and one success, in one file",
-          lang: "tsx",
+          lang: "jsx",
           requires: "babel-plugin-react-compiler (the output is its emit, not the program's)",
           code: `function Conditional({ enabled }) {
   if (enabled) {

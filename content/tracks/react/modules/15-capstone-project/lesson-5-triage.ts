@@ -45,7 +45,7 @@ export const capstoneTriageLesson: Lesson = {
         {
           id: "severity-order",
           title: "server/src/routes/bugs.ts — the ranking",
-          lang: "typescript",
+          lang: "javascript",
           code: `/* Severity is a word, so SQL sorts it alphabetically: blocker, major, minor,
    trivial happens to be right by luck, and would stop being right the moment
    anyone adds "critical". Rank it explicitly instead. */
@@ -176,7 +176,7 @@ export function TriageQueue({ projectId, projectKey }: TriageQueueProps) {
         {
           id: "rollback-test",
           title: "web/src/features/triage/TriageQueue.test.tsx",
-          lang: "tsx",
+          lang: "jsx",
           code: `it("removes a bug from the queue as soon as it is confirmed", async () => {
   /* The fake keeps state, because the real server does. Without this the
      refetch that follows the mutation hands the bug straight back and the

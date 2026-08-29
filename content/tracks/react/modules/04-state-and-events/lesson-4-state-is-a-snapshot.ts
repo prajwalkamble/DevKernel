@@ -34,7 +34,7 @@ export const stateIsASnapshotLesson: Lesson = {
         {
           id: "timeout-snapshot",
           title: "The timeout sees the render it was born in",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -85,7 +85,7 @@ console.log("...and the timeout has now run.");`,
         {
           id: "interval-stuck",
           title: "An interval that never gets past one",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 

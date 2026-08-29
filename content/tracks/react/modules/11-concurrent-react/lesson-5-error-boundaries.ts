@@ -312,7 +312,7 @@ page: <p>sorry</p>`,
         {
           id: "the-pair",
           title: "The pair, in the order that matters",
-          lang: "tsx",
+          lang: "jsx",
           code: `/* Error boundary outside, Suspense inside. If the fetch rejects, the
    promise's throw passes the Suspense boundary — which only handles
    promises — and lands on the error boundary above it. */

@@ -27,7 +27,7 @@ export const splittingAPageLesson: Lesson = {
         {
           id: "before",
           title: "Before: one component, three jobs",
-          lang: "tsx",
+          lang: "jsx",
           code: `const invoice = {
   number: "INV-0042",
   customer: "Ada Lovelace",
@@ -92,7 +92,7 @@ function App() {
         {
           id: "after",
           title: "After: the same output, four pieces",
-          lang: "tsx",
+          lang: "jsx",
           code: `const invoice = {
   number: "INV-0042",
   customer: "Ada Lovelace",

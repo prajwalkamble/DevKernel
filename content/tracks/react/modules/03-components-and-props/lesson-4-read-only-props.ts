@@ -28,7 +28,7 @@ export const readOnlyPropsLesson: Lesson = {
         {
           id: "props-frozen",
           title: "The freeze, demonstrated",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { renderToStaticMarkup as render } from "react-dom/server";
 
 function Probe(props) {
@@ -91,7 +91,7 @@ element frozen? true | props frozen? true`,
         {
           id: "callback-ownership",
           title: "The function the child calls belongs to the parent",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Row({ person, onSelect }) {
   // Row has no idea what selecting means. It reports; it does not decide.
   return (

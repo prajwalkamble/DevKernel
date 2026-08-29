@@ -116,7 +116,7 @@ npm run dev`,
         {
           id: "index-html",
           title: "index.html — the only HTML page there is",
-          lang: "javascript",
+          lang: "html",
           code: `<!doctype html>
 <html lang="en">
   <head>

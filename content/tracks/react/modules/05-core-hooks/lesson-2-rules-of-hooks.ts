@@ -37,7 +37,7 @@ export const rulesOfHooksLesson: Lesson = {
         {
           id: "order-matters",
           title: "The list, and what a condition does to it",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState, act } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -104,7 +104,7 @@ third render, middle gone: {"name":"Ada","age":"Grace"}`,
         {
           id: "hooks-in-a-loop",
           title: "The shape that looks reasonable and is not",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Wrong: the number of hooks depends on the data.
 //
 //   function Fields({ names }) {
