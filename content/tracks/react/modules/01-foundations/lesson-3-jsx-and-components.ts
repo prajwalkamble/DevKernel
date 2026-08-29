@@ -27,7 +27,7 @@ export const jsxAndComponentsLesson: Lesson = {
         {
           id: "jsx-compiles-to",
           title: "The same element, three ways",
-          lang: "tsx",
+          lang: "jsx",
           code: `// What you write:
 const element = <span id="x">hi</span>;
 
@@ -75,7 +75,7 @@ true`,
         {
           id: "jsx-rules",
           title: "The differences from HTML, in one component",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Profile({ user, isAdmin }) {
   const heading = "Profile";
 
@@ -104,6 +104,39 @@ true`,
 }`,
           explanation:
             "The double braces in `style={{ … }}` are not special syntax: the outer pair embeds an expression, and the inner pair is an object literal. Note also that `<>…</>` produces no element in the output — the children are placed directly into the parent.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type User = { name: string; joined: number };
+
+function Profile({ user, isAdmin }: { user: User; isAdmin?: boolean }) {
+  const heading = "Profile";
+
+  return (
+    <>
+      {/* A comment inside JSX is an expression containing a comment. */}
+      <h1 className="title">{heading}</h1>
+
+      <label htmlFor="name">Name</label>
+      <input id="name" defaultValue={user.name} />
+      <br />
+
+      {/* Braces take an expression, so any JS that produces a value works. */}
+      <p>{user.name.toUpperCase()}</p>
+      <p>Member for {new Date().getFullYear() - user.joined} years</p>
+
+      {/* Style is an object, and its keys are camelCase too. */}
+      <p style={{ color: "crimson", fontWeight: 600 }}>Careful</p>
+
+      {/* Dashed attributes stay dashed. */}
+      <div data-testid="profile" aria-live="polite" />
+
+      {isAdmin && <button type="button">Delete user</button>}
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -118,7 +151,7 @@ true`,
         {
           id: "falsy-render",
           title: "The bug, and the fix, side by side",
-          lang: "tsx",
+          lang: "jsx",
           code: `const items = [];       // empty
 const zero = 0;
 
@@ -145,6 +178,36 @@ function Truthy() {
           output: `<ul><li>0</li><li></li><li>fallback</li><li></li><li>ab</li></ul>`,
           explanation:
             "That output is what React actually produces. A stray `0` on the page — usually right where a list is empty — is always this. The habit that prevents it: **make the left side of `&&` a real boolean**, with `> 0`, `!== 0`, or `Boolean(...)`. A ternary (`items.length ? <em/> : null`) avoids the question entirely and is often clearer.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// The annotation matters here: \`const items = []\` on its own is \`never[]\`,
+// so pushing a string into it later would not compile.
+const items: string[] = [];
+const zero = 0;
+
+function Truthy() {
+  return (
+    <ul>
+      {/* items.length is 0, so \`&&\` returns 0, and React renders it. */}
+      <li>{items.length && <em>has items</em>}</li>
+
+      {/* A real boolean. False renders nothing. */}
+      <li>{items.length > 0 && <em>has items</em>}</li>
+
+      {/* \`||\` has the mirror-image trap: 0 is falsy, so this falls through. */}
+      <li>{zero || "fallback"}</li>
+
+      {/* All four of these render nothing whatsoever. */}
+      <li>{null}{undefined}{false}{true}</li>
+
+      {/* An array renders its elements, concatenated. */}
+      <li>{["a", "b"]}</li>
+    </ul>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -166,7 +229,7 @@ function Truthy() {
         {
           id: "first-component",
           title: "Defining and composing components",
-          lang: "tsx",
+          lang: "jsx",
           code: `// Lowercase: React sees the string "avatar" and looks for an HTML tag.
 function avatar() {
   return <img src="/me.png" alt="" />;

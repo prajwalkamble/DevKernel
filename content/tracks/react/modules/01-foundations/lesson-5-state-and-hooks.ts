@@ -32,7 +32,7 @@ export const stateAndHooksLesson: Lesson = {
         {
           id: "broken-counter",
           title: "The version that does nothing",
-          lang: "tsx",
+          lang: "jsx",
           code: `function BrokenCounter() {
   let count = 0;               // recreated on every call of this function
 
@@ -62,7 +62,7 @@ export const stateAndHooksLesson: Lesson = {
         {
           id: "usestate-basic",
           title: "useState, and the pair it returns",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState } from "react";
 
 function Counter() {
@@ -108,7 +108,7 @@ function Counter() {
         {
           id: "stale-snapshot",
           title: "Reading state after setting it",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Confusing() {
   const [count, setCount] = useState(0);
 
@@ -164,7 +164,7 @@ function Counter() {
         {
           id: "immutable-updates",
           title: "The patterns you will use constantly",
-          lang: "tsx",
+          lang: "jsx",
           code: `const [user, setUser] = useState({ name: "Ada", address: { city: "London" } });
 const [todos, setTodos] = useState([{ id: 1, text: "Learn React", done: false }]);
 
@@ -186,6 +186,36 @@ setTodos(todos.map((t) =>                                   // update one
 setTodos(todos.toSorted((a, b) => a.text.localeCompare(b.text)));  // reorder`,
           explanation:
             "The array methods split cleanly: `map`, `filter`, `slice`, `concat`, `toSorted` and `toReversed` return something new and are safe; `push`, `pop`, `splice`, `sort` and `reverse` mutate and are not. Deeply nested state is a signal to flatten the shape or reach for a library such as Immer — the spread chains get unreadable at three levels.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type User = { name: string; address: { city: string } };
+type Todo = { id: number; text: string; done: boolean };
+
+const [user, setUser] = useState<User>({ name: "Ada", address: { city: "London" } });
+const [todos, setTodos] = useState<Todo[]>([{ id: 1, text: "Learn React", done: false }]);
+
+// --- objects ---
+user.name = "Grace";                    // WRONG: same reference, no re-render
+setUser({ ...user, name: "Grace" });    // right: new object, one field changed
+
+// Nested: every level you change must be copied.
+setUser({ ...user, address: { ...user.address, city: "Paris" } });
+
+// --- arrays ---
+todos.push(newTodo);                    // WRONG: mutates
+setTodos([...todos, newTodo]);          // add to the end
+setTodos([newTodo, ...todos]);          // add to the start
+setTodos(todos.filter((t) => t.id !== 1));                 // remove
+setTodos(todos.map((t) =>                                   // update one
+  t.id === 1 ? { ...t, done: !t.done } : t
+));
+setTodos(todos.toSorted((a, b) => a.text.localeCompare(b.text)));  // reorder
+
+// Typing the state as \`readonly Todo[]\` turns the two WRONG lines into
+// compile errors: neither \`push\` nor an in-place \`sort\` exists on it.`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -208,7 +238,7 @@ setTodos(todos.toSorted((a, b) => a.text.localeCompare(b.text)));  // reorder`,
         {
           id: "hook-rules",
           title: "Why the order matters",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Broken({ isLoggedIn }) {
   // WRONG: on the render where isLoggedIn flips, every hook after this
   // one shifts by a slot and picks up the wrong stored value.
@@ -229,6 +259,30 @@ function Fixed({ isLoggedIn }) {
 }`,
           explanation:
             "Almost every apparent need to call a hook conditionally is really a need to *render* conditionally, or to split the component in two so that the hook lives in the child that is conditionally rendered. Install `eslint-plugin-react-hooks` and never disable its rules — it catches this at the moment you type it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function Broken({ isLoggedIn }: { isLoggedIn: boolean }) {
+  // WRONG: on the render where isLoggedIn flips, every hook after this
+  // one shifts by a slot and picks up the wrong stored value.
+  if (isLoggedIn) {
+    const [name, setName] = useState("");
+  }
+  const [count, setCount] = useState(0);
+  // ...
+}
+
+function Fixed({ isLoggedIn }: { isLoggedIn: boolean }) {
+  // Hooks unconditionally at the top; the condition moves into the JSX,
+  // where it belongs. Types do not catch the version above — the rule of
+  // hooks is a runtime rule, which is what the eslint plugin is for.
+  const [name, setName] = useState("");
+  const [count, setCount] = useState(0);
+
+  return isLoggedIn ? <p>{name}</p> : <p>Please sign in</p>;
+}`,
+            },
+          ],
         },
       ],
     },

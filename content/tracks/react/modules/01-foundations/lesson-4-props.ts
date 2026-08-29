@@ -35,7 +35,7 @@ export const propsLesson: Lesson = {
         {
           id: "props-basics",
           title: "Passing and reading",
-          lang: "tsx",
+          lang: "jsx",
           code: `function UserCard(props) {
   return (
     <article>
@@ -60,6 +60,39 @@ function App() {
           output: `<div><article><h3>Ada</h3><p>36 years old</p><span class="badge">admin</span></article><article><h3>Grace</h3><p>45 years old</p></article><article><h3>Alan</h3><p>41 years old</p><span class="badge">admin</span></article></div>`,
           explanation:
             "Three uses of the same component, each with its own data and no shared state. Note `age={36}` in braces: written as `age=\"36\"` it would be the string `\"36\"`, and `props.age - 1` would then produce `35` by coercion in JavaScript but a type error in TypeScript — the sort of bug that is much cheaper to prevent than to find.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type UserCardProps = {
+  name: string;
+  age: number;
+  // Optional, which is what lets the third call site leave it off entirely.
+  isAdmin?: boolean;
+};
+
+function UserCard(props: UserCardProps) {
+  return (
+    <article>
+      <h3>{props.name}</h3>
+      <p>{props.age} years old</p>
+      {props.isAdmin && <span className="badge">admin</span>}
+    </article>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <UserCard name="Ada" age={36} isAdmin={true} />
+      <UserCard name="Grace" age={45} isAdmin={false} />
+
+      {/* A bare attribute is shorthand for {true}. */}
+      <UserCard name="Alan" age={41} isAdmin />
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -74,7 +107,7 @@ function App() {
         {
           id: "props-destructure",
           title: "The form you will actually write",
-          lang: "tsx",
+          lang: "jsx",
           code: `// The signature is now the documentation.
 function Button({ label, variant = "secondary", disabled = false, onClick }) {
   return (
@@ -106,6 +139,54 @@ function App() {
 }`,
           explanation:
             "`{...rest}` spreads the remaining props onto the `<input>`, so `type`, `required` and `placeholder` reach the DOM without `Input` having to know about them. This is the single most useful pattern for building reusable components, and TypeScript can type it exactly (`ComponentProps<\"input\">`).",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ComponentPropsWithoutRef } from "react";
+
+type ButtonProps = {
+  label: string;
+  // A union rather than \`string\`: "primry" is then a compile error, not a
+  // class name that silently does nothing.
+  variant?: "primary" | "secondary";
+  disabled?: boolean;
+  onClick?: () => void;
+};
+
+// The signature is now the documentation.
+function Button({ label, variant = "secondary", disabled = false, onClick }: ButtonProps) {
+  return (
+    <button className={\`btn btn-\${variant}\`} disabled={disabled} onClick={onClick}>
+      {label}
+    </button>
+  );
+}
+
+// Collect the rest, and spread them onto the underlying element. This is how
+// component libraries let you pass any DOM attribute through — and the type
+// says exactly that: everything an <input> takes, plus a label.
+type InputProps = ComponentPropsWithoutRef<"input"> & { label: string };
+
+function Input({ label, id, ...rest }: InputProps) {
+  return (
+    <>
+      <label htmlFor={id}>{label}</label>
+      <input id={id} {...rest} />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <form>
+      <Input label="Email" id="email" type="email" required placeholder="you@example.com" />
+      <Button label="Send" variant="primary" />
+      <Button label="Cancel" />
+    </form>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -127,7 +208,7 @@ function App() {
         {
           id: "props-mutation",
           title: "The mutation bug, and the fix",
-          lang: "tsx",
+          lang: "jsx",
           code: `// WRONG: sort() sorts in place, so this mutates the parent's array.
 function ScoreList({ scores }) {
   const ordered = scores.sort((a, b) => b - a);   // mutates \`scores\`!
@@ -144,11 +225,35 @@ function ScoreListFixed({ scores }) {
 //   const ordered = [...scores].sort((a, b) => b - a);`,
           explanation:
             "`sort`, `reverse`, `splice`, `push` and `pop` all mutate. `toSorted`, `toReversed`, `toSpliced`, `map`, `filter`, `slice` and `concat` all return a new array. When an array or object arrives as a prop, treat it as borrowed: read it, copy it, never write to it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// WRONG: sort() sorts in place, so this mutates the parent's array.
+function ScoreList({ scores }: { scores: number[] }) {
+  const ordered = scores.sort((a, b) => b - a);   // mutates \`scores\`!
+  return <ol>{ordered.map((s) => <li key={s}>{s}</li>)}</ol>;
+}
+
+// RIGHT: copy first. toSorted() returns a new array and never mutates.
+function ScoreListFixed({ scores }: { scores: number[] }) {
+  const ordered = scores.toSorted((a, b) => b - a);
+  return <ol>{ordered.map((s) => <li key={s}>{s}</li>)}</ol>;
+}
+
+// Also right, and works everywhere:
+//   const ordered = [...scores].sort((a, b) => b - a);
+
+// TypeScript can catch the first version outright. Type the prop as
+// \`readonly number[]\` and \`scores.sort(...)\` stops compiling, because sort()
+// is not on the readonly array type — the mutation becomes a build error
+// rather than a bug the parent notices later.`,
+            },
+          ],
         },
         {
           id: "props-callbacks",
           title: "Changes flow up: passing a function down",
-          lang: "tsx",
+          lang: "jsx",
           code: `function SearchInput({ value, onChange, onClear }) {
   // This component owns no state. It renders what it is given and
   // reports what happened; the parent decides what that means.
@@ -176,6 +281,42 @@ function SearchPage() {
 }`,
           explanation:
             "`SearchInput` has no state of its own — the value comes down as a prop and every change goes back up through a callback. This is the *controlled component* pattern, and it is why the `<p>` below stays in sync automatically. The convention is `onSomething` for the prop and `handleSomething` for the function that implements it.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function SearchInput({ value, onChange, onClear }: {
+  value: string;
+  // The callback's signature is the contract: the parent is told what the new
+  // value is, not handed a DOM event to dig through.
+  onChange: (next: string) => void;
+  onClear: () => void;
+}) {
+  // This component owns no state. It renders what it is given and
+  // reports what happened; the parent decides what that means.
+  return (
+    <div>
+      <input value={value} onChange={(e) => onChange(e.target.value)} />
+      {value !== "" && (
+        <button type="button" onClick={onClear}>
+          Clear
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SearchPage() {
+  const [query, setQuery] = useState("");
+
+  return (
+    <>
+      <SearchInput value={query} onChange={setQuery} onClear={() => setQuery("")} />
+      <p>Searching for: {query || "everything"}</p>
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -190,7 +331,7 @@ function SearchPage() {
         {
           id: "children-prop",
           title: "Wrappers, and passing elements as ordinary props",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Card({ title, children, footer }) {
   return (
     <section className="card">
@@ -216,6 +357,41 @@ function App() {
           output: `<section class="card"><h3>Welcome</h3><div class="card-body"><p>Anything at all can go here.</p><p>Including several elements.</p></div><div class="card-footer"><a href="/more">Read more</a></div></section>`,
           explanation:
             "`footer` demonstrates that passing elements is not limited to `children`. When a component needs two or three distinct slots, named element props are clearer than trying to inspect and split `children`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+function Card({ title, children, footer }: {
+  title: string;
+  // React 19 does not add \`children\` for you: a component that takes children
+  // has to say so, like any other prop.
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <section className="card">
+      <h3>{title}</h3>
+      <div className="card-body">{children}</div>
+      {footer && <div className="card-footer">{footer}</div>}
+    </section>
+  );
+}
+
+function App() {
+  return (
+    <Card
+      title="Welcome"
+      /* An element in a prop — \`children\` has no monopoly on this. */
+      footer={<a href="/more">Read more</a>}
+    >
+      <p>Anything at all can go here.</p>
+      <p>Including several elements.</p>
+    </Card>
+  );
+}`,
+            },
+          ],
         },
       ],
     },

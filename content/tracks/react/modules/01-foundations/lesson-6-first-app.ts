@@ -29,7 +29,7 @@ export const firstAppLesson: Lesson = {
         {
           id: "list-keys",
           title: "The index-as-key bug, made concrete",
-          lang: "tsx",
+          lang: "jsx",
           code: `const todos = [
   { id: "a1", text: "Learn JSX" },
   { id: "b2", text: "Learn props" },
@@ -62,6 +62,46 @@ export const firstAppLesson: Lesson = {
 // you typed against "Learn JSX" is now sitting next to "Learn props".`,
           explanation:
             "The rule people repeat is \"never use the index as a key\", which is slightly too strong. The index is fine when the list is **never reordered, filtered, or added to except at the end**, and the items hold no state. The moment any of those stops being true, it is a bug — and since lists tend to gain sorting later, a stable id is the safer habit.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Todo = { id: string; text: string };
+
+const todos: Todo[] = [
+  { id: "a1", text: "Learn JSX" },
+  { id: "b2", text: "Learn props" },
+  { id: "c3", text: "Learn state" },
+];
+
+// Fine: a stable id that belongs to the item.
+<ul>
+  {todos.map((todo) => (
+    <li key={todo.id}>{todo.text}</li>
+  ))}
+</ul>
+
+// Risky: the key is the position, not the item.
+<ul>
+  {todos.map((todo, index) => (
+    <li key={index}>
+      {todo.text}
+      <input defaultValue="" />
+    </li>
+  ))}
+</ul>
+
+// Delete the FIRST item and React reasons:
+//   key 0 used to be "Learn JSX", now it is "Learn props"  -> same key, just update the text
+//   key 1 used to be "Learn props", now it is "Learn state" -> same key, just update the text
+//   key 2 is gone                                           -> remove the last row
+//
+// The text is right. But the <input> in row 0 was never re-created, so whatever
+// you typed against "Learn JSX" is now sitting next to "Learn props".
+//
+// Nothing in the type system distinguishes the two: both keys are valid. This
+// one is caught by reasoning about identity, not by the compiler.`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -82,7 +122,7 @@ export const firstAppLesson: Lesson = {
         {
           id: "controlled-form",
           title: "A form with validation and submission",
-          lang: "tsx",
+          lang: "jsx",
           code: `function AddTodoForm({ onAdd }) {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -118,6 +158,46 @@ export const firstAppLesson: Lesson = {
 }`,
           explanation:
             "Three things worth noticing. `onSubmit` on the form rather than `onClick` on the button, so the Enter key works. `event.preventDefault()`, without which the browser does a full page navigation. And `setText(\"\")` clearing the field — because the input has no value of its own, resetting the state resets the input.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `function AddTodoForm({ onAdd }: { onAdd: (text: string) => void }) {
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+
+  // \`FormEvent\` is the type worth knowing: it is what gives \`preventDefault\`
+  // to the handler, and what stops \`event\` being an implicit \`any\`.
+  function handleSubmit(event: React.FormEvent) {
+    // Without this the browser navigates and the page reloads.
+    event.preventDefault();
+
+    const trimmed = text.trim();
+    if (trimmed === "") {
+      setError("Please write something first.");
+      return;
+    }
+
+    onAdd(trimmed);     // report upward; the parent owns the list
+    setText("");        // clearing state clears the input
+    setError("");
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="todo">New task</label>
+      <input
+        id="todo"
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        aria-invalid={error !== ""}
+      />
+      <button type="submit">Add</button>
+      {error !== "" && <p role="alert">{error}</p>}
+    </form>
+  );
+}`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -145,7 +225,7 @@ export const firstAppLesson: Lesson = {
         {
           id: "lifting-state",
           title: "Before and after lifting",
-          lang: "tsx",
+          lang: "jsx",
           code: `// BEFORE: each panel owns its own filter. The counter cannot see it,
 // so the two disagree the moment anyone types.
 function SearchPanel() {
@@ -176,6 +256,43 @@ function TodoApp() {
 }`,
           explanation:
             "Note that `visible` is **not state**. It is derived from `todos` and `query` during render, so it cannot fall out of sync. Holding a filtered copy in state and keeping it updated with an effect is the single most common piece of unnecessary React code there is.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `type Todo = { id: string; text: string };
+
+// BEFORE: each panel owns its own filter. The counter cannot see it,
+// so the two disagree the moment anyone types.
+function SearchPanel() {
+  const [query, setQuery] = useState("");
+  return <input value={query} onChange={(e) => setQuery(e.target.value)} />;
+}
+
+function ResultCount() {
+  // ...no way to reach \`query\` from here.
+}
+
+// AFTER: the state moves to the nearest common parent.
+function TodoApp() {
+  const [query, setQuery] = useState("");
+  // \`useState([])\` on its own infers \`never[]\`, and every later push is an
+  // error. The type argument is not optional in practice.
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  const visible = todos.filter((t) =>
+    t.text.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <>
+      <SearchPanel query={query} onQueryChange={setQuery} />
+      <ResultCount shown={visible.length} total={todos.length} />
+      <TodoList todos={visible} />
+    </>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
@@ -189,8 +306,115 @@ function TodoApp() {
         {
           id: "complete-app",
           title: "src/App.tsx — a working todo application",
-          lang: "tsx",
+          lang: "jsx",
           code: `import { useState } from "react";
+
+function TodoItem({ todo, onToggle, onDelete }) {
+  return (
+    <li>
+      <label>
+        <input
+          type="checkbox"
+          checked={todo.done}
+          onChange={() => onToggle(todo.id)}
+        />
+        <span style={{ textDecoration: todo.done ? "line-through" : "none" }}>
+          {todo.text}
+        </span>
+      </label>
+      <button type="button" onClick={() => onDelete(todo.id)} aria-label={\`Delete \${todo.text}\`}>
+        ×
+      </button>
+    </li>
+  );
+}
+
+function AddTodoForm({ onAdd }) {
+  const [text, setText] = useState("");
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (text.trim() === "") return;
+    onAdd(text.trim());
+    setText("");
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="new-todo">New task</label>
+      <input id="new-todo" value={text} onChange={(e) => setText(e.target.value)} />
+      <button type="submit">Add</button>
+    </form>
+  );
+}
+
+export default function App() {
+  const [todos, setTodos] = useState([
+    { id: "1", text: "Learn JSX", done: true },
+    { id: "2", text: "Learn props", done: false },
+  ]);
+  const [showDone, setShowDone] = useState(true);
+
+  // Derived during render — never stored, so it can never be stale.
+  const visible = showDone ? todos : todos.filter((t) => !t.done);
+  const remaining = todos.filter((t) => !t.done).length;
+
+  function addTodo(text) {
+    setTodos((current) => [
+      ...current,
+      { id: crypto.randomUUID(), text, done: false },
+    ]);
+  }
+
+  function toggleTodo(id) {
+    setTodos((current) =>
+      current.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+    );
+  }
+
+  function deleteTodo(id) {
+    setTodos((current) => current.filter((t) => t.id !== id));
+  }
+
+  return (
+    <main>
+      <h1>Todo</h1>
+      <p>{remaining} of {todos.length} remaining</p>
+
+      <AddTodoForm onAdd={addTodo} />
+
+      <label>
+        <input
+          type="checkbox"
+          checked={showDone}
+          onChange={(e) => setShowDone(e.target.checked)}
+        />
+        Show completed
+      </label>
+
+      {visible.length === 0 ? (
+        <p>Nothing to show.</p>
+      ) : (
+        <ul>
+          {visible.map((todo) => (
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              onToggle={toggleTodo}
+              onDelete={deleteTodo}
+            />
+          ))}
+        </ul>
+      )}
+    </main>
+  );
+}`,
+          explanation:
+            "Every update uses the functional form (`setTodos(current => …)`) because each one derives the new list from the old one. Every update replaces rather than mutates. `visible` and `remaining` are computed, not stored. And `TodoItem` holds no state at all — it is a pure function of its props, which makes it trivial to test and impossible to desynchronise.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import { useState } from "react";
 
 interface Todo {
   id: string;
@@ -302,8 +526,8 @@ export default function App() {
     </main>
   );
 }`,
-          explanation:
-            "Every update uses the functional form (`setTodos(current => …)`) because each one derives the new list from the old one. Every update replaces rather than mutates. `visible` and `remaining` are computed, not stored. And `TodoItem` holds no state at all — it is a pure function of its props, which makes it trivial to test and impossible to desynchronise.",
+            },
+          ],
         },
       ],
       pitfalls: [

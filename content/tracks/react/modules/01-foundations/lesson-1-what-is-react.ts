@@ -67,7 +67,7 @@ button.addEventListener("click", () => {
         {
           id: "declarative-react",
           title: "The declarative version: you describe the result",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Counter() {
   const [count, setCount] = useState(0);
 
@@ -106,7 +106,7 @@ button.addEventListener("click", () => {
         {
           id: "components-are-functions",
           title: "Components compose the way functions compose",
-          lang: "tsx",
+          lang: "jsx",
           code: `function Badge({ label }) {
   return <span className="badge">{label}</span>;
 }
@@ -135,6 +135,38 @@ function App() {
           output: `<div><h1 class="title">Hello, world!</h1><section><h2>Hello, Ada!</h2><p>Nested children render here.</p><span class="badge">new</span></section></div>`,
           explanation:
             "That output is the real HTML React produces for this tree. Note `className` became `class` — JSX uses the DOM property names, which the next lesson but one covers. `Badge` and `Greeting` are ordinary functions; the only thing that makes them components is that React calls them and they return elements.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactNode } from "react";
+
+function Badge({ label }: { label: string }) {
+  return <span className="badge">{label}</span>;
+}
+
+function Greeting({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    <section>
+      <h2>Hello, {name}!</h2>
+      {children}
+    </section>
+  );
+}
+
+// Composed the same way you would compose any function call.
+function App() {
+  return (
+    <div>
+      <h1 className="title">Hello, world!</h1>
+      <Greeting name="Ada">
+        <p>Nested children render here.</p>
+        <Badge label="new" />
+      </Greeting>
+    </div>
+  );
+}`,
+            },
+          ],
         },
       ],
     },
