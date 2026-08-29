@@ -27,7 +27,7 @@ export const whatJsxCompilesToLesson: Lesson = {
         {
           id: "automatic-runtime-emit",
           title: "Four pieces of JSX, and what each becomes",
-          lang: "tsx",
+          lang: "jsx",
           code: `const one = <span id="x">hi</span>;
 const many = <ul><li>a</li><li>b</li></ul>;
 const keyed = <li key="k" id="i">t</li>;
@@ -46,6 +46,32 @@ const comp = <Widget size={3}>body</Widget>;
 //   const comp  = jsx(Widget, { size: 3, children: "body" });`,
           explanation:
             "Read the four lines of emit and the rest of this module is half-explained. `children` is an ordinary entry in the props object, which is why `children` is an ordinary prop. A DOM tag arrives as the **string** `\"span\"`; a component arrives as **the function itself**, which is what capitalisation decides. `many` calls `jsxs` rather than `jsx`. And `keyed` passes `\"k\"` as a *third argument*, not inside props.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `import type { ReactElement, ReactNode } from "react";
+
+declare function Widget(props: { size: number; children: ReactNode }): ReactElement;
+
+const one = <span id="x">hi</span>;
+const many = <ul><li>a</li><li>b</li></ul>;
+const keyed = <li key="k" id="i">t</li>;
+const comp = <Widget size={3}>body</Widget>;
+
+// Types are erased before the JSX transform runs, so the emit is identical
+// to the JavaScript version — the declaration above produces no code:
+//
+//   import { jsx, jsxs } from "react/jsx-runtime";
+//
+//   const one   = jsx("span", { id: "x", children: "hi" });
+//   const many  = jsxs("ul", { children: [
+//                   jsx("li", { children: "a" }),
+//                   jsx("li", { children: "b" }),
+//                 ] });
+//   const keyed = jsx("li", { id: "i", children: "t" }, "k");
+//   const comp  = jsx(Widget, { size: 3, children: "body" });`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -73,7 +99,7 @@ const comp = <Widget size={3}>body</Widget>;
         {
           id: "element-shape",
           title: "An element, inspected",
-          lang: "tsx",
+          lang: "jsx",
           code: `const el = <li key="k" id="i">t</li>;
 
 console.log("type:      ", el.type);
@@ -92,11 +118,28 @@ frozen:     true
 props keys: ["id","children"]`,
           explanation:
             "Note the symbol's name: in React 19 it is `react.transitional.element`, not the `react.element` that older articles quote. Never compare against it yourself — it is an implementation detail that has already changed once. And note what is missing from `props`: the key you passed.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `const el = <li key="k" id="i">t</li>;
+
+console.log("type:      ", el.type);
+console.log("key:       ", el.key);
+console.log("props:     ", JSON.stringify(el.props));
+// \`$$typeof\` is on the object at runtime, but React does not put it on the
+// element type — so TypeScript needs to be told it is there.
+console.log("$$typeof:  ", String((el as unknown as { $$typeof: symbol }).$$typeof));
+console.log("frozen:    ", Object.isFrozen(el));
+
+// \`key\` is deliberately absent from props.
+console.log("props keys:", JSON.stringify(Object.keys(el.props)));`,
+            },
+          ],
         },
         {
           id: "key-is-not-a-prop",
           title: "Reading `props.key`, and being told off for it",
-          lang: "tsx",
+          lang: "jsx",
           code: `const el = <li key="k" id="i">t</li>;
 
 // React 19 leaves a non-enumerable getter on props purely to catch this.
@@ -105,6 +148,17 @@ console.log(el.props.key);`,
 li: \`key\` is not a prop. Trying to access it will result in \`undefined\` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://react.dev/link/special-props)`,
           explanation:
             "The value is `undefined` and the warning goes to stderr, which is why it is printed after the value here. A component genuinely cannot see its own key, because the key is instruction to React about *which* item this is between renders — not data about the item. When the component needs the value too, pass it twice: `<Row key={row.id} id={row.id} />`.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `const el = <li key="k" id="i">t</li>;
+
+// React 19 leaves a non-enumerable getter on props purely to catch this.
+// The type says nothing either way: \`props\` here is \`any\`, so naming a
+// field that was never a prop is not a compile error — only a runtime scold.
+console.log((el.props as { key?: string }).key);`,
+            },
+          ],
         },
       ],
       pitfalls: [
@@ -125,7 +179,7 @@ li: \`key\` is not a prop. Trying to access it will result in \`undefined\` bein
         {
           id: "spread-order",
           title: "The same props, two orders",
-          lang: "tsx",
+          lang: "jsx",
           code: `const rest = { id: "from-rest", type: "text" };
 
 // Spread first: the explicit \`id\` wins.
@@ -140,6 +194,23 @@ console.log(JSON.stringify(b.props));`,
 {"id":"from-rest","type":"text"}`,
           explanation:
             "This is the whole rule. A component that wants to stay overridable spreads incoming props **last** onto the element it renders; one that must guarantee an attribute — a `type=\"button\"` that has to stay a button — spreads first and sets the attribute after.",
+          alternates: [
+            {
+              lang: "tsx",
+              code: `// \`as const\` narrows \`type\` to "text". Without it the field is \`string\`,
+// which is not assignable to the union \`<input type>\` accepts.
+const rest = { id: "from-rest", type: "text" } as const;
+
+// Spread first: the explicit \`id\` wins.
+const a = <input {...rest} id="explicit" />;
+
+// Spread last: the caller's \`id\` wins.
+const b = <input id="explicit" {...rest} />;
+
+console.log(JSON.stringify(a.props));
+console.log(JSON.stringify(b.props));`,
+            },
+          ],
         },
       ],
     },

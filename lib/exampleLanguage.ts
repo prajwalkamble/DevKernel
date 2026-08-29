@@ -20,8 +20,12 @@ export const EXAMPLE_LANGUAGE_EVENT = "devkernel:example-language-change";
  * The languages a lesson example may be offered in, in dropdown order.
  *
  * Ordered by the label a reader sees rather than by anything internal, so the
- * dropdown reads alphabetically: Assembly, C++, Go, Java, JavaScript, Python,
- * Rust, TypeScript. The picker filters this list rather than reading the keys
+ * dropdown reads alphabetically: Assembly, C++, Go, Java, JavaScript, JSX,
+ * Python, Rust, TSX, TypeScript. JSX and TSX are separate entries rather than
+ * spellings of JavaScript and TypeScript because an example carries one or the
+ * other — a React component and a plain module are not interchangeable — and a
+ * reader picking "JSX" in the React track should not have a DSA example claim
+ * it has that language. The picker filters this list rather than reading the keys
  * off an object, because object key order is insertion order and would leave
  * every dropdown sorted by whichever language a translation happened to be
  * written in first.
@@ -32,8 +36,10 @@ export const EXAMPLE_LANGUAGES = [
   "go",
   "java",
   "javascript",
+  "jsx",
   "python",
   "rust",
+  "tsx",
   "typescript",
 ] as const satisfies readonly CodeLanguage[];
 
@@ -42,7 +48,9 @@ export type ExampleLanguage = (typeof EXAMPLE_LANGUAGES)[number];
 export const EXAMPLE_LANGUAGE_LABEL: Record<ExampleLanguage, string> = {
   python: "Python",
   javascript: "JavaScript",
+  jsx: "JSX",
   typescript: "TypeScript",
+  tsx: "TSX",
   java: "Java",
   cpp: "C++",
   rust: "Rust",
