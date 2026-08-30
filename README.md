@@ -1,312 +1,278 @@
 # DevKernel
 
-**A from-scratch software-engineering curriculum where every line of output on the page was produced by running the code.**
+A software-engineering curriculum where every line of output printed in a lesson was produced by running the code, and every animation was produced by running the algorithm.
 
-Live at **[devkernel.vercel.app](https://devkernel.vercel.app)**
+Live at [devkernel.vercel.app](https://devkernel.vercel.app)
 
 ![The DevKernel home page](docs/screenshots/home.png)
 
-Every screenshot in this README is one page cut on a diagonal: light theme on the left, dark theme on the right.
-
----
+Every screenshot in this file is one page cut on a diagonal: light theme on the left, dark theme on the right.
 
 ## Table of contents
 
 - [What this is](#what-this-is)
-- [Why it exists](#why-it-exists)
-- [What is in it](#what-is-in-it)
-- [The tracks](#the-tracks)
-- [The site](#the-site)
-- [One algorithm, ten languages](#one-algorithm-ten-languages)
-- [Getting started](#getting-started)
+- [The central rule](#the-central-rule)
+- [Features](#features)
+- [How it works](#how-it-works)
+- [What is in the curriculum](#what-is-in-the-curriculum)
+- [Requirements](#requirements)
+- [Installation](#installation)
 - [npm scripts](#npm-scripts)
 - [Environment variables](#environment-variables)
-- [Project structure](#project-structure)
-- [Verification](#verification)
-- [Adding content](#adding-content)
+- [Project layout](#project-layout)
 - [Deployment](#deployment)
 - [Screenshots](#screenshots)
+- [Contributing](#contributing)
 - [Further reading](#further-reading)
 - [License](#license)
 
----
-
 ## What this is
 
-DevKernel is a Next.js 16 application that serves a large, hand-written curriculum in software engineering, plus four interactive tools that run entirely in the browser:
+DevKernel is a Next.js 16 application, using the App Router, that serves a hand-written curriculum in software engineering together with three interactive tools. All four parts are static at build time and everything interactive runs in the visitor's browser. There is no execution backend, no database and no user accounts.
 
-- **Lessons** — long-form prose with worked examples, pitfalls, takeaways and interview questions.
-- **A playground** — write and run nine languages in the browser, with no server round-trip.
-- **A practice console** — solve problems in eight languages and have them graded against real test cases.
-- **A visualisation gallery** — step forwards and backwards through algorithms and data structures.
+The four parts are:
 
-The curriculum is not markdown. It is **TypeScript data** — objects containing prose, code and the output that code produces — which is what makes the central claim enforceable: `scripts/verify-lesson-code.mjs` compiles and runs every example against a real toolchain and diffs it against what the lesson promises. A mismatch is a failed build.
+- Lessons. Long-form prose with worked examples, pitfall callouts, takeaways and interview questions.
+- A playground. An editor that runs nine languages in the browser with no server round-trip.
+- A practice console. Problems solved in eight languages and graded against real test cases.
+- A visualisation gallery. Algorithms and data structures you can step through forwards and backwards.
 
-## Why it exists
+The curriculum is not Markdown files. It is TypeScript data: objects that hold the prose, the code, and the output that code produces. That is what makes the central rule below mechanically enforceable rather than a matter of care.
 
-Most programming courses fail in one of two ways, and they are opposite failures.
+## The central rule
 
-The first is the **tutorial that never goes deep**. It shows you `for i in range(n)` and moves on. It never tells you that integer division rounds toward zero in six languages and toward negative infinity in Python, so you will write a binary search that works on every test you try and breaks on the one with a negative midpoint.
+Nothing that claims to be a program's output is written by hand.
 
-The second is the **reference that assumes the floor**. It starts at arrays. People who already know what a variable costs find it excellent; everyone else bounces off it and concludes they are bad at this.
+A learner who types an example in and gets something different from what the page promised cannot tell whether they made the mistake or the page did. The second time it happens they stop trusting the whole track. So the promise is checked by machine:
 
-There is a third failure that both share, and it is the one this project was built to fix: **the output on the page is usually typed by hand**. Someone wrote the code, believed they knew what it would print, and typed that in. Most of the time they were right. The rest of the time a learner spends an hour discovering that the reference material is wrong.
+- `scripts/verify-lesson-code.mjs` compiles and runs every example in the content tree against a real toolchain, and diffs what it printed against what the lesson claims. A mismatch fails the build.
+- `scripts/verify-visual-frames.ts` runs every visualisation generator and checks that the frames are well formed and that every lesson's visual specification names an algorithm that exists.
+- `scripts/verify-visual-playback.mjs` drives a real browser and confirms the animation actually advances, which no assertion about data can establish.
 
-That last problem is tractable in a way the other two are not. You can just run the code — so this project does, on every push.
+The same rule governs translations. When an example offers itself in another language behind a dropdown, that translation is compiled and run too, and checked against the same expected output. An unverified translation would make the dropdown a promise nothing keeps.
 
-## What is in it
+## Features
 
-Figures below are counted from the content tree, not maintained by hand. Regenerate them by walking `content/tracks` (see [Verification](#verification) for the scripts that do the same walk).
+Lessons
+
+- Server-rendered prose from typed content objects, with a deliberately small inline markup dialect supporting bold, italic and inline code, and no raw HTML.
+- Syntax highlighting by Shiki, done entirely on the server. No highlighter is shipped to the browser.
+- A language dropdown on examples that carry translations. The choice is stored globally, so picking one language carries across every example on the page and into the next lesson.
+- Embedded visualisations, pitfall callouts, per-lesson interview questions, and lesson completion tracked in the browser.
+- Every track publishes its full syllabus in advance. A module nobody has written yet still declares its topics and renders as a preview rather than being hidden.
+
+Playground
+
+- Nine languages: C, C++, Go, Java, JavaScript, Python, Rust, TypeScript, and x86-64 assembly.
+- JavaScript and TypeScript execute as real JavaScript in a Web Worker. TypeScript is type-stripped in the browser, and JSX is compiled against a small React-compatible shim the sandbox provides.
+- Python is real CPython, the Pyodide build compiled to WebAssembly, so the standard library behaves as it does on a machine.
+- C, C++, Go, Java and Rust run on tree-walking interpreters written for this project. x86-64 assembly runs on an assembler and emulator written for this project.
+- Any lesson code block can be sent straight to the playground.
+
+Practice console
+
+- Eight languages: Python, JavaScript, TypeScript, Java, C++, C, Go and Rust.
+- Each problem carries its signature, its visible example cases and hidden cases, and a comparison mode.
+- Your attempt runs against those cases in the browser. Whether an answer is correct is decided in exactly one place, in TypeScript, so correct means the same thing in every language.
+- Drafts are kept per problem and per language, so switching the dropdown does not discard what you had.
+- Each problem carries a chain of approaches from brute force to optimal, in Java and Python, plus the signals in the statement that tell you which pattern it is.
+
+Visualisations
+
+- Generators are ordinary implementations of the algorithm with frame emission threaded through them. Delete the emission calls and a correct algorithm remains.
+- A frame is a complete snapshot rather than a delta, which is what makes stepping backwards possible.
+- Eight frame shapes cover arrays, heaps, trees, sequences, buckets, graphs, matrices and directory listings.
+
+Site-wide
+
+- Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page.
+- Optional analytics through PostHog, proxied same-origin, off entirely when no key is set.
+
+## How it works
+
+At build time, the content tree is walked and every route is pre-rendered: one page per lesson, per track, and per practice problem. Routes are enumerated by `generateStaticParams`, and unknown parameters are refused rather than rendered.
+
+Anything expensive and knowable in advance happens on the server. Shiki highlights every code block, including every translation of every example, and the finished markup is handed to the client. The client components that remain are small: a language picker that re-parents markup already rendered, a visualisation player that steps an index through a precomputed frame array, a sidebar that tracks which module is open, and the two editors.
+
+Anything a visitor types runs in the visitor's browser. That is a security posture, because no untrusted code reaches a server; a cost posture, because the site is static hosting; and the constraint that produced the interpreters in `lib/runtimes`, since a browser tab cannot host rustc, g++ or a JVM.
+
+Progress, drafts and preferences live in `localStorage`. There are no accounts, so there is nothing to sign in to and nothing to lose.
+
+`INTERNALS.md` documents all of this in depth.
+
+## What is in the curriculum
+
+The figures below are counted from the content tree.
 
 | Metric | Count |
 | --- | --- |
 | Tracks | 12 |
-| Modules | **71 live** of 203 declared |
-| Lessons live | **518** |
-| Lessons + published syllabus topics | 1,543 |
+| Modules | 71 live of 203 declared |
+| Lessons live | 518 |
+| Lessons plus published syllabus topics | 1,543 |
 | Sections | 2,321 |
 | Code examples | 1,752 |
-| Verified translations (`alternates`) | 939 |
+| Verified translations | 939 |
 | Embedded visualisations | 61 |
 | Pitfall callouts | 1,074 |
 | Interview questions | 1,826 |
 | Practice problems | 18, with 116 test cases and 40 approaches |
-| Body prose | ~283,000 words (~733,000 including pitfalls, takeaways and interview answers) |
-| Example code | ~45,000 lines, plus ~44,000 lines of translations |
 
-Every track publishes its **full syllabus up front**. A module that has not been written yet still declares its eight topics, renders as a preview lesson, and is counted honestly as "coming soon" rather than hidden.
+The tracks, with live modules against declared modules:
 
-## The tracks
+| Track | Slug | Mode | Modules | Lessons live |
+| --- | --- | --- | --- | --- |
+| Data Structures and Algorithms | `dsa` | learn | 25 / 37 | 200 |
+| System Design | `system-design` | learn | 0 / 29 | 0 |
+| JavaScript and TypeScript | `js-ts` | learn | 12 / 12 | 73 |
+| React | `react` | learn | 15 / 15 | 115 |
+| Next.js | `nextjs` | learn | 0 / 14 | 0 |
+| Angular | `angular` | learn | 0 / 14 | 0 |
+| Rust | `rust` | learn | 1 / 14 | 6 |
+| Go | `go` | learn | 1 / 10 | 6 |
+| x86-64 Assembly | `assembly` | learn | 1 / 14 | 5 |
+| C++ | `cpp` | learn | 14 / 14 | 98 |
+| Java | `java` | revise | 0 / 12 | 0 |
+| Spring Boot | `spring-boot` | learn | 2 / 18 | 15 |
 
-| # | Track | Slug | Mode | Modules (live/total) | Lessons live | Per lesson | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Data Structures & Algorithms | `dsa` | learn | 25 / 37 | 200 | 25–45 min | The deepest track; owns the visualisations and the problem sheet |
-| 2 | System Design: SQL, LLD & HLD | `system-design` | learn | 0 / 29 | 0 | 25–45 min | Syllabus published |
-| 3 | JavaScript & TypeScript | `js-ts` | learn | 12 / 12 | 73 | 20–40 min | Complete; runs in the playground |
-| 4 | React | `react` | learn | 15 / 15 | 115 | 20–45 min | Complete; JSX/TSX translations |
-| 5 | Next.js | `nextjs` | learn | 0 / 14 | 0 | 25–40 min | Syllabus published |
-| 6 | Angular | `angular` | learn | 0 / 14 | 0 | 25–40 min | Syllabus published |
-| 7 | Rust | `rust` | learn | 1 / 14 | 6 | 25–40 min | Build-focused, no interview prep |
-| 8 | Go | `go` | learn | 1 / 10 | 6 | 25–40 min | Build-focused; runs in the playground |
-| 9 | Assembly (x86-64) | `assembly` | learn | 1 / 14 | 5 | 25–40 min | NASM, Intel syntax, Linux |
-| 10 | C++ | `cpp` | learn | 14 / 14 | 98 | 25–40 min | Complete |
-| 11 | Java | `java` | **revise** | 0 / 12 | 0 | 10–15 min | Short standalone refreshers |
-| 12 | Spring Boot | `spring-boot` | learn | 2 / 18 | 15 | 25–40 min | In progress |
+A module with no lessons written yet contributes one preview lesson that lists the topics it will cover. Those preview lessons are counted separately above and are never counted as live.
 
-A `learn` track assumes the language is new and takes the time it takes. A `revise` track assumes you have written it before and is cut into short, self-contained refreshers.
+## Requirements
 
-## The site
+- Node.js 20 and npm. Continuous integration runs on Node 20; there is no `engines` field, so newer versions are untested rather than blocked.
+- Disk: `node_modules` measures about 1.3 GB installed, and the two runtime payloads copied into `public/` add 35 MB, 13 MB for Pyodide and 22 MB for Monaco.
 
-| Route | What it does |
-| --- | --- |
-| `/` | Landing page; track cards, counts derived from the content tree |
-| `/roadmap` | The programme above the level of a track — Modules 0–4, electives, and a first-month plan |
-| `/curriculum` | All tracks, split into "learn from scratch" and "revise and master" |
-| `/curriculum/[trackSlug]` | One track: description, stats, and the full module map with phase dividers |
-| `/learn/[trackSlug]/[moduleSlug]/[lessonSlug]` | A lesson, inside a persistent sidebar shell |
-| `/practice` | The problem sheet, filterable by difficulty, topic, pattern and company |
-| `/practice/[problemSlug]` | One problem as a workspace: statement, signals, approaches, and an in-browser judge |
-| `/visualize` | The gallery of every algorithm family and data structure |
-| `/playground` | A nine-language editor and console |
+The full lesson-code verifier additionally needs the toolchains it runs examples against: a JDK, Python 3, Go, g++, rustc, and NASM with a linker. You do not need any of them to run the site, only to run `npm run verify:code` locally. Continuous integration installs them.
 
-Every content route is enumerated at build time with `generateStaticParams` and pins `dynamicParams = false`, so an unknown slug is a real 404 rather than a 200 that a streamed `loading.tsx` has already committed to.
+## Installation
 
-## One algorithm, ten languages
-
-An example may carry `alternates` — the same program in another language, offered behind a dropdown. **Every alternate is run by the same gate against the same expected output**, so a translation that has drifted is a failed build rather than something a reader discovers.
-
-Where a language legitimately prints something different, the variant carries its own recorded output, and that difference is usually the point. Switching the language on the DSA track's failure example *is* the lesson:
-
-- Python and JavaScript print three lines and then fail — neither looked at line 4 until it arrived there.
-- Java, C++, Rust and Go print nothing at all — each read the whole file and refused to produce a program.
-- TypeScript sits on both sides: `tsc` rejects the file outright, and it still runs under a type-stripping runner, because checking and stripping are separate steps.
-
-The dropdown is fenced per track by a check in `scripts/verify-visual-frames.ts`. DSA offers eight languages; React and Next.js offer JSX/TSX and JavaScript/TypeScript; Angular offers JavaScript/TypeScript. A C++ course's examples are C++ because that is the subject — offering to read one "in Python" would be incoherent, and the check makes that a build failure.
-
-## Getting started
-
-**Requirements**
-
-- Node 20 or newer (CI uses Node 20)
-- npm
-
-**Install and run**
-
-```bash
-git clone https://github.com/prajwalkamble/DevKernel.git
+```
+git clone git@github.com:prajwalkamble/DevKernel.git
 cd DevKernel
 npm install
 npm run dev
 ```
 
-Then open <http://localhost:3000>.
+The site is then at http://localhost:3000.
 
-`npm run dev` and `npm run build` both run `npm run assets` first, which copies two runtime dependencies out of `node_modules` and into `public/`:
+`npm install` is the only setup step. The Pyodide and Monaco payloads are not committed to the repository; `predev` and `prebuild` copy them out of `node_modules` into `public/` automatically, so a fresh clone works without a separate command. To do it by hand, run `npm run assets`.
 
-- **Pyodide** (~13 MB) — a CPython build compiled to WebAssembly, fetched over HTTP by its own loader, so it has to be reachable at a URL.
-- **Monaco** — loaded by an AMD loader for the same reason. Copying it locally also stops `@monaco-editor/react` falling back to a public CDN pinned to a different version than `package.json` declares.
+For a production build:
 
-Both directories are gitignored and are skipped on re-run when already present at the right size, so a warm dev start pays nothing for them.
+```
+npm run build
+npm start
+```
+
+Before pushing, run the fast gates:
+
+```
+npm run verify
+```
+
+That runs Next.js type generation, `tsc --noEmit`, ESLint, and the visualisation frame checker. It takes a couple of minutes. The slow gate, `npm run verify:code`, compiles and runs every example in the content tree and takes around ten minutes with every toolchain installed; it runs in continuous integration on every push.
+
+`CONTRIBUTING.md` covers the branch, commit, pull and push workflow, and what is expected of a content change.
 
 ## npm scripts
 
 | Script | What it does |
 | --- | --- |
-| `npm run dev` | Copies assets, then starts the Next dev server |
-| `npm run build` | Copies assets, then a production build |
-| `npm start` | Serves the production build |
-| `npm run lint` | ESLint (flat config, `eslint-config-next` core-web-vitals + typescript) |
-| `npm run assets` | `pyodide` + `monaco` copy steps |
-| `npm run pyodide` / `npm run monaco` | Either copy step on its own |
-| `npm run verify` | The fast gate: `next typegen`, `tsc --noEmit`, `eslint .`, then `verify:frames` |
-| `npm run verify:frames` | Runs every visualisation and checks the frames are well-formed |
-| `npm run verify:code` | The slow gate: compiles and runs every lesson example and translation |
-| `npm run verify:visuals` | Drives a real Chromium and checks playback actually advances |
+| `npm run dev` | Development server. Copies the runtime assets first. |
+| `npm run build` | Production build. Copies the runtime assets first. |
+| `npm start` | Serves a build produced by `npm run build`. |
+| `npm run lint` | ESLint. |
+| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, and the frame checker. The pre-commit gate. |
+| `npm run verify:frames` | Runs every visualisation generator and checks the frames. |
+| `npm run verify:code` | Compiles and runs every lesson example. Accepts an optional track and module to narrow it. |
+| `npm run verify:visuals` | Drives a real browser and checks that playback advances. Needs a server already running. |
+| `npm run assets` | Copies Pyodide and Monaco into `public/`. Implied by `dev` and `build`. |
+| `npm run pyodide` | Copies Pyodide only. |
+| `npm run monaco` | Copies Monaco only. |
 
-`verify:code` takes an optional track and module filter:
+Two development helpers are not wired to scripts and are run directly:
 
-```bash
-node scripts/verify-lesson-code.mjs                    # every track
-node scripts/verify-lesson-code.mjs dsa                # one track
-node scripts/verify-lesson-code.mjs dsa the-framework  # one module
+```
+node scripts/try-runtime.mjs <rust|cpp|java|c|go> <file|->
+node scripts/try-judge.mjs <problem-slug> <language> <file>
 ```
 
-Two more scripts exist for working on the runtimes without opening a browser:
-
-```bash
-node scripts/try-runtime.mjs java path/to/Main.java    # run a file on a browser runtime
-node scripts/try-judge.mjs two-sum c path/to/sol.c     # grade a solution against real cases
-```
+The first runs a source file through one of the browser language runtimes from Node. The second grades a solution file against a problem's real test cases through the same path the browser uses.
 
 ## Environment variables
 
-Analytics is **opt-in per environment**. With no key set, PostHog never initialises and nothing is sent — which is what a local checkout, CI and a fork should all do. Copy `.env.example` to `.env.local` only when you want your own browsing to show up.
+Analytics is opt-in per environment. With no key set, PostHog never initialises and nothing is sent, which is what a local checkout, continuous integration and a fork should all do. Copy `.env.example` to `.env.local` only if you want your own browsing to be recorded in your own project.
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key. A write-only ingest key; it ships to the browser by design and grants no read access. |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key. A write-only ingest key, meant to ship to the browser, granting no read access. |
 | `NEXT_PUBLIC_POSTHOG_HOST` | Ingest host for your region. Defaults to `https://us.i.posthog.com`. |
 
-Both are `NEXT_PUBLIC_`, so they are inlined by `next build` rather than read at runtime — they must be present in the environment that runs the **production build**, not merely on the server that serves it.
+Both are `NEXT_PUBLIC_`, so `next build` inlines them into the client bundle rather than reading them at runtime. They must be present in the environment that runs the production build, not merely on the server that serves it.
 
-Analytics requests go out same-origin through `/ingest` and are proxied to PostHog by rewrites in `next.config.ts`. The audience for this site is developers, and `*.posthog.com` is on every blocklist worth the name, so measuring directly would quietly under-count exactly the people the course is for.
+Analytics requests go out same-origin through `/ingest` and are proxied to PostHog by rewrites in `next.config.ts`. Session replay blocks the Monaco editors, so nothing anyone types into the playground or the practice console is recorded.
 
-## Project structure
+## Project layout
 
 ```
-.
-├── app/                      # App Router: routes, layouts, loading skeletons, global CSS
-│   ├── (home)/               #   landing page
-│   ├── curriculum/           #   track index and per-track pages
-│   ├── learn/[trackSlug]/    #   lesson shell (a layout, so the sidebar keeps its scroll)
-│   ├── practice/             #   problem sheet and problem workspace
-│   ├── playground/           #   nine-language editor
-│   ├── roadmap/              #   the programme above the level of a track
-│   └── visualize/            #   the visualisation gallery
-├── components/               # UI, split by area: lesson, practice, playground, visuals, layout
-├── content/                  # THE CURRICULUM — TypeScript data, no markdown
-│   ├── types.ts              #   Track / Module / Lesson / Section / CodeExample / VisualSpec
-│   ├── tracks/               #   one directory per track, one file per module
-│   ├── practice/             #   problems, patterns, topics, judge specs
-│   ├── roadmap.ts            #   Modules 0–4, electives, first-month plan
-│   └── comingSoon.ts         #   turns a settled syllabus into a preview lesson
-├── lib/                      # Logic with no JSX
-│   ├── judge/                #   the practice console: runners, workers, grading, stubs
-│   ├── runtimes/             #   in-browser interpreters for C, C++, Go, Java, Rust + an x86-64 emulator
-│   ├── visuals/              #   frame generators — the real algorithms, instrumented
-│   └── *.ts                  #   progress, analytics, theming, transpiling, playground plumbing
-├── public/judge/             # Hand-written worker scripts and the Python driver
-├── scripts/                  # Asset copying, the three verification gates, two dev helpers
-├── docs/screenshots/         # The images in this README
-├── .githooks/pre-commit      # Runs the fast gate before a commit
-└── .github/workflows/        # CI: the fast gate + the full lesson-code run
+app/          Routes. One directory per URL segment, plus a loading skeleton per route.
+components/   React components, grouped by the area of the site they serve.
+content/      The curriculum and the problem sheet, as typed TypeScript data.
+lib/          Everything that is not a component: runtimes, the judge, visualisation
+              generators, and the small client-side state modules.
+scripts/      The verification gates, the asset copiers, and two development helpers.
+public/judge/ The hand-written worker and harness files the practice console loads by URL.
+docs/         Screenshots used by this file.
 ```
 
-## Verification
-
-Three gates, deliberately separated by how long they take.
-
-**1. `npm run verify` — seconds.** Type generation, `tsc --noEmit`, ESLint, and the visual frame checker. This is what the pre-commit hook runs and what gates a pull request. Enable the hook once per clone:
-
-```bash
-git config core.hooksPath .githooks
-```
-
-**2. `npm run verify:code` — up to half an hour.** Compiles and runs every example and every translation, then diffs against the recorded output. This is the check that makes the project's central promise true. It needs real toolchains on `PATH`:
-
-| Language | Needs | CI pins |
-| --- | --- | --- |
-| Java | `java` (single-file source mode) | Temurin 25 |
-| Python | `python3` | 3.13 |
-| Go | `go` | 1.24 |
-| C++ | `g++` (`-std=c++20`) | image default |
-| Rust | `rustc` (edition 2021) | image default |
-| JavaScript / TypeScript | `node`, and the local `tsx` | Node 20 |
-| JSX / TSX | `tsx`, `react-dom/server`, and `jsdom` for examples that touch the DOM | Node 20 |
-| Assembly | `nasm` and `ld` | installed by the workflow |
-
-The versions are pinned for a reason: a recorded output is only reproducible on the toolchain it was recorded against. The runner's default JDK printed `1.15292150460684698E18` where every lesson says `1.152921504606847E18`, because `Double.toString` switched to the shortest round-tripping decimal in JDK 19.
-
-**3. `npm run verify:visuals` — minutes, and needs a running server.** Drives a real Chromium over the DevTools protocol and measures wall-clock playback. It exists for one bug class the other two cannot see: playback is a chain of timeouts, and a dropped dependency in the player's effect leaves frames that are individually perfect while the animation advances one step and stalls.
-
-## Adding content
-
-**A lesson.** Add a `Lesson` object to a module file under `content/tracks/<track>/modules/<nn>-<slug>/`, export it from the module's `index.ts`, and register the module in the track's `index.ts`. Route generation, the sidebar, the curriculum map, progress tracking and the lesson counts all follow from the data — nothing else needs editing.
-
-Write the code first, run it, and **paste the output you actually got**. If an example needs a toolchain the verifier cannot stand up (a Spring application context, say), set `requires: "..."` on it — the verifier then reports it as skipped-with-a-reason rather than as a mismatch, because a suite that is permanently eight-red is a suite people stop reading.
-
-**A problem.** Add a `Problem` to a file under `content/practice/problems/` and re-export it from `content/practice/index.ts`. Order in that array is the recommended solving order, not alphabetical: each problem sits after the one whose idea it builds on. Give it a `judge` block — signature, parameter types and cases — or it becomes a problem you can only read.
-
-**A visualisation.** Add a generator to `lib/visuals/`, register it in the relevant table, and reference it from a lesson's `section.visual`. Generators are ordinary implementations of the algorithm with `emit()` threaded through, so if the implementation is wrong the animation is visibly wrong too. Never hand-author frames.
-
-**A coming-soon module.** Call `createComingSoonModule({ ... })` with eight topics. It becomes a preview lesson, and the topics are what the "planned lessons" counts are derived from.
+The interesting boundaries in this codebase do not line up with directories. The practice console alone spans `content/practice`, `lib/judge`, `lib/runtimes`, `public/judge` and `components/practice`. `INTERNALS.md` is organised by subsystem for that reason.
 
 ## Deployment
 
-Deployed on Vercel at [devkernel.vercel.app](https://devkernel.vercel.app). Nothing is server-rendered per request beyond Next's own defaults: content routes are statically enumerated, and every interactive feature — the playground, the judge, the visualisations — runs in the visitor's browser, so there is no execution backend to operate or secure.
+The site is deployed on Vercel from the `main` branch. Because every route is pre-rendered and nothing executes on a server, any static host would serve it, with two caveats: the `/ingest` rewrite in `next.config.ts` needs a host that can proxy, and the Pyodide and Monaco payloads have to be present in `public/`, which the `prebuild` step handles.
 
-Set `NEXT_PUBLIC_POSTHOG_KEY` in the hosting provider's environment if you want analytics; leave it unset and the SDK never initialises.
+Continuous integration is a GitHub Actions workflow, `.github/workflows/verify.yml`, split in two jobs deliberately. `checks` is the fast half: types, lint, frames and a production build, finishing in a couple of minutes. `lesson-code` is the slow half: it compiles and runs every example and every translation in seven languages. Both run on every push and every pull request.
 
 ## Screenshots
 
-**Reading a lesson.** Prose, a verified example, its real output, and the language picker.
+The lesson page, with a code example and its verified output.
 
-![A lesson page with the language dropdown](docs/screenshots/lesson-languages.png)
+![A lesson](docs/screenshots/lesson-languages.png)
 
-**A lesson with an embedded visualisation** — generated by running the algorithm the lesson is about.
+A visualisation embedded in a lesson.
 
-![A lesson with an embedded heap visualization](docs/screenshots/lesson-visual.png)
+![A lesson visualisation](docs/screenshots/lesson-visual.png)
 
-**The visualisation gallery** — every algorithm family and data structure, steppable and reversible.
+The visualisation gallery.
 
-![The visualize gallery](docs/screenshots/visualize.png)
+![The visualisation gallery](docs/screenshots/visualize.png)
 
-**The practice console** — write a solution, run it in the browser, have it graded against the same tests before you see anyone else's answer.
+The practice console.
 
 ![The practice console](docs/screenshots/practice.png)
 
-**The curriculum**, with every track's full syllabus published up front.
+The curriculum, with every track's syllabus published up front.
 
 ![The curriculum page](docs/screenshots/curriculum.png)
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the git workflow, and what a content or code change is expected to do before it can be merged.
+
 ## Further reading
 
-- **[internals.md](internals.md)** — the in-depth documentation: the content data model, the three execution engines, the judge protocol, the visualisation frame contract, client-side persistence, and every verification gate.
-- `AGENTS.md` / `CLAUDE.md` — notes for coding agents working in this repo. The Next.js block in `AGENTS.md` is written and re-added by `next dev` itself.
-
----
+- [INTERNALS.md](INTERNALS.md). The in-depth documentation: the content data model, the three execution engines, the interpreters, the judge protocol, the visualisation frame contract, client state, and every verification gate.
+- `AGENTS.md` and `CLAUDE.md`. Notes for coding agents working in this repository. The Next.js block in `AGENTS.md` is written and re-added by `next dev` itself.
 
 ## License
 
 Licensed under either of
 
-- **Apache License, Version 2.0** — [`LICENSE-APACHE`](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>
-- **MIT license** — [`LICENSE-MIT`](LICENSE-MIT) or <https://opensource.org/licenses/MIT>
+- Apache License, Version 2.0, in [LICENSE-APACHE](LICENSE-APACHE) or at https://www.apache.org/licenses/LICENSE-2.0
+- MIT license, in [LICENSE-MIT](LICENSE-MIT) or at https://opensource.org/licenses/MIT
 
 at your option. In SPDX terms, `MIT OR Apache-2.0`.
 
-You do not need both. Take whichever fits the project you are putting this into, and comply with that one — MIT if you want the shortest possible obligation, Apache-2.0 if you want its express patent grant and its explicit terms on trademarks, notices and contributions. This is the same arrangement the Rust project uses, and it exists so that neither choice is a barrier.
+You do not need both. Take whichever fits the project you are putting this into and comply with that one. Unless you state otherwise, any contribution you intentionally submit for inclusion in this work is dual licensed as above, with no additional terms or conditions.
 
-Unless you state otherwise, any contribution you intentionally submit for inclusion in this work is dual licensed as above, with no additional terms or conditions.
-
-The licences cover this repository: the application code **and** the curriculum in `content/`. They do not cover the third-party runtimes the deployed site serves, which carry their own terms and are fetched from `node_modules` at build time rather than committed here — [Monaco Editor](https://github.com/microsoft/monaco-editor) (MIT) and [Pyodide](https://github.com/pyodide/pyodide) (MPL-2.0).
+The licences cover this repository, which is the application code and the curriculum in `content/`. They do not cover the third-party runtimes the deployed site serves, which carry their own terms and are copied out of `node_modules` at build time rather than committed here: [Monaco Editor](https://github.com/microsoft/monaco-editor) under MIT, and [Pyodide](https://github.com/pyodide/pyodide) under MPL-2.0.
