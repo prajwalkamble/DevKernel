@@ -122,8 +122,8 @@ console.log(container.innerHTML);`,
       heading: "Who owns the promise",
       body: [
         "This is the part that catches everyone, and it follows from something already established: a suspended component is **re-rendered from scratch** when it retries. Its local state is gone, its `useMemo`s are gone, and every line of its body runs again.",
-        "So a promise created *in* the component is a different promise on every attempt. React suspends on the first one, retries, gets a second one that is also unsettled, suspends again — and the component is stuck in a loop that only ends because each promise does eventually resolve.",
-        "React 19 detects this and warns. It does not throw, because it cannot know that you did not mean it, but the warning is unambiguous.",
+        "So a promise created *in* the component is a different promise on every attempt. React suspends on the first one, retries — and the body runs again, handing `use` a second promise that is also unsettled.",
+        "React 19 detects this and warns — and then quietly papers over it, which is the part worth knowing: having noticed that `use` was handed a different promise at the same position, React discards the new one and resumes with the first, which has settled by then. So the component commits, the screen is correct, and the only trace is a line in the console.",
       ],
       examples: [
         {
@@ -137,7 +137,7 @@ const handedToUse = new Set();
 
 /* A new promise on every render — the mistake everyone makes once. */
 function Bad() {
-  const promise = new Promise((resolve) => setTimeout(() => resolve("done"), 1));
+  const promise = new Promise((resolve) => queueMicrotask(() => resolve("done")));
   handedToUse.add(promise);
   return <b>{use(promise)}</b>;
 }
@@ -148,16 +148,14 @@ const root = createRoot(container);
 await act(async () => {
   root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
-await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
-/* Stop the retry loop before reading anything. Nothing else stops it: each
-   attempt creates the next promise, so the component can suspend for as long
-   as you let it run. */
-await act(async () => { root.unmount(); });
-console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
+
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
+console.log(\`and the screen still says \${container.innerHTML}\`);`,
           output: `use() was handed a different promise each render
+and the screen still says <b>done</b>
 A component was suspended by an uncached promise. Creating promises inside a Client Component or hook is not yet supported, except via a Suspense-compatible library or framework.`,
           explanation:
-            "React's warning goes to standard error, so where it lands relative to the other line depends on how your terminal interleaves the two streams. What the example does *not* print is whether the screen ever reached `done`, and that omission is the finding: the loop terminates only if some attempt happens to commit before its promise resolves, which is a race. On a fast machine it usually wins within a few attempts and the component looks like it works — that is what lets this bug survive review, because with a real `fetch` it also \"works\", having issued several requests, and shows up only as unexplained load on the network tab. On a slower or busier machine the same code can suspend indefinitely. A render that may or may not terminate depending on the host is not a working component, and the warning is the one signal you get.",
+            "The first line is the bug: one render, one promise, and `use` never sees the same one twice. The second is why it survives review — the screen is right anyway. React's recovery is to keep the promise it tracked at that position on the previous attempt and drop the new one, so the retry resolves against the *first* promise and the component commits `done`. With a real `fetch` that is several requests for one render, all but one of whose results are thrown away, and nothing on the screen says so. The warning, which arrives on standard error rather than standard out, is the only signal you get — and it is one line, not one per wasted request.",
           alternates: [
             {
               lang: "tsx",
@@ -168,7 +166,7 @@ const handedToUse = new Set<Promise<string>>();
 
 /* A new promise on every render — the mistake everyone makes once. */
 function Bad() {
-  const promise = new Promise<string>((resolve) => setTimeout(() => resolve("done"), 1));
+  const promise = new Promise<string>((resolve) => queueMicrotask(() => resolve("done")));
   handedToUse.add(promise);
   return <b>{use(promise)}</b>;
 }
@@ -179,12 +177,9 @@ const root = createRoot(container);
 await act(async () => {
   root.render(<Suspense fallback={<i>…</i>}><Bad /></Suspense>);
 });
-await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
-/* Stop the retry loop before reading anything. Nothing else stops it: each
-   attempt creates the next promise, so the component can suspend for as long
-   as you let it run. */
-await act(async () => { root.unmount(); });
-console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);`,
+
+console.log(\`use() was handed \${handedToUse.size > 1 ? "a different promise each render" : "one promise"}\`);
+console.log(\`and the screen still says \${container.innerHTML}\`);`,
             },
           ],
         },
@@ -312,7 +307,7 @@ function Comments({ from }: { from: Promise<Comment[]> }) {
     "It may be called conditionally because it stores nothing in the hook list",
     "It must still be called during a render, never in a handler or a timeout",
     "A suspended component re-renders from scratch, so a promise made in the render is a new one each retry",
-    "React 19 warns about an uncached promise — and the screen usually still works, which is what hides the bug",
+    "React 19 warns about an uncached promise — and the screen still works, because React resumes with the first promise, which is what hides the bug",
     "`useMemo` cannot fix it; the cache has to live outside the tree",
     "The natural shape is a Server Component starting the promise and a Client Component reading it",
   ],
