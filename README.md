@@ -27,6 +27,7 @@ Every screenshot in this README is one page cut on a diagonal: light theme on th
 - [Deployment](#deployment)
 - [Screenshots](#screenshots)
 - [Further reading](#further-reading)
+- [License](#license)
 
 ---
 
@@ -295,4 +296,17 @@ Set `NEXT_PUBLIC_POSTHOG_KEY` in the hosting provider's environment if you want 
 
 ---
 
-This repository ships no `LICENSE` file, so all rights are reserved by default.
+## License
+
+Licensed under either of
+
+- **Apache License, Version 2.0** — [`LICENSE-APACHE`](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>
+- **MIT license** — [`LICENSE-MIT`](LICENSE-MIT) or <https://opensource.org/licenses/MIT>
+
+at your option. In SPDX terms, `MIT OR Apache-2.0`.
+
+You do not need both. Take whichever fits the project you are putting this into, and comply with that one — MIT if you want the shortest possible obligation, Apache-2.0 if you want its express patent grant and its explicit terms on trademarks, notices and contributions. This is the same arrangement the Rust project uses, and it exists so that neither choice is a barrier.
+
+Unless you state otherwise, any contribution you intentionally submit for inclusion in this work is dual licensed as above, with no additional terms or conditions.
+
+The licences cover this repository: the application code **and** the curriculum in `content/`. They do not cover the third-party runtimes the deployed site serves, which carry their own terms and are fetched from `node_modules` at build time rather than committed here — [Monaco Editor](https://github.com/microsoft/monaco-editor) (MIT) and [Pyodide](https://github.com/pyodide/pyodide) (MPL-2.0).
