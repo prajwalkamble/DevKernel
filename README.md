@@ -262,6 +262,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the git workfl
 ## Further reading
 
 - [INTERNALS.md](INTERNALS.md). The in-depth documentation: the content data model, the three execution engines, the interpreters, the judge protocol, the visualisation frame contract, client state, and every verification gate.
+- [CHANGELOG.md](CHANGELOG.md). What changed in each tagged release, with the counts measured against the tree that was released.
 - `AGENTS.md` and `CLAUDE.md`. Notes for coding agents working in this repository. The Next.js block in `AGENTS.md` is written and re-added by `next dev` itself.
 
 ## License
