@@ -108,21 +108,21 @@ The figures below are counted from the content tree.
 | --- | --- |
 | Tracks | 12 |
 | Modules | 72 live of 203 declared |
-| Lessons live | 521 |
-| Lessons plus published syllabus topics | 1,538 |
-| Sections | 2,329 |
-| Code examples | 1,761 |
-| Verified translations | 993 |
-| Embedded visualisations | 62 |
+| Lessons live | 522 |
+| Lessons plus published syllabus topics | 1,539 |
+| Sections | 2,332 |
+| Code examples | 1,764 |
+| Verified translations | 1,011 |
+| Embedded visualisations | 63 |
 | Pitfall callouts | 1,074 |
-| Interview questions | 1,835 |
+| Interview questions | 1,838 |
 | Practice problems | 18, with 116 test cases and 40 approaches |
 
 The tracks, with live modules against declared modules:
 
 | Track | Slug | Mode | Modules | Lessons live |
 | --- | --- | --- | --- | --- |
-| Data Structures and Algorithms | `dsa` | learn | 26 / 37 | 203 |
+| Data Structures and Algorithms | `dsa` | learn | 26 / 37 | 204 |
 | System Design | `system-design` | learn | 0 / 29 | 0 |
 | JavaScript and TypeScript | `js-ts` | learn | 12 / 12 | 73 |
 | React | `react` | learn | 15 / 15 | 115 |
