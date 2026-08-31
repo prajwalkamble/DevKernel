@@ -25,6 +25,7 @@ import { linkedListsModule } from "./modules/22-linked-lists";
 import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
 import { treesModule } from "./modules/24-trees";
 import { heapsModule } from "./modules/25-heaps";
+import { greedyModule } from "./modules/26-greedy-algorithms";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -164,25 +165,7 @@ export const dsaTrack: TrackDefinition = {
         "Strongly connected components, and Tarjan's algorithm",
       ],
     }),
-    createComingSoonModule({
-      id: "dsa-greedy",
-      slug: "greedy-algorithms",
-      title: "Greedy Algorithms",
-      order: 26,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "A strategy that is either optimal or badly wrong with nothing in between — so this module is mostly about proving which one you have.",
-      topics: [
-        "The greedy choice property and optimal substructure",
-        "Proving a greedy algorithm correct by exchange argument",
-        "Finding the counterexample that disproves one",
-        "Interval scheduling, and the sort key that solves it",
-        "Merging intervals, and the family around it",
-        "Huffman coding, built from a heap",
-        "Coin change: when greedy works and when it fails",
-        "Greedy against dynamic programming — the same problems, decided",
-      ],
-    }),
+    greedyModule,
     createComingSoonModule({
       id: "dsa-dp-foundations",
       slug: "dynamic-programming-foundations",
