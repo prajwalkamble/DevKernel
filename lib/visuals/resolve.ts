@@ -22,6 +22,7 @@ import { STRING_ALGOS } from "./strings";
 import { PATTERN_ALGOS } from "./patterns";
 import { TREE_ALGOS } from "./trees";
 import { NUMBER_ALGOS } from "./numbers";
+import { GREEDY_ALGOS } from "./greedy";
 import { REACT_ALGOS } from "./react";
 import { REACT_LAYOUT_ALGOS } from "./react-layout";
 import { REACT_CONCURRENT_ALGOS } from "./react-concurrent";
@@ -69,6 +70,7 @@ export const FAMILIES = {
   pattern: { table: PATTERN_ALGOS, fallback: "twopointers" },
   "tree-algorithm": { table: TREE_ALGOS, fallback: "inorder" },
   "bits-and-math": { table: NUMBER_ALGOS, fallback: "bitops" },
+  greedy: { table: GREEDY_ALGOS, fallback: "intervals" },
   "react-rendering": { table: REACT_ALGOS, fallback: "element-tree" },
   "react-structure": { table: REACT_LAYOUT_ALGOS, fallback: "scaffold" },
   "react-concurrent": { table: REACT_CONCURRENT_ALGOS, fallback: "interruptible-render" },

@@ -78,6 +78,7 @@ export function Visual({ spec }: { spec: VisualSpec }) {
     case "pattern": return <FamilyVisual spec={spec} {...FAMILIES.pattern} />;
     case "tree-algorithm": return <FamilyVisual spec={spec} {...FAMILIES["tree-algorithm"]} />;
     case "bits-and-math": return <FamilyVisual spec={spec} {...FAMILIES["bits-and-math"]} />;
+    case "greedy": return <FamilyVisual spec={spec} {...FAMILIES.greedy} />;
     case "react-rendering": return <FamilyVisual spec={spec} {...FAMILIES["react-rendering"]} />;
     case "react-structure": return <FamilyVisual spec={spec} {...FAMILIES["react-structure"]} />;
     case "react-concurrent": return <FamilyVisual spec={spec} {...FAMILIES["react-concurrent"]} />;
