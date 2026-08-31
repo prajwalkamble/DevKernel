@@ -143,8 +143,8 @@ x86-64 assembler and emulator, the judge protocol, the visualisation frame
 contract, client state, analytics, theming, the asset pipeline and every
 verification gate.
 
-`CONTRIBUTING.md` added: prerequisites split into what you need to run the site
-against what you additionally need to run the lesson verifier, installation,
+`CONTRIBUTING.md` added: prerequisites split between what you need to run the
+site and what you additionally need to run the lesson verifier, installation,
 what each gate costs, the full git workflow including forks, rebases, pushes
 and rejected pushes, and the rules for content, practice problems,
 visualisations and code.
