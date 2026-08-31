@@ -15,8 +15,8 @@ estimated. The commands that produced them are named at the end of each entry.
 
 The first tagged release. It exists because the React track is finished, and a
 finished track is the first thing in this repository worth pinning a version
-to. The release covers the whole repository at commit `084593c`; the React
-track is what is new in it.
+to. The tag covers the whole repository; the React track is what is new in
+it.
 
 ### The React track
 
@@ -47,7 +47,7 @@ between hydration and a Server Component to mean something.
 
 What that comes to, counted from the content tree:
 
-| | |
+| Measure | Count |
 | --- | --- |
 | Modules | 15 |
 | Lessons | 115 |
@@ -186,4 +186,4 @@ site serves, which carry their own terms, and which are copied out of
   resolved, 388 examples carrying a language dropdown, no problems.
 - `node scripts/verify-lesson-code.mjs react` — 294 run, 0 mismatched.
 - `npm run build`.
-- The `verify` workflow on GitHub Actions, green on `084593c`.
+- The `verify` workflow on GitHub Actions, green on the tagged commit.
