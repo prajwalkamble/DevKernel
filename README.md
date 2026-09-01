@@ -207,10 +207,13 @@ Analytics is opt-in per environment. With no key set, PostHog never initialises 
 | --- | --- |
 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key. A write-only ingest key, meant to ship to the browser, granting no read access. |
 | `NEXT_PUBLIC_POSTHOG_HOST` | Ingest host for your region. Defaults to `https://us.i.posthog.com`. |
+| `NEXT_PUBLIC_POSTHOG_DEV` | Set to `1` to send events from `next dev` too. Off by default even with a key set. |
 
-Both are `NEXT_PUBLIC_`, so `next build` inlines them into the client bundle rather than reading them at runtime. They must be present in the environment that runs the production build, not merely on the server that serves it.
+All three are `NEXT_PUBLIC_`, so `next build` inlines them into the client bundle rather than reading them at runtime. They must be present in the environment that runs the production build, not merely on the server that serves it.
 
-Analytics requests go out same-origin through `/ingest` and are proxied to PostHog by rewrites in `next.config.ts`. Session replay blocks the Monaco editors, so nothing anyone types into the playground or the practice console is recorded.
+A key on its own turns analytics on for a production build only. Development is silent unless `NEXT_PUBLIC_POSTHOG_DEV=1` is also set, because a dev machine is often on a flaky network or offline — and a send that cannot reach PostHog prints a page of connection errors per pageview — while the events that do arrive are indistinguishable from a real reader's and skew the data.
+
+Analytics requests go out same-origin through `/ingest` and are proxied to PostHog by rewrites in `next.config.ts`. The rewrites are gated on the same condition, so a checkout with analytics off has no proxy mounted rather than an open one nothing is expected to use. Session replay blocks the Monaco editors, so nothing anyone types into the playground or the practice console is recorded.
 
 ## Project layout
 

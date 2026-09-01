@@ -12,9 +12,26 @@ const POSTHOG_HOST =
 // Analytics is opt-in per environment. With no key in the environment — a
 // local checkout, CI, a fork — posthog never initialises and nothing is sent,
 // so nobody has to remember to turn it off. Set the key in the hosting
-// provider's environment for production; put it in .env.local only when you
-// deliberately want to watch your own local events land.
-if (key) {
+// provider's environment for production.
+//
+// A key alone is not enough in development, for two reasons. A dev server runs
+// on a laptop that is regularly on a flaky network, behind a VPN or offline,
+// and every send that cannot reach PostHog is a proxy failure printed in the
+// terminal — an AggregateError listing every address the host resolves to,
+// several screens per pageview. And the sends that do land are
+// indistinguishable from a real reader's, so browsing your own site while
+// building it quietly skews the data the analytics exist to provide. Set
+// NEXT_PUBLIC_POSTHOG_DEV=1 in .env.local when you deliberately want to watch
+// your own local events land.
+//
+// Both reads below have to stay literal `process.env.NEXT_PUBLIC_…`
+// expressions: Next inlines those textually at build time, and reading them
+// through a shared helper would leave the client with undefined.
+if (
+  key &&
+  (process.env.NODE_ENV === "production" ||
+    process.env.NEXT_PUBLIC_POSTHOG_DEV === "1")
+) {
   posthog.init(key, {
     // Same-origin, proxied to PostHog by the rewrites in next.config.ts.
     // A blocked request is an uncounted reader, and this audience blocks.

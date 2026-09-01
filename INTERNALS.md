@@ -411,9 +411,13 @@ The hooks that expose this state read `localStorage` into React state on mount a
 
 ## 12. Analytics
 
-Optional, and off unless a key is present.
+Optional, and off unless a key is present and the build is a production one.
 
 `instrumentation-client.ts` runs after the document loads but before React hydrates, so a pageview is recorded even if the visitor leaves before the page becomes interactive. With no `NEXT_PUBLIC_POSTHOG_KEY` in the environment, PostHog never initialises and nothing is sent, so a local checkout, continuous integration and a fork are all silent without anyone remembering to turn something off.
+
+A key alone is not enough under `next dev`. Development also needs `NEXT_PUBLIC_POSTHOG_DEV=1`, for two reasons that are easy to discover the hard way. A dev server runs on a machine that is regularly on a flaky network, behind a VPN or offline, and a send that cannot reach PostHog surfaces as a proxy failure printing an `AggregateError` that lists every address the host resolves to — both families, several screens per pageview. And the sends that do succeed are indistinguishable from a real reader's, so browsing the site while building it skews the data the analytics exist to provide.
+
+`next.config.ts` gates the `/ingest` rewrites on the same condition, and that symmetry is the point rather than tidiness. A proxy mounted while the SDK is off is not inert: it forwards whatever reaches `/ingest` — a stray request, a crawler, a browser extension — so a checkout whose owner believes analytics is off would still open outbound connections to PostHog. The two reads in `instrumentation-client.ts` have to stay literal `process.env.NEXT_PUBLIC_…` expressions, because Next inlines those textually at build time and reading them through a shared helper would leave the client with `undefined` — which is why the condition is written out twice rather than factored into one function.
 
 Five configuration decisions are load-bearing:
 
