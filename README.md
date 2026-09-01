@@ -182,7 +182,9 @@ That runs Next.js type generation, `tsc --noEmit`, ESLint, and the visualisation
 | `npm run build` | Production build. Copies the runtime assets first. |
 | `npm start` | Serves a build produced by `npm run build`. |
 | `npm run lint` | ESLint. |
-| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, and the frame checker. The pre-commit gate. |
+| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, the track manifest check, and the frame checker. The pre-commit gate. |
+| `npm run manifest` | Regenerates `content/tracks/manifest.generated.ts` from the curriculum. Run it after changing content. |
+| `npm run verify:manifest` | Fails when that manifest and the curriculum disagree. |
 | `npm run verify:frames` | Runs every visualisation generator and checks the frames. |
 | `npm run verify:code` | Compiles and runs every lesson example. Accepts an optional track and module to narrow it. |
 | `npm run verify:visuals` | Drives a real browser and checks that playback advances. Needs a server already running. |
@@ -221,6 +223,8 @@ Analytics requests go out same-origin through `/ingest` and are proxied to PostH
 app/          Routes. One directory per URL segment, plus a loading skeleton per route.
 components/   React components, grouped by the area of the site they serve.
 content/      The curriculum and the problem sheet, as typed TypeScript data.
+              `tracks/` is the full tree; `tracks/meta.ts` is the same tree without
+              lesson bodies, which is what every page but the lesson route imports.
 lib/          Everything that is not a component: runtimes, the judge, visualisation
               generators, and the small client-side state modules.
 scripts/      The verification gates, the asset copiers, and two development helpers.

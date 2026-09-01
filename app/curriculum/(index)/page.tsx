@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Construction, Map, RefreshCw } from "lucide-react";
-import type { Track } from "@/content/types";
+import type { TrackMeta } from "@/content/tracks/meta";
 import {
   getPlannedLessonCount,
   getTrackStats,
   getTracksByMode,
   lessonBudgetLabel,
   trackHref,
-} from "@/content/tracks";
+} from "@/content/tracks/meta";
 import { TRACK_BADGE_CLASS } from "@/lib/trackTheme";
 
 export const metadata: Metadata = {
@@ -69,7 +69,7 @@ function TrackSection({
   icon: React.ReactNode;
   title: string;
   blurb: string;
-  tracks: Track[];
+  tracks: TrackMeta[];
 }) {
   return (
     <section className="mb-12">
@@ -92,7 +92,7 @@ function TrackSection({
   );
 }
 
-function TrackCard({ track }: { track: Track }) {
+function TrackCard({ track }: { track: TrackMeta }) {
   const stats = getTrackStats(track);
   const live = stats.availableLessons > 0;
   const planned = getPlannedLessonCount(track);

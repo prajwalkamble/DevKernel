@@ -86,12 +86,14 @@ Run the build before opening a pull request if you touched anything under `app/`
 
 | Command | What it checks | Roughly how long |
 | --- | --- | --- |
-| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, visualisation frames | 2 minutes |
+| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, the track manifest, visualisation frames | 2 minutes |
 | `npm run build` | The production build | 2 minutes |
 | `npm run verify:code` | Compiles and runs every lesson example and translation | 10 minutes |
 | `npm run verify:visuals` | Drives a browser and checks that playback advances | Several minutes |
 
 `npm run verify` is the pre-commit gate and the minimum before any push.
+
+If it fails with *"manifest.generated.ts is out of date"*, run `npm run manifest` and commit the result. That file is the curriculum with the lesson bodies stripped out, and every page except the lesson route reads it instead of the real tree — importing the real tree from the root layout made every route compile all 594 lesson files and shipped the whole curriculum to the browser. Adding or renaming a lesson changes the manifest, so regenerating it is part of the same commit.
 
 `npm run verify:code` takes a track and a module, which is how you use it while writing:
 

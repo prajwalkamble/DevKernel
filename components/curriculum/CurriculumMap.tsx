@@ -4,11 +4,11 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { Check, Clock, Construction } from "lucide-react";
 import clsx from "clsx";
-import type { Track } from "@/content/types";
-import { lessonHref } from "@/content/tracks";
+import type { TrackMeta } from "@/content/tracks/meta";
+import { lessonHref } from "@/content/tracks/meta";
 import { useProgress } from "@/lib/useProgress";
 
-export function CurriculumMap({ track }: { track: Track }) {
+export function CurriculumMap({ track }: { track: TrackMeta }) {
   const { isComplete } = useProgress();
 
   return (

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Clock, Construction, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Lesson } from "@/content/types";
-import { getAdjacentLessons, getTrackBySlug, lessonBudgetLabel, lessonHref } from "@/content/tracks";
+import { getAdjacentLessons, getTrackBySlug, lessonBudgetLabel, lessonHref } from "@/content/tracks/meta";
 import { ProseInline } from "./Prose";
 import { SectionBlock } from "./SectionBlock";
 import { InterviewQA } from "./InterviewQA";

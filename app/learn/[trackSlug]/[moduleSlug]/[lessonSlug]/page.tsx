@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllLessonRefs, getLesson, getTrackBySlug } from "@/content/tracks";
+import { getLesson } from "@/content/tracks";
+import { getAllLessonRefs, getTrackBySlug } from "@/content/tracks/meta";
 import { LessonView } from "@/components/lesson/LessonView";
 
 interface LessonPageProps {
