@@ -255,7 +255,9 @@ export function huffmanCoding(): Visualisation {
 
     const id = `n${next++}`;
     nodes.set(id, {
-      id, label: "•", weight: nodes.get(x)!.weight + nodes.get(y)!.weight, left: x, right: y,
+      // "*" rather than a prettier bullet, so an internal node is written the
+      // same way here as in the lesson's own trace table.
+      id, label: "*", weight: nodes.get(x)!.weight + nodes.get(y)!.weight, left: x, right: y,
     });
     pool = [...pool.filter((p) => p !== x && p !== y), id];
     rec.bump("merges");

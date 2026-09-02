@@ -97,7 +97,7 @@ euro cents              200 100 50 20 10 5 2 1    300  canonical
 primes and one          11 7 3 1                   18  canonical
 all divisors of 30      30 24 12 6 3 1             54  fails at 48: greedy 3, best 2
 nine six five one       9 6 5 1                    15  fails at 11: greedy 3, best 2`,
-          explanation: "The bound is `system[0] + system[1]`, the two largest coins. Below it, greedy is compared against a DP table that holds the true minimum for every amount; the first disagreement is reported and the loop stops. Reaching the bound with no disagreement is the proof that there is none anywhere — that is the whole content of the theorem, and the only reason the word canonical can be printed rather than guessed at.",
+          explanation: "The bound is `system[0] + system[1]`, the two largest coins. Up to it, greedy is compared against a DP table that holds the true minimum for every amount; the first disagreement is reported and the loop stops. The theorem says *strictly* below, so the loop checks one amount more than it has to — cheaper than an off-by-one in a proof. Reaching the bound with no disagreement is the proof that there is none anywhere — that is the whole content of the theorem, and the only reason the word canonical can be printed rather than guessed at.",
           alternates: [
             {
               lang: "javascript",
@@ -598,7 +598,7 @@ func main() {
       body: [
         "The bounded search is a proof, but it is a proof that costs the bound. Two coins of a hundred each and you scan two hundred amounts; two coins of a million and you scan two million. The size of the coins has nothing to do with how many coins there are, so a system of four coins can be arbitrarily expensive to decide this way.",
         "Pearson's test decides the same question in time that depends only on the number of coins. The idea is to stop searching amounts and start constructing the one amount that could possibly fail.",
-        "Suppose a system is not canonical and let *w* be its smallest counterexample. Take a shortest representation of *w* — a multiset of coins summing to *w* using as few as possible. Let *i* be the index of the largest coin that representation uses and *j* the index of the smallest. Pearson proved that this representation is forced: above position *j* it agrees exactly with the greedy representation of `c[i-1] - 1`, and at position *j* it holds one coin more.",
+        "Suppose a system is not canonical and let *w* be its smallest counterexample. Take a shortest representation of *w* — a multiset of coins summing to *w* using as few as possible. Let *i* be the index of the largest coin that representation uses and *j* the index of the smallest. Pearson proved that this representation is forced: at every coin larger than `c[j]` it matches the greedy representation of `c[i-1] - 1`, at `c[j]` it holds one coin more than that, and it uses nothing smaller.",
         "That is a complete description of a candidate, and there is one per pair (i, j). So instead of scanning every amount below the bound, build those n² candidates, check each with one greedy pass, and take the smallest that fails. If none fails, the system is canonical — because the smallest counterexample, had one existed, would have been in the list.",
         "The two tests answer the same question, so the honest way to present the fast one is to run both and compare. Every three-, four- and five-coin system with nothing above twenty is five thousand systems, and they agree on all of them.",
       ],
@@ -610,12 +610,17 @@ func main() {
           code: `# Pearson's test decides the same question without searching amounts at all.
 #
 # The reasoning: if a system fails, let w be its smallest counterexample and
-# take a shortest representation of w. Let i be the largest coin that
-# representation uses and j the smallest. Pearson proved that the
-# representation then agrees with the greedy representation of c[i-1] - 1 in
-# every position above j, and holds exactly one more coin in position j. That
-# leaves one candidate amount per pair (i, j) - n squared of them, each costing
-# a greedy pass - and if none of those is a counterexample, none exists.
+# take a shortest representation of w. Let i be the index of the largest coin
+# that representation uses and j the index of the smallest. Pearson proved the
+# representation is then forced: at every coin larger than system[j] it matches
+# the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+# more than that, and it uses nothing smaller. That leaves one candidate amount
+# per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+# of those is a counterexample, none exists.
+#
+# i never reaches 0: if the shortest representation of w used the largest coin
+# then greedy would take that coin too, and w minus it would be a smaller
+# counterexample.
 
 def greedy_coins(system, amount):
     used = 0
@@ -722,12 +727,17 @@ every system of 3 to 5 coins with no coin above 20:
               code: `// Pearson's test decides the same question without searching amounts at all.
 //
 // The reasoning: if a system fails, let w be its smallest counterexample and
-// take a shortest representation of w. Let i be the largest coin that
-// representation uses and j the smallest. Pearson proved that the
-// representation then agrees with the greedy representation of c[i-1] - 1 in
-// every position above j, and holds exactly one more coin in position j. That
-// leaves one candidate amount per pair (i, j) - n squared of them, each costing
-// a greedy pass - and if none of those is a counterexample, none exists.
+// take a shortest representation of w. Let i be the index of the largest coin
+// that representation uses and j the index of the smallest. Pearson proved the
+// representation is then forced: at every coin larger than system[j] it matches
+// the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+// more than that, and it uses nothing smaller. That leaves one candidate amount
+// per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+// of those is a counterexample, none exists.
+//
+// i never reaches 0: if the shortest representation of w used the largest coin
+// then greedy would take that coin too, and w minus it would be a smaller
+// counterexample.
 
 function greedyCoins(system, amount) {
   let used = 0;
@@ -863,12 +873,17 @@ console.log(\`  \${systems} systems, \${failing} not canonical, \${disagreements
               code: `// Pearson's test decides the same question without searching amounts at all.
 //
 // The reasoning: if a system fails, let w be its smallest counterexample and
-// take a shortest representation of w. Let i be the largest coin that
-// representation uses and j the smallest. Pearson proved that the
-// representation then agrees with the greedy representation of c[i-1] - 1 in
-// every position above j, and holds exactly one more coin in position j. That
-// leaves one candidate amount per pair (i, j) - n squared of them, each costing
-// a greedy pass - and if none of those is a counterexample, none exists.
+// take a shortest representation of w. Let i be the index of the largest coin
+// that representation uses and j the index of the smallest. Pearson proved the
+// representation is then forced: at every coin larger than system[j] it matches
+// the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+// more than that, and it uses nothing smaller. That leaves one candidate amount
+// per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+// of those is a counterexample, none exists.
+//
+// i never reaches 0: if the shortest representation of w used the largest coin
+// then greedy would take that coin too, and w minus it would be a smaller
+// counterexample.
 
 function greedyCoins(system: number[], amount: number): number {
   let used = 0;
@@ -1015,12 +1030,17 @@ console.log(\`  \${systems} systems, \${failing} not canonical, \${disagreements
               code: `// Pearson's test decides the same question without searching amounts at all.
 //
 // The reasoning: if a system fails, let w be its smallest counterexample and
-// take a shortest representation of w. Let i be the largest coin that
-// representation uses and j the smallest. Pearson proved that the
-// representation then agrees with the greedy representation of c[i-1] - 1 in
-// every position above j, and holds exactly one more coin in position j. That
-// leaves one candidate amount per pair (i, j) - n squared of them, each costing
-// a greedy pass - and if none of those is a counterexample, none exists.
+// take a shortest representation of w. Let i be the index of the largest coin
+// that representation uses and j the index of the smallest. Pearson proved the
+// representation is then forced: at every coin larger than system[j] it matches
+// the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+// more than that, and it uses nothing smaller. That leaves one candidate amount
+// per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+// of those is a counterexample, none exists.
+//
+// i never reaches 0: if the shortest representation of w used the largest coin
+// then greedy would take that coin too, and w minus it would be a smaller
+// counterexample.
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1180,12 +1200,17 @@ public class Main {
               code: `// Pearson's test decides the same question without searching amounts at all.
 //
 // The reasoning: if a system fails, let w be its smallest counterexample and
-// take a shortest representation of w. Let i be the largest coin that
-// representation uses and j the smallest. Pearson proved that the
-// representation then agrees with the greedy representation of c[i-1] - 1 in
-// every position above j, and holds exactly one more coin in position j. That
-// leaves one candidate amount per pair (i, j) - n squared of them, each costing
-// a greedy pass - and if none of those is a counterexample, none exists.
+// take a shortest representation of w. Let i be the index of the largest coin
+// that representation uses and j the index of the smallest. Pearson proved the
+// representation is then forced: at every coin larger than system[j] it matches
+// the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+// more than that, and it uses nothing smaller. That leaves one candidate amount
+// per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+// of those is a counterexample, none exists.
+//
+// i never reaches 0: if the shortest representation of w used the largest coin
+// then greedy would take that coin too, and w minus it would be a smaller
+// counterexample.
 #include <algorithm>
 #include <functional>
 #include <iomanip>
@@ -1342,12 +1367,17 @@ int main() {
               code: `// Pearson's test decides the same question without searching amounts at all.
 //
 // The reasoning: if a system fails, let w be its smallest counterexample and
-// take a shortest representation of w. Let i be the largest coin that
-// representation uses and j the smallest. Pearson proved that the
-// representation then agrees with the greedy representation of c[i-1] - 1 in
-// every position above j, and holds exactly one more coin in position j. That
-// leaves one candidate amount per pair (i, j) - n squared of them, each costing
-// a greedy pass - and if none of those is a counterexample, none exists.
+// take a shortest representation of w. Let i be the index of the largest coin
+// that representation uses and j the index of the smallest. Pearson proved the
+// representation is then forced: at every coin larger than system[j] it matches
+// the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+// more than that, and it uses nothing smaller. That leaves one candidate amount
+// per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+// of those is a counterexample, none exists.
+//
+// i never reaches 0: if the shortest representation of w used the largest coin
+// then greedy would take that coin too, and w minus it would be a smaller
+// counterexample.
 
 fn greedy_coins(system: &[i32], mut amount: i32) -> i32 {
     let mut used = 0;
@@ -1496,12 +1526,17 @@ fn main() {
               code: `// Pearson's test decides the same question without searching amounts at all.
 //
 // The reasoning: if a system fails, let w be its smallest counterexample and
-// take a shortest representation of w. Let i be the largest coin that
-// representation uses and j the smallest. Pearson proved that the
-// representation then agrees with the greedy representation of c[i-1] - 1 in
-// every position above j, and holds exactly one more coin in position j. That
-// leaves one candidate amount per pair (i, j) - n squared of them, each costing
-// a greedy pass - and if none of those is a counterexample, none exists.
+// take a shortest representation of w. Let i be the index of the largest coin
+// that representation uses and j the index of the smallest. Pearson proved the
+// representation is then forced: at every coin larger than system[j] it matches
+// the greedy representation of system[i-1] - 1, at system[j] it holds one coin
+// more than that, and it uses nothing smaller. That leaves one candidate amount
+// per pair (i, j) - n squared of them, each costing a greedy pass - and if none
+// of those is a counterexample, none exists.
+//
+// i never reaches 0: if the shortest representation of w used the largest coin
+// then greedy would take that coin too, and w minus it would be a smaller
+// counterexample.
 package main
 
 import (
@@ -1671,7 +1706,7 @@ func main() {
       heading: "What an arbitrary cutoff misses",
       body: [
         "It is worth being concrete about what the bound is protecting you from, because the tempting shortcut — check the first hundred amounts and move on — is wrong far more often than it looks.",
-        "Take the system 91, 15, 2, 1. Its first failure is at 105: greedy pays 91 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + 1, eight coins, where seven 15s do it in seven. A hundred-amount check reports nothing and calls the system canonical.",
+        "Take the system 91, 15, 2, 1. Its first failure is at 105: greedy takes the 91, cannot fit a 15 into the 14 that is left, and pays seven 2s for it — eight coins, where seven 15s do it in seven. A hundred-amount check reports nothing and calls the system canonical.",
         "That is not an unlucky specimen. Of the 156,849 four-coin systems with no coin above a hundred, 150,736 are not canonical, and 38,529 of those first fail past amount 100 — a quarter of the failures, invisible to the shortcut.",
         "The bound is also close to tight, which is the other half of why it cannot be tightened by guessing. The worst case in that family is 100, 99, 2, 1, whose first failure is at 198 against a bound of 199. There is no smaller cutoff that would have worked.",
       ],
@@ -2567,7 +2602,7 @@ func main() {
     "A counterexample refutes; a failed search proves nothing unless the search was bounded by something that says where a counterexample would have to be.",
     "Kozen and Zaks: a non-canonical system's smallest counterexample is below the sum of its two largest coins.",
     "That bound turns the hunt of lesson 3 into a decision procedure — the same loop, but now the negative answer means something.",
-    "The bounded search costs the coin values; Pearson's test costs only the coin count, O(n³) either way the answer comes out the same.",
+    "The bounded search costs the coin values; Pearson's test costs only the coin count. Either way the answer is the same.",
     "Pearson constructs candidates rather than searching amounts: one per (largest coin used, smallest coin used) pair.",
     "A fixed cutoff like 100 misses about a quarter of the failures among four-coin systems with coins up to 100.",
     "Canonical is a property of the system, not of the amounts you happened to try.",
