@@ -1909,7 +1909,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "greedy-algorithms",
         "trackSlug": "dsa",
         "title": "Greedy Algorithms",
-        "description": "A strategy that is either optimal or badly wrong with nothing in between, so this module is mostly about proving which one you have. It starts where the difference is sharpest: the same three items and the same bag, greedy-optimal when they can be cut and wrong by 60 when they cannot. In progress: lessons on coin change and the greedy-against-DP decision are still to come.",
+        "description": "A strategy that is either optimal or badly wrong with nothing in between, so this module is mostly about proving which one you have. It starts where the difference is sharpest: the same three items and the same bag, greedy-optimal when they can be cut and wrong by 60 when they cannot. In progress: the lesson on the greedy-against-DP decision is still to come.",
         "order": 26,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -1961,6 +1961,14 @@ export const trackMetas: TrackMeta[] = [
             "estimatedMinutes": 35,
             "status": "available",
             "takeawayCount": 6
+          },
+          {
+            "slug": "coin-change-deciding-a-whole-system",
+            "moduleSlug": "greedy-algorithms",
+            "title": "Coin Change: Deciding a Whole System",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
           }
         ]
       },
