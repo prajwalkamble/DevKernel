@@ -95,13 +95,10 @@ export function getFirstLesson(track: Track): Lesson {
   return track.modules[0].lessons[0];
 }
 
-export function lessonHref(trackSlug: string, moduleSlug: string, lessonSlug: string): string {
-  return `/learn/${trackSlug}/${moduleSlug}/${lessonSlug}`;
-}
-
-export function trackHref(trackSlug: string): string {
-  return `/curriculum/${trackSlug}`;
-}
+/* Defined in `./href`, which holds no data, so a Client Component can import a
+   URL without importing the curriculum. Re-exported here so every existing
+   caller keeps working unchanged. */
+export { lessonHref, trackHref } from "./href";
 
 export interface AdjacentLessons {
   previous: Lesson | null;

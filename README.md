@@ -47,6 +47,7 @@ A learner who types an example in and gets something different from what the pag
 
 - `scripts/verify-lesson-code.mjs` compiles and runs every example in the content tree against a real toolchain, and diffs what it printed against what the lesson claims. A mismatch fails the build.
 - `scripts/verify-visual-frames.ts` runs every visualisation generator and checks that the frames are well formed and that every lesson's visual specification names an algorithm that exists.
+- `scripts/verify-content-ids.ts` checks that no two tracks, modules or lessons share an id. Nothing keys on a lesson id today, which is exactly why five duplicates had accumulated unnoticed; the first feature that does key on one would have conflated two lessons with no way to tell which was meant.
 - `scripts/verify-visual-playback.mjs` drives a real browser and confirms the animation actually advances, which no assertion about data can establish.
 
 The same rule governs translations. When an example offers itself in another language behind a dropdown, that translation is compiled and run too, and checked against the same expected output. An unverified translation would make the dropdown a promise nothing keeps.
@@ -84,6 +85,13 @@ Visualisations
 - Eight frame shapes cover arrays, heaps, trees, sequences, buckets, graphs, matrices and directory listings.
 
 Site-wide
+
+Dashboard
+
+- One page at `/dashboard` for which tracks you have started and how far into each one you are: a completion ring, a bar splitting your completed lessons across tracks, a per-track progress bar, and a square per module shaded by how much of it is done.
+- Everything is derived from the lessons you have marked complete. Nothing is inferred, so there is no invented "recent activity" — `localStorage` records which lessons are done and not when, and the page says only what that supports.
+- Every figure is reachable without a mouse. Each bar and square is a button that opens the same detail on focus as on hover, wired with `aria-describedby` and dismissible with Escape.
+- Reached from the progress bar in the header, and from the menu on a narrow screen.
 
 - Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page.
 - Optional analytics through PostHog, proxied same-origin, off entirely when no key is set.
@@ -182,9 +190,10 @@ That runs Next.js type generation, `tsc --noEmit`, ESLint, and the visualisation
 | `npm run build` | Production build. Copies the runtime assets first. |
 | `npm start` | Serves a build produced by `npm run build`. |
 | `npm run lint` | ESLint. |
-| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, the track manifest check, and the frame checker. The pre-commit gate. |
+| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, the track manifest check, the id check, and the frame checker. The pre-commit gate. |
 | `npm run manifest` | Regenerates `content/tracks/manifest.generated.ts` from the curriculum. Run it after changing content. |
 | `npm run verify:manifest` | Fails when that manifest and the curriculum disagree. |
+| `npm run verify:ids` | Fails when two tracks, modules or lessons claim the same id, or two sections or examples do inside one parent. |
 | `npm run verify:frames` | Runs every visualisation generator and checks the frames. |
 | `npm run verify:code` | Compiles and runs every lesson example. Accepts an optional track and module to narrow it. |
 | `npm run verify:visuals` | Drives a real browser and checks that playback advances. Needs a server already running. |

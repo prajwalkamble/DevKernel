@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Clock, Construction } from "lucide-react";
 import clsx from "clsx";
 import type { TrackMeta } from "@/content/tracks/meta";
-import { lessonHref } from "@/content/tracks/meta";
+import { lessonHref } from "@/content/tracks/href";
 import { useProgress } from "@/lib/useProgress";
 
 export function CurriculumMap({ track }: { track: TrackMeta }) {
