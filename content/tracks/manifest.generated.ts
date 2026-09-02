@@ -1909,7 +1909,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "greedy-algorithms",
         "trackSlug": "dsa",
         "title": "Greedy Algorithms",
-        "description": "A strategy that is either optimal or badly wrong with nothing in between, so this module is mostly about proving which one you have. It starts where the difference is sharpest: the same three items and the same bag, greedy-optimal when they can be cut and wrong by 60 when they cannot. In progress: the lesson on the greedy-against-DP decision is still to come.",
+        "description": "A strategy that is either optimal or badly wrong with nothing in between, so this module is mostly about proving which one you have. It starts where the difference is sharpest: the same three items and the same bag, greedy-optimal when they can be cut and wrong by 60 when they cannot. From there, the two tools that settle it — the exchange argument and the counterexample hunt — then four algorithms that survive them, and a closing lesson on what to do when nothing does.",
         "order": 26,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -1969,6 +1969,14 @@ export const trackMetas: TrackMeta[] = [
             "estimatedMinutes": 35,
             "status": "available",
             "takeawayCount": 7
+          },
+          {
+            "slug": "greedy-against-dynamic-programming",
+            "moduleSlug": "greedy-algorithms",
+            "title": "Greedy Against Dynamic Programming",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
           }
         ]
       },
