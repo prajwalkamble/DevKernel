@@ -1,7 +1,7 @@
 import type { Lesson } from "@/content/types";
 
 export const memoryModelLesson: Lesson = {
-  id: "cpp-memory-model",
+  id: "cpp-memory-orderings",
   slug: "the-memory-model-and-memory-orderings",
   moduleSlug: "concurrency",
   title: "The C++ Memory Model & the Memory Orderings",

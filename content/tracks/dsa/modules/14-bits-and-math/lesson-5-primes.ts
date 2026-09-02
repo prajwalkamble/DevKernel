@@ -1,7 +1,7 @@
 import type { Lesson } from "@/content/types";
 
 export const primesLesson: Lesson = {
-  id: "dsa-math-primes",
+  id: "dsa-math-sieve",
   slug: "primes-sieves-and-factorisation",
   moduleSlug: "bit-manipulation-and-math",
   title: "Primes: the Sieve, Factorisation & Divisor Counting",

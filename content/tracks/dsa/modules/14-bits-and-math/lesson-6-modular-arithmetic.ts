@@ -1,7 +1,7 @@
 import type { Lesson } from "@/content/types";
 
 export const modularArithmeticLesson: Lesson = {
-  id: "dsa-math-modular",
+  id: "dsa-math-modpow",
   slug: "modular-arithmetic-and-fast-exponentiation",
   moduleSlug: "bit-manipulation-and-math",
   title: "Modular Arithmetic, Fast Exponentiation & Inverses",
