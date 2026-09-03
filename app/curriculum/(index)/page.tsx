@@ -22,7 +22,7 @@ export default function CurriculumPage() {
   const revise = getTracksByMode("revise");
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-6">
+    <div className="page-shell px-5 py-10 sm:px-6">
       <div className="mb-10">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Tracks</h1>
         <p className="mt-2 max-w-2xl text-pretty text-muted">
@@ -83,7 +83,7 @@ function TrackSection({
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{blurb}</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid gap-4 2xl:grid-cols-2">
         {tracks.map((track) => (
           <TrackCard key={track.slug} track={track} />
         ))}

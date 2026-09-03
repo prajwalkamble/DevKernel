@@ -146,7 +146,7 @@ export function VisualizeGallery() {
   const groups: Entry["group"][] = ["Algorithms", "Linear structures", "Trees & tables"];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="page-shell px-4 py-8 sm:px-6">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Visualize

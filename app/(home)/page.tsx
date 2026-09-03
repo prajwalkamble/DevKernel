@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="mx-auto max-w-5xl px-5 pt-12 pb-10 text-center sm:px-6 sm:pt-16 sm:pb-12">
+      <section className="page-shell px-5 pt-12 pb-10 text-center sm:px-6 sm:pt-16 sm:pb-12">
         <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted">
           <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
           {tracks.length} tracks — {getTracksByMode("learn").length} to learn,{" "}
@@ -44,7 +44,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl gap-4 px-5 pb-14 sm:grid-cols-2 sm:px-6 sm:pb-16 lg:grid-cols-3">
+      <section className="page-shell grid gap-4 px-5 pb-14 sm:grid-cols-2 sm:px-6 sm:pb-16 lg:grid-cols-3">
         <FeatureCard
           icon={<Layers className="h-5 w-5" />}
           title="Learn it, or get it back"
@@ -63,7 +63,7 @@ export default function Home() {
       </section>
 
       <section className="border-t border-border bg-surface/50 py-14 sm:py-16">
-        <div className="mx-auto max-w-5xl px-5 sm:px-6">
+        <div className="page-shell px-5 sm:px-6">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
             <div className="min-w-0">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">Pick a track</h2>

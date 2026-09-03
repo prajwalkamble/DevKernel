@@ -84,7 +84,7 @@ function RailBody({
   return (
     <div className="flex h-full flex-col">
       <div className="px-4 pb-4 pt-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-dash-rail-muted">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
           Your progress
         </p>
       </div>
@@ -103,8 +103,8 @@ function RailBody({
                     // 44px tall: a touch target you can hit without aiming.
                     "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
                     active
-                      ? "bg-dash-rail-raised text-dash-rail-fg"
-                      : "text-dash-rail-muted hover:bg-dash-rail-raised/60 hover:text-dash-rail-fg"
+                      ? "bg-surface-hover text-foreground"
+                      : "text-muted hover:bg-surface-hover/70 hover:text-foreground"
                   )}
                 >
                   <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden />
@@ -124,13 +124,13 @@ function RailBody({
 
       {/* The rail's own summary card, the way the templates this follows put a
           user card at the foot of the sidebar. */}
-      <div className="border-t border-dash-rail-line p-3">
-        <div className="rounded-lg bg-dash-rail-raised p-3">
-          <p className="text-xs text-dash-rail-muted">Curriculum</p>
-          <p className="mt-0.5 text-lg font-semibold tabular-nums text-dash-rail-fg">
+      <div className="border-t border-border p-3">
+        <div className="rounded-lg bg-surface-hover p-3">
+          <p className="text-xs text-muted">Curriculum</p>
+          <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
             {percent(done, total)}%
           </p>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-dash-rail-line">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-line">
             {done > 0 && (
               <div
                 className="h-full rounded-full bg-[var(--accent)]"
@@ -138,13 +138,13 @@ function RailBody({
               />
             )}
           </div>
-          <p className="mt-2 text-xs text-dash-rail-muted">
+          <p className="mt-2 text-xs text-muted">
             {done}/{total} lessons · {solved}/{problems} problems
           </p>
         </div>
         <Link
           href="/curriculum"
-          className="mt-2 block rounded-lg px-3 py-2 text-xs font-medium text-dash-rail-muted transition-colors hover:bg-dash-rail-raised hover:text-dash-rail-fg"
+          className="mt-2 block rounded-lg px-3 py-2 text-xs font-medium text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
         >
           Browse the curriculum →
         </Link>
@@ -251,12 +251,12 @@ export function DashboardShell({ data }: { data: DashboardData }) {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-[100rem]">
+    <div className="page-shell-wide flex">
       {/* The fixed rail. `top-14` clears the site header, and the height is
           measured against it so the rail scrolls independently of the page.
           `dvh` rather than `vh`: on iOS `vh` counts the space behind the URL
           bar, which puts the rail's own footer under it. */}
-      <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-64 shrink-0 border-r border-dash-rail-line bg-dash-rail lg:block">
+      <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-64 shrink-0 border-r border-border bg-surface lg:block">
         {rail}
       </aside>
 
@@ -374,14 +374,14 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             role="dialog"
             aria-modal="true"
             aria-label="Dashboard sections"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-dash-rail shadow-2xl"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-surface shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-dash-rail-line px-4 py-3">
-              <span className="text-sm font-semibold text-dash-rail-fg">Dashboard</span>
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <span className="text-sm font-semibold text-foreground">Dashboard</span>
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="grid h-9 w-9 place-items-center rounded-lg text-dash-rail-muted transition-colors hover:bg-dash-rail-raised hover:text-dash-rail-fg"
+                className="grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
               >
                 <X className="h-5 w-5" aria-hidden />
                 <span className="sr-only">Close</span>

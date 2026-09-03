@@ -5,7 +5,7 @@ export function LessonShell({ children }: { children: React.ReactNode }) {
   return (
     // Column below `lg`, where the sidebar collapses into a drawer that belongs
     // above the lesson; row from `lg` up, where it is a real sidebar beside it.
-    <div className="mx-auto flex max-w-7xl flex-col lg:flex-row">
+    <div className="page-shell-wide flex flex-col lg:flex-row">
       <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-72 shrink-0 overflow-y-auto border-r border-border scrollbar-thin lg:block">
         <SidebarNav />
       </aside>

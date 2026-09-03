@@ -57,16 +57,6 @@
   --success: #15803d;
   --success-soft: #eafaf0;
 
-  /* The dashboard's sidebar is dark in both themes, the way the admin
-     templates it is modelled on are, so these do not get a `.dark` override.
-     Named separately from the dark palette rather than borrowed from it: the
-     two happen to agree today, and the sidebar should not drift the next time
-     dark mode is retuned. */
-  --dash-rail: #0e1320;
-  --dash-rail-raised: #191f30;
-  --dash-rail-line: #262d3f;
-  --dash-rail-fg: #e7ebf3;
-  --dash-rail-muted: #949cb0;
   --danger: #c81e1e;
   --danger-soft: #fef2f2;
   /* Problem difficulty. Same 4.5:1 rule as the track colours: each one is a
@@ -195,11 +185,6 @@
   --color-next-soft: var(--next-soft);
   --color-angular: var(--angular-color);
   --color-angular-soft: var(--angular-soft);
-  --color-dash-rail: var(--dash-rail);
-  --color-dash-rail-raised: var(--dash-rail-raised);
-  --color-dash-rail-line: var(--dash-rail-line);
-  --color-dash-rail-fg: var(--dash-rail-fg);
-  --color-dash-rail-muted: var(--dash-rail-muted);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-danger: var(--danger);
@@ -213,6 +198,8 @@
   --color-code: var(--code-bg);
   --color-code-header: var(--code-header);
   --color-console: var(--console-bg);
+  --breakpoint-3xl: 120rem;
+  --breakpoint-4xl: 160rem;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -244,6 +231,71 @@ body {
 ::selection {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/*
+ * The two container widths the site uses, as one ladder each.
+ *
+ * Every page used to pick its own ceiling — 56rem here, 64rem there, 80rem for
+ * the header — so on anything past about 1400px the whole site became a column
+ * in the middle of an empty screen: 896px of content on a 2560px monitor is 35%
+ * of it. These grow instead, in steps that match the breakpoints above.
+ *
+ * They stop growing at 100rem and 120rem on purpose. Past that a card row is
+ * wider than a person's comfortable saccade and a table's first and last
+ * columns stop being readable together; the answer to more pixels is not
+ * unbounded width. Prose is capped tighter still and separately — the intro
+ * paragraph on each of these pages carries its own `max-w-2xl`, and a lesson
+ * body its own `max-w-3xl`, so widening the shell never widens a line of text.
+ */
+.page-shell,
+.page-shell-wide {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.page-shell {
+  max-width: 56rem;
+}
+
+.page-shell-wide {
+  max-width: 80rem;
+}
+
+@media (min-width: 80rem) {
+  .page-shell {
+    max-width: 64rem;
+  }
+}
+
+@media (min-width: 96rem) {
+  .page-shell {
+    max-width: 76rem;
+  }
+
+  .page-shell-wide {
+    max-width: 96rem;
+  }
+}
+
+@media (min-width: 120rem) {
+  .page-shell {
+    max-width: 88rem;
+  }
+
+  .page-shell-wide {
+    max-width: 110rem;
+  }
+}
+
+@media (min-width: 160rem) {
+  .page-shell {
+    max-width: 100rem;
+  }
+
+  .page-shell-wide {
+    max-width: 120rem;
+  }
 }
 
 .scrollbar-thin {

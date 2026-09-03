@@ -52,15 +52,5 @@ export function useProgress() {
     [completed]
   );
 
-  /** How many of this track's completed lessons are in local storage. */
-  const completedInTrack = useCallback(
-    (trackSlug: string) => {
-      let count = 0;
-      for (const key of completed) if (key.startsWith(`${trackSlug}/`)) count++;
-      return count;
-    },
-    [completed]
-  );
-
-  return { completed, hydrated, isComplete, toggle, completedInTrack };
+  return { completed, hydrated, isComplete, toggle };
 }

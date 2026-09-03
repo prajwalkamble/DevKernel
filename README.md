@@ -93,9 +93,11 @@ Dashboard
 - Every figure derives from what you have marked complete, and nothing is inferred. `localStorage` records *which* lessons and problems are done and not *when*, so there is no activity feed and no "continue where you left off" — the link is labelled "next unfinished", which is what it computes.
 - Charts follow one rule the site's own palette forces: the twelve track colours are brand identities, not a validated categorical palette (C++ against React measures ΔE 4.7 for normal vision), so no figure distinguishes tracks by colour alone. Every bar, segment and cell is labelled in place or sits in a labelled row. The module heatmap uses a single-hue ramp, because its job is magnitude rather than identity.
 - Every number is reachable without a mouse: each bar and square is a button whose tooltip opens on focus as well as hover, wired with `aria-describedby` and dismissible with Escape.
-- Below `lg` the sidebar becomes a drawer with a focus trap, a scroll lock and Escape to close, and a scrollable tab row covers the same sections. Tables drop columns into the row rather than into a horizontal scroller. Checked at 320, 360, 390, 414, 768, 1024 and 1440 across all four sections: no page scrolls sideways at any of them.
+- Below `lg` the sidebar becomes a drawer with a focus trap, a scroll lock and Escape to close, and a scrollable tab row covers the same sections. Tables drop columns into the row rather than into a horizontal scroller.
 
-- Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page.
+- Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page. Every surface follows the theme, including the dashboard's sidebar.
+- One container ladder, `page-shell` and `page-shell-wide` in `app/globals.css`, rather than a max-width chosen per page. Pages used to stop at 896px, so a 2560px monitor showed 35% content and 65% empty; they now grow in steps to 1600px and 1920px, and the card lists on Tracks and Problems go to two columns once there is room. Prose does not grow with them — each page's intro keeps its own `max-w-2xl` and a lesson body its `max-w-3xl`, because a 1600px line is not a readable one.
+- Checked in a real browser at 320, 360, 390, 414, 640, 768, 834, 1024, 1280, 1440, 1920 and 2560 across every route: nothing overflows its container at any of them.
 - Optional analytics through PostHog, proxied same-origin, off entirely when no key is set.
 
 ## How it works

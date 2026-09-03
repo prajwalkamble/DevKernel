@@ -243,7 +243,7 @@ export function ProblemBrowser({ problems }: { problems: ProblemSummary[] }) {
           Nothing matches those filters. Clear one and try again.
         </p>
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="grid gap-1.5 2xl:grid-cols-2">
           {visible.map((problem) => (
             <li key={problem.slug}>
               <Link

@@ -73,7 +73,7 @@ export default function RoadmapPage() {
   );
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-6">
+    <div className="page-shell px-5 py-10 sm:px-6">
       <header className="mb-10">
         <span className="inline-flex items-center gap-1.5 rounded bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent">
           <MapIcon className="h-3.5 w-3.5" />
