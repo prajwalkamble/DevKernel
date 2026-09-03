@@ -56,6 +56,17 @@
   --angular-soft: #faf5ff;
   --success: #15803d;
   --success-soft: #eafaf0;
+
+  /* The dashboard's sidebar is dark in both themes, the way the admin
+     templates it is modelled on are, so these do not get a `.dark` override.
+     Named separately from the dark palette rather than borrowed from it: the
+     two happen to agree today, and the sidebar should not drift the next time
+     dark mode is retuned. */
+  --dash-rail: #0e1320;
+  --dash-rail-raised: #191f30;
+  --dash-rail-line: #262d3f;
+  --dash-rail-fg: #e7ebf3;
+  --dash-rail-muted: #949cb0;
   --danger: #c81e1e;
   --danger-soft: #fef2f2;
   /* Problem difficulty. Same 4.5:1 rule as the track colours: each one is a
@@ -184,6 +195,11 @@
   --color-next-soft: var(--next-soft);
   --color-angular: var(--angular-color);
   --color-angular-soft: var(--angular-soft);
+  --color-dash-rail: var(--dash-rail);
+  --color-dash-rail-raised: var(--dash-rail-raised);
+  --color-dash-rail-line: var(--dash-rail-line);
+  --color-dash-rail-fg: var(--dash-rail-fg);
+  --color-dash-rail-muted: var(--dash-rail-muted);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-danger: var(--danger);

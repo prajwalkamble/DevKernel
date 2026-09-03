@@ -12,8 +12,17 @@ import {
 
 export function useSolvedProblems() {
   const [solved, setSolved] = useState<Set<string>>(new Set());
+  /**
+   * Whether the first read of localStorage has happened. Mirrors `useProgress`:
+   * anything that would otherwise show "you have solved nothing" for one paint
+   * before the real number arrives should wait on it.
+   */
+  const [hydrated, setHydrated] = useState(false);
 
-  const refresh = useCallback(() => setSolved(getSolvedProblems()), []);
+  const refresh = useCallback(() => {
+    setSolved(getSolvedProblems());
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     // Same pattern as useProgress: localStorage is an external store, so the
@@ -35,7 +44,7 @@ export function useSolvedProblems() {
     setProblemSolved(slug, value);
   }, []);
 
-  return { solved, isSolved, toggle };
+  return { solved, hydrated, isSolved, toggle };
 }
 
 /**
