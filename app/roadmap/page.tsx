@@ -20,7 +20,7 @@ import {
   type RoadmapStatus,
 } from "@/content/roadmap";
 import { getPracticeStats } from "@/content/practice";
-import { getTrackBySlug, lessonHref, trackHref } from "@/content/tracks";
+import { getTrackBySlug, lessonHref, trackHref } from "@/content/tracks/meta";
 import { TRACK_BADGE_CLASS } from "@/lib/trackTheme";
 
 export const metadata: Metadata = {

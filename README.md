@@ -47,6 +47,7 @@ A learner who types an example in and gets something different from what the pag
 
 - `scripts/verify-lesson-code.mjs` compiles and runs every example in the content tree against a real toolchain, and diffs what it printed against what the lesson claims. A mismatch fails the build.
 - `scripts/verify-visual-frames.ts` runs every visualisation generator and checks that the frames are well formed and that every lesson's visual specification names an algorithm that exists.
+- `scripts/verify-content-ids.ts` checks that no two tracks, modules or lessons share an id. Nothing keys on a lesson id today, which is exactly why five duplicates had accumulated unnoticed; the first feature that does key on one would have conflated two lessons with no way to tell which was meant.
 - `scripts/verify-visual-playback.mjs` drives a real browser and confirms the animation actually advances, which no assertion about data can establish.
 
 The same rule governs translations. When an example offers itself in another language behind a dropdown, that translation is compiled and run too, and checked against the same expected output. An unverified translation would make the dropdown a promise nothing keeps.
@@ -85,6 +86,13 @@ Visualisations
 
 Site-wide
 
+Dashboard
+
+- One page at `/dashboard` for which tracks you have started and how far into each one you are: a completion ring, a bar splitting your completed lessons across tracks, a per-track progress bar, and a square per module shaded by how much of it is done.
+- Everything is derived from the lessons you have marked complete. Nothing is inferred, so there is no invented "recent activity" — `localStorage` records which lessons are done and not when, and the page says only what that supports.
+- Every figure is reachable without a mouse. Each bar and square is a button that opens the same detail on focus as on hover, wired with `aria-describedby` and dismissible with Escape.
+- Reached from the progress bar in the header, and from the menu on a narrow screen.
+
 - Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page.
 - Optional analytics through PostHog, proxied same-origin, off entirely when no key is set.
 
@@ -107,22 +115,22 @@ The figures below are counted from the content tree.
 | Metric | Count |
 | --- | --- |
 | Tracks | 12 |
-| Modules | 71 live of 203 declared |
-| Lessons live | 518 |
+| Modules | 72 live of 203 declared |
+| Lessons live | 526 |
 | Lessons plus published syllabus topics | 1,543 |
-| Sections | 2,321 |
-| Code examples | 1,752 |
-| Verified translations | 939 |
-| Embedded visualisations | 61 |
+| Sections | 2,344 |
+| Code examples | 1,776 |
+| Verified translations | 1,083 |
+| Embedded visualisations | 67 |
 | Pitfall callouts | 1,074 |
-| Interview questions | 1,826 |
+| Interview questions | 1,850 |
 | Practice problems | 18, with 116 test cases and 40 approaches |
 
 The tracks, with live modules against declared modules:
 
 | Track | Slug | Mode | Modules | Lessons live |
 | --- | --- | --- | --- | --- |
-| Data Structures and Algorithms | `dsa` | learn | 25 / 37 | 200 |
+| Data Structures and Algorithms | `dsa` | learn | 26 / 37 | 208 |
 | System Design | `system-design` | learn | 0 / 29 | 0 |
 | JavaScript and TypeScript | `js-ts` | learn | 12 / 12 | 73 |
 | React | `react` | learn | 15 / 15 | 115 |
@@ -182,7 +190,10 @@ That runs Next.js type generation, `tsc --noEmit`, ESLint, and the visualisation
 | `npm run build` | Production build. Copies the runtime assets first. |
 | `npm start` | Serves a build produced by `npm run build`. |
 | `npm run lint` | ESLint. |
-| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, and the frame checker. The pre-commit gate. |
+| `npm run verify` | Type generation, `tsc --noEmit`, ESLint, the track manifest check, the id check, and the frame checker. The pre-commit gate. |
+| `npm run manifest` | Regenerates `content/tracks/manifest.generated.ts` from the curriculum. Run it after changing content. |
+| `npm run verify:manifest` | Fails when that manifest and the curriculum disagree. |
+| `npm run verify:ids` | Fails when two tracks, modules or lessons claim the same id, or two sections or examples do inside one parent. |
 | `npm run verify:frames` | Runs every visualisation generator and checks the frames. |
 | `npm run verify:code` | Compiles and runs every lesson example. Accepts an optional track and module to narrow it. |
 | `npm run verify:visuals` | Drives a real browser and checks that playback advances. Needs a server already running. |
@@ -207,10 +218,13 @@ Analytics is opt-in per environment. With no key set, PostHog never initialises 
 | --- | --- |
 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key. A write-only ingest key, meant to ship to the browser, granting no read access. |
 | `NEXT_PUBLIC_POSTHOG_HOST` | Ingest host for your region. Defaults to `https://us.i.posthog.com`. |
+| `NEXT_PUBLIC_POSTHOG_DEV` | Set to `1` to send events from `next dev` too. Off by default even with a key set. |
 
-Both are `NEXT_PUBLIC_`, so `next build` inlines them into the client bundle rather than reading them at runtime. They must be present in the environment that runs the production build, not merely on the server that serves it.
+All three are `NEXT_PUBLIC_`, so `next build` inlines them into the client bundle rather than reading them at runtime. They must be present in the environment that runs the production build, not merely on the server that serves it.
 
-Analytics requests go out same-origin through `/ingest` and are proxied to PostHog by rewrites in `next.config.ts`. Session replay blocks the Monaco editors, so nothing anyone types into the playground or the practice console is recorded.
+A key on its own turns analytics on for a production build only. Development is silent unless `NEXT_PUBLIC_POSTHOG_DEV=1` is also set, because a dev machine is often on a flaky network or offline — and a send that cannot reach PostHog prints a page of connection errors per pageview — while the events that do arrive are indistinguishable from a real reader's and skew the data.
+
+Analytics requests go out same-origin through `/ingest` and are proxied to PostHog by rewrites in `next.config.ts`. The rewrites are gated on the same condition, so a checkout with analytics off has no proxy mounted rather than an open one nothing is expected to use. Session replay blocks the Monaco editors, so nothing anyone types into the playground or the practice console is recorded.
 
 ## Project layout
 
@@ -218,6 +232,8 @@ Analytics requests go out same-origin through `/ingest` and are proxied to PostH
 app/          Routes. One directory per URL segment, plus a loading skeleton per route.
 components/   React components, grouped by the area of the site they serve.
 content/      The curriculum and the problem sheet, as typed TypeScript data.
+              `tracks/` is the full tree; `tracks/meta.ts` is the same tree without
+              lesson bodies, which is what every page but the lesson route imports.
 lib/          Everything that is not a component: runtimes, the judge, visualisation
               generators, and the small client-side state modules.
 scripts/      The verification gates, the asset copiers, and two development helpers.

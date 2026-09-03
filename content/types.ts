@@ -124,6 +124,11 @@ export type VisualKind =
   | "pattern"
   | "tree-algorithm"
   | "bits-and-math"
+  /* Greedy: the choice being made and then never revisited — interval
+     scheduling and merging on a Gantt grid, Huffman built from a heap, and
+     coin change run on a system where the rule holds and one where it does
+     not. */
+  | "greedy"
   /* React's rendering model: element trees, the render/commit split,
      reconciliation, and what a key does to a list. */
   | "react-rendering"

@@ -1,74 +1,52 @@
-import type { Lesson, Module, Track, TrackDefinition, TrackMode } from "@/content/types";
-import { dsaTrack } from "./dsa";
-import { systemDesignTrack } from "./system-design";
-import { jsTsTrack } from "./js-ts";
-import { reactTrack } from "./react";
-import { nextTrack } from "./next";
-import { angularTrack } from "./angular";
-import { rustTrack } from "./rust";
-import { goTrack } from "./go";
-import { assemblyTrack } from "./assembly";
-import { cppTrack } from "./cpp";
-import { javaTrack } from "./java";
-import { springBootTrack } from "./spring-boot";
+/**
+ * The curriculum without the lesson bodies, and the helpers over it.
+ *
+ * This is the import to reach for. Everything that needs titles, counts,
+ * durations, statuses or links belongs here; `@/content/tracks` is only for
+ * the one place that genuinely needs a lesson's sections, which is the lesson
+ * route itself.
+ *
+ * The split is not a micro-optimisation. `Header` sits in the root layout, so
+ * importing the full tree there made every route — the playground, the
+ * practice console, the visualiser — compile all 621 content files. And
+ * `SidebarNav` and `CurriculumMap` are Client Components, so the full tree
+ * reached the browser: every lesson's code examples, in all seven languages,
+ * in the first chunk a reader downloads.
+ *
+ * The helper names and shapes match the ones in `./index.ts` on purpose, so a
+ * consumer switches by changing the import and nothing else.
+ */
+import type { TrackMode } from "@/content/types";
+import type { LessonMeta, ModuleMeta, TrackMeta } from "./meta-types";
+import { trackMetas } from "./manifest.generated";
 
-/** Stamps the owning track onto each module so lookups never need both halves. */
-function toTrack(definition: TrackDefinition): Track {
-  return {
-    ...definition,
-    modules: definition.modules
-      .map((mod) => ({ ...mod, trackSlug: definition.slug }))
-      .sort((a, b) => a.order - b.order),
-  };
-}
+export type { LessonMeta, ModuleMeta, TrackMeta };
 
-export const tracks: Track[] = [
-  dsaTrack,
-  systemDesignTrack,
-  jsTsTrack,
-  reactTrack,
-  nextTrack,
-  angularTrack,
-  rustTrack,
-  goTrack,
-  assemblyTrack,
-  cppTrack,
-  javaTrack,
-  springBootTrack,
-]
-  .map(toTrack)
-  .sort((a, b) => a.order - b.order);
+/** Every track, in display order. Modules within a track are ordered too. */
+export const tracks: TrackMeta[] = trackMetas;
 
-export function getTracksByMode(mode: TrackMode): Track[] {
+export function getTracksByMode(mode: TrackMode): TrackMeta[] {
   return tracks.filter((track) => track.mode === mode);
 }
 
 /** Human-readable lesson budget, e.g. "10-15 min per lesson". */
-export function lessonBudgetLabel(track: Track): string {
+export function lessonBudgetLabel(track: TrackMeta): string {
   const [min, max] = track.lessonMinutes;
-  return `${min}\u2013${max} min per lesson`;
+  return `${min}–${max} min per lesson`;
 }
 
 /** Where "Start learning" goes when no track has been chosen. */
-export const defaultTrack: Track = tracks[0];
+export const defaultTrack: TrackMeta = tracks[0];
 
-export function getTrackBySlug(trackSlug: string): Track | undefined {
+export function getTrackBySlug(trackSlug: string): TrackMeta | undefined {
   return tracks.find((track) => track.slug === trackSlug);
 }
 
-export function getModule(trackSlug: string, moduleSlug: string): Module | undefined {
+export function getModule(trackSlug: string, moduleSlug: string): ModuleMeta | undefined {
   return getTrackBySlug(trackSlug)?.modules.find((mod) => mod.slug === moduleSlug);
 }
 
-export function getLesson(
-  trackSlug: string,
-  moduleSlug: string,
-  lessonSlug: string
-): Lesson | undefined {
-  return getModule(trackSlug, moduleSlug)?.lessons.find((lesson) => lesson.slug === lessonSlug);
-}
-
-export function getTrackLessons(track: Track): Lesson[] {
+export function getTrackLessons(track: TrackMeta): LessonMeta[] {
   return track.modules.flatMap((mod) => mod.lessons);
 }
 
@@ -91,7 +69,7 @@ export function getAllLessonRefs(): LessonRef[] {
   );
 }
 
-export function getFirstLesson(track: Track): Lesson {
+export function getFirstLesson(track: TrackMeta): LessonMeta {
   return track.modules[0].lessons[0];
 }
 
@@ -101,8 +79,8 @@ export function getFirstLesson(track: Track): Lesson {
 export { lessonHref, trackHref } from "./href";
 
 export interface AdjacentLessons {
-  previous: Lesson | null;
-  next: Lesson | null;
+  previous: LessonMeta | null;
+  next: LessonMeta | null;
 }
 
 /** Adjacency is within a track: the last lesson of a track has no next. */
@@ -126,14 +104,19 @@ export function getAdjacentLessons(
   };
 }
 
-/** For a track still being written, its topics are its planned lessons. */
-export function getPlannedLessonCount(track: Track): number {
+/**
+ * For a track still being written, its topics are its planned lessons.
+ *
+ * A preview lesson's topics live in its `takeaways`, which the manifest
+ * carries only as a count — the strings themselves are lesson content.
+ */
+export function getPlannedLessonCount(track: TrackMeta): number {
   return track.modules.reduce(
     (total, mod) =>
       total +
       (mod.status === "available"
         ? mod.lessons.length
-        : mod.lessons.reduce((n, lesson) => n + (lesson.takeaways?.length ?? 0), 0)),
+        : mod.lessons.reduce((n, lesson) => n + lesson.takeawayCount, 0)),
     0
   );
 }
@@ -145,7 +128,7 @@ export interface TrackStats {
   estimatedMinutes: number;
 }
 
-export function getTrackStats(track: Track): TrackStats {
+export function getTrackStats(track: TrackMeta): TrackStats {
   const lessons = getTrackLessons(track).filter((lesson) => lesson.status === "available");
   return {
     availableLessons: lessons.length,

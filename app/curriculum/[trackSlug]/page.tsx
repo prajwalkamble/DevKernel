@@ -12,7 +12,7 @@ import {
   lessonBudgetLabel,
   lessonHref,
   tracks,
-} from "@/content/tracks";
+} from "@/content/tracks/meta";
 import { TRACK_BADGE_CLASS } from "@/lib/trackTheme";
 
 interface TrackPageProps {

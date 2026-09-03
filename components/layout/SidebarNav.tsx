@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { defaultTrack, getFirstLesson, getTrackBySlug, lessonHref, tracks } from "@/content/tracks";
+import { defaultTrack, getFirstLesson, getTrackBySlug, lessonHref, tracks } from "@/content/tracks/meta";
 import { TRACK_BADGE_CLASS } from "@/lib/trackTheme";
 import { useProgress } from "@/lib/useProgress";
 

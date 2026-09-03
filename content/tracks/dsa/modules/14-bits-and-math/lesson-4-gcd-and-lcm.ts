@@ -1,7 +1,7 @@
 import type { Lesson } from "@/content/types";
 
 export const gcdAndLcmLesson: Lesson = {
-  id: "dsa-math-gcd",
+  id: "dsa-math-euclid",
   slug: "gcd-lcm-and-the-euclidean-algorithm",
   moduleSlug: "bit-manipulation-and-math",
   title: "GCD, LCM & the Euclidean Algorithm",

@@ -1,7 +1,7 @@
 import type { Lesson } from "@/content/types";
 
 export const stringsAtProblemScaleLesson: Lesson = {
-  id: "dsa-arr-strings",
+  id: "dsa-arr-string-scale",
   slug: "strings-at-problem-scale",
   moduleSlug: "arrays-and-strings",
   title: "Strings at Problem Scale: Frequency & Canonical Form",

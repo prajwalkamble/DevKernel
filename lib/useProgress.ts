@@ -9,9 +9,20 @@ import {
 
 export function useProgress() {
   const [completed, setCompleted] = useState<Set<string>>(new Set());
+  /**
+   * Whether the first read of localStorage has happened.
+   *
+   * Progress lives in a store the server cannot see, so the first render has
+   * to be the empty set on both sides or hydration mismatches. Everything that
+   * only *shades* a value can ignore this; anything that would otherwise show
+   * "you have completed nothing" for one paint before the real number arrives
+   * should wait on it.
+   */
+  const [hydrated, setHydrated] = useState(false);
 
   const refresh = useCallback(() => {
     setCompleted(getCompletedLessonKeys());
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -51,5 +62,5 @@ export function useProgress() {
     [completed]
   );
 
-  return { completed, isComplete, toggle, completedInTrack };
+  return { completed, hydrated, isComplete, toggle, completedInTrack };
 }

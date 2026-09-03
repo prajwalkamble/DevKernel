@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DevKernelMark } from "@/components/brand/DevKernelMark";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { getTrackStats, tracks } from "@/content/tracks";
+import { getTrackStats, tracks } from "@/content/tracks/meta";
 import { HeaderProgress } from "./HeaderProgress";
 import { HeaderNav } from "./HeaderNav";
 

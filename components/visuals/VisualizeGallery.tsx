@@ -57,6 +57,11 @@ const ENTRIES: Entry[] = [
     spec: { id: "g-bits", kind: "bits-and-math", algorithm: "bitops" },
   },
   {
+    id: "greedy", group: "Algorithms", label: "Greedy algorithms",
+    blurb: "Interval scheduling and merging on a Gantt grid, Huffman built from a heap, and coin change run twice — on a system where the rule is optimal and on one where the same rule is wrong. A rejected option stays rejected, which is the difference between greedy and backtracking.",
+    spec: { id: "g-greedy", kind: "greedy", algorithm: "intervals" },
+  },
+  {
     id: "string-matching", group: "Algorithms", label: "String matching",
     blurb: "Naive, KMP and Rabin–Karp on the same text. The whole point of KMP is what happens after a mismatch, and you have to see it slide.",
     spec: { id: "g-string", kind: "string-matching", algorithm: "kmp" },
