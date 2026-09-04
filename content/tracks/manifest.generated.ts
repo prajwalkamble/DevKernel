@@ -1984,7 +1984,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-foundations",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: Foundations",
-        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. In progress: reconstructing the answer rather than its value, and the three costumes one problem wears, are still to come.",
+        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. In progress: a closing lesson on the three costumes one problem wears is still to come.",
         "order": 27,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2034,6 +2034,14 @@ export const trackMetas: TrackMeta[] = [
             "moduleSlug": "dynamic-programming-foundations",
             "title": "Dropping a Dimension",
             "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "reconstructing-the-answer",
+            "moduleSlug": "dynamic-programming-foundations",
+            "title": "Reconstructing the Answer",
+            "estimatedMinutes": 40,
             "status": "available",
             "takeawayCount": 8
           }
