@@ -56,7 +56,7 @@ export default async function TrackPage({ params }: TrackPageProps) {
   const planned = getPlannedLessonCount(track);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-6">
+    <div className="page-shell px-5 py-10 sm:px-6">
       <Link
         href="/curriculum"
         className="mb-6 -ml-1.5 inline-flex min-h-9 items-center gap-1 rounded-md px-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-foreground"

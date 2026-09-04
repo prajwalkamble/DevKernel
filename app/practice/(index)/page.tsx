@@ -15,7 +15,7 @@ export default function PracticePage() {
   const summaries = PROBLEMS.map(toSummary);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-6">
+    <div className="page-shell px-5 py-10 sm:px-6">
       {/* The header earns four lines and no more. Everything a returning visitor
           wants is the list itself, so the reasoning behind the sheet moves into a
           disclosure rather than standing between them and the first problem. */}

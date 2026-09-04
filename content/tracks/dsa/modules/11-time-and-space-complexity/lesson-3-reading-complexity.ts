@@ -141,7 +141,7 @@ that is 11 values, and log2(1024) + 1 = 11
       heading: "The loops that do not look like loops",
       body: [
         "This is where most misreadings happen: a line that costs O(n) sitting inside a loop that runs n times.",
-        "**`x in list` is O(n)`** — it scans. `x in set` and `x in dict` are O(1). Confusing them is the single most common cause of a solution that is accidentally quadratic.",
+        "**`x in list` is O(n)** — it scans. `x in set` and `x in dict` are O(1). Confusing them is the single most common cause of a solution that is accidentally quadratic.",
         "**Slicing copies.** `values[i:]` allocates and copies, so it is O(n − i), not free.",
         "**String concatenation rebuilds.** `s += x` copies the whole string, as the arrays module established.",
         "**`list.insert(0, x)` and `pop(0)` shift** — O(n).",

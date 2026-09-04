@@ -234,7 +234,7 @@ safe rebuild, starting from size 2
   caught: empty name
   size = 2, consistent = 1  <-- untouched`,
           explanation:
-            "**Note that both versions stayed *consistent*** — `names_` and `lengths_` had matching sizes in each case, because the unsafe version happened to push to both before the failure. Consistency is the basic guarantee, and it is not the same as the strong one: the unsafe rebuild still destroyed the original two entries and left one. The safe version's two swaps are the commit, and both are `noexcept`, which is what makes the pair atomic in effect.",
+            "**Note that both versions stayed consistent** — `names_` and `lengths_` had matching sizes in each case, because the unsafe version happened to push to both before the failure. Consistency is the basic guarantee, and it is not the same as the strong one: the unsafe rebuild still destroyed the original two entries and left one. The safe version's two swaps are the commit, and both are `noexcept`, which is what makes the pair atomic in effect.",
         },
       ],
     },

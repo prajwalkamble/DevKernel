@@ -14,7 +14,7 @@ export const heapsModule: ModuleDefinition = {
   slug: "heaps-and-priority-queues",
   title: "Heaps & Priority Queues",
   description:
-    "The structure for \"the smallest thing so far\". A heap makes a much weaker promise than a search tree — a parent beats its children and nothing else is ordered — and that weakness is what buys an O(log n) repair with no rebalancing and an array with no pointers in it. The module starts from the invariant and the index arithmetic, then the two sifts, then the linear-time build that catches people out. In progress: lessons on top-K, the two-heap running median, k-way merge, when bucket sort wins outright, and heap-backed scheduling are still to come.",
+    "The structure for \"the smallest thing so far\". A heap makes a much weaker promise than a search tree — a parent beats its children and nothing else is ordered — and that weakness is what buys an O(log n) repair with no rebalancing and an array with no pointers in it. The module starts from the invariant and the index arithmetic, then the two sifts, then the linear-time build that catches people out. From there it is the uses: top-K, where the heap has to point the wrong way round; two heaps holding a running median between them; k-way merge over more streams than fit in memory; the counting pass that beats a heap outright when the keys are small integers; and the scheduling problems that are a priority queue wearing a hat.",
   order: 25,
   status: "available",
   phase: "Module 1 · Non-linear DSA",

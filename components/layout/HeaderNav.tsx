@@ -18,23 +18,22 @@ import { Menu, X } from "lucide-react";
  * scaled from nothing to full width, so hovering wipes it in and the current
  * section simply starts at full width and stays there.
  *
- * Below `md` the five links become a menu. Measured rather than guessed, and
- * measured twice. The row of links needs 480px, so on a 375px screen it pushed
- * the document 63px wider than the viewport and every page on the site scrolled
- * sideways — which is what moved it behind a breakpoint in the first place.
+ * Below `md` the six links become a menu. Measured rather than guessed, and
+ * measured three times, because the answer moved each time the header did.
+ * The row of links needs about 480px on its own, so behind no breakpoint at
+ * all it pushed a 375px screen 63px wider than the viewport and every page
+ * scrolled sideways. Behind `sm` the last link still ran to 691px inside a
+ * 640px viewport, because the wordmark and the controls share the row — the
+ * same bug moved rather than fixed. `md` is where the whole row fits.
  *
- * `sm` turned out to be the wrong one. The links are only part of the header:
- * the wordmark, the progress bar and the theme toggle are on the same row, and
- * together they need more than 640px. At exactly `sm` the last link ("Playground")
- * ran from 593px to 691px inside a 640px viewport, so every page still scrolled
- * sideways in the band from 640px to about 700px — the same bug as before,
- * moved rather than fixed. At `md` the whole row fits with room to spare.
- *
- * The wordmark still appears at `sm`, so between the two breakpoints the header
- * is wordmark, menu button, progress and toggle. That is the intended layout
- * for that band, not an accident of the two not matching.
+ * It fits with a sixth link now only because the progress bar that used to sit
+ * beside the theme toggle is gone: the dashboard says all of that properly, so
+ * a second, smaller copy of it in the header was one summary too many. Adding
+ * a seventh link would need this measured again — at 768px the row ends at
+ * 696px, so there is about 70px of slack and no more.
  */
 const LINKS = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/roadmap", label: "Roadmap" },
   /* A lesson lives under /learn but is reached through Tracks, so the section
      stays lit while you are reading one. */
@@ -43,18 +42,6 @@ const LINKS = [
   { href: "/visualize", label: "Visualize" },
   { href: "/playground", label: "Playground" },
 ] as const;
-
-/**
- * What the menu carries, which is the five sections plus one.
- *
- * `/dashboard` is your own progress rather than a section of the site, so on a
- * wide screen it hangs off the progress bar in the header — click the bar, see
- * the detail behind it. The row of links has no room for a sixth: five already
- * overran a 640px viewport, and six render 691px wide even at `md`. So the
- * menu, which is a column and has room, is where it appears instead, and it is
- * the only route to it below `sm` where the progress bar is hidden too.
- */
-const MENU_LINKS = [...LINKS, { href: "/dashboard", label: "Dashboard" }] as const;
 
 function isActive(pathname: string, href: string, also: readonly string[] = []) {
   // Prefix matching, but on whole segments: /practice must not light up for a
@@ -140,7 +127,7 @@ export function HeaderNav() {
         className="fixed inset-x-0 top-14 z-40 border-b border-border bg-background shadow-lg md:hidden"
       >
         <nav className="flex flex-col p-2">
-          {MENU_LINKS.map(({ href, label, ...rest }) => {
+          {LINKS.map(({ href, label, ...rest }) => {
             const active = isActive(pathname, href, "also" in rest ? rest.also : []);
             return (
               <Link

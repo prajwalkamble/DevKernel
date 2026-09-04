@@ -88,12 +88,16 @@ Site-wide
 
 Dashboard
 
-- One page at `/dashboard` for which tracks you have started and how far into each one you are: a completion ring, a bar splitting your completed lessons across tracks, a per-track progress bar, and a square per module shaded by how much of it is done.
-- Everything is derived from the lessons you have marked complete. Nothing is inferred, so there is no invented "recent activity" — `localStorage` records which lessons are done and not when, and the page says only what that supports.
-- Every figure is reachable without a mouse. Each bar and square is a button that opens the same detail on focus as on hover, wired with `aria-describedby` and dismissible with Escape.
-- Reached from the progress bar in the header, and from the menu on a narrow screen.
+- An admin-style page at `/dashboard`, in four sections behind a sidebar: Overview, Tracks, Modules and Practice. The section lives in the URL fragment, so a view can be linked to and Back returns to the previous one.
+- Overview leads with a hero figure and a meter, four stat tiles, a stacked bar splitting your completed lessons across tracks, and the next unfinished lesson in the track you are furthest through. Tracks is a sortable, filterable table of all twelve. Modules is one square per module across the curriculum, shaded by how much of it is done. Practice covers the problem set by difficulty and by topic.
+- Every figure derives from what you have marked complete, and nothing is inferred. `localStorage` records *which* lessons and problems are done and not *when*, so there is no activity feed and no "continue where you left off" — the link is labelled "next unfinished", which is what it computes.
+- Charts follow one rule the site's own palette forces: the twelve track colours are brand identities, not a validated categorical palette (C++ against React measures ΔE 4.7 for normal vision), so no figure distinguishes tracks by colour alone. Every bar, segment and cell is labelled in place or sits in a labelled row. The module heatmap uses a single-hue ramp, because its job is magnitude rather than identity.
+- Every number is reachable without a mouse: each bar and square is a button whose tooltip opens on focus as well as hover, wired with `aria-describedby` and dismissible with Escape.
+- Below `lg` the sidebar becomes a drawer with a focus trap, a scroll lock and Escape to close, and a scrollable tab row covers the same sections. Tables drop columns into the row rather than into a horizontal scroller.
 
-- Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page.
+- Light and dark themes with a system default, per-track accent colours, and a route-matched loading skeleton for every page. Every surface follows the theme, including the dashboard's sidebar.
+- One container ladder, `page-shell` and `page-shell-wide` in `app/globals.css`, rather than a max-width chosen per page. Pages used to stop at 896px, so a 2560px monitor showed 35% content and 65% empty; they now grow in steps to 1600px and 1920px, and the card lists on Tracks and Problems go to two columns once there is room. Prose does not grow with them — each page's intro keeps its own `max-w-2xl` and a lesson body its `max-w-3xl`, because a 1600px line is not a readable one.
+- Checked in a real browser at 320, 360, 390, 414, 640, 768, 834, 1024, 1280, 1440, 1920 and 2560 across every route: nothing overflows its container at any of them.
 - Optional analytics through PostHog, proxied same-origin, off entirely when no key is set.
 
 ## How it works
@@ -115,22 +119,22 @@ The figures below are counted from the content tree.
 | Metric | Count |
 | --- | --- |
 | Tracks | 12 |
-| Modules | 72 live of 203 declared |
-| Lessons live | 526 |
+| Modules | 73 live of 203 declared |
+| Lessons live | 534 |
 | Lessons plus published syllabus topics | 1,543 |
-| Sections | 2,344 |
-| Code examples | 1,776 |
-| Verified translations | 1,083 |
-| Embedded visualisations | 67 |
-| Pitfall callouts | 1,074 |
-| Interview questions | 1,850 |
+| Sections | 2,375 |
+| Code examples | 1,800 |
+| Verified translations | 1,227 |
+| Embedded visualisations | 75 |
+| Pitfall callouts | 1,111 |
+| Interview questions | 1,874 |
 | Practice problems | 18, with 116 test cases and 40 approaches |
 
 The tracks, with live modules against declared modules:
 
 | Track | Slug | Mode | Modules | Lessons live |
 | --- | --- | --- | --- | --- |
-| Data Structures and Algorithms | `dsa` | learn | 26 / 37 | 208 |
+| Data Structures and Algorithms | `dsa` | learn | 27 / 37 | 216 |
 | System Design | `system-design` | learn | 0 / 29 | 0 |
 | JavaScript and TypeScript | `js-ts` | learn | 12 / 12 | 73 |
 | React | `react` | learn | 15 / 15 | 115 |
@@ -194,6 +198,7 @@ That runs Next.js type generation, `tsc --noEmit`, ESLint, and the visualisation
 | `npm run manifest` | Regenerates `content/tracks/manifest.generated.ts` from the curriculum. Run it after changing content. |
 | `npm run verify:manifest` | Fails when that manifest and the curriculum disagree. |
 | `npm run verify:ids` | Fails when two tracks, modules or lessons claim the same id, or two sections or examples do inside one parent. |
+| `npm run verify:prose` | Fails when a lesson string's inline markup would not render as written — an unclosed code span, or asterisks that pair across unrelated words. |
 | `npm run verify:frames` | Runs every visualisation generator and checks the frames. |
 | `npm run verify:code` | Compiles and runs every lesson example. Accepts an optional track and module to narrow it. |
 | `npm run verify:visuals` | Drives a real browser and checks that playback advances. Needs a server already running. |

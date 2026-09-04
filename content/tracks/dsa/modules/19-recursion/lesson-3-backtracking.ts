@@ -20,7 +20,7 @@ export const backtrackingLesson: Lesson = {
       id: "the-template",
       heading: "The template",
       body: [
-        "*If the current path is a complete answer, record it. Otherwise, for each available choice: **choose** it, **explore** by recursing, then **un-choose** it.*",
+        "If the current path is a complete answer, record it. Otherwise, for each available choice: **choose** it, **explore** by recursing, then **un-choose** it.",
         "The un-choose is the whole idea. You are walking a decision tree with a single mutable `path`, and when a branch is exhausted the path must be restored to what it was before that branch started — otherwise the next sibling branch inherits state from the previous one.",
         "That is why it is called backtracking: you go forward, and then you *undo*, deliberately.",
       ],
