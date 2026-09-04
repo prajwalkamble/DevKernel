@@ -1984,7 +1984,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-foundations",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: Foundations",
-        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. In progress: top-down against bottom-up, dropping a dimension, and reconstructing the answer rather than its value are still to come.",
+        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. In progress: dropping a dimension, and reconstructing the answer rather than its value are still to come.",
         "order": 27,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2017,6 +2017,14 @@ export const trackMetas: TrackMeta[] = [
             "slug": "the-recurrence-and-its-base-cases",
             "moduleSlug": "dynamic-programming-foundations",
             "title": "The Recurrence and Its Base Cases",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "top-down-against-bottom-up",
+            "moduleSlug": "dynamic-programming-foundations",
+            "title": "Top-Down Against Bottom-Up",
             "estimatedMinutes": 40,
             "status": "available",
             "takeawayCount": 8
