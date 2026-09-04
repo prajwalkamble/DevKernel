@@ -87,7 +87,7 @@ while computing fib(20), how many times each value is asked for:
 calls to fib(k) equals fib(20-k+1), for every k from 1 to 20: yes
 total calls for fib(20) is 21891, and 2*fib(21)-1 is 21891`,
           explanation:
-            "The recursion is the ordinary one; the only addition is a counter per argument. `distinct` is how many different questions were ever asked, and `calls each` is how many times each was asked on average. The last two lines check a claim rather than stating it: the number of calls to fib(k) inside fib(n) is fib(n-k+1), so the total is 2*fib(n+1)-1 and the cost of the recursion grows exactly as fast as its answer.",
+            "The recursion is the ordinary one; the only addition is a counter per argument. `distinct` is how many different questions were ever asked, and `calls each` is how many times each was asked on average. The last two lines check a claim rather than stating it: the number of calls to fib(k) inside fib(n) is fib(n-k+1), so the total is `2*fib(n+1)-1` and the cost of the recursion grows exactly as fast as its answer.",
           alternates: [
             {
               lang: "javascript",
@@ -2505,7 +2505,7 @@ func main() {
     "Dynamic programming is a diagnosis about a recursion you already wrote, not a technique you apply from the start.",
     "The two preconditions are overlapping subproblems and optimal substructure, and each is useless without the other.",
     "Overlap is measurable: count distinct argument tuples against total calls, and the ratio is roughly the speedup available.",
-    "Naive fib(n) makes 2*fib(n+1)-1 calls, so an exponential recursion over about n distinct states costs as much as its own answer.",
+    "Naive fib(n) makes `2*fib(n+1)-1` calls, so an exponential recursion over about n distinct states costs as much as its own answer.",
     "Optimal substructure fails when a sub-answer forgets something the level above needs \u2014 for longest simple path, which vertices it used.",
     "It is a property of the state you chose, not of the problem: enlarging the state can restore it, at the price of more states.",
     "Optimal substructure without overlap is divide and conquer, and memoising it takes zero cache hits.",
