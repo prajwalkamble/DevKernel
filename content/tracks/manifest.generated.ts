@@ -1834,7 +1834,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "heaps-and-priority-queues",
         "trackSlug": "dsa",
         "title": "Heaps & Priority Queues",
-        "description": "The structure for \"the smallest thing so far\". A heap makes a much weaker promise than a search tree — a parent beats its children and nothing else is ordered — and that weakness is what buys an O(log n) repair with no rebalancing and an array with no pointers in it. The module starts from the invariant and the index arithmetic, then the two sifts, then the linear-time build that catches people out. In progress: lessons on top-K, the two-heap running median, k-way merge, when bucket sort wins outright, and heap-backed scheduling are still to come.",
+        "description": "The structure for \"the smallest thing so far\". A heap makes a much weaker promise than a search tree — a parent beats its children and nothing else is ordered — and that weakness is what buys an O(log n) repair with no rebalancing and an array with no pointers in it. The module starts from the invariant and the index arithmetic, then the two sifts, then the linear-time build that catches people out. From there it is the uses: top-K, where the heap has to point the wrong way round; two heaps holding a running median between them; k-way merge over more streams than fit in memory; the counting pass that beats a heap outright when the keys are small integers; and the scheduling problems that are a priority queue wearing a hat.",
         "order": 25,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -1984,17 +1984,17 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-foundations",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: Foundations",
-        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. Memoisation before tabulation, always.",
+        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. In progress: the mechanical route from brute force to memoisation, defining the state, the recurrence and its base cases, top-down against bottom-up, dropping a dimension, and reconstructing the answer rather than its value are still to come.",
         "order": 27,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "the-two-preconditions",
             "moduleSlug": "dynamic-programming-foundations",
-            "title": "Dynamic Programming: Foundations — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "The Two Preconditions",
+            "estimatedMinutes": 35,
+            "status": "available",
             "takeawayCount": 8
           }
         ]

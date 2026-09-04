@@ -26,6 +26,7 @@ import { stacksAndQueuesModule } from "./modules/23-stacks-and-queues";
 import { treesModule } from "./modules/24-trees";
 import { heapsModule } from "./modules/25-heaps";
 import { greedyModule } from "./modules/26-greedy-algorithms";
+import { dpFoundationsModule } from "./modules/27-dynamic-programming-foundations";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -166,25 +167,7 @@ export const dsaTrack: TrackDefinition = {
       ],
     }),
     greedyModule,
-    createComingSoonModule({
-      id: "dsa-dp-foundations",
-      slug: "dynamic-programming-foundations",
-      title: "Dynamic Programming: Foundations",
-      order: 27,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. Memoisation before tabulation, always.",
-      topics: [
-        "Overlapping subproblems and optimal substructure — the two preconditions",
-        "From brute-force recursion to memoisation, mechanically",
-        "Defining the state, and saying what dp[i] means in one English sentence",
-        "Writing the recurrence, and the base cases that anchor it",
-        "Top-down against bottom-up, and converting between them",
-        "Space optimisation: dropping a dimension from the table",
-        "Reconstructing the answer, not just its value",
-        "Fibonacci, climbing stairs and house robber: one problem, three costumes",
-      ],
-    }),
+    dpFoundationsModule,
     createComingSoonModule({
       id: "dsa-dp-patterns",
       slug: "dynamic-programming-patterns",
