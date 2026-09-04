@@ -149,7 +149,7 @@ Aborted                          # exit status 134
 # and with -DNDEBUG the assert vanishes entirely, so this becomes
 # an integer division by zero -- undefined behaviour, not a clean abort.`,
           explanation:
-            "**The message appears in the diagnostic**, which is the entire reason for the `&&` idiom — `Assertion \\`b != 0'` alone tells you far less. Note the comment at the bottom: with `NDEBUG` the check is gone and `1 / 0` is undefined behaviour rather than a clean failure. **An assertion is a debugging aid, not a safety net**, and anything that must hold in production needs a real check.",
+            "**The message appears in the diagnostic**, which is the entire reason for the `&&` idiom — an assertion naming only `b != 0` tells you far less. Note the comment at the bottom: with `NDEBUG` the check is gone and `1 / 0` is undefined behaviour rather than a clean failure. **An assertion is a debugging aid, not a safety net**, and anything that must hold in production needs a real check.",
         },
       ],
       pitfalls: [

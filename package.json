@@ -17,7 +17,8 @@
     "verify:manifest": "tsx scripts/generate-track-manifest.ts --check",
     "verify:code": "node scripts/verify-lesson-code.mjs",
     "verify:ids": "tsx scripts/verify-content-ids.ts",
-    "verify": "next typegen && tsc --noEmit && eslint . && npm run verify:manifest && npm run verify:ids && npm run verify:frames",
+    "verify:prose": "tsx scripts/verify-prose.ts",
+    "verify": "next typegen && tsc --noEmit && eslint . && npm run verify:manifest && npm run verify:ids && npm run verify:prose && npm run verify:frames",
     "verify:frames": "tsx scripts/verify-visual-frames.ts",
     "verify:visuals": "node scripts/verify-visual-playback.mjs"
   },

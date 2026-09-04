@@ -20,7 +20,7 @@ export const futuresLesson: Lesson = {
       id: "the-model",
       heading: "Results, not threads",
       body: [
-        "Everything so far has been about managing threads. **Futures are about managing *results*** — you say what you want computed, and get an object representing the answer that will exist later.",
+        "Everything so far has been about managing threads. **Futures are about managing results** — you say what you want computed, and get an object representing the answer that will exist later.",
         "The pair is a **shared state** with two handles. A **`std::promise`** is the writing end; a **`std::future`** is the reading end. One value is transferred, once.",
         "**`future::get()` blocks until the value is ready, then returns it — and may only be called once.** It *moves* the value out, leaving the future invalid, which is why a second `get()` throws `std::future_error`. When several parties need the answer, use `shared_future`.",
         "**Exceptions cross the boundary.** If the producing code throws, the exception is captured with `std::current_exception` and rethrown from `get()` in the consuming thread. That is a genuinely valuable property: with a raw `std::thread`, an escaping exception calls `std::terminate` and there is nothing you can do about it, so futures are the only standard way to propagate a failure out of a worker.",

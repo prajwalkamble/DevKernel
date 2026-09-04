@@ -55,7 +55,7 @@ export const valueCategoriesLesson: Lesson = {
             make().member      member of a temporary
             f()  where f returns T&&`,
           explanation:
-            "**The two umbrella terms exist for the two questions.** *glvalue* = has identity (lvalue or xvalue). ***rvalue* = movable (prvalue or xvalue)** — and that is the one that matters, because `T&&` binds to rvalues, meaning \"either a temporary, or something you explicitly said you were finished with\". The historical names come from assignment: **l**eft-hand side and **r**ight-hand side. That mnemonic is no longer accurate — `const int x` is an lvalue you cannot assign to — but it explains the letters.",
+            "**The two umbrella terms exist for the two questions.** *glvalue* = has identity (lvalue or xvalue). *rvalue* = movable (prvalue or xvalue) — and that is the one that matters, because `T&&` binds to rvalues, meaning \"either a temporary, or something you explicitly said you were finished with\". The historical names come from assignment: **l**eft-hand side and **r**ight-hand side. That mnemonic is no longer accurate — `const int x` is an lvalue you cannot assign to — but it explains the letters.",
         },
       ],
     },

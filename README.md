@@ -198,6 +198,7 @@ That runs Next.js type generation, `tsc --noEmit`, ESLint, and the visualisation
 | `npm run manifest` | Regenerates `content/tracks/manifest.generated.ts` from the curriculum. Run it after changing content. |
 | `npm run verify:manifest` | Fails when that manifest and the curriculum disagree. |
 | `npm run verify:ids` | Fails when two tracks, modules or lessons claim the same id, or two sections or examples do inside one parent. |
+| `npm run verify:prose` | Fails when a lesson string's inline markup would not render as written — an unclosed code span, or asterisks that pair across unrelated words. |
 | `npm run verify:frames` | Runs every visualisation generator and checks the frames. |
 | `npm run verify:code` | Compiles and runs every lesson example. Accepts an optional track and module to narrow it. |
 | `npm run verify:visuals` | Drives a real browser and checks that playback advances. Needs a server already running. |

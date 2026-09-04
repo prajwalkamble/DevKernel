@@ -238,7 +238,7 @@ emoji as u32: 129408
   ],
   takeaways: [
     "`i32` is the default integer, `f64` the default float, and `usize` is the type of every length and index",
-    "Integer overflow panics in debug builds and wraps in release builds — never rely on either; use checked_*, saturating_* or wrapping_* when it matters",
+    "Integer overflow panics in debug builds and wraps in release builds — never rely on either; use `checked_*`, `saturating_*` or `wrapping_*` when it matters",
     "`items.len() - 1` on an empty collection is the classic unsigned-underflow bug",
     "Floats are IEEE 754 with all the usual consequences; `0.1 + 0.2 != 0.3`, and floats cannot be sorted with plain `sort` because of NaN",
     "There is no truthiness and no implicit numeric conversion anywhere in the language",
