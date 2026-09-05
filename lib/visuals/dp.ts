@@ -240,6 +240,67 @@ export function coinChange(coins = [1, 3, 4], amount = 6): Visualisation {
   };
 }
 
+/* ------------------------------------------------------------- grid paths -- */
+
+/**
+ * Counting right/down paths through a grid with a wall in it.
+ *
+ * The point the picture makes that the prose cannot: each cell is the sum of
+ * exactly two neighbours, so the wall's zero propagates down and right through
+ * everything that would have gone through it. On an open grid the answer is a
+ * binomial coefficient and no table is needed; one wall and the closed form is
+ * gone while the table has not changed at all.
+ */
+export function gridPaths(grid = ["....", "..#.", "....", "...."]): Visualisation {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const rec = new Recorder<MatrixFrame>();
+  const dp: number[][] = Array.from({ length: rows }, () => new Array(cols).fill(0));
+  const seen: boolean[][] = Array.from({ length: rows }, () => new Array(cols).fill(false));
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: dp.map((row, i) =>
+        row.map((v, j) => (grid[i][j] === "#" ? "#" : seen[i][j] ? String(v) : ""))
+      ),
+      roles,
+      rowLabels: grid.map((_, i) => String(i)),
+      colLabels: grid[0].split("").map((_, j) => String(j)),
+      note,
+    });
+
+  emit({}, `Right/down paths across a ${rows} by ${cols} grid with one wall. Blank cells are not computed yet.`);
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      seen[i][j] = true;
+      if (grid[i][j] === "#") {
+        emit({ [cellKey(i, j)]: "discarded" }, `(${i}, ${j}) is a wall: no path goes through it.`);
+        continue;
+      }
+      if (i === 0 && j === 0) {
+        dp[i][j] = 1;
+        emit({ [cellKey(i, j)]: "found" }, "The start is reached one way: by already being there.");
+        continue;
+      }
+      const above = i > 0 ? dp[i - 1][j] : 0;
+      const left = j > 0 ? dp[i][j - 1] : 0;
+      rec.bump("comparisons");
+      dp[i][j] = above + left;
+      const roles: Record<string, Role> = { [cellKey(i, j)]: "swap" };
+      if (i > 0) roles[cellKey(i - 1, j)] = "compare";
+      if (j > 0) roles[cellKey(i, j - 1)] = "compare";
+      emit(roles, `(${i}, ${j}) is entered from above (${above}) or from the left (${left}): ${dp[i][j]}.`);
+    }
+  }
+  emit({ [cellKey(rows - 1, cols - 1)]: "found" },
+    `${dp[rows - 1][cols - 1]} paths. Without the wall it would be the binomial coefficient C(${rows + cols - 2}, ${rows - 1}).`);
+  return {
+    frames: rec.frames,
+    summary:
+      "Every cell is the sum of the one above and the one to its left, because those are the only two cells a right/down path can arrive from. A wall contributes zero, and that zero spreads through everything downstream of it — which is exactly why the open-grid closed form stops applying the moment one cell is blocked.",
+  };
+}
+
 /* ------------------------------------------- longest increasing subsequence -- */
 
 /**
@@ -310,6 +371,7 @@ export const DP_ALGOS = {
   edit: { label: "Edit distance", run: () => editDistance() },
   knapsack: { label: "0/1 knapsack", run: () => knapsack() },
   coins: { label: "Coin change", run: () => coinChange() },
+  paths: { label: "Grid paths with a wall", run: () => gridPaths() },
   lis: { label: "Longest increasing subsequence", run: () => longestIncreasingSubsequence() },
 } as const;
 
