@@ -28,6 +28,7 @@ import { heapsModule } from "./modules/25-heaps";
 import { greedyModule } from "./modules/26-greedy-algorithms";
 import { dpFoundationsModule } from "./modules/27-dynamic-programming-foundations";
 import { dpPatternsModule } from "./modules/28-dynamic-programming-patterns";
+import { graphsModule } from "./modules/29-graphs";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -129,25 +130,7 @@ export const dsaTrack: TrackDefinition = {
     recursionModule,
     treesModule,
     heapsModule,
-    createComingSoonModule({
-      id: "dsa-graphs",
-      slug: "graphs",
-      title: "Graphs: Modelling, BFS & DFS",
-      order: 29,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything.",
-      topics: [
-        "Modelling a problem as a graph — the actual hard part",
-        "Adjacency list against adjacency matrix, and when each wins",
-        "Directed, undirected, weighted, cyclic: the vocabulary",
-        "Depth-first search, and what the recursion stack is telling you",
-        "Breadth-first search, and why it gives shortest paths on unweighted graphs",
-        "Marking visited on enqueue, and what goes wrong if you do not",
-        "Connected components, and flood fill on a grid",
-        "Cycle detection, in directed and undirected graphs",
-      ],
-    }),
+    graphsModule,
     createComingSoonModule({
       id: "dsa-graph-algorithms",
       slug: "graph-algorithms",

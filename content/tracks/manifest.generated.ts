@@ -2134,17 +2134,17 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graphs",
         "trackSlug": "dsa",
         "title": "Graphs: Modelling, BFS & DFS",
-        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything.",
+        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything — but the traversals are the easy part, so this module starts where the difficulty actually is: deciding what a node is. In progress: representations, the vocabulary, the two traversals, the visited-set discipline, components and flood fill, and cycle detection are still to come.",
         "order": 29,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "modelling-a-problem-as-a-graph",
             "moduleSlug": "graphs",
-            "title": "Graphs: Modelling, BFS & DFS — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Modelling a Problem as a Graph",
+            "estimatedMinutes": 45,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
