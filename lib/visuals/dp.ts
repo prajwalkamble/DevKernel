@@ -240,12 +240,77 @@ export function coinChange(coins = [1, 3, 4], amount = 6): Visualisation {
   };
 }
 
+/* ------------------------------------------- longest increasing subsequence -- */
+
+/**
+ * The patience method, shown as the tails array being overwritten.
+ *
+ * Two rows on purpose. The top row is the input being consumed left to right;
+ * the bottom is `tails`, whose length is the answer and whose *contents* are
+ * not always a subsequence of the input. This default input is the case where
+ * that goes wrong visibly: the final 1 overwrites the first tail at the very
+ * end, leaving [1, 3, 4, 5] — an array that could never have been read off
+ * [2, 6, 8, 3, 4, 5, 1] in order.
+ */
+export function longestIncreasingSubsequence(values = [2, 6, 8, 3, 4, 5, 1]): Visualisation {
+  const rec = new Recorder<MatrixFrame>();
+  const tails: number[] = [];
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: [
+        values.map(String),
+        values.map((_, i) => (i < tails.length ? String(tails[i]) : "")),
+      ],
+      roles,
+      rowLabels: ["input", "tails"],
+      colLabels: values.map((_, i) => String(i)),
+      note,
+    });
+
+  emit({}, `Longest strictly increasing subsequence of ${values.join(", ")}. The tails row starts empty.`);
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    // The first tail not below `value`: replacing it keeps every length still
+    // reachable and lowers the bar for the next element.
+    let lo = 0;
+    let hi = tails.length;
+    while (lo < hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      rec.bump("comparisons");
+      if (tails[mid] < value) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo === tails.length) {
+      tails.push(value);
+      emit({ [cellKey(0, i)]: "active", [cellKey(1, lo)]: "swap" },
+        `${value} is above every tail, so it extends the best run: length ${tails.length}.`);
+    } else {
+      const replaced = tails[lo];
+      tails[lo] = value;
+      emit({ [cellKey(0, i)]: "active", [cellKey(1, lo)]: "swap" },
+        `${value} replaces ${replaced} as the smallest ending for a run of ${lo + 1}. The length does not change.`);
+    }
+  }
+  const last = values.length - 1;
+  emit(
+    Object.fromEntries(tails.map((_, i) => [cellKey(1, i), "found" as Role])),
+    `Length ${tails.length}, from ${last + 1} elements. Read the length, not the contents — the final ${values[last]} overwrote a tail after everything it would have to precede.`
+  );
+  return {
+    frames: rec.frames,
+    summary:
+      "Each value either extends the tails array or overwrites the first tail not below it, found by binary search — O(n log n) rather than the quadratic table. What the array holds is the smallest possible ending value for a run of each length, which is why its *length* is the answer while its contents need not form a real subsequence of the input.",
+  };
+}
+
 export const DP_ALGOS = {
   fibonacci: { label: "Fibonacci (memoised)", run: () => fibonacciMemo() },
   lcs: { label: "Longest common subsequence", run: () => longestCommonSubsequence() },
   edit: { label: "Edit distance", run: () => editDistance() },
   knapsack: { label: "0/1 knapsack", run: () => knapsack() },
   coins: { label: "Coin change", run: () => coinChange() },
+  lis: { label: "Longest increasing subsequence", run: () => longestIncreasingSubsequence() },
 } as const;
 
 export type DpAlgoName = keyof typeof DP_ALGOS;
