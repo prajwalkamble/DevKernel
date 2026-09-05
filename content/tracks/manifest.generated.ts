@@ -2059,7 +2059,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-patterns",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: The Patterns",
-        "description": "The catalogue, and the module that converts \"I understood the solution\" into \"I found the solution\". Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. In progress: the string-pair family, longest increasing subsequence, grids, intervals, trees, and the bitmask and digit variants are still to come.",
+        "description": "The catalogue, and the module that converts \"I understood the solution\" into \"I found the solution\". Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. In progress: longest increasing subsequence, grids, intervals, trees, and the bitmask and digit variants are still to come.",
         "order": 28,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2077,6 +2077,14 @@ export const trackMetas: TrackMeta[] = [
             "moduleSlug": "dynamic-programming-patterns",
             "title": "Subset Sum and Its Reductions",
             "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "the-string-pair-grid",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "The String-Pair Grid",
+            "estimatedMinutes": 45,
             "status": "available",
             "takeawayCount": 8
           }
