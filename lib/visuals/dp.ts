@@ -240,6 +240,68 @@ export function coinChange(coins = [1, 3, 4], amount = 6): Visualisation {
   };
 }
 
+/* --------------------------------------------------------------- intervals -- */
+
+/**
+ * An interval table filling by increasing length, along its diagonals.
+ *
+ * This is the picture that makes interval DP's fill order obvious, and it is
+ * the one thing prose keeps failing to convey: the table fills diagonal by
+ * diagonal from the main diagonal outwards, never row by row, because
+ * dp[i][j] reads dp[i+1][j-1] and dp[i+1][j] — cells on a *later* row. A
+ * row-major sweep would read those before they exist, and they would be zero
+ * rather than missing.
+ */
+export function intervalTable(text = "bbbab"): Visualisation {
+  const n = text.length;
+  const rec = new Recorder<MatrixFrame>();
+  const dp: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+  const seen: boolean[][] = Array.from({ length: n }, () => new Array(n).fill(false));
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: dp.map((row, i) => row.map((v, j) => (j < i ? "" : seen[i][j] ? String(v) : "·"))),
+      roles,
+      rowLabels: text.split(""),
+      colLabels: text.split(""),
+      note,
+    });
+
+  emit({}, `Longest palindromic subsequence of "${text}". Cells below the diagonal are never used.`);
+  for (let i = 0; i < n; i++) {
+    dp[i][i] = 1;
+    seen[i][i] = true;
+  }
+  emit(Object.fromEntries(text.split("").map((_, i) => [cellKey(i, i), "sorted" as Role])),
+    "The main diagonal is every one-character interval, and each is a palindrome of length 1.");
+
+  for (let length = 2; length <= n; length++) {
+    for (let i = 0; i + length <= n; i++) {
+      const j = i + length - 1;
+      seen[i][j] = true;
+      rec.bump("comparisons");
+      if (text[i] === text[j]) {
+        const inner = i + 1 <= j - 1 ? dp[i + 1][j - 1] : 0;
+        dp[i][j] = inner + 2;
+        const roles: Record<string, Role> = { [cellKey(i, j)]: "swap" };
+        if (i + 1 <= j - 1) roles[cellKey(i + 1, j - 1)] = "compare";
+        emit(roles, `'${text[i]}' matches '${text[j]}': the inner interval's ${inner}, plus the two ends.`);
+      } else {
+        dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+        emit({ [cellKey(i, j)]: "swap", [cellKey(i + 1, j)]: "compare", [cellKey(i, j - 1)]: "compare" },
+          `'${text[i]}' and '${text[j]}' differ: drop one end or the other, and keep the better of ${dp[i + 1][j]} and ${dp[i][j - 1]}.`);
+      }
+    }
+  }
+  emit({ [cellKey(0, n - 1)]: "found" },
+    `The whole string is the last diagonal: ${dp[0][n - 1]}. Every cell it needed sits below and to its left.`);
+  return {
+    frames: rec.frames,
+    summary:
+      "The table fills diagonal by diagonal, shortest intervals first, because a cell reads the interval one shorter on each side and the one two shorter in the middle. A row-major sweep would read the row below before writing it — and those cells hold zero, which is a plausible enough answer that nothing complains.",
+  };
+}
+
 /* ------------------------------------------------------------- grid paths -- */
 
 /**
@@ -371,6 +433,7 @@ export const DP_ALGOS = {
   edit: { label: "Edit distance", run: () => editDistance() },
   knapsack: { label: "0/1 knapsack", run: () => knapsack() },
   coins: { label: "Coin change", run: () => coinChange() },
+  interval: { label: "Interval table, filled diagonally", run: () => intervalTable() },
   paths: { label: "Grid paths with a wall", run: () => gridPaths() },
   lis: { label: "Longest increasing subsequence", run: () => longestIncreasingSubsequence() },
 } as const;
