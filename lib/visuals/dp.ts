@@ -240,6 +240,61 @@ export function coinChange(coins = [1, 3, 4], amount = 6): Visualisation {
   };
 }
 
+/* ------------------------------------------------------------------- trees -- */
+
+/**
+ * Tree DP as the table it really is: two numbers per node, folded upwards.
+ *
+ * Maximum-weight independent set. The tree is a parent array with
+ * `parent[i] < i`, so walking the nodes from last to first visits every child
+ * before its parent — which is a post-order without a stack, and makes the
+ * "table" a pair of rows indexed by node. Two rows and not one, because the
+ * parent needs to know whether the child was used, and a single best-per-node
+ * cannot say.
+ */
+export function treeIndependentSet(
+  parent = [-1, 0, 1, 1, 0], weight = [4, 1, 2, 2, 4]
+): Visualisation {
+  const n = parent.length;
+  const rec = new Recorder<MatrixFrame>();
+  const take = [...weight];
+  const skip = new Array(n).fill(0);
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: [
+        parent.map((p) => (p < 0 ? "root" : String(p))),
+        take.map(String),
+        skip.map(String),
+      ],
+      roles,
+      rowLabels: ["parent", "take", "skip"],
+      colLabels: parent.map((_, i) => String(i)),
+      note,
+    });
+
+  emit({}, `Weights ${weight.join(", ")}. Each node starts as if it were alone: take is its own weight, skip is nothing.`);
+  for (let v = n - 1; v > 0; v--) {
+    const p = parent[v];
+    const best = Math.max(take[v], skip[v]);
+    rec.bump("comparisons");
+    take[p] += skip[v];
+    skip[p] += best;
+    emit(
+      { [cellKey(1, p)]: "swap", [cellKey(2, p)]: "swap", [cellKey(1, v)]: "compare", [cellKey(2, v)]: "compare" },
+      `Fold ${v} into ${p}. Taking ${p} forbids ${v}, so it gains skip[${v}] = ${skip[v]}; skipping ${p} leaves ${v} free, so it gains the better of the two, ${best}.`
+    );
+  }
+  const answer = Math.max(take[0], skip[0]);
+  emit({ [cellKey(take[0] >= skip[0] ? 1 : 2, 0)]: "found" },
+    `Every child is folded in. The answer is the better of the root's two numbers: ${answer}.`);
+  return {
+    frames: rec.frames,
+    summary:
+      "Two numbers per node, not one: the best with this node taken, and the best with it skipped. A child folds into its parent by contributing its *skip* value to the parent's take, and the better of its two to the parent's skip. Collapsing that to a single best-per-node loses exactly the fact the parent needs.",
+  };
+}
+
 /* --------------------------------------------------------------- intervals -- */
 
 /**
@@ -433,6 +488,7 @@ export const DP_ALGOS = {
   edit: { label: "Edit distance", run: () => editDistance() },
   knapsack: { label: "0/1 knapsack", run: () => knapsack() },
   coins: { label: "Coin change", run: () => coinChange() },
+  tree: { label: "Tree DP, folded upwards", run: () => treeIndependentSet() },
   interval: { label: "Interval table, filled diagonally", run: () => intervalTable() },
   paths: { label: "Grid paths with a wall", run: () => gridPaths() },
   lis: { label: "Longest increasing subsequence", run: () => longestIncreasingSubsequence() },
