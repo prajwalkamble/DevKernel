@@ -240,6 +240,73 @@ export function coinChange(coins = [1, 3, 4], amount = 6): Visualisation {
   };
 }
 
+/* --------------------------------------------------------------- bitmasks -- */
+
+/**
+ * A bitmask table, filled in numeric order.
+ *
+ * Rows are the position you are standing on, columns are the subset already
+ * visited, read as bits. The fill order is plain numeric order over the masks,
+ * and the reason that works is worth seeing rather than being told: adding an
+ * element only ever makes the integer larger, so every state a cell depends on
+ * has a strictly smaller mask and is already done.
+ */
+export function bitmaskTour(
+  dist = [[0, 4, 1, 9], [4, 0, 2, 6], [1, 2, 0, 3], [9, 6, 3, 0]]
+): Visualisation {
+  const n = dist.length;
+  const rec = new Recorder<MatrixFrame>();
+  const INF = Infinity;
+  const dp: number[][] = Array.from({ length: n }, () => new Array(1 << n).fill(INF));
+  dp[0][1] = 0;
+  const bits = (mask: number) => mask.toString(2).padStart(n, "0");
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: dp.map((row) => row.map((v) => (v === INF ? "" : String(v)))),
+      roles,
+      rowLabels: dp.map((_, i) => `at ${i}`),
+      colLabels: Array.from({ length: 1 << n }, (_, m) => bits(m)),
+      note,
+    });
+
+  emit({ [cellKey(0, 1)]: "sorted" },
+    `${n} cities. Columns are the set visited so far, in binary; rows are where you are standing. Only "at 0, visited {0}" costs nothing.`);
+  for (let mask = 0; mask < 1 << n; mask++) {
+    if (!(mask & 1)) continue;
+    for (let last = 0; last < n; last++) {
+      if (dp[last][mask] === INF) continue;
+      for (let next = 0; next < n; next++) {
+        if ((mask >> next) & 1) continue;
+        rec.bump("comparisons");
+        const grown = mask | (1 << next);
+        const step = dp[last][mask] + dist[last][next];
+        if (step < dp[next][grown]) {
+          dp[next][grown] = step;
+          emit({ [cellKey(next, grown)]: "swap", [cellKey(last, mask)]: "compare" },
+            `From ${last} with ${bits(mask)} visited, step to ${next} for ${dist[last][next]}: ${bits(grown)} reachable at ${step}.`);
+        }
+      }
+    }
+  }
+  const full = (1 << n) - 1;
+  let best = INF;
+  let home = 0;
+  for (let last = 0; last < n; last++) {
+    if (dp[last][full] + dist[last][0] < best) {
+      best = dp[last][full] + dist[last][0];
+      home = last;
+    }
+  }
+  emit({ [cellKey(home, full)]: "found" },
+    `All visited. The cheapest finish is at ${home} for ${dp[home][full]}, plus ${dist[home][0]} to get home: ${best}.`);
+  return {
+    frames: rec.frames,
+    summary:
+      "The state is a set and a position — the set alone cannot price the next edge, because that depends on where you are standing. Filling in numeric order over the masks is a valid topological order for free: adding a city only ever makes the integer larger, so every cell a state reads has a smaller mask and is already written.",
+  };
+}
+
 /* ------------------------------------------------------------------- trees -- */
 
 /**
@@ -488,6 +555,7 @@ export const DP_ALGOS = {
   edit: { label: "Edit distance", run: () => editDistance() },
   knapsack: { label: "0/1 knapsack", run: () => knapsack() },
   coins: { label: "Coin change", run: () => coinChange() },
+  bitmask: { label: "Bitmask tour, filled by mask", run: () => bitmaskTour() },
   tree: { label: "Tree DP, folded upwards", run: () => treeIndependentSet() },
   interval: { label: "Interval table, filled diagonally", run: () => intervalTable() },
   paths: { label: "Grid paths with a wall", run: () => gridPaths() },

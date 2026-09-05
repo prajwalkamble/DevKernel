@@ -2059,7 +2059,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-patterns",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: The Patterns",
-        "description": "The catalogue, and the module that converts \"I understood the solution\" into \"I found the solution\". Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. In progress: the bitmask, digit and state-machine variants are still to come.",
+        "description": "The catalogue, and the module that converts \"I understood the solution\" into \"I found the solution\". Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. Eight lessons: the knapsack family and subset sum, the string-pair grid, longest increasing subsequence, grids, intervals, trees and rerooting, and the bitmask, digit and state-machine variants.",
         "order": 28,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2116,6 +2116,14 @@ export const trackMetas: TrackMeta[] = [
             "slug": "dp-on-trees",
             "moduleSlug": "dynamic-programming-patterns",
             "title": "DP on Trees, and Rerooting",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 9
+          },
+          {
+            "slug": "bitmask-digit-and-state-machines",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "Bitmask, Digit and State-Machine DP",
             "estimatedMinutes": 45,
             "status": "available",
             "takeawayCount": 9
