@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Clock, Layers, Trophy } from "lucide-react";
 import clsx from "clsx";
-import { lessonHref, trackHref } from "@/content/tracks/href";
+import { lessonHref } from "@/content/tracks/href";
 import { TRACK_BADGE_CLASS } from "@/lib/trackTheme";
 import { Tooltip } from "../Tooltip";
 import {
@@ -255,7 +255,7 @@ export function OverviewView({
           <div className="p-3">
             <Empty>
               No track started yet.{" "}
-              <Link href={trackHref("dsa")} className="text-accent hover:underline">
+              <Link href="/curriculum" className="text-accent hover:underline">
                 Browse the curriculum
               </Link>{" "}
               to pick one.
