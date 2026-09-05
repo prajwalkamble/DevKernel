@@ -27,6 +27,7 @@ import { treesModule } from "./modules/24-trees";
 import { heapsModule } from "./modules/25-heaps";
 import { greedyModule } from "./modules/26-greedy-algorithms";
 import { dpFoundationsModule } from "./modules/27-dynamic-programming-foundations";
+import { dpPatternsModule } from "./modules/28-dynamic-programming-patterns";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -168,25 +169,7 @@ export const dsaTrack: TrackDefinition = {
     }),
     greedyModule,
     dpFoundationsModule,
-    createComingSoonModule({
-      id: "dsa-dp-patterns",
-      slug: "dynamic-programming-patterns",
-      title: "Dynamic Programming: The Patterns",
-      order: 28,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "The catalogue. Nine recognisable shapes covering the overwhelming majority of DP problems — the module that converts \"I understood the solution\" into \"I found the solution\".",
-      topics: [
-        "0/1 knapsack, and the unbounded and bounded variants",
-        "Subset sum, partition, and target-sum problems",
-        "Longest common subsequence, edit distance, and the string-pair family",
-        "Longest increasing subsequence, in O(n²) and in O(n log n)",
-        "Grid and path-counting DP, with obstacles",
-        "Interval DP: matrix chain multiplication, burst balloons",
-        "DP on trees, and rerooting",
-        "Bitmask DP, digit DP, and DP with state machines",
-      ],
-    }),
+    dpPatternsModule,
     // ---------------------------------------------------------------------
     // Electives — advanced DSA
     //

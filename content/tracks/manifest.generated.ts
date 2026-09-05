@@ -2059,17 +2059,17 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-patterns",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: The Patterns",
-        "description": "The catalogue. Nine recognisable shapes covering the overwhelming majority of DP problems — the module that converts \"I understood the solution\" into \"I found the solution\".",
+        "description": "The catalogue, and the module that converts \"I understood the solution\" into \"I found the solution\". Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. In progress: subset sum and partition, the string-pair family, longest increasing subsequence, grids, intervals, trees, and the bitmask and digit variants are still to come.",
         "order": 28,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "the-knapsack-family",
             "moduleSlug": "dynamic-programming-patterns",
-            "title": "Dynamic Programming: The Patterns — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "The Knapsack Family",
+            "estimatedMinutes": 40,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
