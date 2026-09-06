@@ -2134,7 +2134,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graphs",
         "trackSlug": "dsa",
         "title": "Graphs: Modelling, BFS & DFS",
-        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything — but the traversals are the easy part, so this module starts where the difficulty actually is: deciding what a node is. In progress: the vocabulary, the two traversals, the visited-set discipline, components and flood fill, and cycle detection are still to come.",
+        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything — but the traversals are the easy part, so this module starts where the difficulty actually is: deciding what a node is. In progress: the two traversals, the visited-set discipline, components and flood fill, and cycle detection are still to come.",
         "order": 29,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2154,6 +2154,14 @@ export const trackMetas: TrackMeta[] = [
             "estimatedMinutes": 45,
             "status": "available",
             "takeawayCount": 9
+          },
+          {
+            "slug": "directed-weighted-and-acyclic",
+            "moduleSlug": "graphs",
+            "title": "Directed, Weighted and Acyclic",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
           }
         ]
       },
