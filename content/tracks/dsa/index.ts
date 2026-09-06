@@ -29,6 +29,7 @@ import { greedyModule } from "./modules/26-greedy-algorithms";
 import { dpFoundationsModule } from "./modules/27-dynamic-programming-foundations";
 import { dpPatternsModule } from "./modules/28-dynamic-programming-patterns";
 import { graphsModule } from "./modules/29-graphs";
+import { graphAlgorithmsModule } from "./modules/30-graph-algorithms";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -131,25 +132,7 @@ export const dsaTrack: TrackDefinition = {
     treesModule,
     heapsModule,
     graphsModule,
-    createComingSoonModule({
-      id: "dsa-graph-algorithms",
-      slug: "graph-algorithms",
-      title: "Graph Algorithms: Shortest Paths, MST & Ordering",
-      order: 30,
-      phase: "Module 1 · Non-linear DSA",
-      description:
-        "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong.",
-      topics: [
-        "Dijkstra, and why a negative edge breaks it",
-        "Bellman-Ford, negative cycles, and detecting them",
-        "Floyd-Warshall, and all-pairs shortest paths",
-        "0-1 BFS and the deque trick",
-        "Topological sort, by DFS and by Kahn's algorithm",
-        "Minimum spanning trees: Prim and Kruskal",
-        "Union-find with path compression and union by rank",
-        "Strongly connected components, and Tarjan's algorithm",
-      ],
-    }),
+    graphAlgorithmsModule,
     greedyModule,
     dpFoundationsModule,
     dpPatternsModule,

@@ -1,0 +1,15 @@
+import type { ModuleDefinition } from "@/content/types";
+
+import { dijkstraLesson } from "./lesson-1-dijkstra";
+
+export const graphAlgorithmsModule: ModuleDefinition = {
+  id: "dsa-graph-algorithms",
+  slug: "graph-algorithms",
+  title: "Graph Algorithms: Shortest Paths, MST & Ordering",
+  description:
+    "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: Bellman-Ford, Floyd-Warshall, 0-1 BFS, topological sort, minimum spanning trees, union-find and strongly connected components are still to come.",
+  order: 30,
+  status: "available",
+  phase: "Module 1 · Non-linear DSA",
+  lessons: [dijkstraLesson],
+};

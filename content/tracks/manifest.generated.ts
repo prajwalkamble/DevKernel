@@ -2209,18 +2209,18 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graph-algorithms",
         "trackSlug": "dsa",
         "title": "Graph Algorithms: Shortest Paths, MST & Ordering",
-        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong.",
+        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: Bellman-Ford, Floyd-Warshall, 0-1 BFS, topological sort, minimum spanning trees, union-find and strongly connected components are still to come.",
         "order": 30,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "dijkstra",
             "moduleSlug": "graph-algorithms",
-            "title": "Graph Algorithms: Shortest Paths, MST & Ordering — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
-            "takeawayCount": 8
+            "title": "Dijkstra, and What a Negative Edge Does",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
           }
         ]
       },
