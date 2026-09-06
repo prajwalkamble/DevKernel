@@ -2134,7 +2134,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graphs",
         "trackSlug": "dsa",
         "title": "Graphs: Modelling, BFS & DFS",
-        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything — but the traversals are the easy part, so this module starts where the difficulty actually is: deciding what a node is. In progress: components and flood fill, and cycle detection are still to come.",
+        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything — but the traversals are the easy part, so this module starts where the difficulty actually is: deciding what a node is. In progress: cycle detection is still to come.",
         "order": 29,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2183,6 +2183,14 @@ export const trackMetas: TrackMeta[] = [
             "slug": "the-visited-set",
             "moduleSlug": "graphs",
             "title": "The Visited Set",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "components-and-flood-fill",
+            "moduleSlug": "graphs",
+            "title": "Connected Components and Flood Fill",
             "estimatedMinutes": 45,
             "status": "available",
             "takeawayCount": 10
