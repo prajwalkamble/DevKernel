@@ -2209,7 +2209,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graph-algorithms",
         "trackSlug": "dsa",
         "title": "Graph Algorithms: Shortest Paths, MST & Ordering",
-        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: minimum spanning trees, union-find and strongly connected components are still to come.",
+        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: minimum spanning trees and strongly connected components are still to come.",
         "order": 30,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2251,6 +2251,14 @@ export const trackMetas: TrackMeta[] = [
             "moduleSlug": "graph-algorithms",
             "title": "Topological Sort and DAG Dynamic Programming",
             "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "union-find",
+            "moduleSlug": "graph-algorithms",
+            "title": "Union-Find: Grouping Under Merges",
+            "estimatedMinutes": 40,
             "status": "available",
             "takeawayCount": 10
           }
