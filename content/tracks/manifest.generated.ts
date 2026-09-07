@@ -2209,7 +2209,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graph-algorithms",
         "trackSlug": "dsa",
         "title": "Graph Algorithms: Shortest Paths, MST & Ordering",
-        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: Floyd-Warshall, 0-1 BFS, topological sort, minimum spanning trees, union-find and strongly connected components are still to come.",
+        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: 0-1 BFS, topological sort, minimum spanning trees, union-find and strongly connected components are still to come.",
         "order": 30,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2226,6 +2226,14 @@ export const trackMetas: TrackMeta[] = [
             "slug": "bellman-ford",
             "moduleSlug": "graph-algorithms",
             "title": "Bellman-Ford and Negative Cycles",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "floyd-warshall",
+            "moduleSlug": "graph-algorithms",
+            "title": "Floyd-Warshall and the Loop Order",
             "estimatedMinutes": 45,
             "status": "available",
             "takeawayCount": 10
