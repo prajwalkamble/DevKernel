@@ -2359,17 +2359,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "the-sheet",
         "trackSlug": "dsa",
         "title": "The Sheet: Company-Wise & Topic-Wise Grind Plans",
-        "description": "How to grind so that it compounds. Ordered sheets by topic, by pattern and by company, with a schedule that revisits rather than accumulates.",
+        "description": "How to grind so that it compounds. A pattern sheet is a dependency graph wearing a list costume, and the measurement here says what ignoring that costs. Eight lessons: why order beats volume, what finishing a pattern means precisely enough to check, how much signal a company list really carries, the progression inside a single pattern, how long to stare before looking, the step everybody skips after reading a solution, which problems earn a revisit, and the six fields worth logging.",
         "order": 32,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "order-beats-volume",
             "moduleSlug": "the-sheet",
-            "title": "The Sheet: Company-Wise & Topic-Wise Grind Plans — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "The Ordered Core Sheet, and Why Order Beats Volume",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "finish-a-pattern",
+            "moduleSlug": "the-sheet",
+            "title": "Topic-Wise Sheets: Finishing a Pattern Before Moving On",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "company-sheets",
+            "moduleSlug": "the-sheet",
+            "title": "Company-Wise Sheets, and How Much Signal They Carry",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "easy-medium-hard",
+            "moduleSlug": "the-sheet",
+            "title": "The Easy–Medium–Hard Progression Within a Pattern",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "twenty-minute-rule",
+            "moduleSlug": "the-sheet",
+            "title": "How Long to Stare Before Looking",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "after-you-look",
+            "moduleSlug": "the-sheet",
+            "title": "What to Do After You Look at the Solution",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "re-solving",
+            "moduleSlug": "the-sheet",
+            "title": "Re-Solving From Scratch, and the Spacing That Makes It Stick",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "tracking",
+            "moduleSlug": "the-sheet",
+            "title": "Tracking: What to Log So a Solved Problem Stays Solved",
+            "estimatedMinutes": 25,
+            "status": "available",
             "takeawayCount": 8
           }
         ]

@@ -31,6 +31,7 @@ import { dpPatternsModule } from "./modules/28-dynamic-programming-patterns";
 import { graphsModule } from "./modules/29-graphs";
 import { graphAlgorithmsModule } from "./modules/30-graph-algorithms";
 import { patternAtlasModule } from "./modules/31-pattern-atlas";
+import { theSheetModule } from "./modules/32-the-sheet";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -135,6 +136,7 @@ export const dsaTrack: TrackDefinition = {
     graphsModule,
     graphAlgorithmsModule,
     patternAtlasModule,
+    theSheetModule,
     greedyModule,
     dpFoundationsModule,
     dpPatternsModule,
@@ -208,25 +210,6 @@ export const dsaTrack: TrackDefinition = {
     // ---------------------------------------------------------------------
     // Module 1 — The grind and the interview
     // ---------------------------------------------------------------------
-    createComingSoonModule({
-      id: "dsa-the-sheet",
-      slug: "the-sheet",
-      title: "The Sheet: Company-Wise & Topic-Wise Grind Plans",
-      order: 32,
-      phase: "Module 1 · The Grind",
-      description:
-        "How to grind so that it compounds. Ordered sheets by topic, by pattern and by company, with a schedule that revisits rather than accumulates.",
-      topics: [
-        "The ordered core sheet, and why order beats volume",
-        "Topic-wise sheets: finishing a pattern before moving on",
-        "Company-wise sheets, and how much signal they really carry",
-        "The easy–medium–hard progression within a single pattern",
-        "How long to stare before looking: the twenty-minute rule",
-        "What to do after you look at the solution — the step everybody skips",
-        "Re-solving from scratch, and the spacing that makes it stick",
-        "Tracking: what to log about a solved problem so it stays solved",
-      ],
-    }),
     createComingSoonModule({
       id: "dsa-interview-technique",
       slug: "interview-technique",
