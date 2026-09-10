@@ -33,6 +33,7 @@ import { graphAlgorithmsModule } from "./modules/30-graph-algorithms";
 import { patternAtlasModule } from "./modules/31-pattern-atlas";
 import { theSheetModule } from "./modules/32-the-sheet";
 import { interviewTechniqueModule } from "./modules/33-interview-technique";
+import { algorithmsBehindGenAiModule } from "./modules/34-algorithms-behind-gen-ai";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -139,6 +140,7 @@ export const dsaTrack: TrackDefinition = {
     patternAtlasModule,
     theSheetModule,
     interviewTechniqueModule,
+    algorithmsBehindGenAiModule,
     greedyModule,
     dpFoundationsModule,
     dpPatternsModule,
@@ -212,24 +214,5 @@ export const dsaTrack: TrackDefinition = {
     // ---------------------------------------------------------------------
     // Module 1 — The grind and the interview
     // ---------------------------------------------------------------------
-    createComingSoonModule({
-      id: "dsa-gen-ai",
-      slug: "algorithms-behind-gen-ai",
-      title: "The Data Structures & Algorithms Behind Gen AI",
-      order: 34,
-      phase: "Module 1 · The Grind",
-      description:
-        "Everything in this track, applied to the systems everyone is now building on. A vector database is a graph search, tokenisation is a greedy merge over a frequency map, and sampling a token is a heap.",
-      topics: [
-        "Tokenisation: byte-pair encoding as a greedy merge over a frequency map",
-        "Embeddings and vector space: cosine, dot product and Euclidean distance",
-        "Exact k-nearest neighbours with a heap, and where it stops scaling",
-        "Approximate nearest neighbours: LSH, inverted file indexes, and HNSW's navigable graph",
-        "Vector quantisation, and the memory-against-recall trade every index makes",
-        "The KV cache as a growing array, and why context length costs quadratically",
-        "Decoding strategies: greedy, beam search and top-k sampling as priority queues",
-        "Retrieval pipelines: inverted indexes, BM25, hybrid ranking and reranking",
-      ],
-    }),
   ],
 };

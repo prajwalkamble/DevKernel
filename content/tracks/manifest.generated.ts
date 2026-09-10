@@ -2509,17 +2509,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "algorithms-behind-gen-ai",
         "trackSlug": "dsa",
         "title": "The Data Structures & Algorithms Behind Gen AI",
-        "description": "Everything in this track, applied to the systems everyone is now building on. A vector database is a graph search, tokenisation is a greedy merge over a frequency map, and sampling a token is a heap.",
+        "description": "Everything in this track, applied to the systems everyone is now building on. A vector database is a graph search, tokenisation is a greedy merge over a frequency map, and sampling a token is a heap. Every lesson is measured: greedy byte-pair merges are optimal 2,687 times in 3,000, cosine survives rescaling 3,000 times in 3,000 where the dot product survives 1,190, a bounded heap spends 1.04 comparisons a document while the distance count stays at exactly n, and fusing a strong ranking with a weak one scores worse than the strong one alone.",
         "order": 34,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "tokenisation",
             "moduleSlug": "algorithms-behind-gen-ai",
-            "title": "The Data Structures & Algorithms Behind Gen AI — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Tokenisation: Byte-Pair Encoding as a Greedy Merge",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "embeddings-and-distance",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Embeddings and Distance: Cosine, Dot Product, Euclidean",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "exact-knn",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Exact k-Nearest Neighbours, and Where It Stops",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "approximate-neighbours",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Approximate Nearest Neighbours: Hashing, Clusters and Graphs",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "vector-quantisation",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Vector Quantisation, and the Shortlist That Rescues It",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "the-kv-cache",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "The KV Cache: A Growing Array, and Why Context Costs",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "decoding-strategies",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Decoding: Greedy, Beam Search, and Bounded Priority Queues",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "retrieval-pipelines",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Retrieval Pipelines: Inverted Indexes, BM25, Fusion and Reranking",
+            "estimatedMinutes": 40,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
