@@ -2209,7 +2209,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graph-algorithms",
         "trackSlug": "dsa",
         "title": "Graph Algorithms: Shortest Paths, MST & Ordering",
-        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. In progress: strongly connected components is still to come.",
+        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. Eight lessons: Dijkstra and the settle-once claim, Bellman-Ford and negative cycles, Floyd-Warshall and the loop order, 0-1 BFS and the deque, topological sort and DAG dynamic programming, union-find, minimum spanning trees, and strongly connected components.",
         "order": 30,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2266,6 +2266,14 @@ export const trackMetas: TrackMeta[] = [
             "slug": "minimum-spanning-trees",
             "moduleSlug": "graph-algorithms",
             "title": "Minimum Spanning Trees: Prim, Kruskal and the Cut Property",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "strongly-connected-components",
+            "moduleSlug": "graph-algorithms",
+            "title": "Strongly Connected Components and the Condensation",
             "estimatedMinutes": 45,
             "status": "available",
             "takeawayCount": 10
