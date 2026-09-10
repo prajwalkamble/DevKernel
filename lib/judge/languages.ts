@@ -24,7 +24,6 @@ export interface LanguageProfile {
   filename: string;
   /** True when Run executes here; false when it hands you a file to run elsewhere. */
   runnable: boolean;
-  tabSize: number;
   /** One line under the dropdown explaining what Run will do. */
   runtimeNote: string;
 }
@@ -53,7 +52,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "python",
     filename: "solution.py",
     runnable: true,
-    tabSize: 4,
     runtimeNote: "Real CPython 3.14 compiled to WebAssembly. The whole standard library is here.",
   },
   javascript: {
@@ -62,7 +60,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "javascript",
     filename: "solution.js",
     runnable: true,
-    tabSize: 2,
     runtimeNote: "Runs in a Web Worker on this page. Starts instantly.",
   },
   typescript: {
@@ -71,7 +68,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "typescript",
     filename: "solution.ts",
     runnable: true,
-    tabSize: 2,
     runtimeNote: "Types are stripped in the browser, then run as JavaScript in a Web Worker.",
   },
   java: {
@@ -80,7 +76,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "java",
     filename: "Main.java",
     runnable: true,
-    tabSize: 4,
     runtimeNote:
       "Runs on this site's own Java interpreter: collections, generics, lambdas and comparators, checked against a real JDK.",
   },
@@ -90,7 +85,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "cpp",
     filename: "solution.cpp",
     runnable: true,
-    tabSize: 4,
     runtimeNote:
       "Runs on this site's own C++ interpreter. `vector`, `string`, `map` and the algorithms these problems need.",
   },
@@ -100,7 +94,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "c",
     filename: "solution.c",
     runnable: true,
-    tabSize: 4,
     runtimeNote:
       "Runs on this site's own C interpreter, with the array-and-length calling convention C solutions use everywhere.",
   },
@@ -110,7 +103,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "go",
     filename: "solution.go",
     runnable: true,
-    tabSize: 4,
     runtimeNote: "Runs on this site's own Go interpreter: slices, maps, and the `sort` and `strings` packages.",
   },
   rust: {
@@ -119,7 +111,6 @@ export const LANGUAGE_PROFILES: Record<PracticeLanguage, LanguageProfile> = {
     monaco: "rust",
     filename: "solution.rs",
     runnable: true,
-    tabSize: 4,
     runtimeNote:
       "Runs on this site's own Rust interpreter. Integer overflow panics here exactly as it does in a debug build.",
   },
