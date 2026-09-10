@@ -2433,18 +2433,74 @@ export const trackMetas: TrackMeta[] = [
       {
         "slug": "interview-technique",
         "trackSlug": "dsa",
-        "title": "Interview Technique: Thinking Out Loud",
-        "description": "Knowing the algorithm and passing the interview are different skills. How to attack an unseen problem in front of somebody, and how to talk while you do it.",
+        "title": "Interview Technique: Communicating a Solution",
+        "description": "The part of the assessment that is not the algorithm. Two of these lessons are measured rather than asserted: four hand-picked tests caught one of four seeded bugs where a brute-force oracle caught all four, and four versions of one problem each have a single visible loop while two of them are quadratic. Eight lessons: the clarifying questions worth asking, restating before solving, the brute force as an oracle, narrating the optimisation, stating complexity including space, testing before they ask, getting unstuck in public, and the last five minutes.",
         "order": 33,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "first-two-minutes",
             "moduleSlug": "interview-technique",
-            "title": "Interview Technique: Thinking Out Loud — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "The First Two Minutes: Clarifying Questions Worth Asking",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "restate-and-confirm",
+            "moduleSlug": "interview-technique",
+            "title": "Restating the Problem, and Confirming It Before You Solve It",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "brute-force-out-loud",
+            "moduleSlug": "interview-technique",
+            "title": "The Brute Force, Out Loud, First",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "narrating-the-optimisation",
+            "moduleSlug": "interview-technique",
+            "title": "Narrating the Optimisation: Naming the Waste",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "stating-your-complexity",
+            "moduleSlug": "interview-technique",
+            "title": "Stating Your Complexity, Including the Space",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "testing-before-they-ask",
+            "moduleSlug": "interview-technique",
+            "title": "Testing Before They Ask, and Which Cases to Pick",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "getting-unstuck-in-public",
+            "moduleSlug": "interview-technique",
+            "title": "Getting Unstuck in Public, and What a Hint Tells You",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "the-last-five-minutes",
+            "moduleSlug": "interview-technique",
+            "title": "The Last Five Minutes: Closing, Behavioural Framing, and What to Ask",
+            "estimatedMinutes": 30,
+            "status": "available",
             "takeawayCount": 8
           }
         ]

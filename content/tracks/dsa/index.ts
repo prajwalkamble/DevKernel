@@ -32,6 +32,7 @@ import { graphsModule } from "./modules/29-graphs";
 import { graphAlgorithmsModule } from "./modules/30-graph-algorithms";
 import { patternAtlasModule } from "./modules/31-pattern-atlas";
 import { theSheetModule } from "./modules/32-the-sheet";
+import { interviewTechniqueModule } from "./modules/33-interview-technique";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -137,6 +138,7 @@ export const dsaTrack: TrackDefinition = {
     graphAlgorithmsModule,
     patternAtlasModule,
     theSheetModule,
+    interviewTechniqueModule,
     greedyModule,
     dpFoundationsModule,
     dpPatternsModule,
@@ -210,25 +212,6 @@ export const dsaTrack: TrackDefinition = {
     // ---------------------------------------------------------------------
     // Module 1 — The grind and the interview
     // ---------------------------------------------------------------------
-    createComingSoonModule({
-      id: "dsa-interview-technique",
-      slug: "interview-technique",
-      title: "Interview Technique: Thinking Out Loud",
-      order: 33,
-      phase: "Module 1 · The Grind",
-      description:
-        "Knowing the algorithm and passing the interview are different skills. How to attack an unseen problem in front of somebody, and how to talk while you do it.",
-      topics: [
-        "The first two minutes: clarifying questions worth asking",
-        "Restating the problem, and confirming it before you solve it",
-        "Brute force first, out loud — and why that scores better, not worse",
-        "Narrating the optimisation: what changed and why it is safe",
-        "Stating your complexity correctly, including the space",
-        "Writing tests before they ask, and the edge cases to name",
-        "Getting unstuck in public, and what a hint is really telling you",
-        "Behavioural framing, and the questions to ask them at the end",
-      ],
-    }),
     createComingSoonModule({
       id: "dsa-gen-ai",
       slug: "algorithms-behind-gen-ai",
