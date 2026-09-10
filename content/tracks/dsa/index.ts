@@ -30,6 +30,7 @@ import { dpFoundationsModule } from "./modules/27-dynamic-programming-foundation
 import { dpPatternsModule } from "./modules/28-dynamic-programming-patterns";
 import { graphsModule } from "./modules/29-graphs";
 import { graphAlgorithmsModule } from "./modules/30-graph-algorithms";
+import { patternAtlasModule } from "./modules/31-pattern-atlas";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -133,6 +134,7 @@ export const dsaTrack: TrackDefinition = {
     heapsModule,
     graphsModule,
     graphAlgorithmsModule,
+    patternAtlasModule,
     greedyModule,
     dpFoundationsModule,
     dpPatternsModule,
@@ -206,25 +208,6 @@ export const dsaTrack: TrackDefinition = {
     // ---------------------------------------------------------------------
     // Module 1 — The grind and the interview
     // ---------------------------------------------------------------------
-    createComingSoonModule({
-      id: "dsa-pattern-atlas",
-      slug: "pattern-atlas-drills",
-      title: "The Pattern Atlas: Recognition Drills",
-      order: 31,
-      phase: "Module 1 · The Grind",
-      description:
-        "Drills in which you are forbidden to write code. You read a statement and name the pattern, the structure and the target complexity — because that is the step you are actually missing, and practising it separately is the fastest way to fix it.",
-      topics: [
-        "Timed recognition: sixty seconds, statement to pattern",
-        "Reading the constraints backwards to the intended complexity",
-        "The phrases that give a pattern away, and the ones that mislead",
-        "Distinguishing the near-identical: window against prefix-sum-plus-map",
-        "Distinguishing greedy from DP on the same statement",
-        "When two patterns both apply, and how to choose",
-        "Building your own decision tree, and pruning it as it grows",
-        "Spaced repetition over patterns rather than over problems",
-      ],
-    }),
     createComingSoonModule({
       id: "dsa-the-sheet",
       slug: "the-sheet",

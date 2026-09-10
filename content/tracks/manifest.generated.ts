@@ -2284,17 +2284,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "pattern-atlas-drills",
         "trackSlug": "dsa",
         "title": "The Pattern Atlas: Recognition Drills",
-        "description": "Drills in which you are forbidden to write code. You read a statement and name the pattern, the structure and the target complexity — because that is the step you are actually missing, and practising it separately is the fastest way to fix it.",
+        "description": "Drills in which you are forbidden to write code. You read a statement and name the pattern, the structure and the target complexity — because that is the step you are actually missing, and practising it separately is the fastest way to fix it. Eight lessons: the sixty-second drill, reading the constraints backwards, the phrases that give a pattern away and the ones that mislead, two pairs of near-identical statements taken apart with measurements, what to do when two patterns both apply, growing a decision tree from your own misses, and spacing repetitions over patterns rather than over problems.",
         "order": 31,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "sixty-seconds",
             "moduleSlug": "pattern-atlas-drills",
-            "title": "The Pattern Atlas: Recognition Drills — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Sixty Seconds: Statement to Pattern",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "constraints-backwards",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Reading the Constraints Backwards",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "tells-and-traps",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "The Phrases That Give a Pattern Away, and the Ones That Mislead",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "window-or-prefix-map",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Window or Prefix Map: Telling Near-Identical Statements Apart",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "greedy-or-dp",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Greedy or DP: One Word Changes the Answer",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "two-patterns-both-apply",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "When Two Patterns Both Apply",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "your-own-decision-tree",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Building Your Own Decision Tree, and Pruning It",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "spacing-patterns",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Spacing Patterns Rather Than Problems",
+            "estimatedMinutes": 25,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
