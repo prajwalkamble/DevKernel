@@ -34,6 +34,7 @@ import { patternAtlasModule } from "./modules/31-pattern-atlas";
 import { theSheetModule } from "./modules/32-the-sheet";
 import { interviewTechniqueModule } from "./modules/33-interview-technique";
 import { algorithmsBehindGenAiModule } from "./modules/34-algorithms-behind-gen-ai";
+import { advancedDataStructuresModule } from "./modules/35-advanced-data-structures";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -152,25 +153,7 @@ export const dsaTrack: TrackDefinition = {
     // the harder end of a senior one, so it sits beside the grind rather than
     // inside it.
     // ---------------------------------------------------------------------
-    createComingSoonModule({
-      id: "dsa-advanced-structures",
-      slug: "advanced-data-structures",
-      title: "Advanced Data Structures",
-      order: 35,
-      phase: "Electives · Advanced DSA",
-      description:
-        "The structures that answer a question no simpler structure can answer fast — range queries, prefix queries, and dynamic connectivity.",
-      topics: [
-        "Tries: prefix search, autocomplete, and the memory trade",
-        "Disjoint set union in anger, and the problems it is secretly the answer to",
-        "Fenwick trees for prefix sums with updates",
-        "Segment trees: range query, point update",
-        "Lazy propagation, and range updates",
-        "Sparse tables, and O(1) range minimum",
-        "Balanced BSTs and order-statistic trees",
-        "Choosing between them: the decision the constraints make for you",
-      ],
-    }),
+    advancedDataStructuresModule,
     bitsAndMathModule,
     createComingSoonModule({
       id: "dsa-advanced-algorithms",

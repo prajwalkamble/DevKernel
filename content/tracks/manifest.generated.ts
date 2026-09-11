@@ -2584,18 +2584,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "advanced-data-structures",
         "trackSlug": "dsa",
         "title": "Advanced Data Structures",
-        "description": "The structures that answer a question no simpler structure can answer fast — range queries, prefix queries, and dynamic connectivity.",
+        "description": "The structures that answer a question no simpler structure can answer fast — prefix queries, range queries with updates, and connectivity with relations. Eight lessons: tries, union-find with a value per node, Fenwick trees, segment trees, lazy propagation, sparse tables, order-statistic trees, and choosing between them by measured cost.",
         "order": 35,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Electives · Advanced DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "tries",
             "moduleSlug": "advanced-data-structures",
-            "title": "Advanced Data Structures — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Tries: Prefix Search, Autocomplete, and the Memory Trade",
+            "estimatedMinutes": 35,
+            "status": "available",
             "takeawayCount": 8
+          },
+          {
+            "slug": "union-find-in-anger",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Union-Find in Anger: Storing a Relation to the Parent",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "fenwick-trees",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Fenwick Trees: Prefix Sums That Survive Updates",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "segment-trees",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Segment Trees: Range Query, Point Update",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "lazy-propagation",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Lazy Propagation: Range Updates on a Segment Tree",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "sparse-tables",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Sparse Tables: Constant-Time Range Minimum",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "order-statistic-trees",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Balanced BSTs and Order-Statistic Trees",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "choosing-a-structure",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Choosing Between Them: The Decision the Constraints Make",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
           }
         ]
       },
