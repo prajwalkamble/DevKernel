@@ -23,7 +23,6 @@ export const sixtySecondsLesson: Lesson = {
         "By this point in the track you can implement everything. Given \"use a monotonic stack\", you write one. Given \"this is a knapsack\", you fill the table. The implementations are not what is costing you problems.",
         "What costs you problems is the twenty seconds between reading the statement and knowing which of those to reach for \u2014 and solving more problems trains that step badly, because every time you solve one you also *implement* it, and implementation is slow, absorbing and satisfying. An hour of practice contains maybe four minutes of recognition and fifty-six minutes of typing. The ratio is upside down.",
         "This module fixes the ratio by banning the typing. You read a statement, you name four things, and you move on. Sixty seconds each. In an hour you get sixty repetitions of the thing you are bad at instead of four.",
-        "This is not a study hack, it is the standard way any skill with a slow and a fast component gets trained. A pianist practising a hard passage does not play the whole sonata forty times.",
       ],
     },
     {

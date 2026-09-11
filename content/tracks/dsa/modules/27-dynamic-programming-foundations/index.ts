@@ -14,7 +14,7 @@ export const dpFoundationsModule: ModuleDefinition = {
   slug: "dynamic-programming-foundations",
   title: "Dynamic Programming: Foundations",
   description:
-    "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. From there it is the state as a sentence you can write down, the two halves of a recurrence and the base case people leave out, the same table filled in two orders, the rows that can be thrown away and what that costs, getting the actual answer back rather than its value, and a closing lesson on recognising a problem you have already solved wearing different clothes.",
+    "Start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. From there it is the state as a sentence you can write down, the two halves of a recurrence and the base case people leave out, the same table filled in two orders, the rows that can be thrown away and what that costs, getting the actual answer back rather than its value, and a closing lesson on recognising a problem you have already solved wearing different clothes.",
   order: 27,
   status: "available",
   phase: "Module 1 · Non-linear DSA",

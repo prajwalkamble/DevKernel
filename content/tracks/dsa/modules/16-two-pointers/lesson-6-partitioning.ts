@@ -42,7 +42,6 @@ export const partitioningLesson: Lesson = {
       body: [
         "Textbook quicksort partitions into two regions — less than the pivot, and not less. On an array with many equal keys that degrades badly: every duplicate of the pivot lands on one side, the split becomes lopsided, and an array of all-identical values gives the O(n²) worst case.",
         "**Three-way partitioning** fixes it. Split into less-than, equal-to and greater-than, then recurse only on the outer two. Every duplicate of the pivot is finished in that pass and never recursed on, so an all-identical array becomes O(n) rather than O(n²).",
-        "This is not a footnote — it is what production sorts do. The sorting module returns to it.",
       ],
       pitfalls: [
         {

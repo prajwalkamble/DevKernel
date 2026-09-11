@@ -62,10 +62,6 @@ export const windowSheetLesson: Lesson = {
           title: "Using a window because the problem mentions subarrays",
           body: "\"Maximum subarray sum\" mentions subarrays and is Kadane's, not a window, because negatives break monotonicity. \"Subarray sum equals k\" mentions subarrays and is prefix sums plus a hash map. The word *subarray* is necessary for a window and nowhere near sufficient.",
         },
-        {
-          title: "Not revisiting",
-          body: "The loop shape is small enough to feel learned after two problems and is not. Re-solve one variable-size problem from a blank editor a day after finishing this module — specifically a *shortest* one, since the record-inside-the-shrink placement is the detail that fades first.",
-        },
       ],
     },
   ],
@@ -88,7 +84,6 @@ export const windowSheetLesson: Lesson = {
     "\"Exactly k\" counting means try the at-most subtraction",
     "Decide longest or shortest first — it fixes the shrink and the recording",
     "\"Subarray\" in the statement is necessary but nowhere near sufficient",
-    "Revisit a shortest-window problem a day later; that placement fades first",
   ],
   status: "available",
 };

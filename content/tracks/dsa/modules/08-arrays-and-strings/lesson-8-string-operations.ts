@@ -13,7 +13,6 @@ export const stringOperationsLesson: Lesson = {
     "Use the dozen string methods that appear in nearly every solution",
     "State the cost of each, and which of them allocate",
     "Handle the split edge cases that produce empty strings",
-    "Close out the module with the array-and-string toolkit in one place",
   ],
   sections: [
     {
@@ -190,17 +189,6 @@ built-in: 100 (non-overlapping, so a different count)
           title: "`s.substring(i, j)` in a loop",
           body: "Each call copies `j - i` characters. Inside a loop over positions that is quadratic even though the loop looks linear — the hidden-nesting problem from the nested-loops lesson. Compare characters by index instead, or use the language's own search, which is implemented in C or native code.",
         },
-      ],
-    },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "Arrays and strings are the two structures every later module is built from, and the toolkit is now complete.",
-        "**Arrays.** Contiguous, O(1) indexing, O(n) search and middle insertion, amortised O(1) append when dynamic. Reversal, rotation and compaction all in place, all with two pointers moving at different speeds.",
-        "**Strings.** The same, minus writing. Convert to a mutable sequence when you need to write, and never rebuild one per character.",
-        "**The habit worth keeping**: before writing any loop over an array or string, ask what each *operation* inside it costs. A linear operation inside a linear loop is quadratic, and it does not announce itself.",
-        "Next is number systems and maths, which is the last group of primitives before the module closes with data structures and complexity.",
       ],
     },
   ],

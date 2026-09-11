@@ -41,7 +41,6 @@ export const reversalAndRotationLesson: Lesson = {
       id: "juggling",
       heading: "The cycles underneath",
       body: [
-        "There is a second rotation algorithm, and it is worth knowing not because you will often need it but because of what it reveals.",
         "A rotation is a **permutation**: every element moves to a computable new position, `i → (i + k) mod n`. Follow that repeatedly from any starting index and you eventually come back to where you started — you have walked a *cycle*. So instead of three passes, you can walk each cycle once, carrying one held value round it.",
         "The question is how many cycles there are, and the answer is exactly **gcd(n, k)**. When n and k share no factor the whole array is one cycle; when they share a factor of 3 there are three independent cycles that never touch. This is the same fact that governs every \"step round a circle of n by k each time\" problem, and it is worth having seen it once.",
         "The payoff is that juggling does exactly n writes where the three-reversal version does about 2n.",

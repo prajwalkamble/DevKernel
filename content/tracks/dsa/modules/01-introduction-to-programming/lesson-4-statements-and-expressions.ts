@@ -226,7 +226,7 @@ func main() {
       id: "assignment-is-not-comparison",
       heading: "Assignment is not comparison",
       body: [
-        "`=` assigns. `==` compares. They are entirely different operations that happen to look alike, and confusing them is a rite of passage.",
+        "`=` assigns. `==` compares. They are entirely different operations that happen to look alike.",
         "Java protects you from most of the damage: an `if` requires a boolean, and an assignment of a number does not produce one, so `if (x = 5)` is a compile error. Python is less protective in general but happens to make this exact mistake a syntax error too, because assignment is a statement there and cannot appear inside a condition.",
         "So both languages catch the classic version. The one to actually watch for is the reverse: writing `==` where you meant `=`, which is legal in both and simply does nothing.",
       ],

@@ -238,15 +238,6 @@ comparing slopes exactly (collinearity):
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "That is the numeric toolkit. Bases and two's complement explain how values are stored; digits, divisors, GCD, powers and modular arithmetic are the operations that appear inside problems; and this lesson is the standing warning about the one representation that lies.",
-        "**The through-line:** integers are exact and bounded, floats are inexact and vast. Every technique in this module — the √n bound, running modular reduction, cross-multiplication, exponentiation by squaring — exists to keep exact integer arithmetic inside its bounds rather than escaping to floats.",
-        "Two modules remain in this track. Next is a tour of the data structures themselves, and then complexity analysis, which is the vocabulary for everything after.",
-      ],
-    },
   ],
   interviewQuestions: [
     {

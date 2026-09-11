@@ -207,7 +207,7 @@ the value appearing once: 4`,
       pitfalls: [
         {
           title: "Precedence of the bitwise operators",
-          body: "`&`, `^` and `|` all bind *looser* than the comparison operators, so `x & 1 == 0` parses as `x & (1 == 0)` in Java — a type error — and in Python as `x & (1 == 0)`, which is `x & False`, silently wrong. Always bracket: `(x & 1) == 0`. This is one of the few places where precedence produces a genuinely surprising parse.",
+          body: "In Java, `&`, `^` and `|` bind *looser* than `==`, so `x & 1 == 0` parses as `x & (1 == 0)` — a compile error, because an `int` cannot be ANDed with a `boolean`. Python ranks them the other way round: `&` binds tighter than `==`, so the same expression means `(x & 1) == 0`. Bracket it in both: `(x & 1) == 0` reads the same in either language, and nobody has to remember which table they are in.",
         },
       ],
     },
@@ -238,6 +238,6 @@ the value appearing once: 4`,
     "Java masks the shift amount, so `1 << 32` is 1 rather than 0 or an error",
     "Test, set, clear, toggle: `(x >> k) & 1`, `x | (1 << k)`, `x & ~(1 << k)`, `x ^ (1 << k)`",
     "`n & (n - 1)` clears the lowest set bit; `n & -n` isolates it; XOR cancels pairs",
-    "Bitwise operators bind looser than comparisons — always bracket `(x & 1) == 0`",
+    "Java binds bitwise operators looser than comparisons and Python binds them tighter — always bracket `(x & 1) == 0`",
   ],
 };

@@ -23,7 +23,6 @@ export const finishAPatternLesson: Lesson = {
         "The default way people work a sheet is breadth-first: a few from arrays, a few from strings, a few from trees, keep the variety up, keep it interesting. It produces partial coverage of many patterns, and partial coverage of a pattern is close to worthless.",
         "The reason is the recognition step from the previous module. Recognising a pattern means recognising it in a statement you have not seen, and that requires having seen the pattern in *several different disguises*. Two problems is not several. Two problems teaches you those two problems.",
         "Full coverage of four patterns beats partial coverage of ten, and the exchange rate is not close. Four patterns you can recognise anywhere are four patterns; ten you half-know are zero, plus a persistent feeling of having covered a lot of ground.",
-        "This is also the most common shape of the complaint that opens this whole track \u2014 \"I have done hundreds of problems and I still freeze\". Hundreds of problems spread thinly is exactly the input that produces it.",
       ],
     },
     {

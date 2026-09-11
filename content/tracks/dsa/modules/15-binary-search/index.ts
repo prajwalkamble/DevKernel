@@ -14,7 +14,7 @@ export const binarySearchModule: ModuleDefinition = {
   slug: "binary-search",
   title: "Binary Search & Binary Search on the Answer",
   description:
-    "The most-failed easy question there is, and then the technique that quietly solves a whole family of hard ones. The two loop conventions and why mixing them is where every off-by-one comes from; the boundary searches that answer \"first\", \"last\" and \"how many\"; the rotated and matrix variants; and then the reframe that matters most — searching the range of possible answers rather than the input, which turns \"minimise the maximum\" into the same twelve lines. Ends on real-valued precision, binary search as the inner step of a larger algorithm, and a peak-finding problem with no sorted input at all.",
+    "The two loop conventions and why mixing them is where every off-by-one comes from; the boundary searches that answer \"first\", \"last\" and \"how many\"; the rotated and matrix variants; and then the reframe that matters most — searching the range of possible answers rather than the input, which turns \"minimise the maximum\" into the same twelve lines. Ends on real-valued precision, binary search as the inner step of a larger algorithm, and a peak-finding problem with no sorted input at all.",
   order: 15,
   status: "available",
   phase: "Module 1 · Linear DSA",

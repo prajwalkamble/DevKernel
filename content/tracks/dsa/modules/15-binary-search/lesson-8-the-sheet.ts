@@ -11,7 +11,7 @@ export const theSheetLesson: Lesson = {
   objectives: [
     "Classify a problem into one of the five binary-search shapes",
     "Name the signals that distinguish them",
-    "Work the sheet in an order that builds rather than accumulates",
+    "Work the sheet in the order the shapes build on each other",
     "Know the complexity to state before writing anything",
   ],
   sections: [
@@ -58,14 +58,6 @@ export const theSheetLesson: Lesson = {
         },
       ],
     },
-    {
-      id: "revisit",
-      heading: "Revisiting, not accumulating",
-      body: [
-        "The failure mode with a sheet is treating it as a queue: solve, tick, never return. Two weeks later the loop conventions are gone again.",
-        "Instead: after finishing a shape, come back a day later and **rewrite one problem from that shape from a blank editor** — not from memory of the code, but from the four questions above. If you cannot, that is the signal to stay on the shape rather than move on. The whole module is about twelve lines of code; what you are actually building is the recognition that picks which twelve.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -86,7 +78,6 @@ export const theSheetLesson: Lesson = {
     "Do the boundary problems until they are boring before starting shape 4",
     "Before typing: what am I searching, what is the predicate, is it monotone, what are the bounds",
     "Sorted input is a hint, not an instruction — it often means two pointers instead",
-    "Rewrite one problem per shape a day later, from the questions rather than the code",
   ],
   status: "available",
 };

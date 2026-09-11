@@ -65,7 +65,6 @@ found: True`,
       id: "accumulator-init",
       heading: "The initialisation that decides correctness",
       body: [
-        "This is the most important thing in the lesson, and it is one line of code.",
         "**A sum starts at 0.** Correct, because zero is the identity for addition and the sum of nothing is zero.",
         "**A product starts at 1.** Same reasoning, different identity.",
         "**A minimum or maximum must start at the first element**, not at 0 and not at a made-up large number. Starting a maximum at 0 is wrong the instant every value is negative — the bug from the errors lesson.",

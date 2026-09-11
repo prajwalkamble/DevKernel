@@ -20,7 +20,6 @@ export const modellingLesson: Lesson = {
       heading: "The graph nobody gave you",
       body: [
         "Graph algorithms have a reputation for being hard that the algorithms themselves do not deserve. Breadth-first search is about fifteen lines. Depth-first search is fewer. What is hard is the step before either of them: looking at a problem that mentions no nodes and no edges, and deciding that it is a graph, and deciding *which* graph.",
-        "So this module starts where the difficulty actually is, and the algorithms come after.",
         "Take the word ladder. From a start word, reach a target word by changing one letter at a time, with every intermediate word in a dictionary. There is nothing graph-shaped in that sentence. But say \"a node is a word, and an edge joins two words that differ in exactly one position\", and the question becomes \"how many edges is the shortest route\" \u2014 which is breadth-first search, unchanged, on a graph you have just invented.",
         "That invention is a choice, and it has a price. The example below builds the same graph two ways. Comparing every pair of words is the obvious construction and costs `n(n-1)/2` comparisons. Grouping words into buckets by wildcard pattern \u2014 the bucket for \"h, anything, t\" holds `hit` and `hot` \u2014 costs one insertion per letter position, so `n` times the word length. Both describe the same graph and both give the same answers on all 3,000 random word sets tested.",
         "What is worth noticing is that the clever one is not always cheaper. For three-letter words the crossover is at seven words, and below that the buckets do more work, not less. Over the small random sets in the example, buckets cost 43,275 insertions against 32,917 comparisons. The quadratic model wins at small `n` and loses catastrophically at large: at ten thousand words it is 49,995,000 comparisons against 30,000 insertions.",
@@ -4585,7 +4584,6 @@ func main() {
         "**What is a node?** Not \"what is a thing in this problem\" \u2014 what has to be known for the rest of the journey to be determined. If the legal-moves rule cannot be written from the node alone, the node is missing something.",
         "**What is an edge?** One legal move, and its cost if there is one. This is also where a problem stops being a graph problem: if the legal moves depend on the whole history rather than on the current node, no amount of searching will fix it, and the state has to grow until they do not.",
         "**Does the graph need to exist?** Materialise it when it is small, reused, or needs to be examined as a whole. Generate neighbours on demand when the space is large or unbounded \u2014 and then bound it deliberately, because an implicit graph will happily let you search a space that is missing the answer.",
-        "Everything after this lesson is what to do once those three are settled: the two representations and when each wins, the vocabulary that changes which algorithms apply, and the two traversals that between them answer a surprising fraction of every graph question there is.",
       ],
     },
   ],

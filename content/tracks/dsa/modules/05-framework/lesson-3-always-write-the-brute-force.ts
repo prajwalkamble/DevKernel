@@ -118,7 +118,6 @@ for (int i = 0; i < n; i++) {
       id: "oracle",
       heading: "The brute force as a test oracle",
       body: [
-        "Here is the use that people are most often unaware of, and it is the one that will save you the most time.",
         "You have two implementations: one obviously correct and slow, one fast and possibly wrong. Generate thousands of small random inputs and compare them. Any disagreement is a bug, and it comes with a minimal counterexample attached.",
         "This finds a category of bug that hand-picked tests structurally cannot. The examples you invent are the ones you thought of — but the bug is, by definition, in the case you did *not* think of. Random search does not share your blind spot.",
         "Three rules make it work. Keep the inputs **tiny** — length 0 to 8 — because a bug that exists at all almost always exists on a small input, and a small counterexample is one you can trace by hand. Keep the **alphabet small** — two or three distinct values — because that manufactures the duplicates and ties where bugs live. And **seed** the generator, so a failure is reproducible.",

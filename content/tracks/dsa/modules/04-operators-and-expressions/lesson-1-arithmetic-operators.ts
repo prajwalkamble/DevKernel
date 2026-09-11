@@ -52,7 +52,6 @@ print(7 // 2.0, type(7 // 2.0).__name__)`,
       id: "division-recap",
       heading: "Division, in one table",
       body: [
-        "Module 2 covered this as an arithmetic trap. Here it is as reference, because it is the operator you will get wrong most often and the two languages genuinely disagree.",
         "**Java `/` on two integers** truncates toward zero: `7 / 2` is 3, `-7 / 2` is −3.",
         "**Java `/` with any double** gives a double: `7 / 2.0` is 3.5.",
         "**Python `/`** always gives a float, even between integers: `7 / 2` is 3.5.",

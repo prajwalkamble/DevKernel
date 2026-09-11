@@ -668,8 +668,8 @@ bitCount       3
       ],
       pitfalls: [
         {
-          title: "`&` binds more loosely than `==` in C, C++, Java and Python",
-          body: "`flags & 2 != 0` parses as `flags & (2 != 0)`, which is `flags & 1` — a completely different question that silently returns a plausible answer. Always parenthesise: `(flags & 2) != 0`. This is one of the oldest bugs in C and it survives into every language that inherited the precedence table.",
+          title: "`&` binds more loosely than `!=` in C, C++ and Java",
+          body: "In C and C++, `flags & 2 != 0` parses as `flags & (2 != 0)`, which is `flags & 1` — a different question that silently returns a plausible answer. Java parses it the same way and then refuses to compile `int & boolean`. Python ranks `&` above the comparisons, so there it means `(flags & 2) != 0`. Parenthesise every mask test anyway: `(flags & 2) != 0` is correct in all four.",
         },
         {
           title: "`1 << 40` is zero in a 32-bit int",
@@ -705,7 +705,7 @@ bitCount       3
     "`n & -n` isolates the lowest set bit; `n & (n - 1)` clears it",
     "Kernighan's loop counts set bits in one iteration per set bit",
     "`>>` keeps the sign; use `>>>` in Java when the integer is a set",
-    "`&` binds looser than `==` — parenthesise every mask test",
+    "`&` binds looser than `==` in C, C++ and Java (not Python) — parenthesise every mask test",
     "`n ≤ 20` plus subsets is the signal to reach for a bitmask",
   ],
   status: "available",

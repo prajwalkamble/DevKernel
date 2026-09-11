@@ -341,7 +341,6 @@ func main() {
       body: [
         "The code has a `while` inside a `for`, which reads as O(n²). It is O(n), and the argument is one sentence: **each index is pushed exactly once and popped at most once**, so the total number of pops across the whole run is at most n.",
         "The inner loop can run many times on one iteration — a large value arriving after a long descending run clears the lot — but that is work *paid for* by the pushes that put them there. The total is bounded by the total number of pushes, which is n.",
-        "This is the same amortised argument as the two-stack queue, and it is worth having ready, because \"isn't that O(n²)?\" is the standard interview follow-up when you write this loop. Answering it crisply is most of the value of knowing the pattern.",
         "The general form: when a nested loop's iterations each consume something that was produced a bounded number of times, the total is linear regardless of how uneven the individual iterations are.",
       ],
       pitfalls: [

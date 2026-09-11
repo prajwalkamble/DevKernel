@@ -996,17 +996,6 @@ XOR has no formula, no division and cannot overflow.`,
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "That is the first module of Module 1, and it has a theme worth naming before moving on.",
-        "**Everything here was one array and two or three indices.** Compaction, partitioning, the flag, spiral boundaries, cyclic sort — none of them allocated anything, and all of them worked by maintaining an invariant about what each region of the array contains. That is the skill this module was actually teaching; the individual problems are consequences of it.",
-        "**The three habits to carry.** State the invariant in one sentence before writing the loop, and you will not get the pointer updates wrong. Test on the shapes that break boundary code — 1×1, single row, single column, non-square. And when the constraints say the values lie in 1 to n, stop and ask whether the array can index itself.",
-        "**On the sheet.** *Valid Anagram* is the counting move from lesson two, and *Contains Duplicate* is the same idea one level simpler. *Product of Array Except Self* is a two-pass in-place construction of exactly the kind lesson three set up, and it is the natural bridge into prefix sums. *Two Sum* is there for contrast — it is the first problem in the track where no amount of pointer discipline helps and you need a different structure entirely, which is what the hashing module is for.",
-        "**What comes next.** Two pointers takes the idea of indices moving under an invariant and adds a proof obligation: showing that moving a pointer discards nothing you needed. Everything after that — windows, prefix sums, binary search — is the same discipline applied to progressively less obvious invariants.",
-      ],
-    },
   ],
   interviewQuestions: [
     {

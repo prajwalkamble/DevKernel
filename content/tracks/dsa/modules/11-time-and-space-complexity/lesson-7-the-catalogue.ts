@@ -159,7 +159,6 @@ hash set O(n)              found=True  operations=    1,000
       id: "what-improvements-buy",
       heading: "What an improvement is actually worth",
       body: [
-        "Some perspective, so effort goes where it pays.",
         "**O(n²) → O(n log n)** is usually the difference between failing and passing. At n = 10⁶ it is 10¹² operations against 2 × 10⁷ — six orders of magnitude.",
         "**O(n log n) → O(n)** is a factor of about 20 at a million. Real, and rarely the difference between accepted and rejected. Worth doing when it falls out naturally; not worth contorting the code for.",
         "**O(n) → O(log n)** is enormous when it is possible, and it usually requires the data to be sorted or preprocessed — so it is really a trade against setup cost.",

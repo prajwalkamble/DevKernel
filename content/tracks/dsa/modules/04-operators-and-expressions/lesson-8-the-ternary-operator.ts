@@ -13,7 +13,6 @@ export const ternaryLesson: Lesson = {
     "Write a conditional expression in both languages",
     "Say what a ternary can do that an `if` statement cannot",
     "Recognise when nesting has made one unreadable",
-    "Close out the operators module with the rules that carry forward",
   ],
   sections: [
     {
@@ -137,21 +136,6 @@ print([grade_table(s) for s in scores])`,
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the operators module",
-      body: [
-        "Eight lessons on syntax that looks obvious. The reason it earns a module is that this is where wrong answers come from without error messages, and the recurring shape is worth naming: **an operator whose behaviour depends on its operand types, or on the sign of its inputs, or on where it sits in a larger expression.**",
-        "Six rules carry forward, and they cover almost everything in this module.",
-        "**Division truncates**, and Java and Python disagree on negatives.",
-        "**Modulo can be negative in Java**, so `Math.floorMod` whenever the result becomes an index.",
-        "**`==` on Java objects compares references**, so use `.equals`.",
-        "**Conditions short-circuit**, so their order is a correctness decision.",
-        "**Bracket bitwise operations that are compared**, because Java's precedence puts them on the wrong side.",
-        "**Give any expression with more than two operators a name**, so you can print it when it misbehaves.",
-        "Next is control flow — conditionals and loops — where these operators start doing real work.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -178,6 +162,5 @@ print([grade_table(s) for s in scores])`,
     "Two levels is the practical nesting limit; past that use `if`/`else if` or a lookup table",
     "A ternary whose branches have side effects is a misused statement",
     "Separating threshold data from logic survives requirement changes better than either form",
-    "The module's six rules: division truncates, modulo can be negative, `==` compares references, conditions short-circuit, bracket compared bitwise ops, name long expressions",
   ],
 };

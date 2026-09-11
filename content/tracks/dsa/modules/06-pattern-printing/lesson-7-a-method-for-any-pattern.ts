@@ -164,8 +164,6 @@ outer bound one short:
       heading: "When to stop",
       body: [
         "There is a large supply of these exercises and diminishing returns after about a dozen. You are done when you can look at a shape and say the row count and the per-row counts before reaching for the keyboard — and when a broken shape tells you which count is wrong rather than sending you back to the start.",
-        "That is the whole objective. Nested loop bounds should now be something you derive in a few seconds rather than something you adjust until the output looks right.",
-        "The next module is functions, where the loops you have been writing get names and start being called from elsewhere.",
       ],
     },
   ],

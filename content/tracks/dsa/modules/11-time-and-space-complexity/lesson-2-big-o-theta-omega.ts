@@ -72,7 +72,6 @@ that is exactly the definition of f(n) = O(n^2)`,
       id: "case-analysis",
       heading: "Notation and case are different questions",
       body: [
-        "This is the most common confusion in the topic and it is worth being precise about.",
         "**O, Ω and Θ are about bounds on a function.** **Best, average and worst case are about which input you are analysing.** They are independent axes, and you can combine them freely.",
         "Linear search: best case Θ(1) — it is the first element. Worst case Θ(n) — it is last or absent. Average case Θ(n) — about n/2 comparisons, and half of n is still linear.",
         "Saying \"the worst case is O(n)\" is a claim about the worst case, not a claim that the algorithm is sometimes faster. The two ideas are orthogonal, and interviewers do notice when they get merged.",

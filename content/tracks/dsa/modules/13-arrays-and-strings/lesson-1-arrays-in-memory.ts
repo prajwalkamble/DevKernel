@@ -19,7 +19,6 @@ export const arraysInMemoryLesson: Lesson = {
       id: "why-again",
       heading: "You have met arrays already — this is the other half",
       body: [
-        "Module 0 taught you to *use* an array: declare it, walk it, index it, reverse it in place. This module treats it as the thing algorithms are built on, and that starts with one question Module 0 deferred.",
         "**Why is `a[999999]` exactly as fast as `a[0]`?** Not \"because arrays are fast\" — because of a specific mechanism, and the mechanism explains several things that otherwise look arbitrary.",
         "An array is one contiguous block of memory holding elements of identical width. The array variable knows the address of the first element and the width of one element. That is all the information needed, because the address of element `i` is not searched for, it is *computed*: `base + i × width`.",
         "One multiply and one add, regardless of `i`. That is the whole of O(1) indexing — there is no lookup table, no traversal, no search. It also explains the two restrictions that come with it: every element must be the same width (or the multiply is wrong), and the block must be contiguous (or the addition lands somewhere else entirely).",
@@ -363,12 +362,10 @@ by more than 2x   : true`,
     },
     {
       id: "what-to-carry",
-      heading: "What to carry forward",
+      heading: "What the arithmetic and the contiguity buy",
       body: [
-        "Three things from this lesson get used constantly in the rest of Module 1.",
         "**Indexing is arithmetic, not search.** Every technique that computes an index instead of scanning for it — cyclic sort, counting sort, marking a value's presence by its own index, the bucket in a hash table — is trading on exactly this. When you see \"values are in the range 1 to n\", the reason it is a gift is that it lets you index by value.",
         "**Contiguity is a real advantage, and it does not appear in the complexity.** It is why an array beats a linked list at nearly everything in practice despite the linked list's better insertion complexity, and why you should be suspicious of a structure whose elements are scattered.",
-        "**Say complexity and constant factor separately.** They are different claims, they are improved by different means, and conflating them is how a good optimisation gets described as a wrong one.",
       ],
     },
   ],

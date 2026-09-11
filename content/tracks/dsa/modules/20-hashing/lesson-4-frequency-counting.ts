@@ -291,7 +291,7 @@ func main() {
       heading: "A map, or an array of counts?",
       body: [
         "When keys are drawn from a small known range — lowercase letters, digits, bytes, ASCII — a plain array indexed by `ch - 'a'` beats a hash map on every axis. No hashing, no boxing, contiguous memory, and the counts come back in sorted key order for free.",
-        "`int[] counts = new int[26]` is the standard move for lowercase-letter problems, and interviewers notice it. It is not premature optimisation; it is choosing the structure that matches the key space.",
+        "`int[] counts = new int[26]` is the standard move for lowercase-letter problems. It is not premature optimisation; it is choosing the structure that matches the key space.",
         "Use a map when the key space is large, unknown, or not an integer — arbitrary strings, coordinate pairs, objects. Use an array when the problem says \"lowercase English letters\", which it very often does.",
         "One caution: the array approach quietly assumes the alphabet. The moment the input can contain uppercase, Unicode, or spaces, `ch - 'a'` indexes out of bounds or silently corrupts a neighbouring count. Read the constraints before choosing.",
       ],
@@ -301,7 +301,7 @@ func main() {
       heading: "Counts as a signature",
       body: [
         "Two strings are anagrams exactly when their tallies are equal. That makes the tally a **canonical form**: a value that is identical for everything in the same class and different for everything outside it.",
-        "This is the bridge to the next lesson. Once a tally can stand in for a whole equivalence class, it can be used as a *map key* — and grouping falls out immediately.",
+        "Once a tally can stand in for a whole equivalence class, it can be used as a *map key* — and grouping falls out immediately.",
         "In practice you rarely hash the tally itself. Either compare counts directly, or turn the tally into something hashable — a sorted string, a tuple of 26 counts, a `frozenset` of items. Which one depends on what your language will let you use as a key, and cheaply.",
         "The subtraction trick is worth having as a reflex: rather than build two tallies and compare, build one, decrement with the second string, and check everything landed on zero. One map instead of two, and an early exit the moment a count goes negative.",
       ],

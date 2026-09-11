@@ -77,7 +77,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "Comments, Naming & Code You Can Read Tomorrow",
             "estimatedMinutes": 20,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           },
           {
             "slug": "errors-and-how-they-announce-themselves",
@@ -326,7 +326,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Ternary Operator, and Where It Helps",
             "estimatedMinutes": 15,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },
@@ -476,7 +476,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "From Patterns to Grids",
             "estimatedMinutes": 25,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },
@@ -551,7 +551,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "Stack Overflow: Causing One, Reading It, Fixing It",
             "estimatedMinutes": 20,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },
@@ -859,7 +859,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "the-framework",
         "trackSlug": "dsa",
         "title": "The Framework: From Statement to First Line of Code",
-        "description": "The module most courses do not have, and the reason their graduates still freeze. A repeatable seven-step method for taking apart a problem you have never seen: restate it, work it by hand, write the brute force, read the constraints backwards to a target complexity, let the dominant operation choose the structure, match the shape to a pattern, and only then write code. Six of the seven steps happen before you type anything. It ends by running all seven, from cold, on a problem that appears nowhere else in this track.",
+        "description": "A repeatable seven-step method for taking apart a problem you have never seen: restate it, work it by hand, write the brute force, read the constraints backwards to a target complexity, let the dominant operation choose the structure, match the shape to a pattern, and only then write code. Six of the seven steps happen before you type anything. It ends by running all seven, from cold, on a problem that appears nowhere else in this track.",
         "order": 12,
         "status": "available",
         "phase": "Bridge · The Problem-Solving Framework",
@@ -1009,7 +1009,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "bit-manipulation-and-math",
         "trackSlug": "dsa",
         "title": "Bit Manipulation, Math & Number Theory",
-        "description": "The two areas that feel like trivia until the problem in front of you is one of them — and then nothing else will do. Bits reframed as a set, so that `n ≤ 20` stops being a constraint and starts being an instruction; XOR's three identities and the family of problems they collapse into one loop; subset enumeration and the 3^n bound that makes it feasible. Then the number theory an interview actually reaches for: Euclid, sieves and factorisation, modular arithmetic with fast exponentiation and inverses, nCr under a prime modulus — and finally overflow, which is where a correct Python solution goes wrong on the way to Java.",
+        "description": "Bits reframed as a set, so that `n ≤ 20` stops being a constraint and starts being an instruction; XOR's three identities and the family of problems they collapse into one loop; subset enumeration and the 3^n bound that makes it feasible. Then the number theory an interview actually reaches for: Euclid, sieves and factorisation, modular arithmetic with fast exponentiation and inverses, nCr under a prime modulus — and finally overflow, which is where a correct Python solution goes wrong on the way to Java.",
         "order": 14,
         "status": "available",
         "phase": "Module 1 · Linear DSA",
@@ -1084,7 +1084,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "binary-search",
         "trackSlug": "dsa",
         "title": "Binary Search & Binary Search on the Answer",
-        "description": "The most-failed easy question there is, and then the technique that quietly solves a whole family of hard ones. The two loop conventions and why mixing them is where every off-by-one comes from; the boundary searches that answer \"first\", \"last\" and \"how many\"; the rotated and matrix variants; and then the reframe that matters most — searching the range of possible answers rather than the input, which turns \"minimise the maximum\" into the same twelve lines. Ends on real-valued precision, binary search as the inner step of a larger algorithm, and a peak-finding problem with no sorted input at all.",
+        "description": "The two loop conventions and why mixing them is where every off-by-one comes from; the boundary searches that answer \"first\", \"last\" and \"how many\"; the rotated and matrix variants; and then the reframe that matters most — searching the range of possible answers rather than the input, which turns \"minimise the maximum\" into the same twelve lines. Ends on real-valued precision, binary search as the inner step of a larger algorithm, and a peak-finding problem with no sorted input at all.",
         "order": 15,
         "status": "available",
         "phase": "Module 1 · Linear DSA",
@@ -1151,7 +1151,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet: Recognising Which Variant",
             "estimatedMinutes": 30,
             "status": "available",
-            "takeawayCount": 7
+            "takeawayCount": 6
           }
         ]
       },
@@ -1301,7 +1301,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet: Recognising a Window",
             "estimatedMinutes": 25,
             "status": "available",
-            "takeawayCount": 7
+            "takeawayCount": 6
           }
         ]
       },
@@ -1676,7 +1676,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet, and How to Not Get Lost",
             "estimatedMinutes": 30,
             "status": "available",
-            "takeawayCount": 6
+            "takeawayCount": 5
           }
         ]
       },
@@ -1751,7 +1751,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet",
             "estimatedMinutes": 25,
             "status": "available",
-            "takeawayCount": 6
+            "takeawayCount": 5
           }
         ]
       },
@@ -1759,7 +1759,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "trees",
         "trackSlug": "dsa",
         "title": "Trees & Binary Search Trees",
-        "description": "Where recursion stops being a party trick. Traversals, the ordering invariant that makes a BST searchable, and the balancing that stops it degenerating into a linked list. The three depth-first orders are taught as one function with the visit line moved, because that is what tells you which one a problem needs — context carried down is pre-order, summaries returned up is post-order, and that single question settles most tree problems. A full lesson goes to validating a BST, since the obvious local check returns a wrong answer rather than a slow one. Ends on serialisation, which forces precision about what a traversal actually records and why in-order alone can never rebuild a tree.",
+        "description": "Traversals, the ordering invariant that makes a BST searchable, and the balancing that stops it degenerating into a linked list. The three depth-first orders are taught as one function with the visit line moved, because that is what tells you which one a problem needs — context carried down is pre-order, summaries returned up is post-order, and that single question settles most tree problems. A full lesson goes to validating a BST, since the obvious local check returns a wrong answer rather than a slow one. Ends on serialisation, which forces precision about what a traversal actually records and why in-order alone can never rebuild a tree.",
         "order": 24,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -1984,7 +1984,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-foundations",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: Foundations",
-        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. From there it is the state as a sentence you can write down, the two halves of a recurrence and the base case people leave out, the same table filled in two orders, the rows that can be thrown away and what that costs, getting the actual answer back rather than its value, and a closing lesson on recognising a problem you have already solved wearing different clothes.",
+        "description": "Start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. From there it is the state as a sentence you can write down, the two halves of a recurrence and the base case people leave out, the same table filled in two orders, the rows that can be thrown away and what that costs, getting the actual answer back rather than its value, and a closing lesson on recognising a problem you have already solved wearing different clothes.",
         "order": 27,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2059,7 +2059,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-patterns",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: The Patterns",
-        "description": "The catalogue, and the module that converts \"I understood the solution\" into \"I found the solution\". Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. Eight lessons: the knapsack family and subset sum, the string-pair grid, longest increasing subsequence, grids, intervals, trees and rerooting, and the bitmask, digit and state-machine variants.",
+        "description": "Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. Eight lessons: the knapsack family and subset sum, the string-pair grid, longest increasing subsequence, grids, intervals, trees and rerooting, and the bitmask, digit and state-machine variants.",
         "order": 28,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2501,7 +2501,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Last Five Minutes: Closing, Behavioural Framing, and What to Ask",
             "estimatedMinutes": 30,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },

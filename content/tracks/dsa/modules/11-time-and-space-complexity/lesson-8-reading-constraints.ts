@@ -13,7 +13,6 @@ export const readingConstraintsLesson: Lesson = {
     "Infer the intended complexity from a stated input bound",
     "Use the mapping in both directions to check a solution before writing it",
     "Notice the secondary constraints that carry as much information",
-    "Close the module and the Module 0 track",
   ],
   sections: [
     {
@@ -113,17 +112,6 @@ budget: about 100,000,000 simple operations per second`,
         "**3. Check your idea against the target before writing it.** Realising a solution is too slow while thinking costs seconds; realising it after implementing costs the interview.",
         "**4. If the brute force fits, write the brute force.** A correct O(n²) solution under a bound of 1000 is a complete answer, and there are no points for unnecessary cleverness.",
         "**5. If nothing you have fits, the gap tells you what to look for.** Needing to get from O(n²) to O(n log n) points at sorting; from O(n²) to O(n) points at hashing or two pointers. The required improvement narrows the search.",
-      ],
-    },
-    {
-      id: "module-close",
-      heading: "Closing the module — and Module 0",
-      body: [
-        "That completes complexity analysis, and with it the whole of Module 0.",
-        "**What you have now.** The language constructs — variables, types, operators, control flow, functions, recursion. Arrays and strings and the loops that go over them. The numeric foundations, including the two representations that lie. A survey of every data structure and what each costs. And the vocabulary to say what any of it costs and why.",
-        "**The three habits worth carrying into Module 1.** Ask what each operation inside a loop costs before you write the loop. Read the constraints before the statement. State the brute force, then climb the ladder.",
-        "**What changes next.** Module 0 explained the tools; Module 1 uses them. The structures get implemented rather than surveyed, the patterns get named and practised, and the problems stop being illustrations and start being the point.",
-        "The last thing to say about complexity is that it is not an academic exercise appended to programming. It is the only reason to prefer one correct program over another, and every choice in the rest of this course is made on the grounds you now have the vocabulary to state.",
       ],
     },
   ],

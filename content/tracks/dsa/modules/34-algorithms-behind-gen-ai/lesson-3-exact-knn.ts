@@ -2105,7 +2105,7 @@ func main() {
         "The distances column is the whole point of the lesson. It is `n`, for every version, at every size, and no data structure in this track changes it.",
         "In the program above a distance is eight multiplies. In a real system it is 768 or 1536, and `n` is a million or a billion. One query against a million 1536-dimensional vectors is about 1.5 billion multiply-adds \u2014 per query. The heap is irrelevant at that point; the floor is the scanning, and the floor is set by the requirement to look at everything.",
         "That requirement is not an implementation detail. It is what *exact* means. An algorithm that guarantees it found the true nearest neighbour cannot skip a candidate, because the one it skipped might have been the nearest.",
-        "So the only way past the floor is to stop guaranteeing the answer. That is the entire subject of the next two lessons, and it is worth arriving at it the way the field did: not as a clever trick, but as the only remaining option once you have made the bookkeeping cost 1.04 comparisons per document and it did not help.",
+        "So the only way past the floor is to stop guaranteeing the answer.",
       ],
     },
   ],

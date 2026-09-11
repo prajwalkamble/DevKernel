@@ -555,7 +555,6 @@ func main() {
       body: [
         "It looks quadratic: a `for` over `right` with a `while` over `left` inside. It is not, and the argument is the same amortised one the arrays module used for cyclic sort.",
         "**`left` only ever increases, and it can never exceed `n`.** The inner `while` may run many times on one iteration and zero times on the next, but summed over the entire outer loop it executes at most `n` times in total. So the two pointers together do at most `2n` moves.",
-        "Say this out loud in an interview. \"The inner loop looks nested but `left` is monotonic, so the total work is O(n)\" is the sentence that gets the complexity question right, and people who have only memorised the shape cannot produce it.",
       ],
       pitfalls: [
         {

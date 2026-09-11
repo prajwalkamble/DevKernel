@@ -145,14 +145,6 @@ public class Main {
         },
       ],
     },
-    {
-      id: "closing",
-      heading: "Closing the module",
-      body: [
-        "That is input, output and data types. The theme running through all eight lessons is the same: **fixed-width types are fast because they are small, and they lie when you exceed them.** Java exposes that directly and Python hides it for integers while keeping it for floats.",
-        "Three things to carry forward. Read the constraints and estimate whether your answer fits before you choose a type. Never compare computed floating-point values with `==`. And when a problem says \"modulo 10⁹ + 7\", it is telling you the intended answer is counting something enormous — and handing you the tool that makes it fit.",
-      ],
-    },
   ],
   interviewQuestions: [
     {

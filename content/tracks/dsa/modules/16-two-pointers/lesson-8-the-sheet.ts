@@ -41,7 +41,6 @@ export const twoPointerSheetLesson: Lesson = {
       body: [
         "Before writing the loop, answer this: **when I move a pointer, what set of candidates am I discarding, and why is none of them the answer?**",
         "If you can answer it in a sentence, write the loop. If you cannot, one of three things is true: the input needs sorting first, the problem needs a hash map instead, or it is a sliding window and you should be maintaining a summary of the region between the pointers rather than just walking them.",
-        "That question is also, almost word for word, what a good interviewer will ask you after you finish. Answering it unprompted is worth more than finishing thirty seconds sooner.",
       ],
       pitfalls: [
         {

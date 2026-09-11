@@ -116,14 +116,6 @@ public class Main {
         "This track shows every algorithm in both languages, so reading the one you did not choose costs you nothing and is worth doing occasionally. Write in one.",
       ],
     },
-    {
-      id: "commit",
-      heading: "Committing properly",
-      body: [
-        "Having chosen, the rest of this module is about making that choice pay. Seven more lessons, each on one thing you will do constantly: the arithmetic traps, building strings, the collections and what they cost, iterating, sorting with a custom order, reading input fast, and the template you start every problem from.",
-        "By the end you should be able to write all twelve core operations without looking anything up. That is what \"stop fighting the language\" means, and it is worth two or three hours to get there once rather than paying a tax on every problem for a year.",
-      ],
-    },
   ],
   interviewQuestions: [
     {

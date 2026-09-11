@@ -60,7 +60,6 @@ export const linkedListSheetLesson: Lesson = {
         "**Draw the list, with the pointers as arrows.** Four or five nodes is plenty. Then draw the state you want *after* the operation. The code is the difference between the two pictures, and writing it without drawing them is guessing.",
         "**Name what each variable points at, in words, before writing the loop.** \"`prev` is the last node of the reversed part; `cur` is the node being moved; `nxt` holds the rest.\" If you cannot state it, the loop will not be right, and the sentence usually reveals a missing variable.",
         "**Assign in dependency order.** Before any assignment, ask what still needs the value about to be overwritten. If something does, save it first. That single question is the entire content of \"save `next` before rewiring\".",
-        "One more, for interviews specifically: **say the invariant out loud** as you write. \"After each iteration, everything before `cur` is reversed.\" Interviewers are largely assessing whether you reason about pointers or pattern-match on them, and stating the invariant is the clearest evidence of the former.",
       ],
       pitfalls: [
         {
@@ -105,7 +104,6 @@ export const linkedListSheetLesson: Lesson = {
     "Name what each pointer refers to before writing the loop",
     "Save anything still needed before you overwrite it",
     "Check empty, one, two, head, tail and all-matching every time",
-    "State the invariant out loud — it is what is being assessed",
   ],
   status: "available",
 };

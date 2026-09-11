@@ -21,7 +21,6 @@ export const countingBucketRadixLesson: Lesson = {
       body: [
         "Tally how many of each key there are, turn the tallies into running totals so each key knows where its block ends, then place elements into position. O(n + k) for keys in 0..k, and no comparison anywhere.",
         "The stability detail matters more than it looks. Walking the input **backwards** while decrementing the running count puts the last equal element at the end of its block, preserving input order. Forwards gives a correct sort with equal elements reversed — fine on bare integers, fatal inside radix sort.",
-        "It is worth writing once, because the running-total step is the same prefix-sum idea that appears throughout this track, and because the visualization of it makes the placement step click in a way the code does not.",
       ],
       visual: {
         id: "radix-visual",
@@ -79,7 +78,6 @@ export const countingBucketRadixLesson: Lesson = {
         "\"colours are 0, 1 or 2\" — the Dutch National Flag problem, which is counting sort's idea collapsed into a single in-place pass with three pointers.",
         "\"fixed-length strings\" or \"32-bit integers, n in the millions\" — radix sort.",
         "\"frequencies\" — bucket by count, as in Top K Frequent.",
-        "When you see one of these, say it out loud in an interview even if you then use the library sort. Recognising that the key range permits a linear sort is the observation being tested, whether or not you implement it.",
       ],
     },
   ],

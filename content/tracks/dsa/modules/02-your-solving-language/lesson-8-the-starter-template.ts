@@ -227,7 +227,6 @@ public class Main {
         "A concrete check, worth doing honestly. Close this page and write, from memory, without looking anything up:",
         "The starter file for your language. A hash map from string to list, populated with two entries. A frequency count of a list of integers. The top two most frequent values. A sort by length, then alphabetically. A BFS-shaped queue with pushes and pops at the right ends. A min-heap with three pushes and one pop. A binary search for the first index at or above a value.",
         "Anything that made you pause is what to drill. Not by reading about it — by typing it five times, on five separate occasions, until the pause is gone. That is a genuinely small amount of work and it removes a tax you would otherwise pay on every problem for the next year.",
-        "That completes the language module. From here on, this track assumes the twelve operations are available to you without thought, and spends its attention entirely on the algorithms.",
       ],
     },
   ],

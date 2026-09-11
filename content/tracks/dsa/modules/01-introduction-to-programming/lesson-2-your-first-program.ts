@@ -202,10 +202,10 @@ on its own line`,
       id: "when-it-does-not-run",
       heading: "When it does not run",
       body: [
-        "Three failures account for nearly every first-program problem. All three are worth causing on purpose once, right now, so that you recognise them instantly later rather than at 1am.",
+        "Three failures account for nearly every first-program problem. All three are worth causing on purpose once, so that you recognise them instantly later.",
         "**Command not found.** The language is not installed, or not on your PATH. Nothing to do with your code — the file was never even read.",
         "**A syntax error.** Your text is not valid in the language: a missing bracket, a missing semicolon, a misspelled keyword. The message names a line number; start there and look at the line *above* it too, since an unclosed bracket is reported where the confusion becomes undeniable rather than where it started.",
-        "**Wrong directory.** `python3 main.py` from a folder that does not contain `main.py` gives \"No such file or directory\". Use `ls` (or `dir` on Windows) to check where you actually are. This one is embarrassingly common and takes people much longer than it should.",
+        "**Wrong directory.** `python3 main.py` from a folder that does not contain `main.py` gives \"No such file or directory\". Use `ls` (or `dir` on Windows) to check where you actually are.",
       ],
       examples: [
         {
@@ -222,14 +222,6 @@ SyntaxError: '(' was never closed`,
           explanation:
             "Notice that the first line did *not* print, even though it was perfectly valid and Python is an interpreted language. A syntax error is different from the runtime error you saw in the last lesson: Python must parse the whole file before it can run any of it, so broken *grammar* stops everything, while a broken *name* only stops things when reached. Notice too that the error points at line 2 rather than line 3 — it names where the unclosed bracket opened.",
         },
-      ],
-    },
-    {
-      id: "which-to-use",
-      heading: "Which one should you actually pick?",
-      body: [
-        "For now: run both, for a week or two, while the programs are small. It costs almost nothing and it makes the next module — where you choose one properly — a decision based on experience rather than on what someone told you.",
-        "The short version of that decision, so it is not hanging over you: **Python** is less to type, has the more forgiving standard library, and gets you to a working answer faster, which is why most people should practise in it. **Java** is more verbose and makes the structures visible, which some people find clarifying, and it is what a large share of interview loops at big companies are conducted in. Neither is wrong. Choosing one and stopping the deliberation is what matters, and that is what the next module is for.",
       ],
     },
   ],

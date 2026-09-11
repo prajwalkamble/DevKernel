@@ -13,7 +13,7 @@ export const dsaFrameworkModule: ModuleDefinition = {
   slug: "the-framework",
   title: "The Framework: From Statement to First Line of Code",
   description:
-    "The module most courses do not have, and the reason their graduates still freeze. A repeatable seven-step method for taking apart a problem you have never seen: restate it, work it by hand, write the brute force, read the constraints backwards to a target complexity, let the dominant operation choose the structure, match the shape to a pattern, and only then write code. Six of the seven steps happen before you type anything. It ends by running all seven, from cold, on a problem that appears nowhere else in this track.",
+    "A repeatable seven-step method for taking apart a problem you have never seen: restate it, work it by hand, write the brute force, read the constraints backwards to a target complexity, let the dominant operation choose the structure, match the shape to a pattern, and only then write code. Six of the seven steps happen before you type anything. It ends by running all seven, from cold, on a problem that appears nowhere else in this track.",
   order: 12,
   status: "available",
   phase: "Bridge · The Problem-Solving Framework",

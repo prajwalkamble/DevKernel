@@ -214,15 +214,6 @@ degenerate tree  n=100,000  depth 100,000  OVERFLOWS
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "Eight lessons on functions, and the thread through them is that **a function is a boundary**. What crosses it is arguments in and a return value out; everything else — globals, mutated parameters, printing — is a leak that makes the function harder to test, unsafe to memoise, and unreliable inside a recursion.",
-        "That boundary is also literally a stack frame, which is why the same idea explains both good design and the depth limit.",
-        "Next is arrays and strings, where these functions start operating on real data, and where the in-place techniques depend on understanding exactly which changes the caller will see.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -249,6 +240,5 @@ degenerate tree  n=100,000  depth 100,000  OVERFLOWS
     "Fixes in order: correct the recursion, convert to iteration, use an explicit stack, raise the limit",
     "Raising the limit is last — unavailable in interviews and on many judges",
     "Logarithmic depth is always safe; linear depth overflows at realistic input sizes",
-    "A function is a boundary: arguments in, return value out, and everything else is a leak",
   ],
 };

@@ -70,7 +70,7 @@ export const constraintsLesson: Lesson = {
 budget used: 100,000,000 operations per second
 the crossover is between n = 10,000 and n = 50,000`,
           explanation:
-            "The counts are exact and the budget is the rule of thumb, so the last column is the decision. Note where the line falls: **a nested pair loop is fine up to about n = 10,000 and hopeless by n = 50,000**, which is exactly why problem setters cluster their constraints around those two values. Measured on the machine this course was written on, the Java version of that n = 10,000 loop takes about 170 ms — comfortably inside a one-second limit, and consistent with the budget being conservative for tight primitive loops.",
+            "The counts are exact and the budget is the rule of thumb, so the last column is the decision. Note where the line falls: **a nested pair loop is fine up to about n = 10,000 and hopeless by n = 50,000**, which is exactly why problem setters cluster their constraints around those two values. Measured on the machine this course was written on, the Java version of that n = 10,000 loop takes about 160 ms — comfortably inside a one-second limit, and consistent with the budget being conservative for tight primitive loops.",
         },
         {
           id: "python-budget",
@@ -130,7 +130,7 @@ O(n): quadrupling n should multiply the time by about 4
 
 that gap -- 16x against 4x -- is what a complexity class means`,
           explanation:
-            "This asserts the *shape* rather than printing milliseconds, because milliseconds are not reproducible — they depend on the machine, the load and whether a JIT has warmed up. The shape is reproducible, and it is what the complexity class actually claims: quadrupling n multiplies a quadratic time by sixteen and a linear time by four, and the threshold of 8 sits in the wide gap between them. On the machine this course was written on, the interpreted quadratic loop at n = 10,000 takes roughly 5 seconds against about 0.17 seconds for the same loop in Java — one to two orders of magnitude, so budget nearer 10⁷ interpreted operations per second in Python than 10⁸. The fix is rarely to switch languages; it is to push the inner loop into C with built-ins, `Counter`, slicing and comprehensions.",
+            "This asserts the *shape* rather than printing milliseconds, because milliseconds are not reproducible — they depend on the machine, the load and whether a JIT has warmed up. The shape is reproducible, and it is what the complexity class actually claims: quadrupling n multiplies a quadratic time by sixteen and a linear time by four, and the threshold of 8 sits in the wide gap between them. On the machine this course was written on, the interpreted quadratic loop at n = 10,000 takes roughly 4.7 seconds against about 0.16 seconds for the same loop in Java — one to two orders of magnitude, so budget nearer 10⁷ interpreted operations per second in Python than 10⁸. The fix is rarely to switch languages; it is to push the inner loop into C with built-ins, `Counter`, slicing and comprehensions.",
         },
       ],
       pitfalls: [
@@ -220,7 +220,7 @@ Two more that are not about n at all:
       id: "practising-it",
       heading: "Making it automatic",
       body: [
-        "This step should eventually take five seconds and happen without deciding to. The drill that gets you there is to read constraint blocks *without* the problems attached — take ten problems, cover the statements, and write down what complexity each one is asking for and which techniques that leaves. You will be right most of the time, which is a surprising and useful thing to discover about yourself.",
+        "This step should eventually take five seconds and happen without deciding to. The drill that gets you there is to read constraint blocks *without* the problems attached — take ten problems, cover the statements, and write down what complexity each one is asking for and which techniques that leaves.",
         "The habit is also directly visible in an interview. \"n is up to ten to the fifth, so I need at least n log n — the O(n²) I just described will not do\" is one sentence, and it tells the interviewer you are working from constraints rather than from a list of memorised solutions. It is one of the cheapest strong signals available.",
       ],
     },
@@ -244,14 +244,14 @@ Two more that are not about n at all:
     {
       question: "Does the language you write in change what complexity you need?",
       answer:
-        "It does not change the complexity, but it changes the constant enough to change the outcome. The same nested loop I measured ran 21 ms in Java and about 5.7 seconds in Python at n = 10,000 — roughly 270×. So in Python I budget around 10⁷ interpreted operations per second rather than 10⁸, and I push work into built-ins like `Counter`, `sorted` and slicing, which run in C. Same algorithm, and the difference between passing and timing out.",
+        "It does not change the complexity, but it changes the constant enough to change the outcome. The same nested loop I measured ran about 160 ms in Java and about 4.7 seconds in Python at n = 10,000 — roughly 30×. So in Python I budget around 10⁷ interpreted operations per second rather than 10⁸, and I push work into built-ins like `Counter`, `sorted` and slicing, which run in C. Same algorithm, and the difference between passing and timing out.",
     },
   ],
   takeaways: [
     "The constraint block is the setter telling you which solution is intended; read it backwards from n to a complexity class",
     "Plan with about 10⁸ simple operations per second — tight numeric loops beat that, anything touching a hash map does not",
     "n ≤ 20 is almost a signature for subsets and bitmasks; n ≤ 10⁹ means you cannot look at the input at all",
-    "The same nested loop measured 21 ms in Java and 5,669 ms in Python at n = 10,000 — budget about 10⁷/second in Python and lean on built-ins",
+    "The same nested loop measured about 160 ms in Java and about 4,700 ms in Python at n = 10,000 — budget about 10⁷/second in Python and lean on built-ins",
     "A space bound is a ban on a technique, placed there to force a better one",
     "A stated complexity is the least ambiguous hint in the statement; very few things produce a log",
     "Read the bound on the values too — largest value times largest count decides whether you need 64 bits",

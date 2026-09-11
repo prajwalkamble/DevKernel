@@ -23,7 +23,6 @@ export const amortisedAnalysisLesson: Lesson = {
         "Appending to a dynamic array is usually O(1) and occasionally O(n), when the array is full and everything gets copied. Quoting the worst case — O(n) — would be technically true and badly misleading, because that expensive append pays for the n cheap ones that follow.",
         "**Amortised cost is the total cost of a sequence of operations, divided by the number of operations.** If n appends cost O(n) in total, each one is amortised O(1), even though no individual append is guaranteed to be cheap.",
         "This is not a probabilistic claim. It is a **worst-case guarantee over a sequence**: any n appends, from any starting state, cost O(n) total. Nothing is being averaged over inputs, and there is no assumption about what the data looks like.",
-        "That distinction is what separates it from average case, and it is the thing interviewers check.",
       ],
       examples: [
         {
@@ -76,7 +75,6 @@ n = 1,000,000   total  2,048,575   average 2.049   worst   524,289
       id: "why-doubling",
       heading: "Why doubling is what makes it work",
       body: [
-        "The doubling is not incidental. Run the argument and it becomes clear why nothing else would do.",
         "With doubling, the copies happen at sizes 1, 2, 4, 8, …, n. Their total is 1 + 2 + 4 + … + n, and **a geometric series sums to less than twice its largest term** — so the total copying is under 2n. Spread over n appends, that is under 2 copies each: a constant.",
         "The table above confirms it — a million appends cost 2,048,575 copy-and-write operations, just over 2n.",
         "**Growing by a fixed amount instead breaks it.** Adding ten slots at a time means reallocating every ten elements, and the copies are 10 + 20 + 30 + … which is an arithmetic series summing to O(n²). Amortised over n appends that is O(n) each, not O(1).",

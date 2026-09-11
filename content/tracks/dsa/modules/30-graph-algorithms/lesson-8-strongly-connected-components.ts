@@ -3624,7 +3624,7 @@ func main() {
       pitfalls: [
         {
           title: "Running a topological sort on the graph instead of the condensation",
-          body: "A directed graph with a cycle has no topological order, and both algorithms from the previous lesson correctly refuse. The condensation always has one \\u2014 3,000 of 3,000 here \\u2014 so the fix is to condense first, not to give up.",
+          body: "A directed graph with a cycle has no topological order, and both algorithms from the previous lesson correctly refuse. The condensation always has one — 3,000 of 3,000 here — so the fix is to condense first, not to give up.",
         },
         {
           title: "Keeping duplicate edges in the condensation",

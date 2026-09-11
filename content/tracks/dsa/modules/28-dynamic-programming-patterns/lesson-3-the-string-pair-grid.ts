@@ -19,11 +19,10 @@ export const stringPairGridLesson: Lesson = {
       id: "one-grid-six-readings",
       heading: "One grid, six readings",
       body: [
-        "The last two lessons were about one additive budget. This one is about two sequences, and it is the densest region of the catalogue \u2014 a dozen named interview problems sit on top of a single grid.",
         "The state is always the same: **a prefix of each string**, so the table is `(len(a) + 1)` by `(len(b) + 1)` and the cell at `(i, j)` is the answer for `a[:i]` against `b[:j]`. The transition always looks at exactly one pair of characters, `a[i-1]` against `b[j-1]`. What changes between problems is only which moves are legal and what each one costs.",
         "So rather than write six functions, the example below writes the grid once and switches on those two things. Six readings, and each is scored against its own exhaustive search \u2014 subsequence enumeration for most, and a breadth-first walk over single edits for edit distance, which is deliberately not another table.",
         "All six agree on 400 of 400 random pairs. The three-line summary of the differences: **a match is free** for LCS and edit distance, **costs one** for the supersequence; **either side may drop** in every reading but one; and the substring reading is the exception that resets to zero on a mismatch, because contiguity is exactly the constraint that a subsequence does not have.",
-        "That last one also has a trap in it, which I walked into while writing this. Every other reading is answered by the bottom-right cell. Longest common **substring** is not \u2014 its cell means \"the run ending exactly here\", so the answer is the largest cell anywhere in the grid. Reading the last cell instead gave 0 where the answer was 2, on the very first pair. Module 27 lesson 3 says the answer is not always the last cell; this is what that looks like in practice.",
+        "That last one also has a trap in it. Every other reading is answered by the bottom-right cell. Longest common **substring** is not \u2014 its cell means \"the run ending exactly here\", so the answer is the largest cell anywhere in the grid. Reading the last cell instead gave 0 where the answer was 2, on the very first pair. Module 27 lesson 3 says the answer is not always the last cell; this is what that looks like in practice.",
       ],
       examples: [
         {
@@ -3743,7 +3742,7 @@ func main() {
     {
       question: "What is the difference between longest common subsequence and longest common substring?",
       answer:
-        "One branch, and where you read the answer. A subsequence may skip, so on a mismatch the cell carries forward the better of its two neighbours. A substring must be contiguous, so on a mismatch the cell resets to zero \u2014 and because the cell then means \"the run ending exactly here\", the answer is the largest cell anywhere in the table rather than the bottom-right one. That second half is easy to miss: I wrote it that way while preparing this and got 0 where the answer was 2. The word to watch for in a statement is contiguous or consecutive.",
+        "One branch, and where you read the answer. A subsequence may skip, so on a mismatch the cell carries forward the better of its two neighbours. A substring must be contiguous, so on a mismatch the cell resets to zero \u2014 and because the cell then means \"the run ending exactly here\", the answer is the largest cell anywhere in the table rather than the bottom-right one. That second half is easy to miss: reading the last cell gives 0 where the answer is 2. The word to watch for in a statement is contiguous or consecutive.",
     },
     {
       question: "How would you handle edit distance where the operations have different costs?",

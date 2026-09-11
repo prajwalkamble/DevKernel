@@ -21,7 +21,6 @@ export const printingAndFormattingLesson: Lesson = {
       heading: "Why this gets its own lesson",
       body: [
         "Because output is compared character by character. A problem that asks for an answer to two decimal places and receives `3.141592653589793` is wrong, with a correct algorithm behind it. So is one that prints `[1, 2, 3]` where `1 2 3` was wanted.",
-        "This is the least intellectually interesting way to fail, and it is common enough to be worth twenty minutes.",
       ],
     },
     {

@@ -13,7 +13,6 @@ export const orderedAndChoosingLesson: Lesson = {
     "Use a sorted map's floor, ceiling and range queries",
     "Substitute `bisect` over a sorted list where Python has no TreeMap",
     "Pick a structure from the operations a problem needs",
-    "Close the module with the whole cost table in one place",
   ],
   sections: [
     {
@@ -178,16 +177,6 @@ Nothing applies? Use a dynamic array. It is the right default.`,
           explanation:
             "Seven questions covering nearly every choice you will make. The one that catches people is the third: needing both keyed lookup *and* order is common — sliding windows over timestamps, calendar problems, closest-value queries — and reaching for a hash map there produces a solution that works and is O(n) where it should be O(log n).",
         },
-      ],
-    },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "You now have the map. Every structure in Module 1 is one of these, examined in more depth or specialised for a particular problem.",
-        "**The habit worth keeping:** when you read a problem, list the operations the algorithm will perform and how often. Then pick the structure whose cheap operations match your frequent ones. That is the entire skill, and it beats memorising which structure goes with which problem name.",
-        "**The one thing to internalise:** every structure buys speed somewhere by giving it up elsewhere. When one looks free, find the price — it is usually memory, ordering, or the ability to search.",
-        "One module remains before Module 1: complexity analysis, which gives you the vocabulary this lesson has been borrowing all the way through. After that, the structures get built rather than surveyed.",
       ],
     },
   ],

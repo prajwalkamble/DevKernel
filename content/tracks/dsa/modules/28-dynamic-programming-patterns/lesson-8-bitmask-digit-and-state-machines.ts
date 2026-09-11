@@ -3793,7 +3793,7 @@ func main() {
       id: "the-whole-catalogue",
       heading: "The whole catalogue, and what to do when nothing fits",
       body: [
-        "That closes the module, so here is the whole catalogue in one place. Every one of these is module 27's method \u2014 find the state, find the transition, check the two preconditions, decide where the answer lives \u2014 with a different answer to the first question.",
+        "Every pattern in this module is module 27's method \u2014 find the state, find the transition, check the two preconditions, decide where the answer lives \u2014 with a different answer to the first question.",
         "**A prefix and a budget**: knapsack and subset sum, lessons 1 and 2. Pseudo-polynomial, because the table is indexed by a value.",
         "**A prefix of each of two sequences**: the string-pair grid, lesson 3. Genuinely polynomial, because both axes are lengths.",
         "**An index that names an ending**: longest increasing subsequence, lesson 4, and the sorted reductions that feed it.",

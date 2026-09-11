@@ -366,7 +366,7 @@ func main() {
         "**When references must stay valid.** A vector reallocating invalidates every pointer into it; list nodes do not move. Intrusive lists in kernels and allocators rely on this.",
         "**When splicing whole ranges.** Moving a run of elements between lists is a constant number of pointer updates regardless of length.",
         "**When you are building another structure.** Hash table chains, adjacency lists, free lists in allocators and the queue behind a scheduler are all linked lists wearing another name.",
-        "Outside these, reach for a dynamic array. In interviews, however, the list is everywhere — because pointer manipulation is where sloppy reasoning becomes visible immediately, which is the honest reason this module exists.",
+        "Outside these, reach for a dynamic array.",
       ],
       visual: {
         id: "doubly-visual",

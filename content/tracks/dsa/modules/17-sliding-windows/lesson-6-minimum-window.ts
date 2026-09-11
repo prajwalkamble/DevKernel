@@ -69,7 +69,6 @@ export const minimumWindowLesson: Lesson = {
         "**Permutation in String** and **Find All Anagrams in a String** are the *fixed*-size cousins: the window is exactly `len(p)` wide, so there is no shrink loop, only a one-in-one-out step.",
         "**Longest Substring with At Most K Distinct Characters** is the longest-direction version with a simpler state.",
         "**Substring with Concatenation of All Words** is the same idea with words instead of characters, and needs a separate window per starting offset within a word length.",
-        "Meeting minimum-window-substring first makes all three read as simplifications, which is the reason it is worth the effort even though it is the hardest.",
       ],
     },
   ],

@@ -23,7 +23,7 @@ export const lowerBoundLesson: Lesson = {
         "There are **n! possible orderings** of n distinct elements, and the algorithm must be able to reach every one of them — otherwise there is some input it sorts wrongly. So the tree needs at least n! leaves.",
         "A binary tree of height h has at most 2^h leaves. So `2^h ≥ n!`, which gives `h ≥ log₂(n!)`.",
         "By Stirling's approximation `log₂(n!)` is `Θ(n log n)`. The height of the tree is the number of comparisons in the worst case, so **every comparison sort needs Ω(n log n) comparisons on some input**.",
-        "The argument is worth being able to reproduce, because it is one of the few lower bounds in the syllabus and interviewers do ask for it. The one-line version: *there are n! answers, each comparison halves the possibilities, so you need log₂(n!) ≈ n log n of them*.",
+        "The one-line version: *there are n! answers, each comparison halves the possibilities, so you need log₂(n!) ≈ n log n of them*.",
       ],
     },
     {

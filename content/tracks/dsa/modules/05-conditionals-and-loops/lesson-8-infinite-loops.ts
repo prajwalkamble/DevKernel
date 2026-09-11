@@ -189,15 +189,6 @@ sqrt(1000) = 31.622777  in 9 passes
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the control-flow module",
-      body: [
-        "Eight lessons on branching and repetition, which between them are most of what a program does.",
-        "The through-line worth keeping: **a loop is only as trustworthy as the two sentences you can say about it.** The invariant says what it knows so far; the termination measure says why it stops. A loop with both is one you can defend on a whiteboard; a loop with neither is one you adjusted until the tests passed.",
-        "Next is pattern printing, which is nothing but nested loops with immediate visual feedback — the fastest way to make everything in this module automatic.",
-      ],
-    },
   ],
   interviewQuestions: [
     {

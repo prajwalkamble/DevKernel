@@ -29,7 +29,7 @@ export const windowStateLesson: Lesson = {
       id: "small-alphabet",
       heading: "When the alphabet is small, use an array",
       body: [
-        "For lowercase English letters, `int[26]` beats a `HashMap<Character, Integer>` — no hashing, no boxing, contiguous memory, and comparing two windows is a 26-element loop rather than a map equality check. On a hot inner loop this is a several-fold difference, and interviewers notice.",
+        "For lowercase English letters, `int[26]` beats a `HashMap<Character, Integer>` — no hashing, no boxing, contiguous memory, and comparing two windows is a 26-element loop rather than a map equality check. On a hot inner loop this is a several-fold difference.",
         "The pattern is `count[ch - 'a']++`. Keep a separate `distinct` integer if you need the count of nonzero entries, since an array has no `size()`.",
         "Reach for a hash map when the alphabet is genuinely large or unknown — arbitrary integers, Unicode, or strings as keys.",
       ],
@@ -40,7 +40,6 @@ export const windowStateLesson: Lesson = {
       body: [
         "\"Find all anagrams of `p` in `s`\" is a fixed-size window over `s` where the state is a letter count, and the test is whether it equals `p`'s letter count.",
         "Comparing two 26-element arrays each step is O(26) — technically constant, and fine. But there is a neater way: keep a single integer `matches` counting how many of the 26 letters currently have the right count. Update it when a letter enters and when one leaves, and the window is an anagram exactly when `matches == 26`. That is O(1) per step and it is the same idea as `missing` in minimum-window-substring.",
-        "Both are acceptable answers. Knowing the second one is what turns \"correct\" into \"optimal\", and the reasoning transfers to every problem where you are testing one map against another.",
       ],
       pitfalls: [
         {

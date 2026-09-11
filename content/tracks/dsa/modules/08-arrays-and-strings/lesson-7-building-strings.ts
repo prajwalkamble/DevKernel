@@ -20,7 +20,6 @@ export const buildingStringsLesson: Lesson = {
       id: "four-ways",
       heading: "Four ways, and when each is right",
       body: [
-        "Module 2 established the rule: never build a string with `+` in a loop. This lesson is the positive version — what to do instead, and how to pick.",
         "**Concatenation with `+`** — right for a fixed, small number of pieces. `\"answer: \" + n` is clear and costs nothing. The problem is repetition, not the operator.",
         "**A buffer** — `StringBuilder` in Java, a list plus `join` in Python. Right whenever the number of pieces depends on the input.",
         "**`join`** — right when you already have the pieces in a collection and want a separator between them. It is the shortest correct answer more often than people expect.",

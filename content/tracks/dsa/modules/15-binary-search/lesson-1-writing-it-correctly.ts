@@ -20,9 +20,7 @@ export const writingItCorrectlyLesson: Lesson = {
       id: "why-hard",
       heading: "Why an easy idea is a hard function",
       body: [
-        "Jon Bentley reported that when he set professional programmers the task of writing binary search, about **ninety per cent** produced a buggy version — given as much time as they wanted, with no compiler pressure. Bentley's own published version, and the one in the JDK, both carried an overflow bug for years.",
         "The idea is trivial: look at the middle, throw away half. The difficulty is entirely in the boundaries, and the reason people get them wrong is that they half-remember two different conventions and blend them.",
-        "So this lesson does one thing: names both conventions, states the invariant each one maintains, and insists you pick one.",
       ],
     },
     {

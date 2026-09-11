@@ -175,7 +175,7 @@ the real log10 is just under 15, but is not representable`,
       heading: "The family of problems",
       body: [
         "Recognising these by name saves time, because they are all the same loop.",
-        "**Digit sum / digital root.** Sum the digits; repeat until one digit remains. The closed form for the digital root is `1 + (n - 1) % 9` for positive n, which is worth knowing as a party trick and as a genuine O(1) answer.",
+        "**Digit sum / digital root.** Sum the digits; repeat until one digit remains. The closed form for the digital root is `1 + (n - 1) % 9` for positive n, which is worth knowing as a genuine O(1) answer.",
         "**Armstrong (narcissistic) numbers.** Each digit raised to the power of the digit count, summed, equals the number. 153 = 1³ + 5³ + 3³.",
         "**Happy numbers.** Repeatedly sum the squares of the digits; the number is happy if this reaches 1. It always either reaches 1 or enters a cycle — which makes it the standard teaching problem for cycle detection.",
         "**Palindrome without reversing the whole number.** Reverse only the second half and compare; this avoids overflow in a fixed-width language, which is the follow-up the interviewer is waiting for.",

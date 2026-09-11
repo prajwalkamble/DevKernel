@@ -613,7 +613,6 @@ func main() {
         "**Space.** The set holds every triple found, which can be O(n²) of them. The skip version holds nothing.",
         "**Time.** Hashing a tuple costs more than comparing two integers, and the set version does it once per found triple rather than once per distinct one.",
         "**It generalises.** The skip idiom is the same at every level of k-Sum. A set of k-tuples gets slower and heavier as k grows.",
-        "There is a fourth, softer reason: the skip demonstrates that you understand *where* duplicates come from, and the set demonstrates that you know they exist. Interviewers can tell the difference.",
       ],
     },
     {

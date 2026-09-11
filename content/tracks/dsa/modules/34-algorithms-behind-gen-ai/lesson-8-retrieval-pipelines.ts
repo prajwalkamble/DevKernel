@@ -2633,7 +2633,6 @@ func min(a, b int) int {
         "**Inverse document frequency.** A term appearing in almost every document tells you almost nothing when it matches, and a rare term tells you a great deal. BM25 weights each term by roughly the log of how rare it is, so matching a rare term dominates matching a common one. Counting has no such weighting, which is why naive search returns documents that happen to contain \"the\".",
         "**Length normalisation.** A long document contains more words, so it matches more query terms by accident. BM25 divides by a document's length relative to the average, so being long is no longer an advantage. Counting rewards it directly.",
         "There is a third, smaller correction: **saturating term frequency**. The tenth occurrence of a word in a document says much less than the second, so BM25's `tf` term flattens out rather than growing linearly. Counting treats the tenth occurrence as worth exactly as much as the first, which is the mechanism behind keyword stuffing.",
-        "Worth noticing that the program computes BM25's logarithm in integer fixed point, for the reason the comment gives: a floating-point log formats differently in different languages and this table has to read identically in all of them. That is the same constraint that shapes every measured table in this track.",
       ],
       pitfalls: [
         {

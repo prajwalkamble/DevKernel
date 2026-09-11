@@ -169,14 +169,6 @@ split handles messy spacing: ['1', '2', '3']`,
         },
       ],
     },
-    {
-      id: "practice-note",
-      heading: "A note on this track",
-      body: [
-        "Almost nothing in this track requires you to read input. The problem sheet hands your function its arguments, and interviews do the same. This lesson exists because judges do not, and because a solved problem that fails on input parsing is uniquely annoying.",
-        "The one habit worth carrying everywhere: when something fails on input that looks correct, print the `repr` of what you actually read before you look at anything else. Nine times out of ten it is a newline, a space, or a value you thought was an `int` and is a string.",
-      ],
-    },
   ],
   interviewQuestions: [
     {

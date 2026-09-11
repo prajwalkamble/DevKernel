@@ -156,15 +156,6 @@ public class Main {
       ],
     },
     {
-      id: "not-in-interviews",
-      heading: "Why none of this belongs in an interview",
-      body: [
-        "In an interview you are handed a function and its parameters. There is no standard input, so there is nothing to read fast.",
-        "Writing a `BufferedReader` harness anyway is a small negative signal — it suggests contest habits applied without thinking about the setting, and it spends your first two minutes on something that is not the problem. The same applies to this track's practice console: you write the function body, and the harness supplies the arguments.",
-        "The useful thing to carry across is the *idea* rather than the code: batching output is faster than repeated writes, and a library that is convenient is often doing more work than the one that is not. Those generalise. `StringTokenizer` does not.",
-      ],
-    },
-    {
       id: "scale",
       heading: "Knowing when it matters",
       body: [

@@ -61,7 +61,6 @@ export const theLastFiveMinutesLesson: Lesson = {
         "Questions that fail are the ones whose answers you could predict or find on the site \u2014 what technologies do you use, what is the culture like, tell me about the company. They are not damaging, but they consume the one part of the interview designed for you to gather information and return nothing.",
         "**Ask your interviewer about their work.** People answer this well and honestly, and the answer tells you more about the day-to-day than any process question. What are you working on this quarter, and what is the annoying part of it.",
         "**Ask about next steps and timeline** if nobody has said. It is practical, it is expected, and not knowing costs you real decision-making ability later.",
-        "One thing worth saying about the whole module: none of this is a substitute for solving the problem. Technique makes a competent solution legible and keeps a difficult one from collapsing \u2014 it does not manufacture a solution you do not have. The pattern atlas and the practice sheet are what produce the solution; this module is about not losing it between your head and the room.",
       ],
     },
   ],
@@ -85,6 +84,5 @@ export const theLastFiveMinutesLesson: Lesson = {
     "Behavioural answers are organised around a decision and its trade-off, not events",
     "Prepare four stories: a conflict, a mistake, something shipped, something learned fast",
     "Ask questions whose answers would change your decision — and ask about their work",
-    "Technique makes a solution legible; it does not manufacture one you do not have",
   ],
 };

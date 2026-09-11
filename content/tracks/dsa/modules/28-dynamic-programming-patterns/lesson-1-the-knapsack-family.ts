@@ -19,7 +19,6 @@ export const knapsackFamilyLesson: Lesson = {
       id: "three-questions-one-loop",
       heading: "Three questions, one loop",
       body: [
-        "The last module built the machinery. This one is the catalogue, and it opens with the pattern the rest of it keeps referring back to, because more problems reduce to a knapsack than to anything else here.",
         "The family is three problems, and they differ by one clause in the statement: **how many times may an item be taken?** Once. Any number of times. At most `k` times. Nothing else changes \u2014 same items, same capacity, same question about total value \u2014 and the code changes by about as much as the sentence does.",
         "Module 27 lesson 5 already met two of them without naming them. Running the inner loop downwards reads `table[cap - w]` from before this item was considered, so the item can be used at most once. Running it upwards reads a cell this item may already be in, so it can be used again and again. That is the whole distinction, and below it is scored against three different exhaustive searches \u2014 subsets, multisets, and multisets with a ceiling.",
         "Three loops that differ in a direction and a repeat count, each agreeing with its own exhaustive search on all three thousand random instances. The printed rows differ where you would want them to: at capacity 12 the answers are 150, 160 and 150, because two items may be reused, and at capacity 9 they are 110, 120 and 110.",

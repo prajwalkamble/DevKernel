@@ -32,7 +32,6 @@ export const whyYouFreezeLesson: Lesson = {
       id: "what-staring-is",
       heading: "What is actually happening while you stare",
       body: [
-        "It is worth being precise about the failure, because the fix follows directly from it.",
         "When you stare at a problem, you are running an unstructured search of your memory for a matching solution. You are, in effect, asking yourself *what is the answer?* — a question with no partial credit. Either the whole answer arrives or nothing does, and there is no way to make progress on it. That is why the time passes without anything happening: you are not stuck on a step, you are stuck on a question that has no steps.",
         "Everyone who is good at this asks a different question, and asks several of them in sequence. Not *what is the answer?* but: what is this problem actually asking? What is the stupidest thing that would work? How big can the input get, and what does that permit? What operation does this do most? Which of the shapes I know has that operation at its centre?",
         "Every one of those questions is answerable in under a minute, and every answer narrows the search. That is the whole difference. Not a better memory — a better sequence of questions.",
@@ -120,7 +119,6 @@ WITH the framework
         "**You always have something to do.** There is no state in which the correct action is to stare. Every step has an output; if you do not have it, that is the work.",
         "**Your stuck-ness becomes diagnosable.** Over ten problems you will notice you are always fine until step 6, or that you always skip step 4 and pay for it. That is a specific weakness with a specific fix, which is worth more than a vague sense that you are bad at DP.",
         "**You get an interview transcript for free.** Steps 1 to 6 are, almost word for word, what a strong candidate says out loud. Interviewers are not primarily assessing whether you produce the optimal solution — they are assessing whether your reasoning is legible. A candidate who restates the problem, gives the brute force, reads the complexity target off the constraints, and *then* reaches for the right structure has already demonstrated most of what is being measured, even if the final code has a bug in it.",
-        "The rest of this module takes the seven steps one at a time. The last lesson runs all of them, from cold, on a problem that appears nowhere else in this track.",
       ],
     },
   ],

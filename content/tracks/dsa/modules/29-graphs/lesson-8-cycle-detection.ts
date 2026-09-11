@@ -5679,14 +5679,12 @@ func main() {
     },
     {
       id: "cycles-and-the-module",
-      heading: "Cycle detection, and the module",
+      heading: "Cycle detection, in summary",
       body: [
-        "Cycle detection, and the module, in summary.",
         "**Undirected: exempt the edge you arrived on.** Without it every edge is a cycle \u2014 1,770 false alarms in 3,000. With it, either exemption works, on multigraphs too, and union-find gets the same answer without a traversal.",
         "**Directed: colours, not a boolean.** A second route into a node is not a loop when the edges point somewhere. The visited check over-reported on 1,149 of 3,000 graphs and never under-reported; grey-against-black was right on all of them.",
         "**Grey is the path, black is the past.** That is the same distinction as the two visited sets, and it is why the two lessons belong next to each other.",
         "**Ask what the question really is.** Existence is one walk. Which edge closed it is a walk per edge. How many there are is exponential, and recognising that is worth more than any implementation detail.",
-        "And that is the module. The traversals were fifteen lines; everything hard was upstream of them \u2014 deciding what a node is, what an edge means, what visited means, and which question is being asked. The next module is the named algorithms, each introduced by the problem that forced its invention.",
       ],
     },
   ],
