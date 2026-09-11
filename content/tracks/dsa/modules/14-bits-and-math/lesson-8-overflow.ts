@@ -159,6 +159,18 @@ bit length = 108`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Where does integer overflow actually bite in interview code?",
+      answer:
+        "Four places: the binary-search midpoint (lo + hi) / 2, which sat in the JDK's Arrays.binarySearch for nine years; multiplying two values that each fit, like two residues under 10^9 + 7; accumulating a sum, where a hundred thousand values of a billion need a long; and factorials or powers, since 21! already exceeds 64 bits. The habit is to multiply the bounds of each side in your head before writing a multiplication or a running sum.",
+    },
+    {
+      question: "Why can a correct Python solution fail when translated to Java?",
+      answer:
+        "Python integers grow without bound, while Java int and long wrap silently at 32 and 64 bits. Nothing throws, the answer is simply wrong, and only on the large tests. The fixes are the overflow-safe midpoint lo + (hi - lo) / 2, casting an operand to long before multiplying rather than casting the result, and Math.multiplyExact where a loud failure is better than a wrong answer.",
+    },
+  ],
   takeaways: [
     "Python integers grow; Java, C++ and Go wrap silently at 32 or 64 bits",
     "A translated solution fails with no error message and only on large inputs",

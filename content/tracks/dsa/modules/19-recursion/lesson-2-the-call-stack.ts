@@ -131,6 +131,18 @@ function still consumes one frame per call.`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "When does recursion become a problem, and what do you do about it?",
+      answer:
+        "Every pending call holds a stack frame, so depth n costs O(n) stack memory, and the stack is small: CPython caps recursion at 1000 frames by default, and a JVM thread's stack is around half a megabyte to a megabyte. Depth up to a few thousand is safe; hundreds of thousands is not, so a linear recursion over n = 10^5 overflows on the largest test. The fix is to convert: linear recursion to a loop, pending work to an accumulator, branching recursion to an explicit stack.",
+    },
+    {
+      question: "Does writing it tail-recursive avoid the stack overflow?",
+      answer:
+        "Not in Java or Python, which do not eliminate tail calls, and C++ and Go compilers may do it at some optimisation levels with no guarantee. Only languages that promise it can be relied on. Raising Python's recursion limit is not a fix either: it trades a clean error for a crash. If depth is the problem, convert to iteration.",
+    },
+  ],
   takeaways: [
     "Every pending call holds a frame; depth n costs O(n) stack memory",
     "Safe to a few thousand; unsafe in the hundreds of thousands",

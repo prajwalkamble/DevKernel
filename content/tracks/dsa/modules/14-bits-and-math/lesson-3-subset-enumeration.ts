@@ -452,6 +452,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you iterate over every submask of a mask, and what is the total cost over all masks?",
+      answer:
+        "Start with sub = mask and repeat sub = (sub - 1) & mask, which gives the next smaller submask each time, and test for zero at the bottom of the loop so the empty submask is still processed. Over all masks of n bits the total is 3^n rather than 4^n, because each element is independently in the submask, in the mask only, or in neither — 81 for n = 4. For n = 20 that is 3.5 billion against a trillion.",
+    },
+    {
+      question: "What in a problem statement tells you bitmask DP is intended?",
+      answer:
+        "A small n, typically at most 20, together with assignments, orderings or covering. That gives 2^n states, each a subset of the things already used. The canonical shape is assigning n tasks to n workers at minimum total cost: the state is which tasks are done, and the answer is at the full mask. It only works when which elements are used matters and the order they were used in does not; if order matters, a bitmask alone is not enough state.",
+    },
+  ],
   takeaways: [
     "Counting 0 to 2^n - 1 enumerates every subset, once each",
     "`sub = (sub - 1) & mask` walks the submasks of a mask in descending order",

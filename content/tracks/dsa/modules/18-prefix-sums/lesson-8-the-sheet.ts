@@ -60,6 +60,18 @@ export const prefixSheetLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "What are the prefix-sum problem shapes, and how do you spot each?",
+      answer:
+        "Four. Static range queries: many queries on an unchanging array. Prefix plus a hash map: count or find subarrays with an exact property such as a sum, XOR, remainder or balance. Difference array: many range updates then one read, or maximum overlapping intervals. Two-dimensional: submatrix sums, or a 2D problem that collapses to 1D by fixing two boundaries.",
+    },
+    {
+      question: "What do you write before the loop in these problems?",
+      answer:
+        "The zero entry — prefix = [0] * (n + 1), or seen = {0: 1} for the hash-map shape — because forgetting it gives a nearly right answer. And a comment stating the convention, that prefix[i] is the sum of the first i elements so a[lo:hi] sums to prefix[hi] - prefix[lo]. Then I check whether the sums need 64 bits and normalise negative remainders outside Python.",
+    },
+  ],
   takeaways: [
     "Four shapes: static queries, prefix plus map, difference array, and 2D",
     "Shape 2 is the highest-value one — count or find with an exact property",

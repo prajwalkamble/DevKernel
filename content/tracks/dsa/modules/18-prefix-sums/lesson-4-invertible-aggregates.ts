@@ -612,6 +612,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Which aggregates can use the prefix technique?",
+      answer:
+        "Those with an inverse, because a range answer is the difference of two prefixes. Sum has subtraction, XOR is its own inverse, and counts work; products only with no zeros and exact division. Minimum, maximum and GCD have no inverse — the minimum of a longer prefix says nothing about the minimum without its first elements. Prefix XOR substitutes directly into the hash-map technique by looking up run ^ k instead of run - k.",
+    },
+    {
+      question: "What do you use for range minimum queries?",
+      answer:
+        "On a static array, a sparse table: O(n log n) to build and O(1) per query, and its overlapping lookups are safe because min is idempotent. If the array changes, a segment tree, with O(log n) queries and updates for any associative operation. A Fenwick tree is smaller and faster but still needs an invertible operation, so it handles sums and not minima.",
+    },
+  ],
   takeaways: [
     "Prefix queries need an operation with an inverse",
     "Sum, XOR and count work; minimum, maximum and GCD do not",

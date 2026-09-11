@@ -62,6 +62,18 @@ export const combinationsLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "What distinguishes subsets, combinations with reuse, and permutations in code?",
+      answer:
+        "Two decisions. If order does not matter and elements are not reused, loop from start and recurse with i + 1. If reuse is allowed, recurse with i so the same index can be chosen again, which is Combination Sum. If order matters, it is a permutation: loop from 0 with a used array and no start index. Combination Sum I and II differ by i against i + 1 plus a duplicate skip.",
+    },
+    {
+      question: "How do constraints tell you which enumeration is intended?",
+      answer:
+        "The output sizes are 2^n for subsets, n! for permutations and C(n, k) for combinations, so read the constraint backwards: n around 8 suggests permutations, since 13! is already 6.2 billion; n up to 20 suggests subsets or bitmask DP; n around 40 suggests meet-in-the-middle. A problem asking for all permutations with a large n is not intending permutations.",
+    },
+  ],
   takeaways: [
     "Two decisions: does order matter, and may elements repeat",
     "No reuse: recurse with `i + 1`. Reuse: recurse with `i`",

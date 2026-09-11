@@ -780,6 +780,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Count subarrays with exactly k distinct values.",
+      answer:
+        "Exactly k is not windowable, because adding an element can push the distinct count over and removing one can push it under. At most k is windowable, so compute exactly(k) = atMost(k) - atMost(k - 1). In atMost, after shrinking until the window has at most k distinct values, every subarray ending at right and starting between left and right is valid, so add right - left + 1. The lesson checks exactly(2) = 12 - 5 = 7 against brute force.",
+    },
+    {
+      question: "Where else does that subtraction work?",
+      answer:
+        "Whenever exactly k is not monotone but at most k is: subarrays with exactly k odd numbers, binary subarrays with sum k, and subarrays with sum exactly k when all values are non-negative. The cue is the word exactly in a counting problem. Two details: delete a frequency key when it reaches zero or the distinct count is wrong, and handle atMost(k - 1) when k is 0.",
+    },
+  ],
   takeaways: [
     "\"Exactly k\" breaks in both directions and is not windowable; \"at most k\" is",
     "`exactly(k) = atMost(k) - atMost(k - 1)`",

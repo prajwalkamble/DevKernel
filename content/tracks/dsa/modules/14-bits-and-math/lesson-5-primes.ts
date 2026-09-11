@@ -736,6 +736,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you find all primes up to n, and what does it cost?",
+      answer:
+        "A sieve of Eratosthenes: mark everything prime, and for each prime i cross off multiples starting at i * i, stopping the outer loop at the square root of n. Starting at i * i is what gives O(n log log n), because smaller multiples were already crossed off by a smaller prime factor. log log n is about 3 even for 10^8, so in practice it is close to linear. It answers a different question from factorising one number, which is trial division up to the square root.",
+    },
+    {
+      question: "You need to factorise a hundred thousand numbers, each up to a million. What do you use?",
+      answer:
+        "A smallest-prime-factor sieve, built once: for every number store its smallest prime factor, then factorise each query by repeated division, O(log x) per number with no searching. Trial division would cost up to a thousand steps per number, and a plain sieve only says which numbers are prime. For a single number I would use trial division and keep the final if n > 1 check, which catches a prime factor larger than the square root.",
+    },
+  ],
   takeaways: [
     "\"All primes below n\" and \"factor this one number\" are different problems",
     "Sieve: start the inner loop at `i*i`, stop the outer at `sqrt(n)`",

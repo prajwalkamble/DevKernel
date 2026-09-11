@@ -515,6 +515,18 @@ Long.MAX  = 9223372036854775807`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Why is Euclid's algorithm O(log n)?",
+      answer:
+        "gcd(a, b) = gcd(b, a mod b) keeps the same common divisors and strictly shrinks the pair. After two steps the larger value has at least halved: if b is at most a/2 the new pair is already bounded by a/2, and otherwise a mod b = a - b, which is less than a/2. So the step count is at most 2 log2 of the smaller value. Consecutive Fibonacci numbers are the worst case, which is why the bound cannot be improved.",
+    },
+    {
+      question: "How do you compute an LCM without overflow?",
+      answer:
+        "Divide before multiplying: a / gcd(a, b) * b. The division is exact because the gcd divides a, and the intermediate value never exceeds the result. The obvious a * b / gcd(a, b) overflows long before the answer does — in the lesson's example the answer is twelve billion, which fits a long easily, but the product on the way is twelve quintillion and the naive version returns a plausible-looking negative number.",
+    },
+  ],
   takeaways: [
     "`gcd(a, b) = gcd(b, a mod b)`, terminating at `gcd(a, 0) = a`",
     "Two iterations halve the larger value, giving O(log min(a, b))",

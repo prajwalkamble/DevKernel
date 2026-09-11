@@ -55,6 +55,18 @@ export const twoPointerSheetLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you recognise which two-pointer shape a problem needs?",
+      answer:
+        "Four shapes. Opposite ends converging: a sorted array and a question about a pair, or the container and rain-water family. Same direction read/write: in place, return the new length, O(1) extra space, filtering or partitioning. Same direction with a lag or different speeds: linked lists, nth from the end, the middle, cycle detection. One pointer per sequence: merging two sorted inputs, subsequence checks, comparing two strings.",
+    },
+    {
+      question: "What should you be able to answer before writing a two-pointer loop?",
+      answer:
+        "When I move a pointer, what candidates am I discarding, and why is none of them the answer? If I can say it in a sentence, I write the loop. If I cannot, the input needs sorting first, the problem needs a hash map, or it is a sliding window and I should be maintaining a summary of the region between the pointers. It is also nearly word for word what a good interviewer asks afterwards.",
+    },
+  ],
   takeaways: [
     "Four shapes: converging, read/write, lag or speed, and one pointer per sequence",
     "Sorted plus a pair question means shape 1; \"in place\" means shape 2",

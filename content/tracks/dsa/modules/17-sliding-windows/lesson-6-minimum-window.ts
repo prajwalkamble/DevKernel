@@ -73,6 +73,18 @@ export const minimumWindowLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find the minimum window of s containing every character of t, including duplicates.",
+      answer:
+        "Keep need as t's character counts and missing as len(t). When a character enters, if need[ch] > 0 it was still required, so decrement missing, then decrement need[ch] unconditionally so surplus goes negative. While missing is 0 the window is valid: record it, then remove s[left] by incrementing need and, if it became positive, incrementing missing. Because it is a shortest-window problem I record inside the shrink loop. That is O(|s| + |t|) with no map comparison per step.",
+    },
+    {
+      question: "What are the classic bugs in that solution?",
+      answer:
+        "Testing need[ch] > 0 after the decrement instead of before, or checking before the increment when removing; using a set for need, which cannot express duplicates; returning the length instead of the substring or losing its indices, which I avoid by tracking length, left and right together; and not handling the case where no valid window exists, which should return the empty string.",
+    },
+  ],
   takeaways: [
     "The requirement includes duplicates, so the state must be counts, not a set",
     "`missing` counts required *characters*, initialised to `len(t)`",

@@ -54,6 +54,18 @@ export const windowStateLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find all anagrams of p in s.",
+      answer:
+        "A fixed-size window of len(p) over s, with the state being letter counts, and a match whenever the window's counts equal p's. Comparing two 26-element arrays each step is constant and acceptable. The optimal version keeps one integer counting how many of the 26 letters currently have the right count, updated as a letter enters and leaves; the window is an anagram exactly when it reaches 26. For a small fixed alphabet an int[26] beats a hash map.",
+    },
+    {
+      question: "How do you decide whether a plain sliding window is enough?",
+      answer:
+        "Ask whether removing an element from the state is O(1). Sums, frequency maps and distinct counts are; a maximum needs a monotonic deque and a median needs two heaps or an order-statistic structure. And never rebuild the state from a slice inside the loop, which quietly turns the window back into O(n·k).",
+    },
+  ],
   takeaways: [
     "The deciding question is whether *removal* is O(1)",
     "Sums, frequency maps and distinct counts are fine; maxima and medians are not",

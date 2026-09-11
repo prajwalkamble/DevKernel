@@ -652,6 +652,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Koko eats bananas at speed k per hour. Find the smallest k that finishes all piles in h hours.",
+      answer:
+        "Binary search on the answer. The candidate speeds run from 1 to max(piles), and feasibility is monotone: if speed k finishes in time, any faster speed does too, so feasible(k) laid out in order reads false then true. feasible(k) is one pass adding up the hours each pile needs at that speed. lower_bound over that predicate finds the first true, in O(n log max) — about thirty feasibility checks even for answers up to a billion.",
+    },
+    {
+      question: "How do you recognise a binary-search-on-the-answer problem, and what can go wrong?",
+      answer:
+        "The statement asks to minimise or maximise a number that is not an element of the input, and checking a given candidate is easy. The recipe is four questions: what the answer is, what feasible(x) is, whether it is monotone, and what the bounds are. The step people skip is proving monotonicity — if feasibility ever reads false, true, false, true, binary search returns an arbitrary true entry. Bounds should be argued, like lo = max(weights) and hi = sum(weights) for shipping packages; a generous hi costs one extra iteration.",
+    },
+  ],
   takeaways: [
     "Search the range of possible answers, not the input",
     "The technique needs a monotone `feasible(x)` — prove it before writing the loop",

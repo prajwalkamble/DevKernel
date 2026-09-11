@@ -585,6 +585,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you compute nCr modulo a prime for many queries?",
+      answer:
+        "Precompute factorials up to the largest argument, then inverse factorials built backwards from a single exponentiation: invert the largest factorial with Fermat, then use inv_fact[i-1] = inv_fact[i] * i. That is O(n + log m) to build and O(1) per query as fact[n] * inv_fact[r] * inv_fact[n-r], reducing after each multiplication, with a guard for r < 0 or r > n so a negative index cannot silently read the wrong entry.",
+    },
+    {
+      question: "When would you use Pascal's triangle instead?",
+      answer:
+        "When n is small, when I want the whole triangle anyway, or when the modulus is not prime. Pascal's rule C(n, r) = C(n-1, r-1) + C(n-1, r) uses only addition, so it needs no modular inverse, at O(n^2) time. For one query with a huge n and a small r I would compute the r-term product directly instead of building any table.",
+    },
+  ],
   takeaways: [
     "Pascal's triangle needs only addition, so no modular inverse and no prime modulus",
     "Factorial tables give O(1) queries after an O(n) build",

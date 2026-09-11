@@ -164,7 +164,7 @@ second
         "**`void`** — returns nothing. Some languages have the program return a number; Java does not use the return value here.",
         "**`main`** — the name the JVM looks for. It is a convention, not a keyword, but it is not negotiable: name it something else and the JVM will not find it.",
         "**`String[] args`** — an array of text values, holding whatever arguments were typed after the program name on the command line. You will almost never use it, but it must be in the signature, because this exact shape is what the JVM searches for.",
-        "**`class Main`** — Java requires every piece of code to live inside a class. For now, treat the class as the container your program lives in. What a class is really for is a Module 2 topic, and trying to understand it now would cost more than it gives.",
+        "**`class Main`** — Java requires every piece of code to live inside a class. For now, treat the class as the container your program lives in. What a class is really for does not come up in solving problems, and trying to understand it now would cost more than it gives.",
         "**`System.out.println`** — the `println` method of the `out` object belonging to the `System` class. It prints its argument and moves to a new line. There is a `print` without the `ln` that stays on the same line, which you will want later for building up a line piece by piece.",
       ],
       examples: [

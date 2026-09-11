@@ -528,6 +528,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you find the first and last occurrence of a value in a sorted array with duplicates?",
+      answer:
+        "With lower_bound and upper_bound. lower_bound returns the first index with a[i] >= t, upper_bound the first with a[i] > t, and they differ only in < against <= in the comparison. The first occurrence is lower_bound if it is in range and equals t, the last is upper_bound - 1, and the count is upper - lower, which is zero exactly when the value is absent. Finding one occurrence and walking outwards is O(n) with many duplicates, which throws the search away.",
+    },
+    {
+      question: "What do the standard libraries give you for this?",
+      answer:
+        "Python's bisect_left and bisect_right are lower and upper bound. C++ has std::lower_bound, std::upper_bound and std::equal_range. Go's sort.Search returns the first index where a predicate holds, which is lower bound generalised. Java's Arrays.binarySearch is neither: with duplicates it returns an unspecified match, and when absent it returns -(insertion point) - 1, so in Java I write the bounds myself.",
+    },
+  ],
   takeaways: [
     "`lower_bound` is the first index with `a[i] >= t`; `upper_bound` the first with `a[i] > t`",
     "They differ only in `<` against `<=`",

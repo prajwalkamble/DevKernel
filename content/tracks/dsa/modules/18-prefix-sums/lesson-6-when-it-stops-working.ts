@@ -65,6 +65,18 @@ export const whenItStopsWorkingLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Range sum queries, but now the array can be updated.",
+      answer:
+        "A prefix array stops working, because changing one element invalidates every prefix after it and repairing that is O(n) per update. A Fenwick tree gives O(log n) queries and updates in about ten lines for sums; a segment tree gives O(log n) for any associative operation, including min, max and GCD, with more code. So: static means a prefix array, mutable sums mean Fenwick, and mutable non-invertible operations mean a segment tree.",
+    },
+    {
+      question: "And if updates apply to whole ranges?",
+      answer:
+        "A segment tree with lazy propagation, or a difference array maintained inside a Fenwick tree. It is worth saying at the first step that a prefix array assumes a static input and naming what I would use otherwise, because that is the standard escalation from Range Sum Query - Immutable to Range Sum Query - Mutable.",
+    },
+  ],
   takeaways: [
     "One element changing invalidates every prefix after it — O(n) to repair",
     "Prefix arrays are for static inputs, full stop",

@@ -30,7 +30,7 @@ export const twentyMinuteRuleLesson: Lesson = {
       heading: "Progress, not time",
       body: [
         "The right rule is: **keep going while you are still producing outputs, stop when you are not.**",
-        "The framework in module 5 gives seven steps, each with an output. Module 31's drill gives four. While you are still generating them \u2014 a restatement, a worked small example, a brute force, a target complexity, a candidate structure \u2014 you are working. Stop the clock and keep going.",
+        "The framework in module 12 gives seven steps, each with an output. Module 31's drill gives four. While you are still generating them \u2014 a restatement, a worked small example, a brute force, a target complexity, a candidate structure \u2014 you are working. Stop the clock and keep going.",
         "The moment you notice you have produced nothing new for a few minutes, you are staring, and that is the signal. It usually arrives well before twenty minutes on a problem that is genuinely beyond you, and well after twenty on one that is not.",
         "So the twenty minutes is real but it is a *symptom* rather than a rule. Twenty minutes is roughly how long it takes most people to exhaust the outputs on a problem they cannot get. If you are exhausted at eight, look at eight. If you are still producing at forty, keep going.",
         "The one thing to do before looking, always: **write down where you stopped.** Which output you could not produce. \"I have the brute force and the target and I cannot see what to exploit\" is a specific, diagnosable state, and it changes what you should read next \u2014 you want the step you are missing, not the whole solution.",

@@ -68,6 +68,18 @@ export const divideAndConquerLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Compare merge sort and quicksort as divide and conquer.",
+      answer:
+        "Same shape, opposite placement of the work. Merge sort splits trivially at the midpoint and does its work in the combine, merging two sorted halves. Quicksort does its work in the split, partitioning around a pivot, and the combine is nothing. Both are O(n log n) when the split is even, because there are log n levels each doing O(n) work; an uneven split, like a bad pivot, collapses that to O(n^2).",
+    },
+    {
+      question: "How do you read the complexity of a recurrence like T(n) = 2T(n/2) + O(n)?",
+      answer:
+        "Draw the recursion tree, ask how much work each level does, and multiply by the depth. Two halves with a linear combine is O(n) per level over log n levels, so O(n log n); two halves with a constant combine is O(n); one half with constant work, like binary search, is O(log n). That is the master theorem's content without its notation. Counting inversions is merge sort with a counter, O(n log n) instead of O(n^2).",
+    },
+  ],
   takeaways: [
     "Divide, conquer, combine — and the question is where the work sits",
     "Merge sort works in the combine; quicksort works in the split",

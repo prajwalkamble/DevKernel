@@ -398,6 +398,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you write a recursive function without tracing every call?",
+      answer:
+        "Assume the recursive call already returns the right answer for the smaller input, and write only the one step that uses it — factorial(n) is n times factorial(n - 1). That assumption is the inductive hypothesis, not hand-waving. The three obligations are a base case that returns without recursing, every call making progress towards it, and the recursive step being correct given the assumption.",
+    },
+    {
+      question: "A recursion never stops. What do you check?",
+      answer:
+        "Two things, in order. Is there a base case for the inputs actually reached — factorial tested with n == 1 recurses forever on 0, which is why n <= 1 is the right test. And does every call shrink the quantity the base case tests; a branch that calls itself with unchanged arguments is the same failure as the lo = mid bug in binary search. Every path must also return a value.",
+    },
+  ],
   takeaways: [
     "Assume the recursive call is correct — that is the inductive hypothesis, not a shortcut",
     "Three obligations: a base case, progress towards it, and one correct step",

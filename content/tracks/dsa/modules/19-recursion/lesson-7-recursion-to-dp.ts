@@ -65,6 +65,18 @@ export const recursionToDpLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you turn a slow recursion into dynamic programming?",
+      answer:
+        "Add a cache keyed by the arguments: look up, return if present, otherwise compute as before and store. The logic does not change. fib(30) makes 2.7 million calls because it recomputes the same subproblems; with memoisation each of the n distinct subproblems is solved once, so it drops from exponential to O(n). In Python functools.cache does it as a decorator; in Java it is a HashMap or an array checked at the top.",
+    },
+    {
+      question: "What makes a good memoisation key?",
+      answer:
+        "The state must capture everything the answer depends on — if two calls with the same key could legitimately return different answers, the cache is a bug — and it should be as small as possible, because the number of states is the memory cost and, times the work per state, the time cost. The function's parameters usually already are the state, like (i, amount) for coin change. A function that depends on mutable state outside its arguments cannot be cached safely, and backtracking that enumerates answers generally cannot be memoised, while counting often can.",
+    },
+  ],
   takeaways: [
     "Overlapping subproblems are what memoisation removes",
     "A correct recursion plus a cache is a correct top-down DP",

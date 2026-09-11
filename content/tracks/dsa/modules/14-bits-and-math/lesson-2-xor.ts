@@ -557,6 +557,18 @@ xor swap: 4 9`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Every number appears twice except one. Find it in O(1) space.",
+      answer:
+        "XOR everything. a ^ a is 0, a ^ 0 is a, and XOR is commutative and associative, so over the whole collection every paired value cancels regardless of order and the unpaired one survives. That is one pass and no extra memory; a hash set also works in O(n) time but costs O(n) space. The same idea finds a missing number by XORing all indices with all values, and unlike a sum it cannot overflow.",
+    },
+    {
+      question: "Now two numbers appear once and all others twice. How do you find both?",
+      answer:
+        "XOR everything to get a ^ b. They are different numbers, so that value has at least one set bit, and x & -x picks one bit where a and b disagree. Partition the whole list on that bit: a and b land in different halves, while each duplicate pair lands together and cancels. XOR each half separately and the two accumulators are a and b — one pass, constant space.",
+    },
+  ],
   takeaways: [
     "`a ^ a = 0`, `a ^ 0 = a`, and order does not matter",
     "XOR over a collection cancels everything appearing an even number of times",

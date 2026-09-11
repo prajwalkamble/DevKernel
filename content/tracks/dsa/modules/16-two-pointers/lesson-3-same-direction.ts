@@ -596,6 +596,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Remove duplicates from a sorted array in place and return the new length.",
+      answer:
+        "Use a read pointer that visits every element and a write pointer marking where the next kept element goes. Keep an element if it differs from a[write - 1], the last kept value, copy it to a[write] and advance write. The invariant is that a[0:write] is finished and correct, a[read:] is unexamined, and the gap between them is garbage the caller never reads. Return write as the length.",
+    },
+    {
+      question: "How do you find the middle of a linked list, or detect a cycle, in one pass?",
+      answer:
+        "Fast and slow pointers: one moves one step, the other two. When the fast pointer reaches the end, the slow one is at the middle. In a list with a cycle the fast pointer laps the slow one and they meet; without one, the fast pointer falls off the end — Floyd's algorithm. For the nth node from the end, start one pointer n ahead and walk both until the leader falls off. None of these keep a summary of the region between the pointers; if you are doing that, it is a sliding window.",
+    },
+  ],
   takeaways: [
     "Read/write: `a[0:write]` is finished, `a[read:]` is unexamined, the gap is garbage",
     "The function returns a length, and the caller reads only that prefix",

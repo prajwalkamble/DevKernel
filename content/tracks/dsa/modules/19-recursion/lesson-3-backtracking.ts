@@ -702,6 +702,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Generate all subsets of a list.",
+      answer:
+        "Backtracking with choose, explore, un-choose: record the current path, then for each index i from start, append nums[i], recurse with start i + 1, and pop. The pop restores the path before the next sibling branch. Record a copy of the path, not the path itself, or every entry aliases the same list and ends up showing its final contents. Permutations differ only by looping from 0 with a used array instead of a start index.",
+    },
+    {
+      question: "How do you avoid duplicate subsets when the input has repeated values?",
+      answer:
+        "Sort, then skip a value equal to its predecessor at the same level: if i > start and nums[i] == nums[i - 1], continue. The i > start condition means this is not the first choice at this level. Using i > 0 instead also skips a 2 whose twin was chosen by an ancestor, which wrongly drops answers like [2, 2].",
+    },
+  ],
   takeaways: [
     "Choose, explore, un-choose — and the un-choose is what people omit",
     "Append a *copy* of the path, or every entry aliases the same list",

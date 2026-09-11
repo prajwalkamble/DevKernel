@@ -551,6 +551,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Count subarrays summing to k when values can be negative.",
+      answer:
+        "Walk once with a running sum and a map from prefix value to how many times it has occurred. A subarray ending at j sums to k exactly when an earlier prefix equals running - k, so add that count, then record the current prefix. Initialise the map with {0: 1} for the empty prefix, or subarrays starting at index 0 are missed — [3] with k = 3 should give 1. This is algebra rather than a monotonicity argument, so signs do not matter.",
+    },
+    {
+      question: "What variants does that technique cover?",
+      answer:
+        "Longest subarray summing to k stores the first index of each prefix and never overwrites; shortest stores the latest. Subarray sum divisible by k keys the map on the remainder, normalised to be non-negative outside Python. Contiguous Array, with equal 0s and 1s, maps 0 to -1 and looks for sum 0. In every case the lookup comes before recording the current prefix.",
+    },
+  ],
   takeaways: [
     "`prefix[i] = prefix[j] - k` is the whole technique",
     "Walk once with a running sum and a map from prefix value to count",

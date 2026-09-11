@@ -757,6 +757,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find the length of the longest increasing subsequence in O(n log n).",
+      answer:
+        "Keep tails, where tails[k] is the smallest value that can end an increasing subsequence of length k + 1. That array is sorted automatically, so for each element binary search for the first tail not smaller than it and replace it, or append if there is none. Replacing never changes the length and appending is the only thing that grows it, so the answer is the length of tails. bisect_left gives strictly increasing and bisect_right non-decreasing.",
+    },
+    {
+      question: "Is the final tails array the subsequence itself?",
+      answer:
+        "No. It has the right length but can mix elements from different subsequences — the lesson's input ends with tails [2, 3, 7, 18], where 18 comes after 101 in the input. Reconstructing an actual subsequence needs a parallel array of predecessor indices. The general move behind it is that an O(n^2) algorithm whose inner loop scans something that can be kept sorted becomes O(n log n) with a binary search.",
+    },
+  ],
   takeaways: [
     "Binary search usually appears as the inner step of a larger algorithm",
     "Any O(n²) scan over something you can keep sorted becomes O(n log n)",

@@ -891,6 +891,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Why does pruning matter so much in N-Queens?",
+      answer:
+        "Backtracking can reject a partial placement and discard the entire subtree below it, and the earlier the rejection, the bigger the subtree. The lesson measures the pruned search against the unpruned one: 20 times fewer nodes at n = 4, 366 times at n = 6, and 9,321 times at n = 8, where the pruned search visits 2,057 nodes. Because the ratio grows with n, pruning changes the base of the exponential rather than a constant factor.",
+    },
+    {
+      question: "How do you check the queen constraints in O(1)?",
+      answer:
+        "Three sets: occupied columns, occupied diagonals identified by row - col, and occupied anti-diagonals identified by row + col. Each candidate square is three lookups rather than a scan of the placed queens, and the sets are updated in the choose and un-choose steps. The general move is to find an invariant that identifies each constraint class and index by it, like the box index in Sudoku.",
+    },
+  ],
   takeaways: [
     "Reject partial candidates as early as possible — that discards whole subtrees",
     "Pruning changes the base of the exponential, so the gap grows with n",

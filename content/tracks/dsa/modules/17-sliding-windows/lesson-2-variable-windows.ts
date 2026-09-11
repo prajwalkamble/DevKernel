@@ -573,6 +573,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Longest substring without repeating characters.",
+      answer:
+        "A variable window: extend right one character at a time, and when the character is already in the window, move left past its previous occurrence. The guard last[ch] >= left matters, because a character last seen before the current left is not in the window, and jumping left backwards would break it. Record the length after restoring validity. For longest problems the rule is shrink while invalid and record after; for shortest problems it is shrink while still valid and record inside the inner loop.",
+    },
+    {
+      question: "The window has a while loop inside a for loop. Why is it still O(n)?",
+      answer:
+        "Because left only ever increases and can never exceed n. The inner loop may run many times on one step and not at all on the next, but across the whole run it executes at most n times in total, so the two pointers make at most 2n moves. Saying that amortised argument out loud is what gets the complexity question right.",
+    },
+  ],
   takeaways: [
     "Grow right always; shrink left in an inner while",
     "Longest: shrink while invalid, record after. Shortest: shrink while valid, record inside",

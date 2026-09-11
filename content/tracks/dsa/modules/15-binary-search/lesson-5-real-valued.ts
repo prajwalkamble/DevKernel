@@ -464,6 +464,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you binary search when the answer is a real number?",
+      answer:
+        "Run a fixed number of iterations instead of looping until lo meets hi. A real-valued window shrinks forever but never empties, and a tolerance below double precision makes the loop hang: the lesson's 1e-18 tolerance stalls at a gap of 2.22e-16, the spacing between adjacent doubles near 1.4, while 1e-9 converges in 31 iterations. Each iteration halves the width, so 100 iterations is past double precision for any practical range and costs nothing.",
+    },
+    {
+      question: "If you use a tolerance anyway, how should it be written?",
+      answer:
+        "Relative to the magnitude, like hi - lo > eps * max(1.0, abs(lo)), so it behaves for answers near a billion as well as near zero. An absolute 1e-9 on an answer of a billion asks for sixteen significant digits, which a double does not have. And there should be no equality test on floats inside the loop; it will essentially never fire.",
+    },
+  ],
   takeaways: [
     "A real-valued window shrinks forever but never empties",
     "Use a fixed iteration count, not a convergence test",

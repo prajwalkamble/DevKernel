@@ -651,6 +651,18 @@ monotone function of its right edge, so 'shrink while valid' is invalid.`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "When does a sliding window give a wrong answer?",
+      answer:
+        "When extending the window can move the tested quantity in both directions. The shrink step assumes an invalid window cannot be fixed by growing it, which holds for a sum of positive values and fails as soon as a negative appears. The lesson's example with one negative value returns a length of 4 where the correct answer is 1, and it returns that plausible number with no error. That is why constraints like nums[i] >= 1 are there on purpose.",
+    },
+    {
+      question: "What do you use instead when the values can be negative?",
+      answer:
+        "For a subarray summing to exactly k, prefix sums with a hash map, which is algebra rather than a monotonicity argument and does not care about signs. For the maximum subarray sum, Kadane's algorithm. For a window maximum or minimum, a monotonic deque. And for 'longest window such that...' when the condition is monotone in the length rather than the contents, binary search on the answer.",
+    },
+  ],
   takeaways: [
     "The window needs the tested quantity to move one way on growth and back on shrink",
     "One negative value destroys that for a sum, silently",

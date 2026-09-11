@@ -67,6 +67,18 @@ export const theSheetLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you decide which binary search variant a problem needs?",
+      answer:
+        "There are five shapes: plain search in a sorted array; boundary search for first, last, count or insertion point, answered with lower and upper bound; a modified array such as rotated or a matrix; binary search on the answer, signalled by minimising a maximum or maximising a minimum over a number not in the input; and binary search as the inner step of a DP or counting algorithm. The question to ask is not whether the input is sorted but whether I can look at one point and rule out a side.",
+    },
+    {
+      question: "What do you settle before typing the loop?",
+      answer:
+        "Four things out loud: what I am searching, an index or a value in an answer range; what the predicate is, a comparison or a feasibility function; why it is monotone, or which half I can rule out; and what the bounds are and why the answer lies inside them. Then I state the complexity, O(log n) or O(n log range). Getting the first question wrong is the biggest time sink in the topic.",
+    },
+  ],
   takeaways: [
     "Five shapes: plain, boundary, modified array, on the answer, and inner step",
     "\"Minimise the maximum\" or \"maximise the minimum\" is shape 4, nearly always",

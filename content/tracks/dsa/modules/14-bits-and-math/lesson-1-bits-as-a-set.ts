@@ -687,6 +687,18 @@ bitCount       3
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you use an integer as a set, and when is that the right representation?",
+      answer:
+        "Treat bit i as membership of element i. Union is or, intersection is and, symmetric difference is xor, and 1 << i is the mask for one element: set it with or, clear it with and-not, toggle it with xor. Each operation is one instruction on the whole set. It is the right representation when the universe is small and fixed — n up to about 20 with a question about subsets or assignments, or a set of lowercase letters that fits in 26 bits — because the alternative, a hash set per subset, allocates and is far slower.",
+    },
+    {
+      question: "What do n & -n and n & (n - 1) do, and why?",
+      answer:
+        "n & -n isolates the lowest set bit: in two's complement -n is the complement plus one, which flips every bit above the lowest set bit and leaves that bit standing. n & (n - 1) clears the lowest set bit, because subtracting one borrows through the trailing zeros and turns that bit into a zero. Looping on the second counts set bits in one iteration per set bit rather than one per bit of width, which is Kernighan's trick. In Java I would also use >>> rather than >> when walking bits, since >> copies the sign bit in.",
+    },
+  ],
   takeaways: [
     "An integer is a set: `|` unions, `&` intersects, `^` is symmetric difference",
     "`1 << i` is the mask for element i; set with `|=`, clear with `&= ~`, toggle with `^=`",

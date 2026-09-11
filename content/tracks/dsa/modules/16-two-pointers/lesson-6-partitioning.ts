@@ -60,6 +60,18 @@ export const partitioningLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Sort an array of 0s, 1s and 2s in one pass with O(1) space.",
+      answer:
+        "The Dutch national flag partition, with three pointers and four regions: a[0:low] is 0s, a[low:mid] is 1s, a[mid:high+1] is unexamined, and a[high+1:] is 2s. Loop while mid <= high. If a[mid] is 0, swap it with a[low] and advance both; if it is 1, advance mid; if it is 2, swap with a[high] and decrement high, but do not advance mid, because the value that just arrived from the tail has not been examined. Advancing mid there is the bug people write.",
+    },
+    {
+      question: "Why does three-way partitioning matter for quicksort?",
+      answer:
+        "A two-way partition puts every copy of the pivot on one side, so heavy duplication makes the split lopsided, and an array of identical values is the O(n^2) worst case. Splitting into less-than, equal and greater-than finishes all copies of the pivot in one pass and recurses only on the outer parts, so the all-identical array becomes O(n). The partition is not stable, which is worth saying if stability matters.",
+    },
+  ],
   takeaways: [
     "Three pointers maintain four regions: done-low, done-mid, unexamined, done-high",
     "0: swap with `low`, advance both. 1: advance `mid`. 2: swap with `high`, advance neither",

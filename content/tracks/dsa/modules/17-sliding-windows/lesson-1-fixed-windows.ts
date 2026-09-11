@@ -559,6 +559,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find the maximum sum of any k consecutive elements.",
+      answer:
+        "Build the sum of the first window once, then slide: add the entering element and subtract the leaving one, keeping the best. Adjacent windows share all but two elements, so recomputing each window is wasted work. That makes it O(n) regardless of k, against O(n·k) for summing each window; the lesson measured a factor of 244, roughly k / 2. Handle len(a) < k before the loop.",
+    },
+    {
+      question: "What kinds of window state can be maintained this way?",
+      answer:
+        "Anything that can be updated in O(1) when one element enters and one leaves: a sum, a frequency map where a key is deleted when its count reaches zero, the number of distinct values, or an average. A maximum cannot, because removing the current maximum gives no information about the next one; that needs a monotonic deque. So before writing a window I ask whether both the entering and the leaving update are cheap.",
+    },
+  ],
   takeaways: [
     "Adjacent windows share all but two elements; the pattern stops recomputing them",
     "Add the entering element, subtract the leaving one — two operations",

@@ -123,29 +123,39 @@ export const dsaTrack: TrackDefinition = {
     dsaFrameworkModule,
 
     // ---------------------------------------------------------------------
-    // Module 1 — Linear DSA, then non-linear DSA
+    // Module 1 — Linear DSA
     // ---------------------------------------------------------------------
     arraysStringsInPlaceModule,
+    bitsAndMathModule,
+    binarySearchModule,
     twoPointersModule,
     slidingWindowsModule,
     prefixSumsModule,
-    sortingModule,
-    binarySearchModule,
+    recursionModule,
     hashingModule,
+    sortingModule,
     linkedListsModule,
     stacksAndQueuesModule,
-    recursionModule,
+
+    // ---------------------------------------------------------------------
+    // Module 1 — Non-linear DSA
+    // ---------------------------------------------------------------------
     treesModule,
     heapsModule,
+    greedyModule,
+    dpFoundationsModule,
+    dpPatternsModule,
     graphsModule,
     graphAlgorithmsModule,
+
+    // ---------------------------------------------------------------------
+    // Module 1 — The grind and the interview
+    // ---------------------------------------------------------------------
     patternAtlasModule,
     theSheetModule,
     interviewTechniqueModule,
     algorithmsBehindGenAiModule,
-    greedyModule,
-    dpFoundationsModule,
-    dpPatternsModule,
+
     // ---------------------------------------------------------------------
     // Electives — advanced DSA
     //
@@ -155,12 +165,7 @@ export const dsaTrack: TrackDefinition = {
     // inside it.
     // ---------------------------------------------------------------------
     advancedDataStructuresModule,
-    bitsAndMathModule,
     advancedAlgorithmsModule,
     advancedDpAndGraphProblemsModule,
-
-    // ---------------------------------------------------------------------
-    // Module 1 — The grind and the interview
-    // ---------------------------------------------------------------------
   ],
 };

@@ -63,6 +63,18 @@ export const windowMaximumLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Return the maximum of every window of size k in O(n).",
+      answer:
+        "Keep a deque of indices whose values are decreasing. Before pushing index i, pop from the back while the value there is <= a[i], since those can never be the maximum again: a[i] is at least as large and leaves the window later. Before reading the front, pop it if its index is outside the window. The front is then the maximum. Every index is pushed once and popped at most once, so the total is O(n).",
+    },
+    {
+      question: "Why not use a heap?",
+      answer:
+        "A max-heap gives the maximum quickly, but deleting an arbitrary element that leaves the window means finding it first. Lazy deletion works — push (value, index) and discard stale tops when reading — for O(n log n), which is a fine answer but not optimal. Storing indices rather than values in the deque is what makes expiry checkable, and two deques, one decreasing and one increasing, extend it to problems needing both the window's maximum and minimum.",
+    },
+  ],
   takeaways: [
     "A maximum cannot be maintained by add-and-remove — removal loses information",
     "A heap gives O(n log n) with lazy deletion, which is good but not optimal",

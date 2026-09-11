@@ -69,6 +69,18 @@ export const windowSheetLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you recognise a sliding window problem?",
+      answer:
+        "Three parts must all be present: the answer is contiguous, a subarray or substring; the question is about length or a count of qualifying stretches; and the condition is monotone, so growth pushes it one way and shrinking pushes it back. Subsequence rules it out immediately. Negative numbers with a sum condition point to prefix sums, and a maximum or median as the state points to a deque or two heaps.",
+    },
+    {
+      question: "What do you decide before writing the window?",
+      answer:
+        "What the state is and whether removal is O(1); whether it is a longest or shortest problem, which fixes whether the shrink runs while invalid or while valid and where the answer is recorded; and why the condition is monotone. Then the complexity: O(n) for nearly all of them, or O(n log n) if a heap is used for a maximum.",
+    },
+  ],
   takeaways: [
     "Three-part signal: contiguous, an extent-or-count question, and a monotone condition",
     "\"Subsequence\" rules it out immediately",

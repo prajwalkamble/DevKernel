@@ -559,6 +559,18 @@ lo + (hi - lo) / 2 = 2050000000`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Write binary search and explain why it is correct.",
+      answer:
+        "I use the half-open convention: hi = len(a), loop while lo < hi, mid = lo + (hi - lo) / 2, and move lo = mid + 1 when a[mid] < target, otherwise hi = mid. The invariant is that if the target is present, it is inside the current window; each move keeps that true and shrinks the window, so when the window is empty the target was never there. The closed convention works too, but its three choices — the initial hi, the loop test and the hi update — are a package, and mixing the two conventions is where the bugs come from.",
+    },
+    {
+      question: "Why does lo = mid cause an infinite loop?",
+      answer:
+        "Because integer division rounds down. With lo = 2 and hi = 3, mid is 2, and setting lo = mid leaves lo exactly where it was, so the window never shrinks. hi = mid is safe for the same reason, since mid is always strictly less than hi. That asymmetry is why the updates are lo = mid + 1 and hi = mid in the half-open form.",
+    },
+  ],
   takeaways: [
     "The invariant: if the target exists, it is inside the current window",
     "Half-open `[lo, hi)`: `hi = len`, loop while `lo < hi`, move `hi = mid`",

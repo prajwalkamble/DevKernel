@@ -57,6 +57,18 @@ export const recursionSheetLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "What are the shapes of recursive problems?",
+      answer:
+        "Linear recursion, one call per level, which usually converts to a loop. Divide and conquer, calls on disjoint parts then a combine, signalled by splitting in half or an O(n log n) target. Backtracking, many calls per level with an un-choose, signalled by all, every, generate or how many ways with a small n. And memoised recursion, backtracking's shape computing a value with overlapping subproblems, signalled by how many ways or minimum cost with n too large to enumerate.",
+    },
+    {
+      question: "What do you answer before writing a recursive function?",
+      answer:
+        "Four questions: what the base case returns, including the empty and single-element inputs; what the one step does with the recursive result; what quantity shrinks on every call; and how deep and how wide the recursion is, since depth is the stack risk and branching to the power of depth is the time — 2^n for subsets, n! for permutations. Together they catch the missing base case, infinite recursion, stack overflow and wrong complexity.",
+    },
+  ],
   takeaways: [
     "Four shapes: linear, divide and conquer, backtracking, and memoised",
     "Ask: base case, one step, what shrinks, how deep and how wide",

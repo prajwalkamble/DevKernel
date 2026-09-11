@@ -636,6 +636,18 @@ func main() {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Solve 3Sum: all distinct triples summing to zero.",
+      answer:
+        "Sort, then for each index i two-point the remainder for a pair summing to -nums[i]. That is O(n^2) after the sort, against O(n^3) brute force. Duplicates need three skips: skip an anchor equal to the previous anchor, and after recording a triple advance both inner pointers past equal values, with each inner skip guarded by lo < hi. The input [0, 0, 0, 0] should give exactly one triple and catches a missing skip. Once nums[i] is positive I can break, since no triple can reach zero.",
+    },
+    {
+      question: "How does this extend to 4Sum and beyond?",
+      answer:
+        "k-Sum is k - 2 nested loops around one two-pointer walk, O(n^(k-1)): 3Sum at n = 3000 is nine million steps and fine, 4Sum at n = 3000 is 2.7 times 10^10 and not. Past that, meet in the middle: a hash map of all pair sums solves 4Sum in O(n^2). I prefer the skip idiom to a set of tuples because it uses no extra space, avoids hashing tuples, and generalises cleanly to every k.",
+    },
+  ],
   takeaways: [
     "3Sum = sort, fix one element, two-point the rest — O(n²) after the sort",
     "Three duplicate skips: one on the anchor, two after recording a triple",
