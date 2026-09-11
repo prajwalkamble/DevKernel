@@ -1,5 +1,4 @@
 import type { TrackDefinition } from "@/content/types";
-import { createComingSoonModule } from "@/content/comingSoon";
 import { introductionToProgrammingModule } from "./modules/01-introduction-to-programming";
 import { yourSolvingLanguageModule } from "./modules/02-your-solving-language";
 import { inputOutputDataTypesModule } from "./modules/03-input-output-and-data-types";
@@ -36,6 +35,7 @@ import { interviewTechniqueModule } from "./modules/33-interview-technique";
 import { algorithmsBehindGenAiModule } from "./modules/34-algorithms-behind-gen-ai";
 import { advancedDataStructuresModule } from "./modules/35-advanced-data-structures";
 import { advancedAlgorithmsModule } from "./modules/36-advanced-algorithms";
+import { advancedDpAndGraphProblemsModule } from "./modules/37-advanced-dp-and-graph-problems";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -157,25 +157,7 @@ export const dsaTrack: TrackDefinition = {
     advancedDataStructuresModule,
     bitsAndMathModule,
     advancedAlgorithmsModule,
-    createComingSoonModule({
-      id: "dsa-advanced-dp-and-graphs",
-      slug: "advanced-dp-and-graph-problems",
-      title: "Advanced DP & Graph Problems",
-      order: 37,
-      phase: "Electives · Advanced DSA",
-      description:
-        "Where the two hardest topics stop being separate. Problems that need a DP over a graph, a graph built out of a DP state, or a technique from each composed into one solution.",
-      topics: [
-        "DP on trees, rerooting, and the two-pass technique",
-        "Bitmask DP over subsets, and travelling-salesman-shaped problems",
-        "Digit DP, and counting the numbers with a property",
-        "Shortest paths as dynamic programming, and longest path on a DAG",
-        "Binary lifting, and lowest common ancestor in logarithmic time",
-        "Euler tours, and flattening a tree into an array you can range-query",
-        "Network flow: max-flow, min-cut, and bipartite matching",
-        "Composing two techniques, which is what makes a hard problem hard",
-      ],
-    }),
+    advancedDpAndGraphProblemsModule,
 
     // ---------------------------------------------------------------------
     // Module 1 — The grind and the interview

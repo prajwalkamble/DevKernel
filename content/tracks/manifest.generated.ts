@@ -2734,18 +2734,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "advanced-dp-and-graph-problems",
         "trackSlug": "dsa",
         "title": "Advanced DP & Graph Problems",
-        "description": "Where the two hardest topics stop being separate. Problems that need a DP over a graph, a graph built out of a DP state, or a technique from each composed into one solution.",
+        "description": "Where the two hardest topics stop being separate. Eight lessons: rerooting when the combine has no inverse, DP over subsets, digit DP, shortest paths as DP with a hop limit, binary lifting, Euler tours, network flow, and composing two techniques into one solution.",
         "order": 37,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Electives · Advanced DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "rerooting",
             "moduleSlug": "advanced-dp-and-graph-problems",
-            "title": "Advanced DP & Graph Problems — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
-            "takeawayCount": 8
+            "title": "DP on Trees: Rerooting When the Combine Has No Inverse",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "dp-over-subsets",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Bitmask DP Over Subsets: Submask Walks and Sum Over Subsets",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "digit-dp",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Digit DP: Counting Numbers With a Property",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "shortest-paths-as-dp",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Shortest Paths as Dynamic Programming",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "binary-lifting",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Binary Lifting and Logarithmic Lowest Common Ancestor",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "euler-tours",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Euler Tours: Flattening a Tree Into an Array",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "network-flow",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Network Flow: Max-Flow, Min-Cut, and Bipartite Matching",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "composing-techniques",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Composing Two Techniques: Binary Search Over a Matching",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
           }
         ]
       }
