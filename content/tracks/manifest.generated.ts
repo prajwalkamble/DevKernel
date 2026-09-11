@@ -2659,17 +2659,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "advanced-algorithms",
         "trackSlug": "dsa",
         "title": "Advanced Algorithms & String Matching",
-        "description": "The specialised toolkit: string matching, hashing tricks, and the geometry that shows up just often enough to be worth knowing.",
+        "description": "The specialised toolkit: string matching, hashing, suffix structures, fast recurrences, geometry, and randomisation. Eight lessons: KMP, the Z-algorithm, Rabin-Karp and its collisions, Manacher's algorithm, suffix arrays with LCP, matrix exponentiation, orientation-based geometry, and randomised algorithms whose error is measured.",
         "order": 36,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Electives · Advanced DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "kmp",
             "moduleSlug": "advanced-algorithms",
-            "title": "Advanced Algorithms & String Matching — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "KMP and the Failure Function",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "z-algorithm",
+            "moduleSlug": "advanced-algorithms",
+            "title": "The Z-Algorithm, and When It Is Simpler Than KMP",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "rabin-karp",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Rabin-Karp, Rolling Hashes, and Collisions",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "manachers-algorithm",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Manacher's Algorithm for Palindromes",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "suffix-arrays",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Suffix Arrays and the Problems They Trivialise",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "matrix-exponentiation",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Matrix Exponentiation for Linear Recurrences",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "computational-geometry",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Computational Geometry: Orientation, Convex Hull, Segment Intersection",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "randomised-algorithms",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Randomised Algorithms, and When Approximate Is the Right Answer",
+            "estimatedMinutes": 35,
+            "status": "available",
             "takeawayCount": 8
           }
         ]

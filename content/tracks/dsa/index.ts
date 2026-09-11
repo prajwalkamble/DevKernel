@@ -35,6 +35,7 @@ import { theSheetModule } from "./modules/32-the-sheet";
 import { interviewTechniqueModule } from "./modules/33-interview-technique";
 import { algorithmsBehindGenAiModule } from "./modules/34-algorithms-behind-gen-ai";
 import { advancedDataStructuresModule } from "./modules/35-advanced-data-structures";
+import { advancedAlgorithmsModule } from "./modules/36-advanced-algorithms";
 
 /**
  * Data structures and algorithms, built around one goal: that you can open a
@@ -155,25 +156,7 @@ export const dsaTrack: TrackDefinition = {
     // ---------------------------------------------------------------------
     advancedDataStructuresModule,
     bitsAndMathModule,
-    createComingSoonModule({
-      id: "dsa-advanced-algorithms",
-      slug: "advanced-algorithms",
-      title: "Advanced Algorithms & String Matching",
-      order: 36,
-      phase: "Electives · Advanced DSA",
-      description:
-        "The specialised toolkit: string matching, hashing tricks, and the geometry that shows up just often enough to be worth knowing.",
-      topics: [
-        "KMP, the failure function, and what it is really computing",
-        "The Z-algorithm, and when it is simpler than KMP",
-        "Rabin-Karp, rolling hashes, and the collisions you must plan for",
-        "Manacher's algorithm for palindromes",
-        "Suffix arrays and the problems they trivialise",
-        "Matrix exponentiation for linear recurrences",
-        "Computational geometry: orientation, convex hull, line intersection",
-        "Randomised algorithms, and when approximate is the right answer",
-      ],
-    }),
+    advancedAlgorithmsModule,
     createComingSoonModule({
       id: "dsa-advanced-dp-and-graphs",
       slug: "advanced-dp-and-graph-problems",
