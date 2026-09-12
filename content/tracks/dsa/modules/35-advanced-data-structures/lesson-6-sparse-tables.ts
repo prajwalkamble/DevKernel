@@ -23,7 +23,7 @@ export const sparseTablesLesson: Lesson = {
         "`table[k][i]` holds the minimum of the `2^k` values starting at position `i`. Row 0 is the array itself. Every later row is built from the one before: a window of length `2^k` is two windows of length `2^(k-1)`, so `table[k][i] = min(table[k-1][i], table[k-1][i + 2^(k-1)])`.",
         "Row `k` has `n - 2^k + 1` entries and there are about `log2 n` rows, so the build is `O(n log n)` time and space.",
         "**Query** `[l, r]`: let `len = r - l + 1` and `k` be the largest power with `2^k \u2264 len`. The window starting at `l` and the window ending at `r`, both of length `2^k`, together cover the range. The answer is `min(table[k][l], table[k][r - 2^k + 1])` \u2014 two reads, no loop.",
-        "Compute `k` with integer operations \u2014 the bit length of `len` minus one, or a precomputed log table \u2014 rather than a floating-point logarithm, which can round `log2(8)` to `2.9999`.",
+        "Compute `k` with integer operations \u2014 the bit length of `len` minus one, or a precomputed log table \u2014 rather than a floating-point logarithm. A float `log2` in fact floors correctly for every array length that fits in memory — checked to 2²⁰ in Python, Node, Java and C, with the first failure at 2⁴⁸ − 1 — but the integer version needs no such check and is faster.",
       ],
     },
     {
@@ -886,7 +886,7 @@ func main() {
         },
         {
           title: "A floating-point logarithm for k",
-          body: "Rounding can pick one power too small or too large, producing a window that falls outside the range. Use integer bit length or a precomputed table.",
+          body: "It is the kind of thing that needs checking rather than trusting: `log(1000)/log(10)` is 2.9999999999999996, and while base-2 logs of array-sized lengths floored correctly in every language measured, the integer bit length is exact by construction and faster. Use it, or a precomputed table.",
         },
         {
           title: "Updating a value in place",

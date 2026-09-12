@@ -22,7 +22,7 @@ export const statingYourComplexityLesson: Lesson = {
       body: [
         "\"It is `O(n)` \u2014 there is one loop.\" This is the single most common incorrect complexity statement in interviews, and it is wrong in a specific way worth naming.",
         "It is a statement about the **shape of the code** rather than about the **work performed**. One loop is `O(n)` iterations, which is only `O(n)` total if each iteration does constant work \u2014 and the moment the body contains a `sort`, a `list.count`, a string concatenation, an `in` on a list, or a nested helper function, it does not.",
-        "The reason the error is so common is that the expensive work usually does not look like a loop. `set(prefix)` is one short expression and a linear scan. `arr[:i]` is a slice and a copy. `\"\".join` inside a loop is fine; `s = s + c` inside a loop is quadratic in most languages. None of these are indented under a `for`.",
+        "The reason the error is so common is that the expensive work usually does not look like a loop. `set(prefix)` is one short expression and a linear scan. `arr[:i]` is a slice and a copy. `\"\".join` inside a loop is fine; `s = s + c` inside a loop is quadratic in Java, Go and C++ — measured — while CPython and V8 optimise it into an append and Rust's `String + &str` appends in place; none of which is a guarantee to lean on. None of these are indented under a `for`.",
         "The correct question is not how many loops there are. It is: **for one iteration, how much work happens?** Multiply that by the iteration count. That is the whole method.",
       ],
     },

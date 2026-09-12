@@ -91,7 +91,7 @@ sys.stdout.write("\\n".join(map(str, results)) + "\\n")`,
 9
 16`,
           explanation:
-            "Identical output, one system call instead of n. At 10⁵ lines the difference is large enough to fail a time limit on its own. `print(*results, sep=\"\\n\")` is a shorter version of the same idea and is worth knowing as the one-liner.",
+            "Identical output, one `print` call instead of n. Python already buffers standard output — printing 10⁵ lines one at a time still made only 72 write system calls — so the cost is the 10⁵ calls into `print` itself, and at that scale it is large enough to fail a time limit on its own. `print(*results, sep=\"\\n\")` is a shorter version of the same idea and is worth knowing as the one-liner.",
         },
       ],
       pitfalls: [
@@ -151,7 +151,7 @@ public class Main {
         },
         {
           title: "`System.out.println` inside a large loop",
-          body: "Every call can flush, meaning a system call per line. Build a `StringBuilder` and print once at the end. This is the same quadratic-adjacent trap as string concatenation, and it is the more common cause of a mysteriously slow Java submission.",
+          body: "Every call flushes, meaning a system call per line — 100,000 writes for 100,000 lines when measured. Build a `StringBuilder` and print once at the end. It is linear rather than quadratic, but that constant is large, and it is the more common cause of a mysteriously slow Java submission.",
         },
       ],
     },
@@ -173,7 +173,7 @@ public class Main {
     {
       question: "How do you speed up input and output in Python for competitive programming?",
       answer:
-        "Replace `input()` with `sys.stdin.readline`, or read everything at once with `sys.stdin.read().split()` and walk the resulting token list with an index. For output, build the whole answer and write it in one call — `sys.stdout.write(\"\\n\".join(map(str, results)))` or `print(*results, sep=\"\\n\")` — rather than calling `print` per line. Both changes replace n system calls with one, which at 10⁵ lines is frequently the difference between passing and timing out.",
+        "Replace `input()` with `sys.stdin.readline`, or read everything at once with `sys.stdin.read().split()` and walk the resulting token list with an index. For output, build the whole answer and write it in one call — `sys.stdout.write(\"\\n\".join(map(str, results)))` or `print(*results, sep=\"\\n\")` — rather than calling `print` per line. Both changes replace n calls into the I/O layer with one, which at 10⁵ lines is frequently the difference between passing and timing out.",
     },
     {
       question: "Why does `nextLine()` return an empty string after `nextInt()`?",

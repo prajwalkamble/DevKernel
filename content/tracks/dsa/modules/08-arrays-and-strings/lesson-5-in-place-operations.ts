@@ -90,7 +90,7 @@ empty:
         "Rotating an array right by k places is a standard problem, and the naive answer — shift everything one place, k times — is O(n × k), which is quadratic when k is around n.",
         "The trick is three reversals. **Reverse the whole array, then reverse the first k, then reverse the rest.** That is O(n) time and O(1) space.",
         "Why it works: reversing the whole array puts the last k elements at the front but backwards, and puts the first n − k at the back, also backwards. Reversing each part separately fixes both.",
-        "Two details that are easy to get wrong. `k` must be reduced modulo `n` first, since rotating by n is rotating by nothing. And a negative or zero `k` needs handling or the sub-reversals get nonsense bounds.",
+        "Two details that are easy to get wrong. `k` must be reduced modulo `n` first, since rotating by n is rotating by nothing. And a negative `k` needs normalising — `((k % n) + n) % n` in Java — or the sub-reversals get nonsense bounds; `k = 0` needs nothing, since the three reversals then restore the array.",
       ],
       examples: [
         {
@@ -226,7 +226,7 @@ dedupe   : [1, 2, 3] (kept 3 )
     {
       question: "How do you reverse an array in place?",
       answer:
-        "Two pointers, one at each end, swapping and moving inward while `lo < hi`. It performs n/2 swaps, is O(n) time and O(1) space. The condition must be strict: with an odd length the pointers meet on the middle element, which needs no swap, and using `<=` on an even length would let them cross and undo the work. Java needs a temporary variable for the swap; Python's tuple assignment handles it directly.",
+        "Two pointers, one at each end, swapping and moving inward while `lo < hi`. It performs n/2 swaps, is O(n) time and O(1) space. `lo < hi` is the natural condition: with an odd length the pointers meet on the middle element, which needs no swap. `lo <= hi` is also correct — it only adds a harmless swap of the middle element with itself. Java needs a temporary variable for the swap; Python's tuple assignment handles it directly.",
     },
     {
       question: "How do you rotate an array right by k in O(1) space?",

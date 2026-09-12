@@ -26,7 +26,7 @@ export const precedenceLesson: Lesson = {
         "**3 — additive.** `+`, `-`.",
         "**4 — shifts, then relational, then equality.** `<<` `>>`, then `<` `<=` `>` `>=`, then `==` `!=`.",
         "**5 — bitwise, then logical.** `&`, then `^`, then `|`, then `&&`, then `||`. Loosest.",
-        "That is Java's ordering. Python agrees on everything except one thing: it places the bitwise operators *tighter* than comparison rather than looser, which is the subject of the next section and the only precedence difference between the two languages you will meet.",
+        "That is Java's ordering. Python agrees on everything except one thing: it places the bitwise operators *tighter* than comparison rather than looser, which is the subject of the next section. It is not the only difference: Python's `not` binds looser than comparisons, so `not 1 == 2` is `True`, and `**` binds tighter than unary minus, so `-2 ** 2` is `-4`.",
       ],
     },
     {

@@ -83,7 +83,7 @@ export const sixtySecondsLesson: Lesson = {
     },
   ],
   takeaways: [
-    "Recognition and implementation are separate skills, and solving trains them at a ratio of about one to fourteen",
+    "Recognition and implementation are separate skills, and solving spends most of its time on the second",
     "The drill bans code: read, name four things, move on, sixty seconds",
     "The four outputs are the restatement, the target complexity, the structure and the pattern — in that order",
     "The pattern comes last because it is deduced from the structure, not chosen and then justified",

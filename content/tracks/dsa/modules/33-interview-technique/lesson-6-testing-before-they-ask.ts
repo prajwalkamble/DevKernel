@@ -60,7 +60,7 @@ export const testingBeforeTheyAskLesson: Lesson = {
         "**From the code.** Every branch you wrote is a claim that both sides can happen, so find an input for each side. Every `while` is a claim it can run zero times. Every index arithmetic like `i - 1` or `i + 1` is a claim about the ends. Reading your own code for these takes thirty seconds and is far more targeted than a generic list.",
         "**From the problem statement.** Whatever it said could happen: duplicates allowed, values may be negative, the answer may not exist, `k` may exceed `n`. Anything the statement went out of its way to permit was permitted deliberately.",
         "**From your assumptions.** Every clarifying question you asked and every decision you made when the interviewer said \"you decide\" is an edge case with your name on it. \"I assumed empty returns zero \u2014 let me check that path actually does.\"",
-        "The best of these is the second, because it is derived from what you actually wrote rather than from what the problem is about. The four hand-picked tests measured in the brute-force lesson were all of the first kind, and they caught one bug in four.",
+        "The best of these is the second, because it is derived from what you actually wrote rather than from what the problem is about. Three of the four hand-picked tests measured in the brute-force lesson came from the input type and the fourth from the statement, and they caught one bug in four.",
       ],
     },
   ],

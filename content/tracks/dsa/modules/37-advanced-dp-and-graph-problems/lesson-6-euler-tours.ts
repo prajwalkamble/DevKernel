@@ -23,7 +23,7 @@ export const eulerToursLesson: Lesson = {
         "Run a depth-first search and give each node the next number when it is first entered: `tin[v]`. When the search finishes a node's subtree, record `tout[v]`, the largest number given out inside it.",
         "Depth-first search enters a node and then everything below it before leaving, so the nodes of `v`'s subtree receive exactly the numbers `tin[v]` through `tout[v]`, with no gaps and nothing else mixed in.",
         "Two consequences follow immediately. **A subtree is a range**: store each node's value at position `tin[v]`, and the subtree of `v` is the array slice `[tin[v], tout[v]]`. **Ancestry is a comparison**: `u` is an ancestor of `v` exactly when `tin[u] \u2264 tin[v] \u2264 tout[u]`.",
-        "Write the search iteratively, keeping a stack of (node, next child index). A tree shaped like a path is as deep as it has nodes, and a recursive search on 100,000 nodes overflows the call stack in most languages.",
+        "Write the search iteratively, keeping a stack of (node, next child index). A tree shaped like a path is as deep as it has nodes, and a recursive search on 100,000 nodes overflows CPython at 1,000 frames, Node at about 6,000 and Java at roughly 10,000 to 24,000, while C++ on Linux and Go take it.",
       ],
     },
     {

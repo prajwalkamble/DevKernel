@@ -20,7 +20,7 @@ export const theKvCacheLesson: Lesson = {
       id: "what-it-caches",
       heading: "What is being cached",
       body: [
-        "When a model generates text it produces one token at a time, and each new token attends to every token before it. Attention needs two arrays per earlier token \u2014 its **key** and its **value** \u2014 and those arrays depend only on that token, not on anything generated later.",
+        "When a model generates text it produces one token at a time, and each new token attends to every token before it. Attention needs two arrays per earlier token \u2014 its **key** and its **value** \u2014 and those arrays depend on that token and the ones before it, never on anything generated later.",
         "So they never change once computed. That is the entire justification for the cache: a value that is expensive, reused every step, and immutable is the textbook case for storing it.",
         "Without the cache, generating token 500 means recomputing keys and values for all 499 earlier tokens, and that recomputation happened at token 499 too, and at 498. With the cache, each token's key and value are computed once and appended.",
         "The program counts the operations rather than describing them, and then counts two other things that are routinely confused with this one.",
@@ -249,7 +249,7 @@ before it is a compute problem. Grouped-query attention, which shares
 one set of keys and values across several query heads, exists to
 divide precisely this table.`,
           explanation:
-            "The first table is the cache working: without it the count grows by 7.9 each time the sequence doubles, which is cubic; with it, 3.9, which is quadratic. At 512 tokens that is a factor of 171 and it keeps widening. The second table is the cost the cache does not remove -- a token at position 4096 costs 4096 times what the first token cost, because it attends to 4096 cached entries. The third is the append itself: growing the cache by one entry per token moves 33 million entries over 8192 tokens, while doubling the capacity moves 8191, which is 0.99 per token at every size. The last is memory: 64 GB of cache for one 128k-token conversation on a 32-layer model of width 4096.",
+            "The first table is the cache working: without it the count grows by 7.9 each time the sequence doubles, which is cubic; with it, 3.9, which is quadratic. At 512 tokens that is a factor of 171 and it keeps widening. The second table is the cost the cache does not remove -- a token at position 4096 costs 4096 times what the first token cost, because it attends to 4096 cached entries. The third is the append itself: growing the cache by one entry per token moves 33 million entries over 8192 tokens, while doubling the capacity moves 8191, which is 0.99 per token at every size. The last is memory: 64 GB of cache for one 128k-token conversation on a 32-layer model of width 4096 — in fp16, with every head keeping its own keys and values. Grouped-query attention, which most current models use, divides that by the number of heads sharing a key-value pair.",
           alternates: [
             {
               lang: "javascript",
@@ -1289,7 +1289,7 @@ func main() {
         },
         {
           title: "Assuming a longer context window is free once supported",
-          body: "The last table is the price: 512 MB at 1k tokens, 64 GB at 128k, for one sequence. Support for long context is a memory purchase.",
+          body: "The last table is the price: 512 MB at 1k tokens, 64 GB at 128k, for one sequence — before grouped-query attention, which divides it. Support for long context is a memory purchase.",
         },
       ],
     },
@@ -1300,7 +1300,7 @@ func main() {
         "The third table is the earliest data structure in this track, appearing in the hottest buffer in a language model runtime.",
         "The cache is appended to once per token and never has an entry removed mid-sequence. That is a dynamic array, and the growth policy question is the same one: how much capacity to allocate when it fills.",
         "Growing by exactly one entry per token means copying the whole cache on every token, and the measured total is 33 million entry moves over 8,192 tokens. Doubling the capacity when full moves 8,191 \u2014 **0.99 per token, and it stays at 0.99 at every size measured.** That is the amortised argument, unchanged, and it is why nobody profiling a model runtime ever sees the append.",
-        "Real implementations do one thing differently that is worth knowing, because it is a data structure decision too. Doubling a 64 GB cache means briefly holding 96 GB, which is not acceptable, and a conversation that ends leaves a hole no other conversation quite fits. So serving systems use **paged attention**: the cache is stored in fixed-size blocks with a table mapping logical positions to blocks, and it grows one block at a time.",
+        "Real implementations do one thing differently that is worth knowing, because it is a data structure decision too. Doubling a 32 GB cache to 64 GB means briefly holding 96 GB, which is not acceptable, and a conversation that ends leaves a hole no other conversation quite fits. So serving systems use **paged attention**: the cache is stored in fixed-size blocks with a table mapping logical positions to blocks, and it grows one block at a time.",
         "That is virtual memory, applied to a tensor. It gives up contiguity, which attention did not need, and gets back the ability to allocate in fixed units and share blocks between requests with a common prefix \u2014 the same system prompt cached once for every user of it.",
       ],
     },
@@ -1309,7 +1309,7 @@ func main() {
     {
       question: "What is the KV cache and what does it save?",
       answer:
-        "Each token's key and value arrays depend only on that token, so they never change once computed -- expensive, reused every step, immutable, which is the textbook case for caching. Without it, generating token 500 recomputes keys and values for all 499 earlier tokens, and it did that at token 499 too. I counted it: without the cache the work grows by 7.9 each time the sequence doubles, which is cubic; with it, 3.9, which is quadratic. At 512 tokens that is a factor of 171. What it does not do is make generation cheap -- it turns cubic into quadratic, and 3.9 is not 2.0.",
+        "Each token's key and value depend on it and the tokens before it and never on what comes after, so they never change once computed -- expensive, reused every step, immutable, which is the textbook case for caching. Without it, generating token 500 recomputes keys and values for all 499 earlier tokens, and it did that at token 499 too. I counted it: without the cache the work grows by 7.9 each time the sequence doubles, which is cubic; with it, 3.9, which is quadratic. At 512 tokens that is a factor of 171. What it does not do is make generation cheap -- it turns cubic into quadratic, and 3.9 is not 2.0.",
     },
     {
       question: "Why is context length quadratic?",
@@ -1319,11 +1319,11 @@ func main() {
     {
       question: "How is the KV cache managed in memory?",
       answer:
-        "It is a dynamic array: appended once per token, never shortened mid-sequence. Growing by one entry per token moves 33 million entries over 8192 tokens; doubling the capacity moves 8191, which is 0.99 moves per token at every size -- the standard amortised argument, which is why nobody profiling a runtime sees the append. Real systems do not double, though, because doubling a 64 GB cache means briefly holding 96 GB. They use paged attention: fixed-size blocks with a table from logical position to block, grown one block at a time. That is virtual memory applied to a tensor, and it also lets two requests with the same system prompt share the blocks for it.",
+        "It is a dynamic array: appended once per token, never shortened mid-sequence. Growing by one entry per token moves 33 million entries over 8192 tokens; doubling the capacity moves 8191, which is 0.99 moves per token at every size -- the standard amortised argument, which is why nobody profiling a runtime sees the append. Real systems do not double, though, because doubling a 32 GB cache to 64 GB means briefly holding 96 GB. They use paged attention: fixed-size blocks with a table from logical position to block, grown one block at a time. That is virtual memory applied to a tensor, and it also lets two requests with the same system prompt share the blocks for it.",
     },
   ],
   takeaways: [
-    "Keys and values depend only on their own token, so they never change",
+    "Keys and values never depend on later tokens, so they never change once computed",
     "Measured doubling ratios: 7.9 without the cache, 3.9 with — cubic to quadratic",
     "The quadratic is a linear loop run a linear number of times",
     "A token at position 4096 costs 4096 times the first token",

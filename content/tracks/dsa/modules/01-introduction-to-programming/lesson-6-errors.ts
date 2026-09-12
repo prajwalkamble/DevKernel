@@ -37,7 +37,7 @@ export const errorsLesson: Lesson = {
       examples: [
         {
           id: "cascade",
-          title: "One mistake, several complaints",
+          title: "One mistake, reported on the line before",
           lang: "java",
           code: `public class Main {
     public static void main(String[] args) {
@@ -126,7 +126,7 @@ ZeroDivisionError: division by zero
         "**Index out of bounds.** `ArrayIndexOutOfBoundsException` in Java, `IndexError` in Python. Almost always a loop running to `<= length` instead of `< length`, or an empty collection you did not check for.",
         "**Divide by zero.** `ArithmeticException` in Java for integers, `ZeroDivisionError` in Python. Almost always a count that turned out to be zero — an average over an empty list, as above.",
         "**Null.** `NullPointerException` in Java, `AttributeError: 'NoneType' object has no attribute...` in Python. Almost always a lookup that found nothing and returned `null`/`None`, used without checking.",
-        "**Stack overflow.** `StackOverflowError` in Java, `RecursionError` in Python. Always a recursion whose base case is missing or never reached.",
+        "**Stack overflow.** `StackOverflowError` in Java, `RecursionError` in Python. Usually a recursion whose base case is missing or never reached — otherwise a correct recursion that is simply deeper than the stack allows.",
       ],
       examples: [
         {

@@ -154,7 +154,7 @@ doubled: [6, 2, 8, 2, 10] original: [3, 1, 4, 1, 5]`,
         "**Search for a value — O(n).** No shortcut without extra structure; you look at each element.",
         "**Insert or delete at the end — O(1) amortised** for a dynamic array, impossible for a fixed one.",
         "**Insert or delete in the middle — O(n).** Everything after the position shifts.",
-        "The last one is the array's defining weakness, and it is exactly what linked lists trade against — they make middle insertion O(1) and give up the constant-time indexing.",
+        "The last one is the array's defining weakness, and it is exactly what linked lists trade against — they make insertion O(1) once you hold the neighbouring node — reaching the middle is still O(n) — and give up the constant-time indexing.",
       ],
       examples: [
         {

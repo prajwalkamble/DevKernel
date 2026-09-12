@@ -123,7 +123,7 @@ n = 10,000  average cost per insert =   4999.5
       pitfalls: [
         {
           title: "Calling a hash map \"amortised O(1)\"",
-          body: "It is average O(1) for lookup — the constant depends on the input's hash distribution, not on a sequence argument. The *resizing* of a hash map genuinely is amortised, by the same doubling argument as the array. So a hash map is average O(1) for lookup and amortised O(1) for insertion, and being able to say which is which is a small but real signal of understanding.",
+          body: "It is average O(1) for lookup — the constant depends on the input's hash distribution, not on a sequence argument. The *resizing* of a hash map genuinely is amortised, by the same doubling argument as the array. So a hash map is average O(1) for lookup and expected amortised O(1) for insertion — amortised for the resizing, average for the probing — and being able to say which is which is a small but real signal of understanding.",
         },
       ],
     },
@@ -134,7 +134,7 @@ n = 10,000  average cost per insert =   4999.5
         "**Dynamic arrays** — append and pop at the end, by doubling. `list.append`, `ArrayList.add`.",
         "**Hash map resizing** — the rehash on growth, by the same argument.",
         "**StringBuilder** — the same growable buffer, which is why building a string with one is O(n) overall.",
-        "**Union-find with path compression** — amortised near-constant, technically the inverse Ackermann function, which is under 5 for any input that exists.",
+        "**Union-find with path compression and union by rank** — amortised near-constant, technically the inverse Ackermann function, which is under 5 for any input that exists.",
         "**The two-pointer and monotonic-stack patterns** — each element is pushed and popped at most once across the whole run, so an inner loop that looks nested is O(n) overall. This is amortised reasoning applied to an *algorithm* rather than a structure, and it is why sliding-window solutions are linear despite the inner `while`.",
         "**When it is not good enough:** real-time systems, where a single 500,000-step pause matters even if the average is 2. That is why some systems use incrementally-resizing structures that never have a single expensive operation, trading a worse average for a bounded worst case.",
       ],
@@ -149,7 +149,7 @@ n = 10,000  average cost per insert =   4999.5
     {
       question: "What is the difference between amortised and average case?",
       answer:
-        "Amortised is a guarantee over a sequence of operations that holds for every input — expensive operations are rare and paid for by the cheap ones. Average case is an expectation over a distribution of inputs — expensive inputs are unlikely. The practical difference is that an adversary can defeat an average-case bound but not an amortised one, which is why hash-flooding attacks exist and nobody attacks an ArrayList. A hash map is average O(1) for lookup and amortised O(1) for insertion.",
+        "Amortised is a guarantee over a sequence of operations that holds for every input — expensive operations are rare and paid for by the cheap ones. Average case is an expectation over a distribution of inputs — expensive inputs are unlikely. The practical difference is that an adversary can defeat an average-case bound but not an amortised one, which is why hash-flooding attacks exist and nobody attacks an ArrayList. A hash map is average O(1) for lookup and expected amortised O(1) for insertion.",
     },
     {
       question: "Why does a dynamic array double rather than grow by a fixed amount?",

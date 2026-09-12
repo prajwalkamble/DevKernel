@@ -350,7 +350,7 @@ Integer[] bytes   : 80000000 of pointers + 160000000 of objects
 boxed slower      : true
 by more than 2x   : true`,
           explanation:
-            "Six times the memory for the same ten million numbers, and about **4.7×** the time on the verifying machine. The memory figures are exact arithmetic rather than a measurement: eight bytes for each reference, plus a sixteen-byte object header and payload for each `Integer` it points at. Neither array's traversal is anything other than O(n) — this is entirely constant factor, and constant factors of five decide whether a solution finishes inside a time limit.",
+            "Six times the memory by this arithmetic for the same ten million numbers, and about **4.7×** the time on the verifying machine. The memory figures are arithmetic rather than a measurement, and they assume eight-byte references plus a sixteen-byte `Integer` for each one. A default 64-bit JVM compresses references to four bytes, which makes it 20 bytes against 4 — about five times — and measuring the heap agreed: 4.1 against 20.1 bytes per element. Neither array's traversal is anything other than O(n) — this is entirely constant factor, and constant factors of five decide whether a solution finishes inside a time limit.",
         },
       ],
       pitfalls: [
@@ -383,7 +383,7 @@ by more than 2x   : true`,
     {
       question: "When would you choose `int[]` over `List<Integer>`?",
       answer:
-        "Whenever the work is numeric and hot, and the size is known or manageable. `List<Integer>` is backed by an `Object[]`, so every element is a reference to a separately allocated box — about six times the memory and, measured over ten million elements, roughly five times the time for the same sum. It also introduces the `==` trap, since comparing two `Integer` references outside the −128 to 127 cache compares identity rather than value. Take the list when you need growth or the collections API, and take the array when the loop matters.",
+        "Whenever the work is numeric and hot, and the size is known or manageable. `List<Integer>` is backed by an `Object[]`, so every element is a reference to a separately allocated box — about five times the memory with the JVM's default compressed references and, measured over ten million elements, roughly five times the time for the same sum. It also introduces the `==` trap, since comparing two `Integer` references outside the −128 to 127 cache compares identity rather than value. Take the list when you need growth or the collections API, and take the array when the loop matters.",
     },
   ],
   takeaways: [
@@ -391,7 +391,7 @@ by more than 2x   : true`,
     "That arithmetic is the whole reason indexing is O(1) — nothing is searched",
     "Memory arrives a cache line at a time, so consecutive access is nearly free",
     "Row-major vs column-major over a 4000×4000 matrix: ~17× apart, same O(n²)",
-    "`Integer[]` costs ~6× the memory and ~5× the time of `int[]` for the same numbers",
+    "`Integer[]` costs ~5× the memory and ~5× the time of `int[]` for the same numbers",
     "`==` on boxed Integers compares identity — true below 128, false above it",
     "Complexity and constant factor are separate claims; state them separately",
     "\"Values in the range 1 to n\" is an invitation to index by value",

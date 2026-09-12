@@ -160,10 +160,10 @@ second
       body: [
         "`public static void main(String[] args)` is usually presented as a magic phrase to copy. It is not magic, and knowing what it says removes a small permanent source of unease.",
         "**`public`** — visible from outside this class. The JVM has to be able to find and call this method from outside your code, so it cannot be private.",
-        "**`static`** — belongs to the class itself rather than to an instance of it. This one matters: to call a non-static method you first need an object to call it *on*, and when your program starts there are no objects yet. `static` is what makes it callable without one.",
+        "**`static`** — belongs to the class itself rather than to an instance of it. This one matters: to call a non-static method you first need an object to call it *on*, and when your program starts there are no objects yet. `static` is what makes it callable without one. (Since Java 25 the launcher will also create the object itself and call a non-static `main`, which is why the short form works.)",
         "**`void`** — returns nothing. Some languages have the program return a number; Java does not use the return value here.",
         "**`main`** — the name the JVM looks for. It is a convention, not a keyword, but it is not negotiable: name it something else and the JVM will not find it.",
-        "**`String[] args`** — an array of text values, holding whatever arguments were typed after the program name on the command line. You will almost never use it, but it must be in the signature, because this exact shape is what the JVM searches for.",
+        "**`String[] args`** — an array of text values, holding whatever arguments were typed after the program name on the command line. You will almost never use it. Until Java 25 it had to be in the signature, because this exact shape is what the launcher searched for; since Java 25 a plain `void main()` also runs, and `String[] args` is only needed when you read the arguments.",
         "**`class Main`** — Java requires every piece of code to live inside a class. For now, treat the class as the container your program lives in. What a class is really for does not come up in solving problems, and trying to understand it now would cost more than it gives.",
         "**`System.out.println`** — the `println` method of the `out` object belonging to the `System` class. It prints its argument and moves to a new line. There is a `print` without the `ln` that stays on the same line, which you will want later for building up a line piece by piece.",
       ],
@@ -229,7 +229,7 @@ SyntaxError: '(' was never closed`,
     {
       question: "Why does Java's `main` method have to be `static`?",
       answer:
-        "Because the JVM has to call it before any objects exist. A non-static method belongs to an instance and can only be called on one, so invoking it would require the JVM to construct an object of your class first — which raises the question of which constructor to use and with what arguments. Making `main` static sidesteps all of that: it belongs to the class itself, so the JVM can call it as soon as the class is loaded.",
+        "Because the JVM has to call it before any objects exist. A non-static method belongs to an instance and can only be called on one, so invoking it would require the JVM to construct an object of your class first — which raises the question of which constructor to use and with what arguments. Making `main` static sidesteps all of that: it belongs to the class itself, so the JVM can call it as soon as the class is loaded. Since Java 25 the launcher will also construct the object itself, with the no-argument constructor, when `main` is not static — which is why a plain `void main()` runs — but `static` remains the form that needs no object at all.",
     },
     {
       question: "What does `String[] args` do?",

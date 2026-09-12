@@ -88,7 +88,7 @@ triangular is half of nested -- same class, constant factor apart`,
       heading: "Where logarithms come from",
       body: [
         "A logarithm appears whenever the problem size is **divided by a constant factor** each step rather than reduced by a constant amount.",
-        "`while n > 1: n //= 2` runs log₂ n times, because halving 1024 eleven times reaches 1. That is the entire source of every log in this course.",
+        "`while n > 1: n //= 2` runs log₂ n times, because halving 1024 ten times reaches 1. That is the entire source of every log in this course.",
         "Three places it shows up: **binary search**, which halves the search range; **balanced tree operations**, where the height of a tree over n nodes is log n; and **divide-and-conquer recursion**, where the recursion depth is log n and each level does O(n) work, giving the O(n log n) of merge sort.",
         "**The base is never written**, because changing base multiplies by a constant — log₂ n = log₁₀ n / log₁₀ 2 — and constants are dropped. Everyone means base 2 and nobody writes it.",
       ],

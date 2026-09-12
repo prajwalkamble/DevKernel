@@ -154,7 +154,7 @@ pop from front : 0 [1, 2, 4]`,
       pitfalls: [
         {
           title: "Removing elements while iterating",
-          body: "Deleting from a list you are looping over shifts the remaining elements under the cursor, so the loop skips the element after each removal. Both languages have the same trap; Java at least throws `ConcurrentModificationException` for a for-each loop, while Python silently produces a wrong answer. Build a new list, iterate backwards, or use the read-and-write-pointer pattern from the arrays module.",
+          body: "Deleting from a list you are looping over shifts the remaining elements under the cursor, so the loop skips the element after each removal. Both languages have the same trap; Java usually throws `ConcurrentModificationException` for a for-each loop (not when the removed element is the second-to-last), while Python silently produces a wrong answer. Build a new list, iterate backwards, or use the read-and-write-pointer pattern from the arrays module.",
         },
       ],
     },

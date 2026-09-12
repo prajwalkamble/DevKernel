@@ -23,7 +23,7 @@ export const stringOperationsLesson: Lesson = {
         "**Length** — `len(s)` / `s.length()`. O(1) in both.",
         "**Character at** — `s[i]` / `s.charAt(i)`. O(1).",
         "**Substring** — `s[a:b]` / `s.substring(a, b)`. O(b − a), and it allocates.",
-        "**Search** — `s.find(t)` and `s.index(t)` / `s.indexOf(t)`. O(n × m) in the worst case for the naive implementations both use.",
+        "**Search** — `s.find(t)` and `s.index(t)` / `s.indexOf(t)`. Java's `indexOf` is a naive scan, O(n × m) in the worst case — 8.5 seconds on a text built to trigger it; CPython's `find` switches to a linear-time two-way algorithm for longer patterns and stayed at about 7 ms on the same input.",
         "**Contains** — `t in s` / `s.contains(t)`.",
         "**Split** — `s.split(sep)` / `s.split(regex)`. Note Java's takes a *regular expression*, which is a real difference.",
         "**Join** — `sep.join(parts)` / `String.join(sep, parts)`.",
@@ -201,7 +201,7 @@ built-in: 100 (non-overlapping, so a different count)
     {
       question: "What is the difference between `s.split()` and `s.split(\" \")` in Python?",
       answer:
-        "With no argument, `split` treats any run of whitespace as one separator and ignores leading and trailing whitespace, so `\"  3   1  \"` gives three tokens. With an explicit `\" \"` it splits on each single space, producing empty strings for every consecutive space and for the leading and trailing ones — ten elements for the same input. For whitespace-separated input the no-argument form is nearly always what you want.",
+        "With no argument, `split` treats any run of whitespace as one separator and ignores leading and trailing whitespace, so `\"  3   1  \"` gives two tokens. With an explicit `\" \"` it splits on each single space, producing empty strings for every consecutive space and for the leading and trailing ones — eight elements for the same input. For whitespace-separated input the no-argument form is nearly always what you want.",
     },
     {
       question: "Which string operations allocate, and why does it matter?",

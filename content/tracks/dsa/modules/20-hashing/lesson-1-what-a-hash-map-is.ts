@@ -227,7 +227,7 @@ func main() {
         "The **load factor** is `entries / buckets`. At 0.75 — Java's default — three quarters of the buckets have something in them and chains are still short.",
         "Push past that and chains lengthen, so every lookup walks further. So the table **resizes**: allocate a bigger array, usually double, and re-insert everything. Every key's index is recomputed, because the index depended on the bucket count.",
         "A resize is O(n). It happens rarely enough that the *average* insertion is still O(1) — this is amortised analysis, the same argument as the dynamic array's doubling. The cost is real but spread out.",
-        "Two practical consequences. **First**, if you know roughly how many entries are coming, say so at construction — `new HashMap<>(expectedSize)` — and you skip the resize chain entirely. **Second**, a single `put` can occasionally take far longer than the others, which matters for latency-sensitive code and not at all for interview problems.",
+        "Two practical consequences. **First**, if you know roughly how many entries are coming, say so at construction — but `new HashMap<>(n)` sets the table size, not the entry count, so 100 entries in `new HashMap<>(100)` still resize once at 75% load; `HashMap.newHashMap(100)` (Java 19+) sizes for the entries and skips the resize chain entirely. **Second**, a single `put` can occasionally take far longer than the others, which matters for latency-sensitive code and not at all for interview problems.",
       ],
       pitfalls: [
         {

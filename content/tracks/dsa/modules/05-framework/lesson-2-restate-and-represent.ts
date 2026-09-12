@@ -66,7 +66,7 @@ RESTATED    Find every group of three of these numbers that cancel out. Groups
       heading: "The words that change everything",
       body: [
         "A small number of words carry enormous weight, and every one of them is easy to read past. When you restate, check each of these explicitly.",
-        "**Contiguous / substring / subarray** against **subsequence.** A subarray is a slice; a subsequence can skip. This one word decides whether a sliding window is available at all — a window is contiguous by construction, so if the problem says subsequence, no window will ever work. It is the difference between an O(n) problem and a DP problem.",
+        "**Contiguous / substring / subarray** against **subsequence.** A subarray is a slice; a subsequence can skip. This one word decides whether a sliding window is available at all — a window is contiguous by construction, so if the problem says subsequence, no window will ever work. What replaces it depends on the question — two pointers for \"is s a subsequence of t\", a monotonic stack for the smallest subsequence, dynamic programming for the longest common one.",
         "**Distinct** against **unique.** \"Return all distinct triplets\" means de-duplicate the *output*; \"the array has distinct values\" is a promise about the *input*. They look similar and demand opposite work.",
         "**Sorted.** If the input is sorted, that is not decoration — it is a permission slip. It licenses binary search and two pointers, and it usually means the hash-map answer, though correct, is not the intended one.",
         "**In place** / **O(1) extra space.** An explicit ban on the obvious structure. Read it as the setter pointing at the technique that does not need one.",
@@ -186,7 +186,7 @@ after submitting.`,
     {
       question: "How would you tell a subarray problem from a subsequence problem, and why does it matter?",
       answer:
-        "A subarray is contiguous, a subsequence may skip elements. It matters because contiguity is what makes a sliding window possible: a window is a contiguous range by construction, so if elements can be skipped, no window applies and it is almost certainly dynamic programming instead. The words to watch are 'substring' and 'subarray' for contiguous, 'subsequence' for skippable — and it is worth confirming out loud, because they are one word apart and a different algorithm.",
+        "A subarray is contiguous, a subsequence may skip elements. It matters because contiguity is what makes a sliding window possible: a window is a contiguous range by construction, so if elements can be skipped, no window applies — the replacement is often dynamic programming, though \"is this a subsequence\" is two pointers and \"smallest subsequence\" a monotonic stack. The words to watch are 'substring' and 'subarray' for contiguous, 'subsequence' for skippable — and it is worth confirming out loud, because they are one word apart and a different algorithm.",
     },
     {
       question: "Which edge cases do you check without being asked?",

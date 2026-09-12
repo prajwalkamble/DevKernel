@@ -21,7 +21,7 @@ export const thePrefixArrayLesson: Lesson = {
       heading: "Pay once, answer forever",
       body: [
         "Answering *q* range-sum queries by looping over each range costs O(q · n). Precomputing prefix sums costs O(n) once and then O(1) per query — total O(n + q).",
-        "For one query the precomputation is wasted. For a thousand queries on a million elements it is the difference between a second and a fortnight. The pattern is worth recognising as a *trade* rather than a trick: you are buying query speed with a linear setup.",
+        "For one query the precomputation is wasted. For a thousand queries on a million elements it is the difference between a billion additions, which take seconds, and a million, which take milliseconds. The pattern is worth recognising as a *trade* rather than a trick: you are buying query speed with a linear setup.",
       ],
       examples: [
         {

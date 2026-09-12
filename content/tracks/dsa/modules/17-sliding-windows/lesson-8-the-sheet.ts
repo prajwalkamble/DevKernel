@@ -31,7 +31,7 @@ export const windowSheetLesson: Lesson = {
       heading: "Ruling it out fast",
       body: [
         "**\"Subsequence\"** — not contiguous, so not a window. Usually DP or greedy.",
-        "**Negative numbers with a sum condition** — not monotone. Prefix sums with a hash map.",
+        "**Negative numbers with a sum condition** — not monotone. Prefix sums with a hash map for an exact sum; prefix sums with a monotonic deque for \"at least k\".",
         "**\"Exactly k\"** in a counting problem — not monotone directly, but try `atMost(k) - atMost(k-1)`.",
         "**A maximum or median as the window state** — needs a monotonic deque or two heaps, not a plain window.",
         "**The window size is fixed and the state is a comparison against a target map** — still a window, and the simplest kind; do not over-engineer it.",

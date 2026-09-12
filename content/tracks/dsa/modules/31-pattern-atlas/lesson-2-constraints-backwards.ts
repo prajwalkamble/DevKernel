@@ -23,7 +23,7 @@ export const constraintsBackwardsLesson: Lesson = {
         "Every statement ends with something like `1 <= n <= 200000`. It reads like housekeeping. It is the single most informative line in the problem.",
         "The reasoning is one step long. A time limit is worth roughly a hundred million simple operations. Your algorithm's operation count is some function of `n`. If you know `n`, you know which functions fit \u2014 and because the growth rates are so far apart, you do not need the hundred million to be accurate. A factor of ten either way almost never changes the answer.",
         "The example does the arithmetic exactly. For each growth rate it finds the largest `n` whose count is still inside the budget, by counting rather than by timing, and then reads the same table the other way: given a stated limit, which growth rates survive.",
-        "The four rows worth memorising are in the output, and they are: `n <= 20` means exponential is expected. `n <= 1000` means quadratic is fine. `n <= 100,000` rules quadratic out \u2014 a hundred thousand squared is a hundred times the budget \u2014 and asks for `n log n` or better. `n <= 1,000,000` usually means linear.",
+        "The four rows worth memorising are in the output, and they are: `n <= 20` means exponential is expected. `n <= 1000` means quadratic is fine. `n <= 100,000` rules quadratic out \u2014 a hundred thousand squared is a hundred times the budget \u2014 and asks for `n log n` or better. `n <= 1,000,000` leaves n log n and linear standing.",
         "Read it before you start solving. The cost of not reading it is symmetric and both directions hurt: you build something too slow and find out at submission, or you spend twenty minutes finding an `n log n` answer to a problem where `n <= 100` and the brute force was the intended solution.",
       ],
       examples: [
@@ -136,7 +136,7 @@ print("or better. That is the most common constraint in interview problems,")
 print("and it is telling you to sort, or to use a hash map, or to sweep once")
 print("with two pointers.")
 print()
-print("n <= 1,000,000 usually means linear, and often means the intended")
+print("n <= 1,000,000 leaves n log n and linear standing, and often means the intended")
 print("solution reads the input once and keeps O(1) or O(n) state.")
 print()
 print("Read this before you start solving, not after. The difference between")
@@ -178,7 +178,7 @@ or better. That is the most common constraint in interview problems,
 and it is telling you to sort, or to use a hash map, or to sweep once
 with two pointers.
 
-n <= 1,000,000 usually means linear, and often means the intended
+n <= 1,000,000 leaves n log n and linear standing, and often means the intended
 solution reads the input once and keeps O(1) or O(n) state.
 
 Read this before you start solving, not after. The difference between
@@ -296,7 +296,7 @@ console.log("or better. That is the most common constraint in interview problems
 console.log("and it is telling you to sort, or to use a hash map, or to sweep once");
 console.log("with two pointers.");
 console.log();
-console.log("n <= 1,000,000 usually means linear, and often means the intended");
+console.log("n <= 1,000,000 leaves n log n and linear standing, and often means the intended");
 console.log("solution reads the input once and keeps O(1) or O(n) state.");
 console.log();
 console.log("Read this before you start solving, not after. The difference between");
@@ -413,7 +413,7 @@ console.log("or better. That is the most common constraint in interview problems
 console.log("and it is telling you to sort, or to use a hash map, or to sweep once");
 console.log("with two pointers.");
 console.log();
-console.log("n <= 1,000,000 usually means linear, and often means the intended");
+console.log("n <= 1,000,000 leaves n log n and linear standing, and often means the intended");
 console.log("solution reads the input once and keeps O(1) or O(n) state.");
 console.log();
 console.log("Read this before you start solving, not after. The difference between");
@@ -544,7 +544,7 @@ public class Main {
         System.out.println("and it is telling you to sort, or to use a hash map, or to sweep once");
         System.out.println("with two pointers.");
         System.out.println();
-        System.out.println("n <= 1,000,000 usually means linear, and often means the intended");
+        System.out.println("n <= 1,000,000 leaves n log n and linear standing, and often means the intended");
         System.out.println("solution reads the input once and keeps O(1) or O(n) state.");
         System.out.println();
         System.out.println("Read this before you start solving, not after. The difference between");
@@ -681,7 +681,7 @@ int main() {
     std::cout << "and it is telling you to sort, or to use a hash map, or to sweep once\\n";
     std::cout << "with two pointers.\\n";
     std::cout << "\\n";
-    std::cout << "n <= 1,000,000 usually means linear, and often means the intended\\n";
+    std::cout << "n <= 1,000,000 leaves n log n and linear standing, and often means the intended\\n";
     std::cout << "solution reads the input once and keeps O(1) or O(n) state.\\n";
     std::cout << "\\n";
     std::cout << "Read this before you start solving, not after. The difference between\\n";
@@ -853,7 +853,7 @@ fn main() {
     println!("and it is telling you to sort, or to use a hash map, or to sweep once");
     println!("with two pointers.");
     println!();
-    println!("n <= 1,000,000 usually means linear, and often means the intended");
+    println!("n <= 1,000,000 leaves n log n and linear standing, and often means the intended");
     println!("solution reads the input once and keeps O(1) or O(n) state.");
     println!();
     println!("Read this before you start solving, not after. The difference between");
@@ -1009,7 +1009,7 @@ func main() {
 	fmt.Println("and it is telling you to sort, or to use a hash map, or to sweep once")
 	fmt.Println("with two pointers.")
 	fmt.Println()
-	fmt.Println("n <= 1,000,000 usually means linear, and often means the intended")
+	fmt.Println("n <= 1,000,000 leaves n log n and linear standing, and often means the intended")
 	fmt.Println("solution reads the input once and keeps O(1) or O(n) state.")
 	fmt.Println()
 	fmt.Println("Read this before you start solving, not after. The difference between")
@@ -1028,7 +1028,7 @@ func main() {
         },
         {
           title: "Reading n and ignoring the other limits",
-          body: "A statement often bounds two things -- the number of items and the number of queries, or n and the value range. The product is frequently the real budget. `n <= 1000` with `q <= 1000` queries is a million, not a thousand, and a per-query linear scan is exactly on the line.",
+          body: "A statement often bounds two things -- the number of items and the number of queries, or n and the value range. The product is frequently the real budget. `n <= 10^5` with `q <= 10^5` queries is 10^10, not 10^5, and a per-query linear scan is a hundred times over budget.",
         },
         {
           title: "Assuming a small limit means the problem is easy",
@@ -1089,7 +1089,7 @@ func main() {
     "A time limit is worth roughly a hundred million simple operations — an order of magnitude, and that is enough",
     "`n <= 20` means exponential is expected; nothing polynomial needs a limit that small",
     "`n <= 1000` means quadratic is fine; `n <= 100,000` rules it out at a hundred times over budget",
-    "`n <= 1,000,000` usually means linear, and often one pass with O(1) state",
+    "`n <= 1,000,000` leaves n log n and linear standing — often one pass with O(1) state",
     "A bound on the values, not their count, is about a structure — a frequency array or a bitmask",
     "Guarantees phrased as constraints (sorted, distinct, connected) are usually load-bearing",
     "The real budget is often a product: n times the number of queries",

@@ -58,7 +58,7 @@ export const windowMaximumLesson: Lesson = {
       body: [
         "**Median of a sliding window** — two heaps, a max-heap for the lower half and a min-heap for the upper, kept balanced, with lazy deletion for elements leaving. O(n log k).",
         "**Window maximum *and* minimum together** — two monotonic deques, one decreasing and one increasing. This solves \"longest subarray where max minus min is at most limit\" in O(n), which is otherwise a hard problem.",
-        "**k-th largest in the window** — an order-statistic tree or a balanced BST; in C++ a policy-based tree, in Java a `TreeMap` with counts.",
+        "**k-th largest in the window** — an order-statistic tree or a balanced BST; in C++ a policy-based tree, in Java a `TreeMap` with counts gives O(log k) updates but finds the k-th largest only by walking the map.",
         "The recognition rule: if the quantity you need is an *order statistic* of the window rather than an aggregate of it, the plain window is not enough.",
       ],
     },

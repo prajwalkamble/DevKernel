@@ -21,7 +21,7 @@ export const afterYouLookLesson: Lesson = {
       heading: "Understanding it is not the goal",
       body: [
         "Here is the standard sequence: struggle, look, read, think \"ah, of course\", feel the click, tick the problem, move on. Three weeks later the same problem defeats you.",
-        "The click is real and it is the problem. It is the feeling of recognition \u2014 being shown an answer and seeing why it works \u2014 and module 31 opened by pointing out that recognition and retrieval are different operations. The click tells you the recognition worked. It says nothing about retrieval, which is the direction you were failing in.",
+        "The click is real and it is the problem. It is the feeling of being shown an answer and seeing why it works. That is a different operation from producing the answer from a statement, and the second one is what failed. The click tells you the reading worked; it says nothing about whether you could have got there.",
         "Worse, the click is *satisfying*, which makes it feel like the session paid off, which is exactly why the next step gets skipped. Understanding a solution is the beginning of the work on that problem, not the end of it.",
         "Four things, and they take about fifteen minutes.",
       ],
@@ -70,11 +70,11 @@ export const afterYouLookLesson: Lesson = {
     {
       question: "Why is understanding the solution not enough?",
       answer:
-        "Because understanding a solution you are looking at is recognition, and the thing that failed was retrieval. They are different operations -- one runs backwards from an answer, the other forwards from a statement -- and the click of 'ah, of course' is evidence about the first one only. It is also satisfying, which is precisely why the work after it gets skipped and why the same problem can defeat you again three weeks later. The test that it took is closing the page and writing it from nothing.",
+        "Because understanding a solution you are looking at and producing one from a statement are different operations -- one runs backwards from an answer, the other forwards from a statement -- and the click of 'ah, of course' is evidence about the first one only. It is also satisfying, which is precisely why the work after it gets skipped and why the same problem can defeat you again three weeks later. The test that it took is closing the page and writing it from nothing.",
     },
   ],
   takeaways: [
-    "The click is recognition, and recognition is the direction that was not failing",
+    "The click means you followed the answer — which was never the part that failed",
     "Understanding the solution is the start of the work on that problem",
     "Find the single observation the solution hinges on; everything else is consequence",
     "If you cannot compress it to one observation, you memorised it",

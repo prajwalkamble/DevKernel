@@ -543,7 +543,7 @@ xor swap: 4 9`,
       heading: "Why not a hash set, or a sum?",
       body: [
         "A `HashSet` solves single-number and missing-number too, in O(n) time — but in **O(n) space**, and with the constant factor of hashing every element. XOR is O(1) space and one instruction per element. When an interviewer says \"now do it without extra space\", XOR is the answer they are waiting for.",
-        "A **sum** also works for missing-number: add up `0..n`, subtract what you have. It reads more naturally, and it has one real weakness — the sum can overflow where the XOR cannot, because XOR never produces a value wider than its inputs. For `n = 10^5` the sum is fine; for `n` near the width of the type it is not. This is the same trade the cyclic-sort lesson made, seen from the other side.",
+        "A **sum** also works for missing-number: add up `0..n`, subtract what you have. It reads more naturally, and it has one real weakness — the sum can overflow where the XOR cannot, because XOR never produces a value wider than its inputs. For `n = 10^5` the sum is 5,000,050,000, already past a 32-bit `int`, so it needs a `long`; XOR needs nothing wider than the inputs. This is the same trade the cyclic-sort lesson made, seen from the other side.",
       ],
       pitfalls: [
         {

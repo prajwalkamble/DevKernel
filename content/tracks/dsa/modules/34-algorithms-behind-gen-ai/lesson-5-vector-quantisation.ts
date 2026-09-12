@@ -20,7 +20,7 @@ export const vectorQuantisationLesson: Lesson = {
       id: "why-compress",
       heading: "Why compress at all",
       body: [
-        "A million vectors of 1,536 dimensions in fp32 is about 6 GB. Ten million is 60 GB, which is more than a single machine's RAM and far more than a GPU's. The index structures from the previous lesson do not help \u2014 they decide which vectors to look at, not how much each one costs to keep.",
+        "A million vectors of 1,536 dimensions in fp32 is about 6 GB. Ten million is 60 GB, and a billion is 6 TB — past any single machine's RAM. The index structures from the previous lesson do not help \u2014 they decide which vectors to look at, not how much each one costs to keep.",
         "So the vectors themselves get compressed, and the question is the same one as before with a different currency: **how much recall does a byte buy?**",
         "Two schemes cover most of practice. **Scalar quantisation** stores each coordinate in fewer bits \u2014 8 instead of 32, or 4, or 1. **Product quantisation** splits the vector into slices and replaces each slice with the index of the nearest entry in a small learned codebook.",
         "The program measures both against a full-precision baseline, and then measures the one line that changes the conclusion.",

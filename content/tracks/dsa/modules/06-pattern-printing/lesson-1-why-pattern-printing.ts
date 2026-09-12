@@ -180,7 +180,7 @@ for r in range(n):
     {
       question: "Why build each line in a variable rather than printing character by character?",
       answer:
-        "One write instead of n. Printing per character means a system call per character, which on any real output is far slower than accumulating the line and printing once — the same argument as batching output on a judge. In Java it also matters which accumulator you use: `+=` on a String in a loop is quadratic, so it must be a `StringBuilder`.",
+        "One write instead of n. In Java, printing per character with `System.out.print` made a write system call per character — 51,000 of them for a 51,000-character pattern; Python buffers its output and made 7, but still pays a `print` call per character. Accumulating the line and printing once avoids both — the same argument as batching output on a judge. In Java it also matters which accumulator you use: `+=` on a String in a loop is quadratic, so it must be a `StringBuilder`.",
     },
     {
       question: "How do you approach a pattern you have not seen before?",

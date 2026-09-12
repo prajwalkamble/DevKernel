@@ -68,7 +68,7 @@ as a max-heap — negate on the way in, negate on the way out:
 
 the heap never knew which one it was doing. Only the key changed.`,
           explanation:
-            "There is no max-heap in Python's standard library and there does not need to be. The heap compares whatever you hand it, so negating the key on the way in and again on the way out turns the same code into a max-heap. Java takes the other route \u2014 `PriorityQueue` accepts a `Comparator`, and `Comparator.reverseOrder()` does the same job without touching the data. Either way the structure is unchanged; only the ordering it is asked about moves.",
+            "Python's standard library had no max-heap until 3.14 added `heappush_max`, `heappop_max` and `heapify_max`, and before that there did not need to be one. The heap compares whatever you hand it, so negating the key on the way in and again on the way out turns the same code into a max-heap. Java takes the other route \u2014 `PriorityQueue` accepts a `Comparator`, and `Comparator.reverseOrder()` does the same job without touching the data. Either way the structure is unchanged; only the ordering it is asked about moves.",
           alternates: [
             {
               lang: "javascript",
@@ -471,7 +471,7 @@ the fix is a tiebreaker that is always comparable and never ties:
    equal priorities now come out in insertion order, which is usually
    what was wanted anyway — a priority queue is not otherwise stable.`,
           explanation:
-            "A tuple compares field by field, so a tie in the priority quietly promotes the *payload* to being the tiebreaker. When the payload is a string that is merely surprising. When it is an object with no ordering it is a `TypeError` \u2014 and one that appears only when two priorities actually collide, which is exactly the case a small test suite is least likely to contain. The monotonic counter fixes it for good: it is always comparable, it never ties, and it makes equal priorities come out in insertion order, which is almost always the behaviour that was silently assumed. The three variants are worth reading against each other, because this is one of the few places where the languages fail *differently* rather than identically. Java has no tuple key, so the same mistake is a missing comparator and a `ClassCastException` on the second `add` — a heap of one never compares anything, so a single-element test passes. JavaScript does not raise at all: `<` coerces both objects to `[object Object]`, every task ties with every other, and the wrong order arrives with no line number attached, which is worse. C++, Rust and Go are absent because there the mistake does not compile, and a variant that will not run is not a translation.",
+            "A tuple compares field by field, so a tie in the priority quietly promotes the *payload* to being the tiebreaker. When the payload is a string that is merely surprising. When it is an object with no ordering it is a `TypeError` \u2014 and one that appears only when two priorities actually collide, which is exactly the case a small test suite is least likely to contain. The monotonic counter fixes it for good: it is always comparable, it never ties, and it makes equal priorities come out in insertion order, which is almost always the behaviour that was silently assumed. The three variants are worth reading against each other, because this is one of the few places where the languages fail *differently* rather than identically. Java has no tuple key, so the same mistake is a missing comparator and a `ClassCastException` on the very first `add`, because `PriorityQueue` casts the element to `Comparable` before it compares anything. JavaScript does not raise at all: `<` coerces both objects to `[object Object]`, every task ties with every other, and the wrong order arrives with no line number attached, which is worse. C++, Rust and Go are absent because there the mistake does not compile, and a variant that will not run is not a translation.",
           alternates: [
             {
               lang: "javascript",
@@ -1230,9 +1230,9 @@ func main() {
   ],
   interviewQuestions: [
     {
-      question: "Python has no max-heap. How do you get one?",
+      question: "Before Python 3.14 there was no max-heap. How do you get one?",
       answer:
-        "Negate the key going in and coming out — push `-priority` and negate what you pop. The heap only ever asks whether one key is less than another, so reversing the sign reverses the ordering without changing a line of the structure. For values that cannot be negated, wrap them in a small class with `__lt__` defined backwards, or store `(-priority, tiebreaker, payload)`. The point worth making out loud is that a max-heap is not a different data structure, only a different comparison.",
+        "Negate the key going in and coming out — push `-priority` and negate what you pop. The heap only ever asks whether one key is less than another, so reversing the sign reverses the ordering without changing a line of the structure. For values that cannot be negated, wrap them in a small class with `__lt__` defined backwards, or store `(-priority, tiebreaker, payload)`. Python 3.14 adds `heappush_max`, `heappop_max` and `heapify_max`, which do it directly. The point worth making out loud is that a max-heap is not a different data structure, only a different comparison.",
     },
     {
       question: "You push `(priority, task)` tuples and it works in testing, then throws in production. What happened?",

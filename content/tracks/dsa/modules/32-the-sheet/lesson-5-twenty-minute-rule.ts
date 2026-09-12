@@ -20,7 +20,7 @@ export const twentyMinuteRuleLesson: Lesson = {
       id: "both-ends-are-bad",
       heading: "Both ends are bad",
       body: [
-        "**Looking too early** is the obvious failure. You read the solution, it makes sense, you feel you have learned something, and you have learned it in the recognition direction \u2014 which module 31 already established is the direction that does not transfer. Four minutes of struggle followed by an editorial is a very expensive way to read an editorial.",
+        "**Looking too early** is the obvious failure. You read the solution, it makes sense, you feel you have learned something, and you have learned it by reading an answer, which is a different operation from producing one from a statement \u2014 and producing it is the part that failed. Four minutes of struggle followed by an editorial is a very expensive way to read an editorial.",
         "**Staring too long** is the less obvious one and it is at least as common among people who have been told not to look. Ninety minutes on a problem you were never going to get produces one data point and a bad mood, and the same ninety minutes would have covered four problems with the hint used properly.",
         "The advice that circulates \u2014 twenty minutes, or thirty, or an hour depending on who you ask \u2014 is trying to split the difference with a clock. A clock is the wrong instrument, because the relevant question is not how long you have been sitting there.",
       ],
@@ -73,11 +73,11 @@ export const twentyMinuteRuleLesson: Lesson = {
     {
       question: "Is it bad to look at the solution?",
       answer:
-        "Only if you look at all of it, and only if you stop there. There is a ladder of hints and the full solution is the largest rung: the topic tag, the target complexity, the first sentence of the editorial, the recurrence without the implementation, and then the whole thing. The smallest rung that unsticks you preserves most of the work you have already done. What makes looking genuinely costly is scrolling until something helps, which means taking every rung at once, and then not doing the work afterwards -- reading a solution builds recognition, and recognition is the direction that does not transfer.",
+        "Only if you look at all of it, and only if you stop there. There is a ladder of hints and the full solution is the largest rung: the topic tag, the target complexity, the first sentence of the editorial, the recurrence without the implementation, and then the whole thing. The smallest rung that unsticks you preserves most of the work you have already done. What makes looking genuinely costly is scrolling until something helps, which means taking every rung at once, and then not doing the work afterwards -- reading a solution teaches you to follow an answer, which is not the same as producing one.",
     },
   ],
   takeaways: [
-    "Looking too early teaches in the recognition direction, which does not transfer",
+    "Looking too early teaches you to follow an answer, not to produce one",
     "Staring too long buys one data point for the price of four problems",
     "The rule is progress, not time: keep going while outputs are still appearing",
     "Twenty minutes is roughly when outputs run out — a symptom, not a rule",

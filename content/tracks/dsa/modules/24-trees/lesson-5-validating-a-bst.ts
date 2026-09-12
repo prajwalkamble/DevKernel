@@ -21,7 +21,7 @@ export const validatingBstLesson: Lesson = {
       body: [
         "The natural first attempt: at every node, confirm the left child is smaller and the right child is larger, then recurse.",
         "It is wrong, and the counterexample is small enough to hold in your head. Take root 10, left child 5, right child 15 — fine so far. Give 15 a left child of 6.",
-        "Every local comparison passes: 6 is less than 15, so it is correctly placed as 15's left child. But 6 sits in **10's right subtree**, and the invariant says everything there must exceed 10. Searching for 6 from the root would go right, then left, and find it — but searching for 6 in a valid BST would go *left* at the root, so the structure is broken in a way that breaks search.",
+        "Every local comparison passes: 6 is less than 15, so it is correctly placed as 15's left child. But 6 sits in **10's right subtree**, and the invariant says everything there must exceed 10. Searching for 6 from the root goes *left*, because 6 is less than 10, reaches 5, turns right into an empty slot and reports it missing — even though 6 is in the tree. The structure is broken in exactly the way that breaks search.",
         "The lesson generalises: the invariant constrains a node against **every ancestor**, not just its parent. A check that only looks one level cannot see that.",
       ],
       examples: [

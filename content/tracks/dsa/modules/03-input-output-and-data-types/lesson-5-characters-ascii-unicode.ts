@@ -175,7 +175,7 @@ print("hello world".title())`,
 hello HELLO
 Hello World`,
           explanation:
-            "Java's equivalents are `Character.isDigit`, `Character.isLetter`, `Character.isUpperCase`, `Character.isWhitespace` and `Character.isLetterOrDigit`, with the same behaviour. Prefer these to `c >= '0' && c <= '9'` — the built-in is clearer, is not wrong on non-ASCII digits, and reads as its own documentation.",
+            "Java's equivalents are `Character.isDigit`, `Character.isLetter`, `Character.isUpperCase`, `Character.isWhitespace` and `Character.isLetterOrDigit`, with the same behaviour. They read better than `c >= '0' && c <= '9'`, but they accept every Unicode digit — `Character.isDigit('٣')` is true and `'٣' - '0'` is 1587, and Python's `'²'.isdigit()` is `True` — so when the next step is `c - '0'`, the explicit range check is the correct test.",
         },
       ],
     },
@@ -224,7 +224,7 @@ b'h\\xc3\\xa9llo'
     {
       question: "What is the difference between `String.length()` in Java and `len()` in Python?",
       answer:
-        "Python 3 strings are sequences of Unicode code points, so `len` counts characters as a human would. Java strings are sequences of UTF-16 code units, so characters outside the Basic Multilingual Plane — emoji and some scripts — occupy two units and are counted twice, and `charAt` can return one half of a surrogate pair. For English input the two agree; the distinction matters the moment a problem genuinely involves Unicode.",
+        "Python 3 strings are sequences of Unicode code points, so `len` counts code points — usually what a human would count, though a letter written as a base plus a combining accent counts as two. Java strings are sequences of UTF-16 code units, so characters outside the Basic Multilingual Plane — emoji and some scripts — occupy two units and are counted twice, and `charAt` can return one half of a surrogate pair. For English input the two agree; the distinction matters the moment a problem genuinely involves Unicode.",
     },
   ],
   takeaways: [
@@ -234,7 +234,7 @@ b'h\\xc3\\xa9llo'
     "Java's `'a'` and `\"a\"` are different types; Python has no character type at all",
     "An `int[26]` indexed by `c - 'a'` counts letters faster than a map and iterates in alphabetical order",
     "Uppercase input gives a negative index into that array and crashes",
-    "Use `isDigit`/`isalpha`-style helpers rather than comparing code points by hand",
+    "The `isDigit`/`isdigit` helpers accept non-ASCII digits; check `'0'` to `'9'` before computing `c - '0'`",
     "Python's `len` counts code points; Java's `length()` counts UTF-16 units and double-counts emoji",
   ],
 };

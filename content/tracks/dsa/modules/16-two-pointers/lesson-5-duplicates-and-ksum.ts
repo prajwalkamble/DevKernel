@@ -87,7 +87,7 @@ print("skip version            :", three_sum(xs))`,
 same answer, set version: [[-1, -1, 2], [-1, 0, 1]]
 skip version            : [[-1, -1, 2], [-1, 0, 1]]`,
           explanation:
-            "There are **three** duplicate skips and all three are necessary. The outer `if i > 0 and nums[i] == nums[i-1]: continue` stops the same anchor being used twice. The two inner `while` loops, which run only *after* a triple is recorded, stop the same second and third elements being reused with that anchor.\n\n`[0, 0, 0, 0]` is the test that catches a missing skip: it should give exactly one triple, and a version without the inner skips gives three. It is the case worth running by hand.\n\nThe `if nums[i] > 0: break` is a genuine optimisation, not decoration — once the smallest of the three is positive, no triple from a sorted array can reach zero, and on an input of large positives it turns the whole run into a single iteration.",
+            "There are **three** duplicate skips and all three are necessary. The outer `if i > 0 and nums[i] == nums[i-1]: continue` stops the same anchor being used twice. The two inner `while` loops, which run only *after* a triple is recorded, stop the same second and third elements being reused with that anchor.\n\n`[0, 0, 0, 0]` should give exactly one triple; without the skip on the anchor it gives two. It does not catch missing inner skips — with those gone it still gives one — so also run `[-2, 0, 0, 2, 2]`, which gives `(-2, 0, 2)` twice without them. It is the case worth running by hand.\n\nThe `if nums[i] > 0: break` is a genuine optimisation, not decoration — once the smallest of the three is positive, no triple from a sorted array can reach zero, and on an input of large positives it turns the whole run into a single iteration.",
           alternates: [
             {
               lang: "javascript",
@@ -621,7 +621,7 @@ func main() {
       body: [
         "The construction recurses. **4Sum** is two nested loops around a two-pointer walk: O(n³). **k-Sum** is `k - 2` nested loops around one walk: **O(n^(k-1))**.",
         "So 3Sum at n = 3000 is nine million operations — fine. 4Sum at n = 200 is eight million — fine. 4Sum at n = 3000 is 2.7 × 10¹⁰, and it is not fine. The constraints tell you which k the intended solution uses.",
-        "**Past k = 4, stop.** The better route is meet-in-the-middle: build a hash map of all pair sums, which is O(n²) space and time, then look up complements. That solves 4Sum in O(n²) and is the intended answer whenever n is large enough that O(n³) fails.",
+        "**Past k = 4, stop.** The better route is meet-in-the-middle: build a hash map of all pair sums, which is O(n²) space and time, then look up complements. That decides whether a 4Sum exists, or counts them, in O(n²); listing every distinct quadruple can take longer, because one pair sum may match many pairs.",
       ],
       pitfalls: [
         {
@@ -639,12 +639,12 @@ func main() {
     {
       question: "Solve 3Sum: all distinct triples summing to zero.",
       answer:
-        "Sort, then for each index i two-point the remainder for a pair summing to -nums[i]. That is O(n^2) after the sort, against O(n^3) brute force. Duplicates need three skips: skip an anchor equal to the previous anchor, and after recording a triple advance both inner pointers past equal values, with each inner skip guarded by lo < hi. The input [0, 0, 0, 0] should give exactly one triple and catches a missing skip. Once nums[i] is positive I can break, since no triple can reach zero.",
+        "Sort, then for each index i two-point the remainder for a pair summing to -nums[i]. That is O(n^2) after the sort, against O(n^3) brute force. Duplicates need three skips: skip an anchor equal to the previous anchor, and after recording a triple advance both inner pointers past equal values, with each inner skip guarded by lo < hi. The input [0, 0, 0, 0] should give exactly one triple and catches a missing anchor skip; [-2, 0, 0, 2, 2] catches missing inner skips. Once nums[i] is positive I can break, since no triple can reach zero.",
     },
     {
       question: "How does this extend to 4Sum and beyond?",
       answer:
-        "k-Sum is k - 2 nested loops around one two-pointer walk, O(n^(k-1)): 3Sum at n = 3000 is nine million steps and fine, 4Sum at n = 3000 is 2.7 times 10^10 and not. Past that, meet in the middle: a hash map of all pair sums solves 4Sum in O(n^2). I prefer the skip idiom to a set of tuples because it uses no extra space, avoids hashing tuples, and generalises cleanly to every k.",
+        "k-Sum is k - 2 nested loops around one two-pointer walk, O(n^(k-1)): 3Sum at n = 3000 is nine million steps and fine, 4Sum at n = 3000 is 2.7 times 10^10 and not. Past that, meet in the middle: a hash map of all pair sums decides or counts 4Sum in O(n^2). I prefer the skip idiom to a set of tuples because it uses no extra space, avoids hashing tuples, and generalises cleanly to every k.",
     },
   ],
   takeaways: [
@@ -652,7 +652,7 @@ func main() {
     "Three duplicate skips: one on the anchor, two after recording a triple",
     "Skip after appending and advancing, never before",
     "Guard the inner skips with `lo < hi`",
-    "`[0, 0, 0, 0]` is the test that catches a missing skip",
+    "`[0, 0, 0, 0]` catches a missing anchor skip; `[-2, 0, 0, 2, 2]` catches missing inner skips",
     "Skipping beats a set on space, time, and generalisation",
     "k-Sum is O(n^(k-1)); past k=4 use meet-in-the-middle on pair sums",
   ],

@@ -78,7 +78,7 @@ n =  1000  operations =   499,500  ops/n^2 = 0.499`,
         "**Lower-order terms.** As n grows, 3n² swamps 5n + 17 completely. At n = 1000 the quadratic term is three million and the rest is around five thousand — a rounding error. Keeping them adds noise, not information.",
         "**The constant factor.** The 3 depends on how you count and on the machine. An algorithm that is 3n² on one machine is 7n² on another, and the useful claim — that doubling n quadruples the work — holds for both.",
         "So 3n² + 5n + 17 becomes **O(n²)**, read as \"order n squared\". What survives is the one thing that transfers.",
-        "**The honest caveat:** constants are dropped from the *analysis*, not from reality. An O(n log n) algorithm with a huge constant can lose to an O(n²) one on small inputs, which is why real sorting implementations switch to insertion sort below about sixteen elements. Complexity tells you what happens as n grows; it does not promise anything at n = 10.",
+        "**The honest caveat:** constants are dropped from the *analysis*, not from reality. An O(n log n) algorithm with a huge constant can lose to an O(n²) one on small inputs, which is why real sorting implementations switch to insertion sort below a few dozen elements — 32 in Java's TimSort, 44 in its dual-pivot quicksort, 16 in libstdc++'s `std::sort`. Complexity tells you what happens as n grows; it does not promise anything at n = 10.",
       ],
     },
     {

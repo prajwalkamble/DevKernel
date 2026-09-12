@@ -1271,7 +1271,7 @@ func main() {
         },
         {
           title: "Overflow in the cells",
-          body: "A cell near the top holds the sum of up to half the array. Size the cell type for the total, not for one value.",
+          body: "A cell whose index is a power of two holds that many elements, so cell n holds the whole array. Size the cell type for the total, not for one value.",
         },
       ],
     },

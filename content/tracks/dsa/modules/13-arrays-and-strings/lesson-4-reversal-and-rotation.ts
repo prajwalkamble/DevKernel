@@ -19,7 +19,7 @@ export const reversalAndRotationLesson: Lesson = {
       id: "recap",
       heading: "The three reversals, and the first thing to get right",
       body: [
-        "Module 0 showed you that rotating an array left by k is three reversals: reverse the whole thing, then reverse the first k, then reverse the rest. This lesson asks *why*, and what else it is good for.",
+        "Module 0 showed you that rotating an array right by k is three reversals: reverse the whole thing, then reverse the first k, then reverse the rest. Rotating left by k is the same three reversals with the cut at n − k. This lesson asks *why*, and what else it is good for.",
         "The why is short. Rotating splits the array into two blocks, `A` and `B`, and produces `BA` from `AB`. Reversing the whole array gives `(AB)ʳ`, and reversal has the property that `(AB)ʳ = BʳAʳ` — the blocks swap places and each is individually backwards. Reversing each block in place then undoes the second half of that, leaving `BA`. Three linear passes, O(n) time, O(1) space.",
         "Before any of it, though: **normalise k**. `k` can exceed `n`, and in a left/right conversion it can go negative. `k %= n` handles the first; in Java, where `%` keeps the sign of the dividend, `k = ((k % n) + n) % n` handles both. Forgetting this is the most common way this code fails, and it fails with an index out of bounds rather than a wrong answer, so it is at least loud.",
       ],

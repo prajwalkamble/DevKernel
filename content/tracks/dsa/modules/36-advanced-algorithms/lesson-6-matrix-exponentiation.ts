@@ -871,7 +871,7 @@ func main() {
         "**A constant term.** `a(n) = a(n-1) + a(n-2) + 5` is not linear in the previous terms, but it is linear in `(a(n-1), a(n-2), 1)`. Add the constant 1 to the state and a row that keeps it 1; the matrix grows by one.",
         "**A term in n.** `a(n) = a(n-1) + n` is linear in `(a(n-1), n, 1)`, since `n + 1 = n + 1\u00b71`. Polynomials in `n` of degree `d` need `d + 1` extra state entries.",
         "**Counting walks in a graph.** The entry `(i, j)` of the adjacency matrix raised to the power `L` counts walks of length exactly `L` from `i` to `j`. The same squaring counts walks of length `10^18` in a small graph.",
-        "**When not to use it.** The `k^3` factor grows fast. With `k = 100` a single product is a million multiplications, and 60 of them is 60 million \u2014 slower than stepping `n` terms unless `n` is far beyond 10^8. The method is for small `k` and very large `n`.",
+        "**When not to use it.** The `k^3` factor grows fast. With `k = 100` a single product is a million multiplications, so n = 10\u2076 costs 26 of them \u2014 26 million \u2014 against 100 million for stepping a 100-term recurrence that far. Counted against each other, matrix power wins from about n = 200,000 and loses below it. The method is for small `k` and very large `n`.",
       ],
       pitfalls: [
         {
@@ -884,7 +884,7 @@ func main() {
         },
         {
           title: "Using it when k is large and n is moderate",
-          body: "At k = 100, one matrix product costs 10^6 multiplications. Measure against simply stepping the recurrence.",
+          body: "At k = 100, one matrix product costs 10^6 multiplications, and the crossover against simply stepping the recurrence is near n = 200,000 — measure rather than assume it is astronomically far away.",
         },
       ],
     },
@@ -898,7 +898,7 @@ func main() {
     {
       question: "How does matrix exponentiation generalise, and when does it stop paying off?",
       answer:
-        "Any recurrence linear in its previous k terms uses a k by k companion matrix: coefficients in the first row, ones on the diagonal below to shift the older terms. Constant terms and polynomial terms in n are absorbed by adding state entries that stay 1 or count up. Powers of an adjacency matrix count walks of a given length. The cost is k^3 multiplications per product times about log n products, so it pays off for small k and huge n; I measured the 3 by 3 case at 27/8 the cost of 2 by 2. At k = 100 each product is a million multiplications, and stepping is often faster.",
+        "Any recurrence linear in its previous k terms uses a k by k companion matrix: coefficients in the first row, ones on the diagonal below to shift the older terms. Constant terms and polynomial terms in n are absorbed by adding state entries that stay 1 or count up. Powers of an adjacency matrix count walks of a given length. The cost is k^3 multiplications per product times about log n products, so it pays off for small k and huge n; I measured the 3 by 3 case at 27/8 the cost of 2 by 2. At k = 100 each product is a million multiplications, so stepping wins below about n = 200,000 and loses above it.",
     },
   ],
   takeaways: [

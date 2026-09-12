@@ -48,7 +48,7 @@ for r in range(n):
       pitfalls: [
         {
           title: "Using `r` spaces instead of `n - r - 1`",
-          body: "That inverts the shape into an upside-down funnel — the apex ends up at the bottom-left. If a pyramid comes out leaning the wrong way, the space count is the thing to look at, not the star count.",
+          body: "That makes the indent grow as the rows widen, so each row slides further right and the shape leans instead of centring. If a pyramid comes out leaning the wrong way, the space count is the thing to look at, not the star count.",
         },
       ],
     },

@@ -246,7 +246,7 @@ func main() {
         },
         {
           title: "Persisting or transmitting a hash value",
-          body: "`hashCode` and `hash()` are not stable across processes, versions or platforms. Python randomises string hashes per run by default. A hash is a bucket index, not an identifier — if you need a stable fingerprint, use a real digest such as SHA-256.",
+          body: "Do not assume `hashCode` or `hash()` is stable across processes, versions or platforms. Python randomises string hashes per run by default, and Java's default `Object.hashCode` is an identity value that changes between runs — `String.hashCode` is one of the few that is specified. A hash is a bucket index, not an identifier — if you need a stable fingerprint, use a real digest such as SHA-256.",
         },
         {
           title: "Assuming the worst case cannot happen to you",

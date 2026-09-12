@@ -228,7 +228,7 @@ func main() {
       body: [
         "`=` assigns. `==` compares. They are entirely different operations that happen to look alike.",
         "Java protects you from most of the damage: an `if` requires a boolean, and an assignment of a number does not produce one, so `if (x = 5)` is a compile error. Python is less protective in general but happens to make this exact mistake a syntax error too, because assignment is a statement there and cannot appear inside a condition.",
-        "So both languages catch the classic version. The one to actually watch for is the reverse: writing `==` where you meant `=`, which is legal in both and simply does nothing.",
+        "So both languages catch the classic version. The one to actually watch for is the reverse: writing `==` where you meant `=`, which Python accepts and silently ignores, and Java rejects as `not a statement`.",
       ],
       examples: [
         {
@@ -294,7 +294,7 @@ print(count)`,
       body: [
         "You will read code that packs four operations into one line, and you may be tempted to write it. Resist for now, and mostly resist later.",
         "There is no performance argument. A compiler produces identical instructions for one dense line and three clear ones, so the only thing density buys is fewer lines on screen — and the only thing it costs is that you cannot see which part is wrong when something is.",
-        "Splitting an expression gives each intermediate a name, and the name is documentation that cannot go stale. `int mid = lo + (hi - lo) / 2;` is one line; if it ever misbehaves, having `mid` as a separate named value means you can print it. That is the whole argument, and it is enough.",
+        "Splitting an expression gives each intermediate a name, and the name is documentation that sits in the code itself. `int mid = lo + (hi - lo) / 2;` is one line; if it ever misbehaves, having `mid` as a separate named value means you can print it. That is the whole argument, and it is enough.",
       ],
     },
   ],
@@ -321,7 +321,7 @@ print(count)`,
     "Same-precedence operators group left to right, which is why `10 - 4 - 3` is 3",
     "In Java `+` concatenates when either side is text, and `\"sum: \" + 1 + 2` gives `sum: 12`",
     "Python refuses to mix text and numbers with `+`; use several arguments to `print`, or an f-string",
-    "`=` is \"becomes\", `==` is \"equals\" — and `count == 20` on its own line is legal and does nothing",
+    "`=` is \"becomes\", `==` is \"equals\" — and `count == 20` on its own line does nothing in Python and is a compile error (`not a statement`) in Java",
     "Use `x++` only as a whole statement, never inside a bigger expression",
     "Splitting a dense expression costs nothing at run time and gives each intermediate a name you can print",
   ],

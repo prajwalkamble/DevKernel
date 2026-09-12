@@ -767,7 +767,7 @@ func main() {
       pitfalls: [
         {
           title: "`atMost(k - 1)` when k is 0",
-          body: "The subtraction calls the helper with `k - 1`, which is `-1` when `k` is zero. The helper must return 0 rather than misbehaving — with the `while len(count) > k` form it does, because the window immediately empties. Check it rather than assume it.",
+          body: "The subtraction calls the helper with `k - 1`, which is `-1` when `k` is zero. The helper must return 0 rather than misbehaving, and the `while len(count) > k` form does not: with k = −1 the condition stays true after the window empties, `left` runs past `right`, and the next read indexes out of range. Add `if k < 0: return 0` at the top.",
         },
         {
           title: "Deleting the key at zero, not just decrementing",

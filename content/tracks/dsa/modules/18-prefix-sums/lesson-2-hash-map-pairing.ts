@@ -538,7 +538,7 @@ func main() {
       pitfalls: [
         {
           title: "Recording the current prefix before doing the lookup",
-          body: "The `seen[running] += 1` must come *after* the lookup, or an element equal to k counts itself twice through a zero-length subarray. In the loop above the order is: update running, look up, then record.",
+          body: "The `seen[running] += 1` must come *after* the lookup. Recorded first, the current prefix matches itself whenever k is 0 — a zero-length subarray — so `[-1, -1, -1, -2, -1]` with k = 0 reports 5 instead of 0. For any other k the order makes no difference, which is why the bug survives tests. In the loop above the order is: update running, look up, then record.",
         },
         {
           title: "Using a set instead of a count map",

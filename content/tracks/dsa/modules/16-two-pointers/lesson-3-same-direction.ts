@@ -587,7 +587,7 @@ func main() {
       pitfalls: [
         {
           title: "Comparing against `a[write - 1]`, not `a[read - 1]`",
-          body: "In the dedup, the last *kept* value is at `write - 1`, not `read - 1` — those diverge as soon as anything is dropped. Using `read - 1` compares against a value that may have been discarded, and it fails on the first input with three or more consecutive duplicates.",
+          body: "In the dedup, the last *kept* value is at `write - 1`, and that is the index to compare against. For keep-one deduplication of a sorted array `read - 1` happens to work too — the two indices hold equal values whenever it matters, and 20,000 random sorted arrays never told them apart — which is exactly why the habit survives. The moment the rule keeps up to two copies it breaks: compare against `a[write - 2]`, because `a[read - 2]` may be a copy that was already dropped.",
         },
         {
           title: "`fast + 1 < len` against `fast < len` changes which middle you get",

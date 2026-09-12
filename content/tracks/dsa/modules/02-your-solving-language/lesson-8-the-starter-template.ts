@@ -244,7 +244,7 @@ public class Main {
     {
       question: "What is the difference between `sorted(values)` and `values.sort()` in Python?",
       answer:
-        "`sorted` returns a new sorted list and leaves the original alone; `.sort()` sorts in place and returns `None`. Use `sorted` when you need the original order preserved — which matters whenever the problem asks for indices — and `.sort()` when you do not. Java's `Collections.sort` and `List.sort` both mutate, with no returning equivalent, so a defensive `clone()` or a copy is the way to keep the original there.",
+        "`sorted` returns a new sorted list and leaves the original alone; `.sort()` sorts in place and returns `None`. Use `sorted` when you need the original order preserved — which matters whenever the problem asks for indices — and `.sort()` when you do not. Java's `Collections.sort` and `List.sort` both mutate; the non-mutating equivalent is `list.stream().sorted().toList()`, or sorting a copy.",
     },
   ],
   takeaways: [

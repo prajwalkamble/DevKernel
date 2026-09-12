@@ -3332,7 +3332,7 @@ func main() {
       pitfalls: [
         {
           title: "A global visited set cannot enumerate routes",
-          body: "It finds one route into each node and stops, because later routes hit nodes the first one claimed. Over 3,000 random directed graphs it undercounted on 150 and never overcounted. If the question is \"how many ways\" or \"list the ways\", the set has to be unmarked on the way out.",
+          body: "It finds one route into each node and stops, because later routes hit nodes the first one claimed. Over 3,000 random directed graphs it undercounted on 150 and never overcounted. If the question is \"list the ways\", the set has to be unmarked on the way out; if it is only \"how many ways\" and the graph is acyclic, memoising a count per node answers it in one linear pass.",
         },
         {
           title: "Unmarking on the way out when the question is about nodes",
@@ -4605,7 +4605,7 @@ func main() {
         "**Where do I mark?** On enqueue. It costs nothing and it bounds the queue by nodes rather than edges \u2014 200 entries instead of 19,901 on a dense graph.",
         "**What does marked mean?** \"Dealt with\" for questions about nodes; \"on the current route\" for questions about routes. Getting it backwards is silent in one direction (150 undercounts in 3,000) and exponential in the other (262,141 entries against 49).",
         "**What is it stored in?** An array indexed by a computed key when the state can be numbered; a hash set when it cannot. Not a list you scan \u2014 that was 3.7 million probes where the array did 4,640.",
-        "And underneath all three: the visited set is what makes the search finite. Remove it and the program does not return, on every graph that has an edge.",
+        "And underneath all three: the visited set is what makes the search finite. Remove it and the program does not return, on every undirected graph that has an edge.",
       ],
     },
   ],

@@ -22,7 +22,7 @@ export const computationalGeometryLesson: Lesson = {
       body: [
         "For points `o`, `a`, `b`, the cross product `(a.x - o.x)(b.y - o.y) - (a.y - o.y)(b.x - o.x)` is twice the signed area of the triangle they form. Its sign says which way the path `o \u2192 a \u2192 b` turns: positive is a left (counter-clockwise) turn, negative a right turn, zero means the three points are collinear.",
         "With integer coordinates this is exact: no division, no square roots, no rounding. Every primitive in this lesson reduces to signs of cross products, and keeping coordinates integral keeps every decision exact.",
-        "The only numeric concern is overflow. The product of two coordinate differences can be as large as the square of the coordinate range, so coordinates up to 10^9 need 64-bit arithmetic; beyond about 3 \u00d7 10^9 they need 128-bit or arbitrary precision.",
+        "The only numeric concern is overflow. The product of two coordinate differences can be as large as the square of the coordinate range, so coordinates up to 10\u2079 need 64-bit arithmetic; the cross product stays inside a signed 64-bit integer while the coordinate *differences* stay under about 2.1 \u00d7 10\u2079, and past that it needs 128-bit or arbitrary precision.",
       ],
     },
     {

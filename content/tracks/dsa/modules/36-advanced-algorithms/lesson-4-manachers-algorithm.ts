@@ -953,7 +953,7 @@ func main() {
       heading: "When to use it",
       body: [
         "The random-string rows show that expanding around centres is near-linear when palindromes are short, which they are in most data. Its cost is the total length of all palindromes found, and that is only quadratic on highly repetitive input.",
-        "So: expanding around centres is the right first answer for \"longest palindromic substring\" in an interview, stated as `O(n^2)` worst case. Manacher is the answer when the input can be adversarial or repetitive, or when the question asks for every palindrome length at every centre \u2014 for example, the minimum number of cuts to split a string into palindromes, where the palindrome table is the expensive part.",
+        "So: expanding around centres is the right first answer for \"longest palindromic substring\" in an interview, stated as `O(n^2)` worst case. Manacher is the answer when the input can be adversarial or repetitive, or when the question asks for every palindrome length at every centre: with the radius array, \"is s[l..r] a palindrome\" is one comparison, which is what a palindrome-partitioning DP asks n\u00b2 times.",
         "Problems about palindromic **subsequences** are different. Characters need not be adjacent, and the standard tool is interval dynamic programming, not Manacher.",
       ],
       pitfalls: [

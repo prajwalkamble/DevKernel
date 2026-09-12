@@ -1001,7 +1001,7 @@ func main() {
       id: "ordering",
       heading: "Ordering the passes",
       body: [
-        "Pass one needs children before parents; pass two needs parents before children. A recursive depth-first search provides both, and on a path-shaped tree of 100,000 nodes it overflows the call stack.",
+        "Pass one needs children before parents; pass two needs parents before children. A recursive depth-first search provides both, and on a path-shaped tree of 100,000 nodes it overflows CPython's recursion limit, Node's stack and Java's — though not C++'s on Linux or Go's.",
         "Two iterative orders avoid that. When parents are always numbered before their children \u2014 true of the program's random trees, and arranged by relabelling otherwise \u2014 descending numeric order visits children first and ascending order visits parents first. In general, record the order in which a breadth-first or iterative depth-first search discovers nodes; that list has every parent before its children, and its reverse has every child before its parent.",
         "The same two orders serve every rerooting problem. Only the combine and what \"everything except this child\" means change between them.",
       ],

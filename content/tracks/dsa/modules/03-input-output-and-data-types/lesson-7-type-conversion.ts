@@ -20,7 +20,7 @@ export const typeConversionLesson: Lesson = {
       id: "widening",
       heading: "Widening: the conversions Java does for you",
       body: [
-        "Moving a value into a type that can hold everything the original could is a **widening** conversion, and Java performs it automatically because nothing can be lost.",
+        "Moving a value into a type that can hold everything the original could is a **widening** conversion, and Java performs it automatically. Between integer types nothing can be lost; `long` to `double` and `int` to `float` also count as widening and can round — `(double) 9007199254740993L` is `9.007199254740992E15`.",
         "The chain is `byte` → `short` → `int` → `long` → `float` → `double`. Anything left to right is silent and safe.",
         "The consequence you meet daily: in a mixed expression, the narrower operand is promoted. `1 / 2` is 0, but `1 / 2.0` is 0.5, because the `1` becomes a `double` first.",
       ],
@@ -87,7 +87,7 @@ export const typeConversionLesson: Lesson = {
       pitfalls: [
         {
           title: "Casting when you meant rounding",
-          body: "`(int) (x + 0.5)` is the old trick for rounding and it is wrong for negative numbers — `(int) (-2.5 + 0.5)` is −2, not −3. Use `Math.round`, which handles both signs, and remember it returns a `long` for a `double` input.",
+          body: "`(int) (x + 0.5)` is the old trick for rounding and it is wrong for negative numbers — `(int) (-2.7 + 0.5)` is −2, not −3. Use `Math.round`, which handles both signs, and remember it returns a `long` for a `double` input.",
         },
       ],
     },

@@ -165,7 +165,7 @@ visit in sorted order O(n log n) O(n log n) O(n log n)       O(n) O(n log n)
         "Three trades run through everything that follows, and naming them now means you will recognise them each time.",
         "**Space for time.** A hash map is fast because it keeps extra empty slots — typically it is only two-thirds full. Precomputing anything is the same trade.",
         "**Order for speed.** A hash map is faster than a tree at lookup precisely *because* it does not maintain order. The moment you need sorted output, you pay for it somewhere.",
-        "**Flexibility for locality.** A linked list inserts anywhere in O(1) and is slow to walk, because its nodes are scattered in memory. An array is the reverse. This is the one that does not show up in the big-O table at all and still shows up in the benchmark.",
+        "**Flexibility for locality.** A linked list inserts in O(1) wherever it already holds a node and is slow to walk, because its nodes are scattered in memory. An array is the reverse. This is the one that does not show up in the big-O table at all and still shows up in the benchmark.",
         "When a structure looks like it is free, look for which of these three it is quietly spending.",
       ],
     },

@@ -183,7 +183,7 @@ print("fixed :", differential_test(fast))`,
           output: `buggy : FAILED on trial 9: s='bbaab' brute=2 fast=3
 fixed : 10000 random tests passed`,
           explanation:
-            "Nine trials. It took nine random five-character strings to find a bug that survives every example the problem statement provides. And the counterexample it hands you — `'bbaab'` — is short enough to trace by hand: after `\"bba\"` the window starts at index 2, so when the second `b` arrives at index 4 its last-seen index of 1 is **stale**, already behind the window. The buggy version jumps `left` backwards to 2 and reports a window that contains two `b`s.",
+            "Nine trials. It took nine random five-character strings to find a bug that survives every example the problem statement provides. And the counterexample it hands you — `'bbaab'` — is short enough to trace by hand: after `\"bbaa\"` the window starts at index 3, so when the last `b` arrives at index 4 its last-seen index of 1 is **stale**, already behind the window. The buggy version jumps `left` backwards to 2 and reports `\"aab\"` — a window that contains two `a`s.",
         },
         {
           id: "oracle-java",

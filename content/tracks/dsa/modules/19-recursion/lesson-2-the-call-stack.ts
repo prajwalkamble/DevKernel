@@ -93,7 +93,7 @@ sumRec  on 200,000 elements -> StackOverflowError
 Java does not do tail-call elimination, so a tail-recursive
 function still consumes one frame per call.`,
           explanation:
-            "The depth is asserted rather than printed, because it depends on the JVM, the platform and the size of each frame — a number here would be a number you could not reproduce. What is stable is the *shape*: comfortably past a thousand, nowhere near two hundred thousand.\n\nThat band is the practical rule. **Recursion depth up to a few thousand is safe; depth in the hundreds of thousands is not.** A problem with `n ≤ 10^5` and a linear recursion — a linked list walked recursively, a DFS on a path-shaped graph — will overflow, and it will do so only on the largest test.",
+            "The depth is asserted rather than printed, because it depends on the JVM, the platform and the size of each frame — a number here would be a number you could not reproduce. What is stable is the *shape*: comfortably past a thousand, nowhere near two hundred thousand.\n\nThat band is the practical rule. **Recursion depth in the hundreds is safe everywhere; a few thousand is fine in Java but already past CPython's default limit of 1,000; depth in the hundreds of thousands is safe in neither.** A problem with `n ≤ 10^5` and a linear recursion — a linked list walked recursively, a DFS on a path-shaped graph — will overflow, and it will do so only on the largest test.",
         },
       ],
     },
@@ -102,7 +102,7 @@ function still consumes one frame per call.`,
       heading: "Why tail calls do not save you",
       body: [
         "A **tail call** is a recursive call whose result is returned directly, with no pending work after it. In principle the current frame could be reused rather than stacked, making the recursion constant-space — that is tail-call elimination.",
-        "**Java does not do it. Python does not do it. C++ and Go compilers may, at some optimisation levels, with no guarantee.** Only languages that promise it — Scheme, and Scala for direct self-recursion — can be relied on.",
+        "**Java does not do it. Python does not do it. Go does not either — a compiled self-call is still a call. C and C++ compilers often do at `-O2`, with no guarantee from the language.** Only languages that promise it — Scheme, and Scala for direct self-recursion — can be relied on.",
         "Guido van Rossum has been explicit that Python will not add it, on the grounds that it destroys stack traces. So writing a function in tail form is a good habit for readability and buys you nothing for depth. If depth is the problem, convert to iteration.",
       ],
     },
@@ -118,7 +118,7 @@ function still consumes one frame per call.`,
       pitfalls: [
         {
           title: "Raising Python's recursion limit as a fix",
-          body: "`sys.setrecursionlimit(10**6)` removes Python's own guard but not the operating system's stack, so instead of a catchable `RecursionError` you get a segmentation fault. It is occasionally the right call in a contest with a known depth; it is never the right call in production.",
+          body: "`sys.setrecursionlimit(10**6)` removes Python's own guard. On older CPython releases the operating system's stack was then the real limit, and going past it was a segmentation fault instead of a catchable `RecursionError`; on current ones pure-Python calls do not use the C stack, and a recursion a million deep ran to completion on 3.13, at the cost of memory. It is occasionally the right call in a contest with a known depth; it is never the right call in production.",
         },
         {
           title: "Recursing over a linked list",
@@ -135,20 +135,20 @@ function still consumes one frame per call.`,
     {
       question: "When does recursion become a problem, and what do you do about it?",
       answer:
-        "Every pending call holds a stack frame, so depth n costs O(n) stack memory, and the stack is small: CPython caps recursion at 1000 frames by default, and a JVM thread's stack is around half a megabyte to a megabyte. Depth up to a few thousand is safe; hundreds of thousands is not, so a linear recursion over n = 10^5 overflows on the largest test. The fix is to convert: linear recursion to a loop, pending work to an accumulator, branching recursion to an explicit stack.",
+        "Every pending call holds a stack frame, so depth n costs O(n) stack memory, and the stack is small: CPython caps recursion at 1000 frames by default, and a JVM thread's stack is around half a megabyte to a megabyte. Depth in the hundreds is safe, a few thousand is fine in Java but past CPython's default, and hundreds of thousands is not, so a linear recursion over n = 10^5 overflows on the largest test. The fix is to convert: linear recursion to a loop, pending work to an accumulator, branching recursion to an explicit stack.",
     },
     {
       question: "Does writing it tail-recursive avoid the stack overflow?",
       answer:
-        "Not in Java or Python, which do not eliminate tail calls, and C++ and Go compilers may do it at some optimisation levels with no guarantee. Only languages that promise it can be relied on. Raising Python's recursion limit is not a fix either: it trades a clean error for a crash. If depth is the problem, convert to iteration.",
+        "Not in Java or Python, which do not eliminate tail calls, Go does not do it either, and C and C++ compilers often do at `-O2` with no guarantee from the language. Only languages that promise it can be relied on. Raising Python's recursion limit is a fix only with care: on CPython 3.13 a pure-Python recursion a million deep ran to completion, but the documentation still warns that a too-high limit can crash the interpreter. If depth is the problem, convert to iteration.",
     },
   ],
   takeaways: [
     "Every pending call holds a frame; depth n costs O(n) stack memory",
-    "Safe to a few thousand; unsafe in the hundreds of thousands",
-    "Java, Python and CPython do not eliminate tail calls",
+    "Safe to hundreds (CPython stops at 1,000 by default); unsafe in the hundreds of thousands",
+    "Java, CPython and Go do not eliminate tail calls",
     "Linear recursion converts to a loop; branching recursion needs an explicit stack",
-    "Raising Python's limit trades a clean error for a segfault",
+    "Raising Python's limit works on current CPython when the depth is known, and can crash older interpreters",
     "Never recurse over a linked list of unbounded length",
     "A tree may be degenerate — depth is O(n), not O(log n), in the worst case",
   ],

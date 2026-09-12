@@ -2641,7 +2641,7 @@ func min(a, b int) int {
         },
         {
           title: "Treating BM25's constants as universal",
-          body: "k1 and b control the term-frequency saturation and the length normalisation. The usual 1.5 and 0.75 are defaults, not laws, and they are tuned on measured data.",
+          body: "k1 and b control the term-frequency saturation and the length normalisation. The 1.5 and 0.75 used here are one set of defaults — Lucene ships k1 = 1.2 and b = 0.75 — tuned on measured data rather than laws.",
         },
         {
           title: "Assuming dense retrieval replaces lexical search",
@@ -2677,7 +2677,7 @@ func min(a, b int) int {
     {
       question: "How does a search engine avoid scoring every document?",
       answer:
-        "An inverted index: a hash map from term to the list of documents containing it. A query looks up its terms, unions or intersects the posting lists, and scores only those documents. In my measurement that was 574 documents per query instead of 2,000, and the ratio gets far better as the collection grows, because the posting lists depend on how common the query terms are rather than on how big the collection is.",
+        "An inverted index: a hash map from term to the list of documents containing it. A query looks up its terms, unions or intersects the posting lists, and scores only those documents. In my measurement that was 574 documents per query instead of 2,000, and the fraction scored is set by how common the query terms are: a rare term touches almost nothing, while a stop word touches nearly everything — which is why engines drop those or prune the postings they walk.",
     },
     {
       question: "What does BM25 add over counting query term matches?",

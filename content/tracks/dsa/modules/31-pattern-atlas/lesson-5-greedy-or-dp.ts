@@ -1800,7 +1800,6 @@ func main() {
         "**Interval scheduling** (greedy, earliest finish) against **weighted interval scheduling** (DP). The word is \"value\".",
         "**Fractional knapsack** (greedy, best value per unit) against **0/1 knapsack** (DP). The words are \"you may take part of an item\" against \"take it or leave it\".",
         "**Coin change with a canonical coin system** (greedy, largest coin first) against **coin change in general** (DP). Nothing in the statement usually says which system you are in, which is what makes this one genuinely nasty \u2014 the greedy rule works on the coins in your pocket and fails on, say, 1, 3 and 4 making 6.",
-        "**Minimum spanning tree** (greedy, and provably so \u2014 the cut property) against **shortest path tree** (Dijkstra, which is also greedy but for a different reason). Two greedy algorithms with two different justifications, and the module-30 lesson measured what happens when you mistake one for the other.",
         "**Activity selection** (greedy) against **longest increasing subsequence** (DP). Both are \"pick a compatible subset in order\", and only one of them has a local rule.",
         "In every pair the greedy version has an exchange argument and the DP version does not. That is the only difference that matters, and it is why the test above is about the argument rather than about the vocabulary.",
       ],

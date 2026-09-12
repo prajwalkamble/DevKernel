@@ -1552,7 +1552,7 @@ func main() {
         },
         {
           title: "Using a window for an exact-sum count on non-negative values without the two-call trick",
-          body: "Counting subarrays with sum exactly k is not a single window sweep even when the values are non-negative -- a window naturally answers \"at most\". The exact count is atMost(k) minus atMost(k-1), which is two sweeps. Trying to count exact hits inside one sweep is a common and subtly wrong implementation.",
+          body: "Counting subarrays with sum exactly k is not a single window sweep even when the values are non-negative -- a window naturally answers \"at most\". The exact count is atMost(k) minus atMost(k-1), which is two sweeps. A single sweep counting exact hits works while every value is strictly positive — right on 3,000 of 3,000 measured — and breaks as soon as zeros are allowed, at 2,114 of 3,000, which is what makes it subtly rather than obviously wrong.",
         },
         {
           title: "Assuming the prefix map is always the safe default",
@@ -1577,7 +1577,7 @@ func main() {
     {
       question: "When can you use a sliding window on a subarray problem?",
       answer:
-        "When the quantity you are tracking moves one way as the window grows. For sums that means non-negative values, because the shrink-while-too-big rule is only correct if moving the left end can only lower the sum and moving the right end can only raise it. With a negative in the array that breaks: a window that is too big might have become small enough by getting bigger, and the shrink rule will never look there. I measured it -- on arrays with values from -3 to 3 the window got 1,193 of 3,000 wrong, in both directions, silently. The general answer for subarray sums with arbitrary values is prefix sums in a hash map, because every subarray sum is a difference of two prefixes and that needs no monotonicity at all.",
+        "When the quantity you are tracking moves one way as the window grows. For sums that means non-negative values, because the shrink-while-too-big rule is only correct if moving the left end can only lower the sum and moving the right end can only raise it. With a negative in the array that breaks: a window that is too big might have become small enough by getting bigger, and the shrink rule will never look there. I measured it -- on arrays with values from -3 to 3 the window got 1,193 of 3,000 wrong, in both directions, silently. The general answer for an exact-sum question with arbitrary values is prefix sums in a hash map, because every subarray sum is a difference of two prefixes and that needs no monotonicity. A threshold question — longest subarray with sum at most k — needs more than a map: prefix sums with a running maximum and a binary search, which was right on all 3,000 of the mixed-value arrays where a hash map cannot answer it at all.",
     },
     {
       question: "How do you count subarrays with sum exactly k?",

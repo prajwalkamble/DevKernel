@@ -1988,8 +1988,8 @@ func main() {
           body: "The word is the same and the answer is not. It matched the strongly connected answer on 418 of 3,000 random graphs and wrongly merged 14,782 pairs of nodes. The error is one-sided -- rubbing out an arrow only ever adds routes -- so it always over-merges, never under-merges.",
         },
         {
-          title: "Using a node's lowlink instead of its index for a back edge in Tarjan",
-          body: "When the neighbour is still on the stack, take its `index`, not its `low`. Its lowlink belongs to a component that has not finished forming, and borrowing it merges components that should stay apart. This is the single most common Tarjan bug and it only shows up on some shapes.",
+          title: "Taking a neighbour's lowlink rather than its index in Tarjan",
+          body: "The textbook line takes the neighbour's `index` when it is still on the stack. Taking its `low` instead is widely called a bug and, for strongly connected components, is not: an on-stack neighbour is in the same component, so the root test fires in the same place — 20,000 random digraphs gave identical components either way. Where the distinction is real is bridges and articulation points, which compare a child's lowlink against the parent's index and do break.",
         },
         {
           title: "Forgetting that a single node is a component",

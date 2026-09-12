@@ -21,7 +21,7 @@ export const companySheetsLesson: Lesson = {
       heading: "What it is a sample of",
       body: [
         "A company-tagged list is a sample of *what candidates remembered and chose to report*, filtered through whatever platform collected it, over some window of time nobody states.",
-        "It is not a sample of the company's question bank. Question banks rotate, and the ones that rotate fastest are the ones that get reported most, because a heavily reported question is one the company can see has leaked.",
+        "It is not a sample of the company's question bank. Question banks rotate, and a heavily reported question is the one a company can most easily see has leaked — so the entries most likely to be on a list are also among the likeliest to have been retired.",
         "That is worth stating plainly because the lists are treated as if they were the bank. They are closer to a survey with an unknown response rate, an unknown date range, and a known incentive for the interesting entries to be removed.",
       ],
     },
@@ -30,7 +30,7 @@ export const companySheetsLesson: Lesson = {
       heading: "The three biases",
       body: [
         "**Reporting bias.** People report the memorable, which means the hard and the unusual. The routine question that most candidates actually got is under-represented precisely because it was routine.",
-        "**Staleness, with a twist.** Every list is out of date, and the twist is that it is *selectively* out of date: the questions most likely to have been retired are the ones most likely to be on the list, because being on the list is what got them retired.",
+        "**Staleness, with a twist.** Every list is out of date, and the twist is that it is *selectively* out of date: the questions most likely to have been retired are the ones most likely to be on the list, since being widely reported is what makes a leak visible.",
         "**Survivorship.** Lists are assembled disproportionately from people who passed and were pleased to write it up. What the people who failed were asked is missing, and there is no reason to assume it is the same distribution.",
         "None of that makes the lists useless. It makes them a weak, noisy signal that should not be allowed to displace the ordered sheet \u2014 and displacing it is exactly what they do, because they arrive with a specific company attached and therefore feel much more actionable than \"work through two pointers properly\".",
       ],
@@ -70,7 +70,7 @@ export const companySheetsLesson: Lesson = {
   takeaways: [
     "A company list samples what candidates reported, not the question bank",
     "Reporting bias favours the memorable over the routine",
-    "Staleness is selective: being on the list is what got a question retired",
+    "Staleness is selective: the widely reported questions are the likeliest to have been retired",
     "Survivorship: what the people who failed were asked is missing",
     "A pattern's absence from a biased sample is not evidence it is not asked",
     "The surviving use is calibration — difficulty band, format, house style",

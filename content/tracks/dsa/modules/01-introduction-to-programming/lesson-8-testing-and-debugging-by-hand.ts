@@ -128,7 +128,7 @@ answer: 2`,
       heading: "Shrinking a failing input",
       body: [
         "You have a bug that shows up on an input of a thousand elements. Do not debug that input. Find a smaller one that fails the same way, and debug that.",
-        "The procedure is mechanical. Halve the input. Does it still fail? If yes, halve again. If no, put back the half you removed and halve the other one. Repeat until removing anything makes the failure go away.",
+        "The procedure is mechanical. Halve the input. Does it still fail? If yes, halve again. If no, put back the half you removed and halve the other one. Repeat until removing anything makes the failure go away. If neither half fails on its own, the failure needs pieces of both: remove smaller chunks — quarters, then single elements — instead of halves.",
         "You now have a minimal reproducing case — typically three or four elements — that you can trace by hand in a minute. And the shape of that minimal case usually names the bug outright: if it is all-negative, your accumulator started at zero; if it is two identical values, your comparison used `>` where it needed `>=`.",
         "The reason this feels like a detour and is not: debugging effort scales with input size, and shrinking is a handful of runs. Ten minutes of halving beats an hour of squinting at a thousand numbers, every time.",
       ],

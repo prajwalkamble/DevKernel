@@ -213,7 +213,7 @@ fib(20) =  6765   calls:   21891
 fib(25) = 75025   calls:  242785
 fib_memo(100) = 354224848179261915075`,
           explanation:
-            "Look at the growth: from n = 10 to n = 20 the calls go up by a factor of 124, and each further step of 5 multiplies them by roughly 11. That is exponential — the call count is itself about `2 × fib(n)`. Meanwhile the memoised version reaches n = 100 instantly, because each value is computed once. Note that the naive version at n = 100 would need more calls than there are atoms in the observable universe.",
+            "Look at the growth: from n = 10 to n = 20 the calls go up by a factor of 124, and each further step of 5 multiplies them by roughly 11. That is exponential — the call count is exactly `2 × fib(n + 1) − 1`, about 3.2 × fib(n). Meanwhile the memoised version reaches n = 100 instantly, because each value is computed once. The naive version at n = 100 would need about 1.1 × 10²¹ calls — at a billion calls a second, roughly 36,000 years.",
         },
       ],
       pitfalls: [

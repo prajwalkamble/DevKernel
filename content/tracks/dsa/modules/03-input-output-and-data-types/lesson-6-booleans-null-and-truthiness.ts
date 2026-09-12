@@ -239,7 +239,7 @@ None        : True True`,
     },
   ],
   takeaways: [
-    "Python's falsy values: 0, 0.0, '', [], (), {}, set(), None, False — and nothing else",
+    "Python's built-in falsy values: 0, 0.0, '', [], (), {}, set(), None, False — plus any object whose `__bool__` or `__len__` says so",
     "`'0'` is a non-empty string and therefore true; `[0]` is a non-empty list and true",
     "`if not count:` cannot distinguish zero from missing; use `is None`, `== 0`, or `key in dict`",
     "Java has no truthiness — a condition must be a boolean, which removes that whole class of bug",

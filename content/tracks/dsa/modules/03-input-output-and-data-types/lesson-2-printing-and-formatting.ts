@@ -134,7 +134,7 @@ print(round(0.5), round(1.5), round(2.5))`,
 2
 0 2 2`,
           explanation:
-            "Two surprises. `2.675` formats to `2.67` rather than `2.68`, because the stored value is very slightly below 2.675 — a floating-point issue covered properly two lessons from here. And halves round to the nearest *even* number, which is why 0.5 and 2.5 both give 2's neighbours rather than always rounding up. This is deliberate and standard, and it is not what school taught.",
+            "Two surprises. `2.675` formats to `2.67` rather than `2.68`, because the stored value is very slightly below 2.675 — a floating-point issue covered properly two lessons from here. And halves round to the nearest *even* number, which is why 0.5 gives 0 and 2.5 gives 2 rather than always rounding up. This is deliberate in Python, and it is not what school taught; Java's `String.format` rounds halves up and prints `2.68` for the same value.",
         },
       ],
     },
@@ -174,7 +174,7 @@ print("[" + " ".join(map(str, results)) + "]")`,
     {
       question: "How do you print a number to two decimal places?",
       answer:
-        "`f\"{value:.2f}\"` in Python, `System.out.printf(\"%.2f%n\", value)` or `String.format(\"%.2f\", value)` in Java. Both round rather than truncate. Note that rounding a value that appears to be an exact half may not go the way you expect, because the stored binary value is usually slightly above or below the decimal you wrote, and because ties round to even.",
+        "`f\"{value:.2f}\"` in Python, `System.out.printf(\"%.2f%n\", value)` or `String.format(\"%.2f\", value)` in Java. Both round rather than truncate. Note that rounding a value that appears to be an exact half may not go the way you expect, because the stored binary value is usually slightly above or below the decimal you wrote, and because the languages break true ties differently — Python to even (`2.5` → `2`), Java half up (`2.5` → `3`).",
     },
     {
       question: "What is the difference between `%n` and `\\n` in Java's printf?",
@@ -194,7 +194,7 @@ print("[" + " ".join(map(str, results)) + "]")`,
     "`print(*results)` prints a list space-separated with no loop; `print(results)` prints the brackets",
     "Java: `%.2f`, `%05d`, `%6s`, and `%n` rather than `\\n` inside a format string",
     "`%d` given a `double` throws at run time, not compile time",
-    "Halves round to even, and `2.675` formats as `2.67` — both are floating point, not a bug",
+    "Python rounds halves to even and prints `2.675` as `2.67`; Java rounds halves up and prints `2.68`",
     "Build output with `join` so a trailing separator is structurally impossible",
   ],
 };

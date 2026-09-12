@@ -2013,7 +2013,7 @@ func main() {
         "What changes with a grid is that one decision stops being written down anywhere. **What does \"next to\" mean?** Four neighbours or eight? The problem is supposed to say and frequently does not, and the two give different answers on the same map.",
         "How different: over 3,000 random maps of up to five by five, the four-way and eight-way counts disagreed on 1,342 of them. Neither is wrong \u2014 they are correct about two different graphs, and only one of those graphs is the one in the problem.",
         "There is a fact worth carrying to remember which way round it goes: eight-way never finds *more* islands than four-way, on any of the 3,000 maps. Adding the diagonals can only join components; it can never split one. So the diagonal reading always gives a count that is the same or smaller.",
-        "And one practical warning that comes straight from the depth-first lesson. A recursive flood fill needs one frame per cell on the current path, so on a solid 200 by 200 map it needs 40,000 frames \u2014 the whole grid \u2014 which is past what a default stack will take. Grid fills are exactly the case where the input can be long and thin, and the iterative version is worth writing.",
+        "And one practical warning that comes straight from the depth-first lesson. A recursive flood fill needs one frame per cell on the current path, so on a solid 200 by 200 map it needs 40,000 frames \u2014 the whole grid \u2014 which is past what CPython, Node or Java will take by default, though not C++ on Linux or Go. Grid fills are exactly the case where the input can be long and thin, and the iterative version is worth writing.",
       ],
       examples: [
         {
@@ -2195,7 +2195,7 @@ print("On a solid 200 by 200 map a recursive fill would need this many frames:")
 solid = ["#" * 200 for _ in range(200)]
 print(f"  four-way  {deepest_fill(solid, MOVES_4)}")
 print(f"  eight-way {deepest_fill(solid, MOVES_8)}")
-print("which is the whole grid, and past what a default stack will take.")
+print("which is the whole grid, and past the default stack in Python, Node and Java.")
 `,
           output: `map                       islands, 4 ways  islands, 8 ways  by pairs, 4
 #..#/.##./#..#/#..#                     5                1            5
@@ -2221,7 +2221,7 @@ The recursion depth is the other thing worth knowing about flood fill.
 On a solid 200 by 200 map a recursive fill would need this many frames:
   four-way  40000
   eight-way 40000
-which is the whole grid, and past what a default stack will take.`,
+which is the whole grid, and past the default stack in Python, Node and Java.`,
           explanation:
             "Islands counted with four neighbours and with eight, each checked against an independent pairwise grouping, plus the recursion depth a solid grid would demand.",
           alternates: [
@@ -2417,7 +2417,7 @@ const solid = [];
 for (let r = 0; r < 200; r += 1) solid.push("#".repeat(200));
 console.log(\`  four-way  \${deepestFill(solid, MOVES_4)}\`);
 console.log(\`  eight-way \${deepestFill(solid, MOVES_8)}\`);
-console.log("which is the whole grid, and past what a default stack will take.");
+console.log("which is the whole grid, and past the default stack in Python, Node and Java.");
 `,
             },
             {
@@ -2614,7 +2614,7 @@ const solid: string[] = [];
 for (let r = 0; r < 200; r += 1) solid.push("#".repeat(200));
 console.log(\`  four-way  \${deepestFill(solid, MOVES_4)}\`);
 console.log(\`  eight-way \${deepestFill(solid, MOVES_8)}\`);
-console.log("which is the whole grid, and past what a default stack will take.");
+console.log("which is the whole grid, and past the default stack in Python, Node and Java.");
 `,
             },
             {
@@ -2874,7 +2874,7 @@ public class Main {
         }
         System.out.println("  four-way  " + deepestFill(solid, MOVES_4));
         System.out.println("  eight-way " + deepestFill(solid, MOVES_8));
-        System.out.println("which is the whole grid, and past what a default stack will take.");
+        System.out.println("which is the whole grid, and past the default stack in Python, Node and Java.");
     }
 }
 `,
@@ -3116,7 +3116,7 @@ int main() {
     std::vector<std::string> solid(200, std::string(200, '#'));
     std::cout << "  four-way  " << deepest_fill(solid, MOVES_4) << "\\n";
     std::cout << "  eight-way " << deepest_fill(solid, MOVES_8) << "\\n";
-    std::cout << "which is the whole grid, and past what a default stack will take.\\n";
+    std::cout << "which is the whole grid, and past the default stack in Python, Node and Java.\\n";
     return 0;
 }
 `,
@@ -3374,7 +3374,7 @@ fn main() {
     let solid: Vec<String> = (0..200).map(|_| "#".repeat(200)).collect();
     println!("  four-way  {}", deepest_fill(&solid, &MOVES_4));
     println!("  eight-way {}", deepest_fill(&solid, &MOVES_8));
-    println!("which is the whole grid, and past what a default stack will take.");
+    println!("which is the whole grid, and past the default stack in Python, Node and Java.");
 }
 `,
             },
@@ -3619,7 +3619,7 @@ func main() {
 	}
 	fmt.Printf("  four-way  %d\\n", deepestFill(solid, moves4))
 	fmt.Printf("  eight-way %d\\n", deepestFill(solid, moves8))
-	fmt.Println("which is the whole grid, and past what a default stack will take.")
+	fmt.Println("which is the whole grid, and past the default stack in Python, Node and Java.")
 }
 `,
             },
@@ -3633,7 +3633,7 @@ func main() {
         },
         {
           title: "A recursive flood fill on a large grid",
-          body: "The depth is one frame per cell on the current path, so a solid 200 by 200 map needs 40,000 frames -- past a default stack. Grids are the canonical long-and-thin input, so this is where the iterative version earns its keep.",
+          body: "The depth is one frame per cell on the current path, so a solid 200 by 200 map needs 40,000 frames -- past CPython's, Node's and Java's defaults. Grids are the canonical long-and-thin input, so this is where the iterative version earns its keep.",
         },
       ],
     },
@@ -5240,7 +5240,7 @@ func main() {
     {
       question: "How is flood fill different from a graph traversal?",
       answer:
-        "It is not -- it is the same loop with the neighbour function computed instead of stored. A cell is a node and adjacency is arithmetic on the coordinates, so no graph is ever built. The two things that actually differ in practice are both worth raising. First, \"adjacent\" is ambiguous: four neighbours or eight gives different answers, and on 3,000 random small maps they disagreed on 1,342 -- so I would ask which one the problem means. Eight-way never finds more islands than four-way, because diagonals can only join components. Second, grids are deep: a recursive fill on a solid 200 by 200 grid needs 40,000 frames, past a default stack, so I would write the explicit-stack version for anything large.",
+        "It is not -- it is the same loop with the neighbour function computed instead of stored. A cell is a node and adjacency is arithmetic on the coordinates, so no graph is ever built. The two things that actually differ in practice are both worth raising. First, \"adjacent\" is ambiguous: four neighbours or eight gives different answers, and on 3,000 random small maps they disagreed on 1,342 -- so I would ask which one the problem means. Eight-way never finds more islands than four-way, because diagonals can only join components. Second, grids are deep: a recursive fill on a solid 200 by 200 grid needs 40,000 frames — past CPython's, Node's and Java's defaults — so I would write the explicit-stack version for anything large.",
     },
     {
       question: "What does \"connected\" mean for a directed graph?",

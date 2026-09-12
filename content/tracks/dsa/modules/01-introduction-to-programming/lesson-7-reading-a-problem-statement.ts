@@ -63,7 +63,7 @@ print("subsequences", sorted(subsequences, key=len))`,
           output: `subarrays    [[5], [5, -2], [5, -2, 3], [-2], [-2, 3], [3]]
 subsequences [[], [5], [-2], [3], [5, -2], [5, 3], [-2, 3], [5, -2, 3]]`,
           explanation:
-            "Six subarrays against eight subsequences for a three-element array — and the gap grows fast: there are n(n+1)/2 subarrays and 2ⁿ subsequences. `[5, 3]` appears in the second list and not the first, because it skips an element. That one word in the statement is the difference between a linear-time sliding window and an exponential search that needs dynamic programming.",
+            "Six subarrays against eight subsequences for a three-element array — and the gap grows fast: there are n(n+1)/2 subarrays and 2ⁿ subsequences. `[5, 3]` appears in the second list and not the first, because it skips an element. That one word in the statement decides whether a sliding window is possible at all; with 2ⁿ subsequences, enumerating them is out, and the usual way round it is dynamic programming or a greedy argument.",
         },
       ],
       pitfalls: [
@@ -78,9 +78,9 @@ subsequences [[], [5], [-2], [3], [5, -2], [5, 3], [-2, 3], [5, -2, 3]]`,
       heading: "The constraints are the problem-setter talking to you",
       body: [
         "The constraints are not administrative detail. They are the setter telling you what solution they intend, because they chose the limits to admit one approach and exclude another. Reading them backwards to a target complexity is the single highest-value habit in this whole track, and there is a full lesson on it in the Framework module.",
-        "For now, the crude version is enough. Assume roughly 10⁸ simple operations per second.",
+        "For now, the crude version is enough. Assume roughly 10⁸ simple operations per second in a compiled language such as Java or C++; plain Python loops manage about 10⁷.",
         "**n ≤ 20** — exponential is fine. They expect you to try every subset.",
-        "**n ≤ 5,000** — O(n²) is fine. Nested loops are expected.",
+        "**n ≤ 5,000** — O(n²) is fine: 2.5 × 10⁷ steps, comfortable in Java and a few seconds in a plain Python loop. Nested loops are expected.",
         "**n ≤ 10⁵ or 10⁶** — you need O(n) or O(n log n). Nested loops will time out.",
         "**n ≤ 10⁹** — you cannot even look at every value. The answer is mathematical, or a binary search over the answer.",
         "Two more things hide in the constraints. The **value range** tells you whether an `int` will overflow — if values reach 10⁹ and you sum n of them, you need a `long`. And an explicit **space limit**, such as \"use only constant extra space\", is not an inconvenience; it is the setter banning the hash map to force a different technique.",

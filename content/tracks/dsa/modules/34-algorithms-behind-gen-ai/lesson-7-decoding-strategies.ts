@@ -1334,11 +1334,11 @@ func main() {
       pitfalls: [
         {
           title: "Calling beam search optimal",
-          body: "Width 16 found the best sequence 259 times of 300. A wider beam is a better approximation, not a guarantee, and there is no width short of the whole vocabulary that makes it one.",
+          body: "Width 16 found the best sequence 259 times of 300. A wider beam is a better approximation, not a guarantee. Even a beam as wide as the vocabulary is not one: on a five-token toy, width 5 found the best sequence 278 times in 300, and a guarantee needs vocabulary^(length − 1) prefixes — 625 of them here.",
         },
         {
           title: "Comparing sequences of different lengths by total score",
-          body: "Scores accumulate per token, so a longer sequence has a lower total almost automatically. Production beam search divides by length, or by a function of it, before comparing -- otherwise it systematically prefers stopping early.",
+          body: "Log-probabilities are negative and accumulate per token, so a longer sequence has a lower total almost automatically. Production beam search divides by length, or by a function of it, before comparing -- otherwise it systematically prefers stopping early.",
         },
         {
           title: "Assuming a bigger beam gives better text",
@@ -1353,8 +1353,8 @@ func main() {
         "There is a result in this area that surprises people, and it is not about search quality: **wide beam search produces worse text.** Flat, repetitive, hedging text, and it gets worse as the beam gets wider.",
         "The reason is not a bug in beam search \u2014 it is doing exactly what it was asked. It is that the most probable continuation of almost any prefix is something bland, because bland continuations are what a corpus contains most of. Maximising probability optimises for the least surprising thing that could be said next, which is not what anybody wants from a model.",
         "So most generation does not maximise at all. It **samples**, and the sampling strategies are selection problems with a random choice at the end.",
-        "**Top-k sampling** keeps the `k` highest-scoring tokens and samples among them, which is a bounded heap followed by a weighted random draw. **Nucleus sampling** keeps the smallest set of tokens whose scores sum past a threshold and samples among those, which is a partial sort followed by a prefix scan and then the same draw. Both exist to exclude the long tail of implausible tokens while leaving genuine choice among the plausible ones.",
-        "The useful framing is that these are not worse searches. They are answers to a different question. Beam search asks for the most likely sequence; sampling asks for a likely sequence, and for most uses the second question is the right one. Where the first question *is* right \u2014 translation, constrained extraction, code with a single correct answer \u2014 beam search is still what gets used.",
+        "**Top-k sampling** keeps the `k` highest-scoring tokens and samples among them, which is a bounded heap followed by a weighted random draw. **Nucleus sampling** keeps the smallest set of tokens whose probabilities sum past a threshold and samples among those, which is a partial sort followed by a prefix scan and then the same draw. Both exist to exclude the long tail of implausible tokens while leaving genuine choice among the plausible ones.",
+        "The useful framing is that these are not worse searches. They are answers to a different question. Beam search asks for the most likely sequence; sampling asks for a likely sequence, and for most uses the second question is the right one. Where the first question *is* right \u2014 translation, constrained extraction, code with a single correct answer \u2014 maximising is what gets used: beam search in translation systems, and greedy decoding at temperature 0 for most code generation.",
       ],
     },
   ],
@@ -1372,7 +1372,7 @@ func main() {
     {
       question: "Why do models sample instead of taking the most likely token?",
       answer:
-        "Because the most likely sequence is usually not the one you want. Wide beam search is known to produce flat, repetitive text, and it gets worse as the beam widens -- not a bug, but the consequence of maximising probability, since the most probable continuation of almost anything is something bland. So generation usually samples instead. Top-k keeps the k highest-scoring tokens and draws among them, which is a bounded heap plus a weighted random choice; nucleus sampling keeps the smallest set whose scores pass a threshold, which is a partial sort and a prefix scan. Neither is a worse search -- they answer a different question. Where the most likely sequence really is what you want, like translation or constrained extraction, beam search is still what gets used.",
+        "Because the most likely sequence is usually not the one you want. Wide beam search is known to produce flat, repetitive text, and it gets worse as the beam widens -- not a bug, but the consequence of maximising probability, since the most probable continuation of almost anything is something bland. So generation usually samples instead. Top-k keeps the k highest-scoring tokens and draws among them, which is a bounded heap plus a weighted random choice; nucleus sampling keeps the smallest set whose probabilities pass a threshold, which is a partial sort and a prefix scan. Neither is a worse search -- they answer a different question. Where the most likely sequence really is what you want, like translation or constrained extraction, beam search is still what gets used.",
     },
   ],
   takeaways: [

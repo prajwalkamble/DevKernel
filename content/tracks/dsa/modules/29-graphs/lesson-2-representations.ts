@@ -6,7 +6,7 @@ export const representationsLesson: Lesson = {
   moduleSlug: "graphs",
   title: "Adjacency Lists, Matrices and Edge Lists",
   summary:
-    "The three ways to store a graph and what each one costs, measured rather than asserted: the traversal penalty a matrix pays on sparse graphs, the workload arithmetic that decides between them rather than a rule about density, and the edge list \u2014 the representation that a whole family of algorithms wants and the only one that stores a multigraph without losing edges.",
+    "The three ways to store a graph and what each one costs, measured rather than asserted: the traversal penalty a matrix pays on sparse graphs, the workload arithmetic that decides between them rather than a rule about density, and the edge list \u2014 the representation that a whole family of algorithms wants, and one of the two that store a multigraph without losing edges.",
   estimatedMinutes: 45,
   objectives: [
     "State the two operations that the whole representation trade turns on",
@@ -4519,7 +4519,7 @@ func main() {
         "So the three, and what each is for.",
         "**Adjacency list.** The default. `O(V + E)` space, traversal proportional to the edges, edge queries proportional to the degree. Use it unless something specific argues otherwise.",
         "**Adjacency matrix.** `O(V^2)` space regardless of edges, constant-time edge queries, traversal proportional to `V^2`. Right when the graph is dense, when the program asks about specific pairs far more than it traverses, or when the algorithm itself is matrix-shaped \u2014 Floyd-Warshall in the next module is exactly that.",
-        "**Edge list.** No index at all. Right when the algorithm consumes edges rather than following them: Kruskal, Bellman-Ford, and anything that sorts or filters edges. It is also the only one of the three that stores a multigraph faithfully.",
+        "**Edge list.** No index at all. Right when the algorithm consumes edges rather than following them: Kruskal, Bellman-Ford, and anything that sorts or filters edges. It also stores a multigraph faithfully — so does an adjacency list, by listing a repeated neighbour twice; the boolean matrix is the one that cannot.",
         "And one practical note: these are not exclusive. Holding an edge list *and* an adjacency list costs `O(E)` extra and buys both access patterns, which is often the right answer for a program that does several different things with the same graph.",
       ],
     },
@@ -4533,7 +4533,7 @@ func main() {
     {
       question: "When would you use an edge list?",
       answer:
-        "When the algorithm consumes edges instead of following them. Kruskal sorts the edges and walks them in order; Bellman-Ford relaxes every edge repeatedly. Neither ever asks for a node's neighbours, so an adjacency structure is work thrown away. The other reason is correctness: an edge list is the only one of the three that stores a multigraph faithfully. A boolean matrix has one cell per pair, so parallel edges collapse and a self-loop counts once instead of twice \u2014 over 3,000 random multigraphs, degrees computed through a matrix matched the edge list only 812 times. If the problem mentions several roads between two towns, that is the deciding fact.",
+        "When the algorithm consumes edges instead of following them. Kruskal sorts the edges and walks them in order; Bellman-Ford relaxes every edge repeatedly. Neither ever asks for a node's neighbours, so an adjacency structure is work thrown away. The other reason is correctness: a boolean matrix cannot hold a multigraph at all, where an edge list can — as can an adjacency list with the repeated neighbour listed twice. A boolean matrix has one cell per pair, so parallel edges collapse and a self-loop counts once instead of twice \u2014 over 3,000 random multigraphs, degrees computed through a matrix matched the edge list only 812 times. If the problem mentions several roads between two towns, that is the deciding fact.",
     },
     {
       question: "How much memory does each representation use, and does it matter?",

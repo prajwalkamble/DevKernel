@@ -165,10 +165,10 @@ after toggling bit 5     : 0 = 00000000
       id: "four-tricks",
       heading: "Four tricks worth memorising",
       body: [
-        "**`n & 1`** — the last bit, so 1 for odd and 0 for even. Faster than `%` on very old hardware and identical on modern hardware, so use whichever reads better; `n % 2` usually does.",
-        "**`n & (n - 1)`** — clears the lowest set bit. So `n & (n - 1) == 0` tests whether n is a power of two, and repeatedly applying it counts the set bits in as many steps as there are bits set.",
+        "**`n & 1`** — the last bit, so 1 for odd and 0 for even. Faster than `%` on very old hardware and identical on modern hardware, so use whichever reads better — with one trap in Java: for a negative odd `n`, `n % 2` is −1, so `n % 2 == 1` misses it while `(n & 1) == 1` does not. Test `n % 2 != 0` instead.",
+        "**`n & (n - 1)`** — clears the lowest set bit. So `(n & (n - 1)) == 0` tests whether a positive n is a power of two, and repeatedly applying it counts the set bits in as many steps as there are bits set.",
         "**`n & -n`** — isolates the lowest set bit. The basis of the Fenwick tree, and useful whenever you need to iterate set bits one at a time.",
-        "**`a ^ a == 0` and `a ^ 0 == a`** — XOR is its own inverse. That is why XORing every element of an array where all values appear twice except one leaves exactly the odd one out, in O(n) time and O(1) space.",
+        "**`(a ^ a) == 0` and `(a ^ 0) == a`** — XOR is its own inverse. That is why XORing every element of an array where all values appear twice except one leaves exactly the odd one out, in O(n) time and O(1) space.",
       ],
       examples: [
         {

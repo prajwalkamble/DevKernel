@@ -112,7 +112,7 @@ no code is a prefix of any other, so the stream reads back one way only
 224 bits against 300, a saving of 25%
 and the commonest symbol got the shortest code, which is the whole idea.`,
           explanation:
-            "The middle block is the one worth sitting with. Assigning shorter codes to commoner symbols is the right instinct, and done by hand it produces something that scores 139 bits and cannot be read back at all — because `0` is a prefix of `00`, the bitstream `00` is both `f f` and `d`, and no amount of cleverness at the decoder recovers which was meant. The prefix-free requirement is not a technicality; it is the entire difference between a compression scheme and a lossy one. The last block checks it by brute force rather than by inspection: every pair of codes, against every other.",
+            "The middle block is the one worth sitting with. Assigning shorter codes to commoner symbols is the right instinct, and done by hand it produces something that scores 139 bits and cannot be read back at all — because `0` is a prefix of `00`, the bitstream `00` is both `f f` and `d`, and no amount of cleverness at the decoder recovers which was meant. The prefix-free requirement is not a technicality; it is the entire difference between a compression scheme and a bitstream nobody can decode. The last block checks it by brute force rather than by inspection: every pair of codes, against every other.",
           alternates: [
             {
               lang: "javascript",

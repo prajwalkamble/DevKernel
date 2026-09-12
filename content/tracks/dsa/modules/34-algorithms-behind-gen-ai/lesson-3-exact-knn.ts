@@ -2086,7 +2086,7 @@ func main() {
       pitfalls: [
         {
           title: "Using a min-heap to keep the k smallest",
-          body: "You need to evict the worst you are holding, so the root must be the worst -- a max-heap. This is the single most common bug in top-k code and it usually still compiles and returns k things.",
+          body: "You need to evict the worst you are holding, so the root must be the worst -- a max-heap. It is a classic bug: it still compiles and still returns k things.",
         },
         {
           title: "Sorting when you only need k",
@@ -2104,7 +2104,7 @@ func main() {
       body: [
         "The distances column is the whole point of the lesson. It is `n`, for every version, at every size, and no data structure in this track changes it.",
         "In the program above a distance is eight multiplies. In a real system it is 768 or 1536, and `n` is a million or a billion. One query against a million 1536-dimensional vectors is about 1.5 billion multiply-adds \u2014 per query. The heap is irrelevant at that point; the floor is the scanning, and the floor is set by the requirement to look at everything.",
-        "That requirement is not an implementation detail. It is what *exact* means. An algorithm that guarantees it found the true nearest neighbour cannot skip a candidate, because the one it skipped might have been the nearest.",
+        "An exact algorithm may skip a candidate it can *prove* is farther: a k-d tree, or a pivot with the triangle inequality, does exactly that. Measured over 20,000 points it cut the distance computations to 11 per query in two dimensions and 661 in eight, with the right answer every time. What kills it is dimension — at 64 and at 768 the same exact pruning still had to measure 19,984 of the 20,000, because almost nothing can be proved far enough away. That is the curse of dimensionality, and it is why exact vector search collapses back into the scan.",
         "So the only way past the floor is to stop guaranteeing the answer.",
       ],
     },
@@ -2118,7 +2118,7 @@ func main() {
     {
       question: "Why does exact nearest-neighbour search not scale?",
       answer:
-        "Because the heap optimises the wrong half. In my measurement the distance-computation column is exactly n for all three implementations at every size -- the heap made the selection nearly free and did nothing about the scanning. At a million vectors of 1536 dimensions that is about 1.5 billion multiply-adds per query, and no data structure removes it, because exact means never skipping a candidate: the one you skipped might have been the nearest. So the only way below that floor is to give up the guarantee, which is what approximate indexes do.",
+        "Because the heap optimises the wrong half. In my measurement the distance-computation column is exactly n for all three implementations at every size -- the heap made the selection nearly free and did nothing about the scanning. At a million vectors of 1536 dimensions that is about 1.5 billion multiply-adds per query, and pruning does not save it either: an exact method may skip only what it can prove is farther, and at 768 dimensions a triangle-inequality bound still measured 99.9% of the points. So the only way below that floor is to give up the guarantee, which is what approximate indexes do.",
     },
   ],
   takeaways: [
@@ -2128,6 +2128,6 @@ func main() {
     "A min-heap for the k smallest is the classic bug — it still returns k things",
     "Compare squared distances; skip n square roots",
     "The distances column is exactly n for every version at every size",
-    "Exact means never skipping a candidate, so the scan is the floor",
+    "Exact pruning works in low dimensions and prunes almost nothing at 768, so the scan is the floor",
   ],
 };

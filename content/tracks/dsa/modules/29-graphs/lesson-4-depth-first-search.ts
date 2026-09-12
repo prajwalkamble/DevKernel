@@ -3087,7 +3087,7 @@ func main() {
       body: [
         "There is exactly one real difference between the two implementations, and it is not the algorithm. It is where the stack lives, and therefore how big it is allowed to get.",
         "A recursive depth-first search holds one call frame per node on the current path. On a graph that is one long chain, that is one frame per node. The measured table says it plainly: a path of 50,000 nodes needs 50,000 frames, while the explicit stack on the same graph never holds more than one, because a node in the middle of a chain has a single unvisited neighbour, pushed as the previous one is popped.",
-        "A runtime's call stack is a fixed allocation \u2014 commonly around a megabyte, a few tens of thousands of frames \u2014 and no amount of correctness in the algorithm enlarges it. A heap-allocated list has no such ceiling. That is the entire practical argument for writing the iterative version, and it applies exactly when the input can be long and thin.",
+        "A call stack has a ceiling that no amount of correctness in the algorithm raises, and where it sits depends on the runtime: measured, CPython stops at 1,000 frames, Node at about 6,000, Java at roughly 10,000 to 24,000 on its default thread stack, while C++ on Linux's 8 MB main stack took 200,000 and Go's growable stacks a million. A heap-allocated list has no such ceiling. That is the entire practical argument for writing the iterative version, and it applies exactly when the input can be long and thin.",
         "It is not a general claim that one container is smaller. Run the same measurement on a star of 50,000 nodes and it reverses: the recursion is two frames deep and the explicit stack holds 49,999 leaves at once. Over 3,000 random small graphs the recursion went deeper on 1,681 and the stack went deeper on 109. Neither is the frugal one \u2014 but only one of them is allowed to grow.",
         "So the rule is about the shape of the input, not about taste. If the graph could be a long path \u2014 a linked structure, a chain of dependencies, a grid traversed edge-first, a tree built from sorted input \u2014 write the iterative version or raise the limit deliberately. If it is broad and shallow, the recursion is shorter and clearer and there is no reason to avoid it.",
       ],
@@ -3102,7 +3102,7 @@ func main() {
 # A recursive depth-first search needs one call frame per node on the current
 # path. The worst case is a graph that is one long path, and there the depth is
 # the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-# the runtime's stack is a fixed allocation that no amount of correctness in the
+# the runtime's stack has a ceiling that no amount of correctness in the
 # algorithm can enlarge.
 #
 # The explicit-stack version puts the same information in a heap-allocated list.
@@ -3278,7 +3278,7 @@ in general; what differs is that one of them is allowed to grow.`,
 // A recursive depth-first search needs one call frame per node on the current
 // path. The worst case is a graph that is one long path, and there the depth is
 // the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-// the runtime's stack is a fixed allocation that no amount of correctness in the
+// the runtime's stack has a ceiling that no amount of correctness in the
 // algorithm can enlarge.
 //
 // The explicit-stack version puts the same information in a heap-allocated list.
@@ -3444,7 +3444,7 @@ console.log("in general; what differs is that one of them is allowed to grow.");
 // A recursive depth-first search needs one call frame per node on the current
 // path. The worst case is a graph that is one long path, and there the depth is
 // the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-// the runtime's stack is a fixed allocation that no amount of correctness in the
+// the runtime's stack has a ceiling that no amount of correctness in the
 // algorithm can enlarge.
 //
 // The explicit-stack version puts the same information in a heap-allocated list.
@@ -3612,7 +3612,7 @@ console.log("in general; what differs is that one of them is allowed to grow.");
 // A recursive depth-first search needs one call frame per node on the current
 // path. The worst case is a graph that is one long path, and there the depth is
 // the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-// the runtime's stack is a fixed allocation that no amount of correctness in the
+// the runtime's stack has a ceiling that no amount of correctness in the
 // algorithm can enlarge.
 //
 // The explicit-stack version puts the same information in a heap-allocated list.
@@ -3835,7 +3835,7 @@ public class Main {
 // A recursive depth-first search needs one call frame per node on the current
 // path. The worst case is a graph that is one long path, and there the depth is
 // the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-// the runtime's stack is a fixed allocation that no amount of correctness in the
+// the runtime's stack has a ceiling that no amount of correctness in the
 // algorithm can enlarge.
 //
 // The explicit-stack version puts the same information in a heap-allocated list.
@@ -4041,7 +4041,7 @@ int main() {
 // A recursive depth-first search needs one call frame per node on the current
 // path. The worst case is a graph that is one long path, and there the depth is
 // the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-// the runtime's stack is a fixed allocation that no amount of correctness in the
+// the runtime's stack has a ceiling that no amount of correctness in the
 // algorithm can enlarge.
 //
 // The explicit-stack version puts the same information in a heap-allocated list.
@@ -4254,7 +4254,7 @@ fn main() {
 // A recursive depth-first search needs one call frame per node on the current
 // path. The worst case is a graph that is one long path, and there the depth is
 // the number of nodes. That is fine at 1,000 nodes and fatal at 100,000, because
-// the runtime's stack is a fixed allocation that no amount of correctness in the
+// the runtime's stack has a ceiling that no amount of correctness in the
 // algorithm can enlarge.
 //
 // The explicit-stack version puts the same information in a heap-allocated list.
@@ -4449,7 +4449,7 @@ func main() {
       pitfalls: [
         {
           title: "Recursion depth is set by the input, not by the code",
-          body: "A path of 50,000 nodes needs 50,000 frames whatever the language. The call stack is a fixed allocation of roughly a megabyte in most runtimes, so the crash arrives as a function of the data. If the graph can be long and thin, that is the moment to write the loop.",
+          body: "A path of 50,000 nodes needs 50,000 frames whatever the language, and whether they fit depends on the runtime: measured, it overflows CPython, Node and Java, and runs fine in C++ on Linux and in Go. The crash arrives as a function of the data. If the graph can be long and thin, that is the moment to write the loop.",
         },
         {
           title: "The explicit stack is not unconditionally smaller",
@@ -4472,7 +4472,7 @@ func main() {
     {
       question: "What is the difference between recursive and iterative depth-first search?",
       answer:
-        "Where the stack lives. The recursive version uses the call stack, the iterative one allocates an array on the heap, and the sequence of decisions is identical. The reason they usually print different orders is that pushing a node's neighbours reverses them, so the iterative search takes the last child first; push them in reverse and the orders match exactly -- I measured that on 3,000 random graphs and it was 3,000 out of 3,000. The difference that matters in practice is depth: the call stack is a fixed allocation, commonly about a megabyte, so a graph that is one long path of 50,000 nodes needs 50,000 frames and overflows, while the heap-allocated stack on that same graph never holds more than one entry. So the choice is about the shape the input can take, not about style.",
+        "Where the stack lives. The recursive version uses the call stack, the iterative one allocates an array on the heap, and the sequence of decisions is identical. The reason they usually print different orders is that pushing a node's neighbours reverses them, so the iterative search takes the last child first; push them in reverse and the orders match exactly -- I measured that on 3,000 random graphs and it was 3,000 out of 3,000. The difference that matters in practice is depth: the call stack has a ceiling the algorithm cannot raise — 1,000 frames in CPython, about 6,000 in Node, roughly 10,000 to 24,000 in Java, but 200,000 in C++ on Linux and a million in Go — so a graph that is one long path of 50,000 nodes needs 50,000 frames and overflows in the first three, while the heap-allocated stack on that same graph never holds more than one entry. So the choice is about the shape the input can take, not about style.",
     },
     {
       question: "What can DFS do that BFS cannot?",

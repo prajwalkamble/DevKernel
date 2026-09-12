@@ -22,7 +22,7 @@ export const unionFindLesson: Lesson = {
       body: [
         "\"Are these two in the same group?\" is graph connectivity, and module 29 answered it with a search. That answer stops working when the graph keeps growing: edges arrive one at a time and queries are interleaved with them, so there is no finished graph to search.",
         "Three structures handle that, and all three are correct \u2014 over 3,000 random operation streams every one of them matched a definition that recomputed the whole picture from scratch at each query. What separates them is where the work sits.",
-        "**A search per query** re-walks a component that has not changed since the last time it walked it. **A label array** \u2014 one component number per node \u2014 makes a query one comparison, and pays for it at every merge by rewriting a whole side. **Union-find** gives each node a single parent pointer: a merge is one write, and a query follows pointers until it reaches a root.",
+        "**A search per query** re-walks a component that has not changed since the last time it walked it. **A label array** \u2014 one component number per node \u2014 makes a query one comparison, and pays for it at every merge by rewriting labels — the version measured here rescans the whole array, though relabelling only the smaller side through member lists would make it O(n log n) in total. **Union-find** gives each node a single parent pointer: a merge is one write, and a query follows pointers until it reaches a root.",
         "That last trade is the interesting one, and the first version of it is not yet a win. On a stream that merges 1,600 nodes in the order that builds the longest chain, the search took 3,839,199 steps, the label array 2,558,400 writes and bare union-find 1,279,200 pointer hops. Better, and still quadratic.",
         "The reason is visible in the number: a chain of merges builds a chain of pointers, and then every query walks it. Which is exactly what the next example fixes.",
       ],
@@ -1766,7 +1766,7 @@ func main() {
         },
         {
           title: "Using a label array because queries are O(1)",
-          body: "They are, and the merge is the problem: relabelling one whole side cost 2,558,400 writes on the same stream. It is the right structure only when merges are rare compared with queries.",
+          body: "They are, and the merge is the problem: the version here rescans every node, 2,558,400 writes on the same stream. Member lists and relabelling the smaller side bring that to O(n log n) overall, which is competitive — at the price of the bookkeeping union-find does not need. It is the right structure only when merges are rare compared with queries.",
         },
         {
           title: "Writing find as a loop that stops one step early",
@@ -1779,10 +1779,10 @@ func main() {
       heading: "A bound and a repair",
       body: [
         "Two standard repairs, each about a line, and they are almost always presented together \u2014 which hides the fact that they work in completely different ways.",
-        "**Union by size** hangs the smaller tree under the larger one. It *prevents* deep trees: on the adversarial merge order, no find ever walked more than one pointer.",
+        "**Union by size** hangs the smaller tree under the larger one. It *prevents* deep trees: on the adversarial merge order, no find ever walked more than one pointer, and in general it holds the depth under log₂ n.",
         "**Path compression** points every node on a find's path straight at the root on the way back. It does not prevent deep trees \u2014 on the same order it let the chain form, and the structure it left behind still had a chain of 1,998 in it. It flattens after the fact, so the first query through a deep chain pays and the rest do not.",
         "All four variants \u2014 neither, either, both \u2014 are correct on all 3,000 random streams. They always were; the fixes are about cost and nothing about the answers changes.",
-        "And on a merge order that is not adversarial, all four columns are identical: 3,997 hops each. The bare version was already flat and neither fix had anything to do. Which is the honest summary \u2014 union by size is a bound, path compression is a repair, and the reason to write both is that only the bound holds whatever order the merges arrive in.",
+        "And on a merge order that is not adversarial, all four columns are identical: 3,997 hops each. The bare version was already flat and neither fix had anything to do. Which is the honest summary \u2014 union by size is a bound, path compression is a repair, and the reason to write both is that together they give the inverse-Ackermann bound; alone, union by size guarantees logarithmic depth and path compression gives a logarithmic amortised bound of its own.",
       ],
       examples: [
         {
@@ -3431,7 +3431,7 @@ func main() {
       id: "the-operation-it-does-not-have",
       heading: "The operation it does not have",
       body: [
-        "Union-find merges, and it has no undo. There is no way to take a pointer back out, because a root has forgotten which of its descendants arrived in which merge \u2014 throwing that away is the whole reason it is fast.",
+        "Union-find merges, and it has no general undo. There is no way to take an arbitrary pointer back out, because a root has forgotten which of its descendants arrived in which merge \u2014 throwing that away is the whole reason it is fast.",
         "So a stream of edge *deletions* with connectivity queries in between looks like the wrong problem for it. Taken in order, it is. Taken backwards, it is exactly the right one: run time in reverse and every deletion becomes an insertion.",
         "That matched a recompute-from-scratch definition on all 3,000 random streams, using the same union-find as before with nothing added. Every edge that is never deleted goes in first, then the operations are walked from last to first, and the answers come out reversed.",
         "The obvious shortcut \u2014 merge everything and ignore the deletions \u2014 matched on 1,092 of 3,000, and all 5,065 of its mistakes were in the same direction: **connected, when the edge that connected them is gone**. It can only ever be wrong that way, because adding edges only merges groups, so what it reports is the truth about a graph that is a superset of the real one.",
@@ -5415,7 +5415,7 @@ func main() {
       pitfalls: [
         {
           title: "Trying to add a delete by resetting a parent pointer",
-          body: "There is nothing to reset it to. The root does not know which descendants arrived with the edge being removed, and the pointers of everything under it were rewritten by path compression. The structure is one-way by construction.",
+          body: "There is nothing to reset it to. The root does not know which descendants arrived with the edge being removed, and the pointers of everything under it were rewritten by path compression. The structure is one-way by construction — unless you give up path compression and keep a stack of the unions made, which buys a rollback of the most recent one and nothing more.",
         },
         {
           title: "Ignoring deletions and hoping",
@@ -5448,7 +5448,7 @@ func main() {
     {
       question: "What do union by size and path compression each do?",
       answer:
-        "Different things, which is why I would not describe them as one optimisation. Union by size hangs the smaller tree under the larger, and it prevents deep trees from forming at all -- on a merge order built to make a chain of 2,000 nodes, no find ever walked more than a single pointer. Path compression does not prevent them; it repairs them, pointing every node on a find's path straight at the root on the way back. On the same adversarial order it let the chain form -- the structure it left behind still had a chain of 1,998 in it -- but almost no query paid for that. Both are correct with or without the other; I measured all four combinations against a recompute-from-scratch definition on 3,000 streams and all four matched every time. The reason to write both is that only the bound holds regardless of the order the merges arrive in.",
+        "Different things, which is why I would not describe them as one optimisation. Union by size hangs the smaller tree under the larger, and it prevents deep trees from forming at all -- on a merge order built to make a chain of 2,000 nodes, no find ever walked more than a single pointer. Path compression does not prevent them; it repairs them, pointing every node on a find's path straight at the root on the way back. On the same adversarial order it let the chain form -- the structure it left behind still had a chain of 1,998 in it -- but almost no query paid for that. Both are correct with or without the other; I measured all four combinations against a recompute-from-scratch definition on 3,000 streams and all four matched every time. The reason to write both is that together they give the inverse-Ackermann bound — each alone is only logarithmic.",
     },
     {
       question: "Can union-find handle edge deletions?",
@@ -5469,7 +5469,7 @@ func main() {
     "Path compression does not prevent them, it flattens them afterwards \u2014 1,998 deep left behind.",
     "All four combinations are correct; the fixes change cost, never answers.",
     "On a friendly merge order all four cost exactly the same, 3,997 hops.",
-    "There is no delete, and there cannot be: the structure discarded what it would need to undo.",
+    "There is no arbitrary delete: the structure discarded what it would need. Union by size without path compression can roll back its most recent union, which is what offline dynamic connectivity runs on.",
     "An offline deletion stream run backwards is an insertion stream \u2014 right on all 3,000 tested.",
     "Ignoring deletions is wrong in one direction only: connected when it should be separate, 5,065 times.",
   ],

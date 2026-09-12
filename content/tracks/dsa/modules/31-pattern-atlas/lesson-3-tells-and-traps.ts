@@ -32,7 +32,7 @@ export const tellsAndTrapsLesson: Lesson = {
       body: [
         "**\"Sorted\"** \u2014 binary search, or two pointers from opposite ends. The property is order, and both techniques are ways of discarding half the remaining candidates using it.",
         "**\"Contiguous\" / \"subarray\" / \"substring\"** \u2014 sliding window or prefix sums. The property is that the answer is described by two indices. Which of the two you want is the subject of the next lesson.",
-        "**\"Subsequence\" (order kept, gaps allowed)** \u2014 usually dynamic programming. The property is that each element has an independent take-or-leave decision, which is `2^n` choices with overlapping subproblems.",
+        "**\"Subsequence\" (order kept, gaps allowed)** \u2014 usually dynamic programming, though \"is s a subsequence of t\" is two pointers and \"smallest subsequence\" is a monotonic stack. The property is that each element has an independent take-or-leave decision, which is `2^n` choices with overlapping subproblems.",
         "**\"Subset\" / \"any order\"** with a small `n` \u2014 bitmask enumeration or bitmask DP. Order not mattering plus `n <= 20` is the pair that names it.",
         "**\"Kth largest\" / \"top k\" / \"median so far\"** \u2014 a heap, or two heaps. The property is that you need one end of an ordering repeatedly and do not need the rest sorted.",
         "**\"Next greater\" / \"nearest smaller\" / \"how long until\"** \u2014 a monotonic stack. The property is that an element resolves an unknown number of earlier pending elements, and once resolved they never come back.",
@@ -49,7 +49,7 @@ export const tellsAndTrapsLesson: Lesson = {
         "**\"Maximum\" or \"minimum\"** tells you almost nothing. It appears in greedy problems, DP problems, binary-search-on-the-answer problems, shortest-path problems and sorting problems. Treating it as a DP signal is one of the most common recognition errors, and lesson five is about the specific version of it.",
         "**\"Optimal\"** is worse, because it sounds more technical. It is the same word as \"maximum\" with a suit on.",
         "**\"Tree\"** is ambiguous in a way that matters. It might mean a rooted binary tree with children, a general tree given as edges, or a graph that happens to be acyclic. The techniques differ, and the statement usually says which within a line or two.",
-        "**\"Efficient\"** is not a constraint. The constraints are the constraint. A statement asking for an efficient solution and permitting `n <= 500` is asking for `O(n^2)`.",
+        "**\"Efficient\"** is not a constraint. The constraints are the constraint. A statement asking for an efficient solution and permitting `n <= 500` is satisfied by `O(n^2)`, and in a compiled language by `O(n^3)`.",
         "**\"Count the ways\"** is a weak DP signal at best. Counting is often combinatorics with a closed form, and often a single pass with a hash map. It becomes a real DP signal when combined with \"and each step depends on the previous choice\".",
         "**\"Array\"** narrows nothing at all, and neither does \"string\" \u2014 a string problem is an array problem with a small alphabet, which is itself sometimes the tell (26 buckets).",
         "**A story about robots, or cars, or a warehouse.** The setting is decoration. Strip it, and the same statement is usually one of a dozen shapes. The habit of restating in your own words exists partly to strip it.",

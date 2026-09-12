@@ -45,7 +45,7 @@ export const whenItStopsWorkingLesson: Lesson = {
         "There is a standard three-step escalation, and recognising it means you can see the next question coming.",
         "**\"Range sum query on a fixed array.\"** Prefix sums. This is LeetCode 303.",
         "**\"Now the array can be updated.\"** Fenwick or segment tree. LeetCode 307, explicitly named *Range Sum Query — Mutable*.",
-        "**\"Now updates apply to a whole range too.\"** Segment tree with lazy propagation, or a difference array on top of a Fenwick tree.",
+        "**\"Now updates apply to a whole range too.\"** Segment tree with lazy propagation, or two Fenwick trees — one over the difference array and one over i times the difference.",
         "The useful move is to say out loud, at step one, that the prefix array assumes a static input — and to name what you would reach for if it were not. That answers step two before it is asked, and it is a cheap way to show you know the boundary of the technique rather than only the technique.",
       ],
       visual: {
@@ -74,7 +74,7 @@ export const whenItStopsWorkingLesson: Lesson = {
     {
       question: "And if updates apply to whole ranges?",
       answer:
-        "A segment tree with lazy propagation, or a difference array maintained inside a Fenwick tree. It is worth saying at the first step that a prefix array assumes a static input and naming what I would use otherwise, because that is the standard escalation from Range Sum Query - Immutable to Range Sum Query - Mutable.",
+        "A segment tree with lazy propagation, or two Fenwick trees over the difference array. It is worth saying at the first step that a prefix array assumes a static input and naming what I would use otherwise, because that is the standard escalation from Range Sum Query - Immutable to Range Sum Query - Mutable.",
     },
   ],
   takeaways: [

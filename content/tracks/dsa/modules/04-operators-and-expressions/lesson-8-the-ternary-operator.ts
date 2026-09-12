@@ -54,7 +54,7 @@ None
         },
         {
           id: "ternary-java",
-          title: "Java, including one thing an `if` cannot do",
+          title: "Java, including a `final` given its value in one line",
           lang: "java",
           code: `public class Main {
     public static void main(String[] args) {
@@ -77,7 +77,7 @@ None
 first: 3
 negative`,
           explanation:
-            "The `final` line is the case where a ternary is not merely tidier but necessary: a `final` variable must be assigned exactly once, at its declaration, so an `if`/`else` that assigns it afterwards will not compile. The last line chains two ternaries for a three-way result, which is the one nesting that stays readable — and the next section is about the point where it stops.",
+            "The `final` line shows a ternary giving a `final` its value in the declaration itself. An `if`/`else` could also do it — Java accepts a blank `final` assigned exactly once on each branch — but only by splitting the declaration from its value. The last line chains two ternaries for a three-way result, which is the one nesting that stays readable — and the next section is about the point where it stops.",
         },
       ],
     },
@@ -141,7 +141,7 @@ print([grade_table(s) for s in scores])`,
     {
       question: "What can a ternary do that an `if` statement cannot?",
       answer:
-        "Produce a value in a position where only an expression is allowed. That includes initialising a `final` variable at its declaration, which an `if` cannot do because the assignment would come later; passing a conditional argument to a call; and appearing inside a string interpolation or a comprehension. The brevity is secondary — the real distinction is expression against statement.",
+        "Produce a value in a position where only an expression is allowed. That includes the initialiser in a declaration, where an `if` cannot appear — a blank `final` assigned in both branches of an `if` also compiles, but takes several lines; passing a conditional argument to a call; and appearing inside a string interpolation or a comprehension. The brevity is secondary — the real distinction is expression against statement.",
     },
     {
       question: "When should you not use a ternary?",
@@ -157,7 +157,7 @@ print([grade_table(s) for s in scores])`,
   takeaways: [
     "A ternary is an expression, so it goes where a value goes and an `if` cannot",
     "Java: `cond ? a : b`. Python: `a if cond else b`, with the condition in the middle",
-    "It is required for assigning a `final` variable at its declaration",
+    "It gives a `final` its value in the declaration itself; a blank `final` assigned in each branch of an `if` also compiles",
     "It is the only way to branch inside an f-string or a comprehension",
     "Two levels is the practical nesting limit; past that use `if`/`else if` or a lookup table",
     "A ternary whose branches have side effects is a misused statement",

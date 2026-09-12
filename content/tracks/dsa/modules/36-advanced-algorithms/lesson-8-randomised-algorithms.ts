@@ -1389,7 +1389,7 @@ func main() {
           body: "The estimate assumes the hashes of distinct items are spread evenly. A hash that maps nearby integers to nearby values clusters the smallest hashes and skews the estimate. Use a well-mixed hash such as the MurmurHash3 finaliser the program uses.",
         },
         {
-          title: "Repeating a two-sided test and taking a majority as if it were one-sided",
+          title: "Treating one answer from a two-sided test as certain",
           body: "Repetition works for both, but only one-sided errors let a single certain answer settle the question. For two-sided error, take a majority vote over independent runs.",
         },
         {

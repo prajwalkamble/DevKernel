@@ -169,7 +169,7 @@ linked list     (rarely used)         LinkedList<E>`,
     "`ArrayDeque` is Java's answer for both stacks and queues; avoid `Stack` and `LinkedList`",
     "A Python list is already a stack — append and pop at the end are O(1)",
     "Python has no sorted map; use `bisect` over a sorted list, or `sortedcontainers`",
-    "Python's `heapq` is min-only and operates on a plain list",
+    "Python's `heapq` operates on a plain list and was min-only until 3.14 added `heappush_max` and friends",
     "Implement a few for understanding; use the built-in hash map always",
   ],
 };

@@ -22,7 +22,7 @@ export const bitsAsASetLesson: Lesson = {
       body: [
         "Bit manipulation feels like trivia right up to the moment you stop thinking of an integer as a *number* and start thinking of it as a **set**.",
         "Bit `i` is either present or absent. So a 32-bit integer is a subset of `{0, 1, ..., 31}`, and the bitwise operators are set operations: `|` is union, `&` is intersection, `^` is symmetric difference, `~` is complement. Every one of them runs in a single CPU instruction on the whole set at once.",
-        "That is the entire reason this topic matters for interviews. When a problem says *n ≤ 20 and you must consider every subset*, it is telling you that a subset fits in an integer and that there are only a million of them. The alternative — a `HashSet` per subset — is a hundred times slower and allocates.",
+        "That is the entire reason this topic matters for interviews. When a problem says *n ≤ 20 and you must consider every subset*, it is telling you that a subset fits in an integer and that there are only a million of them. The alternative — a `HashSet` per subset — is far slower and allocates.",
       ],
     },
     {
@@ -672,8 +672,8 @@ bitCount       3
           body: "In C and C++, `flags & 2 != 0` parses as `flags & (2 != 0)`, which is `flags & 1` — a different question that silently returns a plausible answer. Java parses it the same way and then refuses to compile `int & boolean`. Python ranks `&` above the comparisons, so there it means `(flags & 2) != 0`. Parenthesise every mask test anyway: `(flags & 2) != 0` is correct in all four.",
         },
         {
-          title: "`1 << 40` is zero in a 32-bit int",
-          body: "In Java and C, `1` is an `int`, so shifting by 40 wraps the shift count modulo 32 and gives you `1 << 8`. Write `1L << 40` when the mask needs more than 32 bits. Python has no such limit, which is exactly why a solution that works there can fail when translated.",
+          title: "`1 << 40` is not 2⁴⁰ in a 32-bit int",
+          body: "In Java, `1` is an `int` and the shift count is taken modulo 32, so `1 << 40` is `1 << 8`, which is 256. In C and C++ shifting an `int` by 40 is undefined behaviour. Write `1L << 40` when the mask needs more than 32 bits. Python has no such limit, which is exactly why a solution that works there can fail when translated.",
         },
       ],
     },

@@ -84,7 +84,7 @@ floorDiv(-7, 2) = -4`,
       pitfalls: [
         {
           title: "Dividing by zero",
-          body: "Integer division by zero throws — `ArithmeticException` in Java, `ZeroDivisionError` in Python. Floating-point division by zero does not: in both languages it gives infinity or NaN, silently. So `1 / 0` crashes and `1.0 / 0` gives `inf`, which then propagates through every subsequent calculation without complaint.",
+          body: "Integer division by zero throws — `ArithmeticException` in Java, `ZeroDivisionError` in Python. Floating-point division by zero differs between them: Java gives `Infinity` or `NaN`, silently, and that value then propagates through every later calculation without complaint; Python raises `ZeroDivisionError` for `1.0 / 0` as well.",
         },
       ],
     },

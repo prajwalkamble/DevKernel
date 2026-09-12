@@ -40,7 +40,7 @@ print(Counter("mississippi").most_common(2))`,
 Counter({'i': 4, 's': 4, 'p': 2, 'm': 1})
 [('i', 4), ('s', 4)]`,
           explanation:
-            "`get(key, 0)` is the portable idiom and worth knowing because it exists everywhere: Java's `getOrDefault`, Go's zero-value read, C++'s `operator[]` default-construction. `Counter` is Python's batteries-included version, and `most_common` is a sort under the hood — O(n log n), which matters when the problem says top-k and n is large. Note that the plain dict preserves insertion order (m, i, s, p) while `Counter` prints in descending count order.",
+            "`get(key, 0)` is the portable idiom and worth knowing because it exists everywhere: Java's `getOrDefault`, Go's zero-value read, C++'s `operator[]` default-construction. `Counter` is Python's batteries-included version, and `most_common()` with no argument sorts every key — O(d log d) for d distinct values; given `k`, CPython uses `heapq.nlargest` instead, which is O(d log k). Note that the plain dict preserves insertion order (m, i, s, p) while `Counter` prints in descending count order.",
           alternates: [
             {
               lang: "javascript",
@@ -315,8 +315,8 @@ func main() {
           body: "Sorting both strings and comparing is O(n log n) and perfectly correct — it is the answer people reach for first. The counting version is O(n). Mention both, then implement the second; the interviewer is usually waiting for exactly that improvement.",
         },
         {
-          title: "Using most_common for top-k without noticing the sort",
-          body: "`most_common(k)` sorts all distinct keys: O(d log d) for d distinct values. When d is large and k is small, a heap of size k is O(d log k), and bucket sort by count is O(d). For Top K Frequent Elements this is precisely the follow-up question.",
+          title: "Calling most_common() and slicing when only k are needed",
+          body: "`most_common()` with no argument sorts all d distinct keys, O(d log d), and slicing its result keeps that cost. `most_common(k)` does not: CPython hands it to `heapq.nlargest`, which is O(d log k). Bucket sort by count is O(d), and for Top K Frequent Elements that is precisely the follow-up question.",
         },
         {
           title: "Counting when order actually matters",
@@ -348,7 +348,7 @@ func main() {
     "A fixed array beats a map when keys are a small known range",
     "A tally is a canonical form, which makes it a grouping key",
     "Decrement with the second string instead of building two tallies",
-    "most_common sorts; a heap or bucket sort is better for top-k",
+    "most_common() sorts everything; most_common(k) uses a heap; bucket sort by count is O(d)",
   ],
   status: "available",
 };

@@ -141,7 +141,7 @@ if   : 0`,
       heading: "Conditions you can read",
       body: [
         "Two habits, both cheap.",
-        "**Name a compound condition.** `boolean inBounds = r >= 0 && r < rows && c >= 0 && c < cols;` then `if (inBounds)`. The name is documentation that cannot go stale, and the condition becomes reusable in the same function.",
+        "**Name a compound condition.** `boolean inBounds = r >= 0 && r < rows && c >= 0 && c < cols;` then `if (inBounds)`. The name documents the condition where it is used, and the condition becomes reusable in the same function.",
         "**Prefer positive conditions.** `if (isValid)` reads better than `if (!isInvalid)`, and double negatives — `if (!notFound)` — are where reasoning errors live.",
       ],
     },
