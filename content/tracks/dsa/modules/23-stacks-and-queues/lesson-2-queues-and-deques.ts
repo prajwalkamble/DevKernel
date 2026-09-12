@@ -20,7 +20,7 @@ export const queuesAndDequesLesson: Lesson = {
       heading: "First in, first out — and the naive trap",
       body: [
         "A queue adds at the back and removes from the front. The obvious implementation — an array with `append` and `remove(0)` — is a trap: removing the first element shifts every other element down, making dequeue **O(n)** and a loop of dequeues O(n²).",
-        "Python's `list.pop(0)` and Java's `ArrayList.remove(0)` both do exactly this. The fix is `collections.deque` in Python and `ArrayDeque` in Java. `ArrayDeque` is a ring buffer; CPython's `deque` is a doubly linked list of fixed-size blocks, which reaches the same O(1) ends by another route — and is why indexing its middle is O(n): 405 ns at an end against 132,197 ns in the middle, measured.",
+        "Python's `list.pop(0)` and Java's `ArrayList.remove(0)` both do exactly this. The fix is `collections.deque` in Python and `ArrayDeque` in Java. `ArrayDeque` is a ring buffer; CPython's `deque` is a doubly linked list of fixed-size blocks, which reaches the same O(1) ends by another route — and is why indexing its middle is O(n): on a deque of a million, about 160 ns to index near an end against about 180,000 ns in the middle.",
         "This is the most common accidental quadratic in BFS code, and it is invisible: the algorithm is right, the complexity analysis on the whiteboard is right, and the submission times out.",
       ],
       visual: {

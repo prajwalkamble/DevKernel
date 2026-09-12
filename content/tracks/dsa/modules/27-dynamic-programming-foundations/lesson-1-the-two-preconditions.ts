@@ -1497,7 +1497,7 @@ func main() {
         },
         {
           title: "Negative weights break Dijkstra's order, not optimal substructure",
-          body: "With negative edges but no negative cycle, optimal substructure still holds: every prefix of a shortest path is itself shortest, which is what Bellman-Ford relies on. Over 1,500 random graphs with negative edges there was not one violation of it, while Dijkstra was wrong on 478. What a negative edge withdraws is Dijkstra's *order* \u2014 it finalises a vertex assuming nothing later can improve it \u2014 and the fix, Bellman-Ford, is the version that stops assuming and relaxes every edge repeatedly.",
+          body: "With negative edges but no negative cycle, optimal substructure still holds: every prefix of a shortest path is itself shortest, which is what Bellman-Ford relies on. Over 599 random graphs that had a negative edge and no negative cycle there was not one violation of it — while Dijkstra, which settles each vertex once, disagreed with Bellman-Ford on 21 of them. What a negative edge withdraws is Dijkstra's *order* \u2014 it finalises a vertex assuming nothing later can improve it \u2014 and the fix, Bellman-Ford, is the version that stops assuming and relaxes every edge repeatedly.",
         },
       ],
     },

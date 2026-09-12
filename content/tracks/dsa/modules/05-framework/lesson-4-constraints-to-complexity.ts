@@ -244,14 +244,14 @@ Two more that are not about n at all:
     {
       question: "Does the language you write in change what complexity you need?",
       answer:
-        "It does not change the complexity, but it changes the constant enough to change the outcome. The same nested loop I measured ran about 160 ms in Java and about 4.7 seconds in Python at n = 10,000 — roughly 30×. So in Python I budget around 10⁷ interpreted operations per second rather than 10⁸, and I push work into built-ins like `Counter`, `sorted` and slicing, which run in C. Same algorithm, and the difference between passing and timing out.",
+        "It does not change the complexity, but it changes the constant enough to change the outcome. The same nested loop, on the machine this course was written on, ran in tens of milliseconds in Java and in seconds in Python at n = 10,000 — one to two orders of magnitude, with the exact ratio moving according to what the loop body does. So in Python I budget around 10⁷ interpreted operations per second rather than 10⁸, and I push work into built-ins like `Counter`, `sorted` and slicing, which run in C. Same algorithm, and the difference between passing and timing out.",
     },
   ],
   takeaways: [
     "The constraint block is the setter telling you which solution is intended; read it backwards from n to a complexity class",
     "Plan with about 10⁸ simple operations per second — tight numeric loops beat that, anything touching a hash map does not",
     "n ≤ 20 is almost a signature for subsets and bitmasks; n ≤ 10⁹ means you cannot look at the input at all",
-    "The same nested loop measured about 160 ms in Java and about 4,700 ms in Python at n = 10,000 — budget about 10⁷/second in Python and lean on built-ins",
+    "The same nested loop runs one to two orders of magnitude slower in Python than in Java — budget about 10⁷/second in Python and lean on built-ins",
     "A space bound is a ban on a technique, placed there to force a better one",
     "A stated complexity is the least ambiguous hint in the statement; very few things produce a log",
     "Read the bound on the values too — largest value times largest count decides whether you need 64 bits",

@@ -23,7 +23,7 @@ export const stringOperationsLesson: Lesson = {
         "**Length** — `len(s)` / `s.length()`. O(1) in both.",
         "**Character at** — `s[i]` / `s.charAt(i)`. O(1).",
         "**Substring** — `s[a:b]` / `s.substring(a, b)`. O(b − a), and it allocates.",
-        "**Search** — `s.find(t)` and `s.index(t)` / `s.indexOf(t)`. Java's `indexOf` is a naive scan, O(n × m) in the worst case — 8.5 seconds on a text built to trigger it; CPython's `find` switches to a linear-time two-way algorithm for longer patterns and stayed at about 7 ms on the same input.",
+        "**Search** — `s.find(t)` and `s.index(t)` / `s.indexOf(t)`. Java's `indexOf` is a naive scan, O(n × m) in the worst case: searching a text of a million `a`s for a thousand `a`s followed by a `b` took about 1.3 seconds on the machine this was written on, where CPython's `find` — which switches to a linear-time two-way algorithm for longer patterns — took about 8 ms on the same input.",
         "**Contains** — `t in s` / `s.contains(t)`.",
         "**Split** — `s.split(sep)` / `s.split(regex)`. Note Java's takes a *regular expression*, which is a real difference.",
         "**Join** — `sep.join(parts)` / `String.join(sep, parts)`.",

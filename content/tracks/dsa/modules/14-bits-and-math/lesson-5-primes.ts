@@ -708,7 +708,7 @@ func main() {
       heading: "Where O(n log log n) comes from",
       body: [
         "The inner loop for prime `p` runs about `n/p` times. Summing over all primes below n gives `n · (1/2 + 1/3 + 1/5 + 1/7 + ...)`, and the sum of reciprocals of primes up to n grows like `log log n` — a result of Mertens'.",
-        "`log log n` is effectively a small constant: for n = 10⁸ it is about 3. So a sieve is close to linear in practice, and sieving ten million numbers took about 176 ms in Java — but about 5.7 seconds as a plain Python loop, or about 110 ms with slice assignment doing the crossing off. Treat it as \"basically O(n)\" when you are estimating whether a solution fits.",
+        "`log log n` is effectively a small constant: for n = 10⁸ it is about 3. So a sieve is close to linear in practice, and sieving ten million numbers took about 140 ms in Java on the machine this was written on — but about seven seconds as a plain Python loop, or about 250 ms with slice assignment doing the crossing off. Treat it as \"basically O(n)\" when you are estimating whether a solution fits.",
       ],
     },
     {

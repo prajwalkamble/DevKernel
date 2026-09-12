@@ -350,7 +350,7 @@ Integer[] bytes   : 80000000 of pointers + 160000000 of objects
 boxed slower      : true
 by more than 2x   : true`,
           explanation:
-            "Six times the memory by this arithmetic for the same ten million numbers, and about **4.7×** the time on the verifying machine. The memory figures are arithmetic rather than a measurement, and they assume eight-byte references plus a sixteen-byte `Integer` for each one. A default 64-bit JVM compresses references to four bytes, which makes it 20 bytes against 4 — about five times — and measuring the heap agreed: 4.1 against 20.1 bytes per element. Neither array's traversal is anything other than O(n) — this is entirely constant factor, and constant factors of five decide whether a solution finishes inside a time limit.",
+            "Six times the memory by this arithmetic for the same ten million numbers, and about **4.7×** the time on the verifying machine. The memory figures are arithmetic rather than a measurement, and they assume eight-byte references plus a sixteen-byte `Integer` for each one. A default 64-bit JVM compresses references to four bytes, which makes it 20 bytes against 4 — about five times — and measuring the heap agreed: 4.1 against 20.4 bytes per element. Neither array's traversal is anything other than O(n) — this is entirely constant factor, and constant factors of five decide whether a solution finishes inside a time limit.",
         },
       ],
       pitfalls: [
