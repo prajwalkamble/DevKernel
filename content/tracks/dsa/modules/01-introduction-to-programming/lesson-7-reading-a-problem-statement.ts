@@ -78,7 +78,7 @@ subsequences [[], [5], [-2], [3], [5, -2], [5, 3], [-2, 3], [5, -2, 3]]`,
       heading: "The constraints are the problem-setter talking to you",
       body: [
         "The constraints are not administrative detail. They are the setter telling you what solution they intend, because they chose the limits to admit one approach and exclude another. Reading them backwards to a target complexity is the single highest-value habit in this whole track, and there is a full lesson on it in the Framework module.",
-        "For now, the crude version is enough. Assume roughly 10⁸ simple operations per second in a compiled language such as Java or C++; plain Python loops manage about 10⁷.",
+        "For now, the crude version is enough. Assume roughly 10⁸ simple operations per second in a compiled language such as Java or C++; plain Python loops manage about 10⁷ — a factor of ten under that budget, and about thirty under the same loop written in Java.",
         "**n ≤ 20** — exponential is fine. They expect you to try every subset.",
         "**n ≤ 5,000** — O(n²) is fine: 2.5 × 10⁷ steps, comfortable in Java and a few seconds in a plain Python loop. Nested loops are expected.",
         "**n ≤ 10⁵ or 10⁶** — you need O(n) or O(n log n). Nested loops will time out.",

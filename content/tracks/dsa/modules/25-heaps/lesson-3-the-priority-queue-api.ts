@@ -68,7 +68,7 @@ as a max-heap — negate on the way in, negate on the way out:
 
 the heap never knew which one it was doing. Only the key changed.`,
           explanation:
-            "Python's standard library had no max-heap until 3.14 added `heappush_max`, `heappop_max` and `heapify_max`, and before that there did not need to be one. The heap compares whatever you hand it, so negating the key on the way in and again on the way out turns the same code into a max-heap. Java takes the other route \u2014 `PriorityQueue` accepts a `Comparator`, and `Comparator.reverseOrder()` does the same job without touching the data. Either way the structure is unchanged; only the ordering it is asked about moves.",
+            "Python's standard library had no max-heap until 3.14 added `heappush_max`, `heappop_max` and `heapify_max` — and even before them there did not need to be one. The heap compares whatever you hand it, so negating the key on the way in and again on the way out turns the same code into a max-heap. Java takes the other route \u2014 `PriorityQueue` accepts a `Comparator`, and `Comparator.reverseOrder()` does the same job without touching the data. Either way the structure is unchanged; only the ordering it is asked about moves.",
           alternates: [
             {
               lang: "javascript",

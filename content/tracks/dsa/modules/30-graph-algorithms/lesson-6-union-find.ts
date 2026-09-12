@@ -3434,7 +3434,7 @@ func main() {
         "Union-find merges, and it has no general undo. There is no way to take an arbitrary pointer back out, because a root has forgotten which of its descendants arrived in which merge \u2014 throwing that away is the whole reason it is fast.",
         "So a stream of edge *deletions* with connectivity queries in between looks like the wrong problem for it. Taken in order, it is. Taken backwards, it is exactly the right one: run time in reverse and every deletion becomes an insertion.",
         "That matched a recompute-from-scratch definition on all 3,000 random streams, using the same union-find as before with nothing added. Every edge that is never deleted goes in first, then the operations are walked from last to first, and the answers come out reversed.",
-        "The obvious shortcut \u2014 merge everything and ignore the deletions \u2014 matched on 1,092 of 3,000, and all 5,065 of its mistakes were in the same direction: **connected, when the edge that connected them is gone**. It can only ever be wrong that way, because adding edges only merges groups, so what it reports is the truth about a graph that is a superset of the real one.",
+        "The obvious shortcut \u2014 merge everything and ignore the deletions \u2014 matched on 727 of 3,000, and all 5,065 of its mistakes were in the same direction: **connected, when the edge that connected them is gone**. It can only ever be wrong that way, because adding edges only merges groups, so what it reports is the truth about a graph that is a superset of the real one.",
         "The requirement, and the trade, is knowing the whole stream in advance. That is what \"offline\" means: the algorithm cannot answer a query before it has been told what comes after it. When queries genuinely arrive live and edges genuinely disappear, union-find is the wrong structure and the answer is a dynamic connectivity structure, which is a different subject.",
       ],
       examples: [
@@ -5419,7 +5419,7 @@ func main() {
         },
         {
           title: "Ignoring deletions and hoping",
-          body: "It matched the truth on 1,092 of 3,000 streams, and every one of its 5,065 errors was the same kind: connected when the connecting edge is gone. Never the reverse -- which makes it exactly the sort of error that survives a spot check.",
+          body: "It matched the truth on 727 of 3,000 streams, and every one of its 5,065 errors was the same kind: connected when the connecting edge is gone. Never the reverse -- which makes it exactly the sort of error that survives a spot check.",
         },
         {
           title: "Reaching for the reversal trick when queries arrive live",
@@ -5453,7 +5453,7 @@ func main() {
     {
       question: "Can union-find handle edge deletions?",
       answer:
-        "Not directly. It has no undo, because a root has forgotten which descendants arrived in which merge -- discarding that is why it is fast. But if the whole operation stream is known in advance, run it backwards: in reverse, every deletion is an insertion. Union the edges that are never deleted, then walk the operations from last to first, answering queries as you go, and reverse the answers at the end. That matched a recompute-from-scratch definition on all 3,000 random streams I tested. The tempting shortcut of just ignoring deletions matched on 1,092 of them, and all 5,065 of its mistakes were the same kind -- reporting connected when the connecting edge is gone -- because adding edges only merges groups. If queries genuinely arrive live, union-find is the wrong structure and you want a dynamic connectivity structure instead.",
+        "Not directly. It has no undo, because a root has forgotten which descendants arrived in which merge -- discarding that is why it is fast. But if the whole operation stream is known in advance, run it backwards: in reverse, every deletion is an insertion. Union the edges that are never deleted, then walk the operations from last to first, answering queries as you go, and reverse the answers at the end. That matched a recompute-from-scratch definition on all 3,000 random streams I tested. The tempting shortcut of just ignoring deletions matched on 727 of them, and all 5,065 of its mistakes were the same kind -- reporting connected when the connecting edge is gone -- because adding edges only merges groups. If queries genuinely arrive live, union-find is the wrong structure and you want a dynamic connectivity structure instead.",
     },
     {
       question: "What is union-find actually used for?",

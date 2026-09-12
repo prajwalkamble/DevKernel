@@ -38,7 +38,7 @@ export const divideAndConquerLesson: Lesson = {
         "For a recurrence `T(n) = a·T(n/b) + f(n)` — `a` subproblems, each of size `n/b`, plus `f(n)` work to split and combine — the cost falls into three cases depending on whether the leaves or the root dominate.",
         "**Work dominated by the leaves.** Two halves, constant combine: `T(n) = 2T(n/2) + O(1)` gives **O(n)**. Binary tree traversals are here.",
         "**Work evenly spread.** Two halves, linear combine: `T(n) = 2T(n/2) + O(n)` gives **O(n log n)**. Merge sort, and quicksort's average case. There are `log n` levels and each does O(n) total work — which is the picture worth carrying rather than the formula.",
-        "**Work evenly spread, one branch.** One half, constant work: `T(n) = T(n/2) + O(1)` gives **O(log n)** — log n levels, each doing O(1). Binary search. Root-dominated is a different case: `T(n) = T(n/2) + O(n)` sums to **O(n)**, because the top level's work outweighs everything below it.",
+        "**A single branch.** One half, constant work: `T(n) = T(n/2) + O(1)` gives **O(log n)** — log n levels, each doing O(1). Binary search. Root-dominated is a different case: `T(n) = T(n/2) + O(n)` sums to **O(n)**, because the top level's work outweighs everything below it.",
         "You can nearly always get the answer by drawing the tree and asking how much work each *level* does, then multiplying by the number of levels. That is the master theorem's content without its notation.",
       ],
     },

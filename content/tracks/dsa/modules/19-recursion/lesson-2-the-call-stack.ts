@@ -140,7 +140,7 @@ function still consumes one frame per call.`,
     {
       question: "Does writing it tail-recursive avoid the stack overflow?",
       answer:
-        "Not in Java or Python, which do not eliminate tail calls, Go does not do it either, and C and C++ compilers often do at `-O2` with no guarantee from the language. Only languages that promise it can be relied on. Raising Python's recursion limit is a fix only with care: on CPython 3.13 a pure-Python recursion a million deep ran to completion, but the documentation still warns that a too-high limit can crash the interpreter. If depth is the problem, convert to iteration.",
+        "Not in Java or Python, which do not eliminate tail calls; Go does not either, and C and C++ compilers often do at `-O2`, with no guarantee from the language. Only languages that promise it can be relied on. Raising Python's recursion limit is a fix only with care: on CPython 3.13 a pure-Python recursion a million deep ran to completion, but the documentation still warns that a too-high limit can crash the interpreter. If depth is the problem, convert to iteration.",
     },
   ],
   takeaways: [

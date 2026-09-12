@@ -165,7 +165,7 @@ largest n with n! in a long : 20
       id: "math-pow",
       heading: "Why not `Math.pow`",
       body: [
-        "Java's `Math.pow` takes two doubles and returns a double. Using it for integer work introduces floating-point error into an exact computation, and the failures are subtle rather than loud.",
+        "Java's `Math.pow` takes two doubles and returns a double. Using it for integer work puts a floating-point step in the middle of an exact computation, and the failures are subtle rather than loud.",
         "`Math.pow(10, 2)` is exactly `100.0`: the Javadoc promises an exact result when both arguments are integers and the answer is representable as a double. The trouble is everything outside that promise.",
         "Past 2⁵³ a double stops representing consecutive integers, so `(long) Math.pow(3, 35)` returns 50031545098999704 where 3³⁵ is 50031545098999707 — a number that looks right and is not. (`Math.pow(2, 60)` happens to be exact, because powers of two are representable.)",
         "**Use integer multiplication.** A `long` loop, exponentiation by squaring, or `Math.multiplyExact` if you want overflow to throw. In Python, `pow` and `**` on integers are exact and unbounded, so the issue only arises if you introduce a float yourself.",
