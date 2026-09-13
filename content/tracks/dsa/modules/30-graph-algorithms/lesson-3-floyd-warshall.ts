@@ -5604,7 +5604,7 @@ func main() {
     {
       question: "Can the same triple loop solve anything other than shortest paths?",
       answer:
-        "Yes, and it is worth knowing because it is one line of change. The algorithm only uses two operations: combine the route i->k with k->j, and keep the better of that and what i->j held. With plus and min it is shortest paths. With and and or it is the transitive closure -- reachability between every pair. With min and max it is the widest path, the route whose narrowest edge is as wide as possible, which is the most a single route can carry. I checked both of the new ones against exhaustive walks over every simple path on 3,000 random graphs and they matched on all of them. The widest-path version is the one I would actually reach for; it answers a question that looks like it should need flow machinery.",
+        "Yes, and it is worth knowing because it is one line of change. The algorithm only uses two operations: combine the route i->k with k->j, and keep the better of that and what i->j held. With `+` and `min` it is shortest paths. With `and` and `or` it is the transitive closure -- reachability between every pair. With `min` and `max` it is the widest path, the route whose narrowest edge is as wide as possible, which is the most a single route can carry. I checked both of the new ones against exhaustive walks over every simple path on 3,000 random graphs and they matched on all of them. The widest-path version is the one I would actually reach for; it answers a question that looks like it should need flow machinery.",
     },
   ],
   takeaways: [

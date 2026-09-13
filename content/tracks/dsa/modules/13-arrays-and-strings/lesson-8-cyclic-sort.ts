@@ -917,7 +917,7 @@ func main() {
       body: [
         "For the single-missing-number case there are two shorter answers, and it is worth knowing all three along with their trade-offs.",
         "**The sum formula.** The values 0 to n sum to n(n+1)/2, so subtract the actual sum and the difference is the missing value. Two lines. It only works when exactly one value is missing and nothing repeats, and it is vulnerable to overflow.",
-        "**XOR.** XOR every index and every value together, and every present value cancels with its index — leaving the missing one, since `x ^ x == 0`. Also two lines, no formula, and **no overflow is possible**, because XOR is bitwise and never produces a value wider than its inputs.",
+        "**XOR.** XOR every index and every value together, and every present value cancels with its index — leaving the missing one, since `(x ^ x) == 0`. Also two lines, no formula, and **no overflow is possible**, because XOR is bitwise and never produces a value wider than its inputs.",
         "**Cyclic sort.** Longer, and the only one that generalises to duplicates, multiple missing values, and out-of-range input.",
         "The overflow point deserves an actual demonstration rather than a warning, because the failure is not where people expect it to be.",
       ],

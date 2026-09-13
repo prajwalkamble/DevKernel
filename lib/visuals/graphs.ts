@@ -369,7 +369,7 @@ export function unionFind(): Visualisation {
   return {
     frames: rec.frames,
     summary:
-      "Union-Find keeps disjoint sets as a forest, where each node points at a parent and the root names the set. `union` links two roots; `find` walks to the root and — with path compression — flattens the path on the way back. With union by rank as well, both operations are effectively constant time. It is what makes Kruskal's algorithm and dynamic connectivity practical.",
+      "Union-Find keeps disjoint sets as a forest, where each node points at a parent and the root names the set. `union` links two roots; `find` walks to the root and — with path compression — flattens the path on the way back. With union by rank as well, both operations are effectively constant time. It is what makes Kruskal's algorithm practical, and connectivity queries cheap while groups only ever merge.",
   };
 }
 

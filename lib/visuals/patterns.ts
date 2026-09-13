@@ -469,7 +469,7 @@ export function rotateMatrix(n = 4): Visualisation {
         `Now ${cells[r][c]} and ${cells[c][r]} have traded places.`);
     }
   }
-  emit(cells, {}, `Transposed — the grid is mirrored along its main diagonal. Every row is now the column it needs to be, but backwards.`);
+  emit(cells, {}, `Transposed — the grid is mirrored along its main diagonal. Every row now holds the values its rotated row needs, in reverse order.`);
 
   for (let r = 0; r < n; r++) {
     let lo = 0;

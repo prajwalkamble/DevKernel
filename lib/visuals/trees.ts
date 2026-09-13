@@ -186,7 +186,7 @@ export function avlRotation(): Visualisation {
     { id: "10", label: "10", depth: 1, x: 0, parent: "20", role: "sorted" },
     { id: "20", label: "20", depth: 0, x: 1, role: "swap" },
     { id: "30", label: "30", depth: 1, x: 2, parent: "20", role: "sorted" },
-  ], "Rotate left around 10: 20 becomes the root, 10 becomes its left child. Height 1 again, and the in-order order is unchanged.");
+  ], "Rotate left around 10: 20 becomes the root, 10 becomes its left child. Both of 20's subtrees now have height 1, and the in-order order is unchanged.");
   emit([
     { id: "10", label: "10", depth: 1, x: 0, parent: "20" },
     { id: "20", label: "20", depth: 0, x: 1 },
@@ -195,19 +195,19 @@ export function avlRotation(): Visualisation {
   ], "Insert 40. Balanced.");
   emit([
     { id: "10", label: "10", depth: 1, x: 0, parent: "20" },
-    { id: "20", label: "20", depth: 0, x: 1, role: "swap" },
-    { id: "30", label: "30", depth: 1, x: 2, parent: "20", role: "compare" },
+    { id: "20", label: "20", depth: 0, x: 1 },
+    { id: "30", label: "30", depth: 1, x: 2, parent: "20", role: "swap" },
     { id: "40", label: "40", depth: 2, x: 3, parent: "30" },
     { id: "50", label: "50", depth: 3, x: 4, parent: "40", role: "compare" },
-  ], "Insert 50. Now 20 is unbalanced: right height 3, left height 1.");
+  ], "Insert 50. The lowest unbalanced node is 30: its right subtree has height 2 and its left has height 0. 20 is out of balance too, but rebalancing the lowest node repairs every ancestor above it.");
   rec.bump("rotations");
   emit([
-    { id: "10", label: "10", depth: 2, x: 0, parent: "20" },
-    { id: "20", label: "20", depth: 1, x: 1, parent: "30", role: "sorted" },
-    { id: "30", label: "30", depth: 0, x: 2, role: "swap" },
-    { id: "40", label: "40", depth: 1, x: 3, parent: "30", role: "sorted" },
-    { id: "50", label: "50", depth: 2, x: 4, parent: "40" },
-  ], "Rotate left around 20. Five nodes at height 2 — a plain BST would have had all five in a line at height 4.");
+    { id: "10", label: "10", depth: 1, x: 0, parent: "20" },
+    { id: "20", label: "20", depth: 0, x: 1 },
+    { id: "30", label: "30", depth: 2, x: 2, parent: "40", role: "sorted" },
+    { id: "40", label: "40", depth: 1, x: 3, parent: "20", role: "swap" },
+    { id: "50", label: "50", depth: 2, x: 4, parent: "40", role: "sorted" },
+  ], "Rotate left around 30: 40 takes its place as 20's right child, with 30 on its left and 50 on its right. Five nodes at height 3 — a plain BST would have had all five in a line at height 5.");
   return {
     frames: rec.frames,
     summary:

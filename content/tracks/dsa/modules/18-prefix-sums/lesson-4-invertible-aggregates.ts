@@ -108,7 +108,7 @@ prefix max of [3, 9, 1, 7]: [3, 9, 9, 9]
   max of b[1:3] is 9 but there is no arithmetic on
   prefix maxima that recovers it — 9 is in both prefixes.`,
           explanation:
-            "**Prefix XOR** substitutes directly into everything from lesson 2. The complement lookup becomes `run ^ k` instead of `run - k`, because XOR is its own inverse — `x ^ k ^ k == x`. That one substitution turns \"count subarrays summing to k\" into \"count subarrays XOR-ing to k\", which is a common problem in its own right.\n\nThe prefix-maximum output shows the failure concretely. `9` appears in the prefix maximum at every position from index 1 onwards, so both `pm[1]` and `pm[3]` are 9, and no operation on those two numbers recovers the maximum of the range between them.",
+            "**Prefix XOR** substitutes directly into everything from lesson 2. The complement lookup becomes `run ^ k` instead of `run - k`, because XOR is its own inverse — `(x ^ k ^ k) == x`. That one substitution turns \"count subarrays summing to k\" into \"count subarrays XOR-ing to k\", which is a common problem in its own right.\n\nThe prefix-maximum output shows the failure concretely. `9` appears in the prefix maximum at every position from index 1 onwards, so both `pm[1]` and `pm[3]` are 9, and no operation on those two numbers recovers the maximum of the range between them.",
           alternates: [
             {
               lang: "javascript",
