@@ -148,7 +148,7 @@ for point in [(0, 0), (3, 0), (0, 4), (2, 5)]:
       pitfalls: [
         {
           title: "A bare name in a Python `case` captures, it does not compare",
-          body: "`case ORIGIN:` where `ORIGIN` is a constant you defined does *not* compare against it — it matches anything and rebinds the name. To compare against a constant you must qualify it, as `case Point.ORIGIN:` or `case (0, 0):`. This is the single most confusing rule in `match` and it fails silently by matching everything.",
+          body: "`case ORIGIN:` where `ORIGIN` is a constant you defined does *not* compare against it — it matches anything and rebinds the name. To compare against a constant you must qualify it, as `case Point.ORIGIN:` or `case (0, 0):`. This is the single most confusing rule in `match`: followed by another case it is a `SyntaxError` — `name capture 'ORIGIN' makes remaining patterns unreachable` — and as the last case it silently matches everything.",
         },
       ],
     },
@@ -157,7 +157,7 @@ for point in [(0, 0), (3, 0), (0, 4), (2, 5)]:
       heading: "switch, chain, or map?",
       body: [
         "Three tools for multi-way branching, and the choice is usually clear once stated.",
-        "**An if/elif chain** when the conditions are *ranges or expressions* — `score >= 90`. A switch cannot express those.",
+        "**An if/elif chain** when the conditions are *ranges or expressions* — `score >= 90`. A classic switch cannot express those; Python's `match` can, with a guard — `case _ if score >= 90:` — though a chain reads better.",
         "**A switch or match** when you are comparing one value against a fixed set of constants, and each case does something different.",
         "**A map** when each case just *produces a value*. `Map<String, Integer> priority = ...; priority.get(key)` beats a twelve-case switch that only returns numbers, because adding a case becomes adding data rather than editing control flow.",
         "That last one is worth taking seriously. A long switch that returns a constant per case is a lookup table written as code, and converting it to an actual table usually shortens the function and makes it extensible.",

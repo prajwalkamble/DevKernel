@@ -23,7 +23,7 @@ export const arithmeticTrapsLesson: Lesson = {
         "You met overflow in the previous module: a Java `int` holds up to 2,147,483,647, and exceeding it wraps to a negative number silently. Knowing that is not the same as spotting it, so here are the three places it actually occurs in problem solving. Almost every real instance is one of these.",
         "**Sums over an array.** n up to 10⁵ with values up to 10⁹ gives a total up to 10¹⁴. Each element fits in an `int` comfortably; the sum does not, by five orders of magnitude.",
         "**Products of two values.** Two numbers around 10⁵ multiply to 10¹⁰. This is the one that catches people computing areas, or a count of pairs as `n * (n - 1) / 2`.",
-        "**Midpoints in binary search.** `(lo + hi) / 2` overflows when both are near the maximum, which is exactly the case a stress test will find.",
+        "**Midpoints in binary search.** `(lo + hi) / 2` overflows once `lo + hi` passes 2³¹ — an array of over a billion elements — which a small random stress test will never reach; writing `lo + (hi - lo) / 2` means the question never arises.",
         "The defence is a habit rather than vigilance: **make the accumulator a `long` by default**. It costs nothing and removes the need to estimate the maximum every time.",
       ],
       examples: [
@@ -101,7 +101,7 @@ print(int(-7 / 2))`,
 -4
 -3`,
           explanation:
-            "`//` floors, giving −4. If you want Java's truncate-toward-zero, `int(-7 / 2)` gives −3 — though it goes through a float on the way, which is unsafe for very large integers. The clean version is `-(-7 // 2)` for exact truncation of a negative, or simply deciding which rounding you actually want.",
+            "`//` floors, giving −4. If you want Java's truncate-toward-zero, `int(-7 / 2)` gives −3 — though it goes through a float on the way, which is unsafe for very large integers. The exact version negates, floor-divides the magnitude and negates back — `-(7 // 2)` is −3, in general `-(-a // b)` for a negative `a` — or simply decide which rounding you actually want.",
         },
       ],
     },

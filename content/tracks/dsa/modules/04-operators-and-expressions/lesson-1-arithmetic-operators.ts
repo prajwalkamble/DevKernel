@@ -52,7 +52,6 @@ print(7 // 2.0, type(7 // 2.0).__name__)`,
       id: "division-recap",
       heading: "Division, in one table",
       body: [
-        "Module 2 covered this as an arithmetic trap. Here it is as reference, because it is the operator you will get wrong most often and the two languages genuinely disagree.",
         "**Java `/` on two integers** truncates toward zero: `7 / 2` is 3, `-7 / 2` is −3.",
         "**Java `/` with any double** gives a double: `7 / 2.0` is 3.5.",
         "**Python `/`** always gives a float, even between integers: `7 / 2` is 3.5.",
@@ -85,7 +84,7 @@ floorDiv(-7, 2) = -4`,
       pitfalls: [
         {
           title: "Dividing by zero",
-          body: "Integer division by zero throws — `ArithmeticException` in Java, `ZeroDivisionError` in Python. Floating-point division by zero does not: in both languages it gives infinity or NaN, silently. So `1 / 0` crashes and `1.0 / 0` gives `inf`, which then propagates through every subsequent calculation without complaint.",
+          body: "Integer division by zero throws — `ArithmeticException` in Java, `ZeroDivisionError` in Python. Floating-point division by zero differs between them: Java gives `Infinity` or `NaN`, silently, and that value then propagates through every later calculation without complaint; Python raises `ZeroDivisionError` for `1.0 / 0` as well.",
         },
       ],
     },

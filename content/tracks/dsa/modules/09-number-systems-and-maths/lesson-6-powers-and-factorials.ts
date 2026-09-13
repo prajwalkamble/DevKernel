@@ -23,7 +23,7 @@ export const powersAndFactorialsLesson: Lesson = {
         "Computing bᵉ by multiplying b into a total e times is O(e). There is an O(log e) method and it is short enough to memorise.",
         "**The identity:** b²ᵏ = (b²)ᵏ. So halving the exponent while squaring the base leaves the answer unchanged — and when the exponent is odd you peel off one factor of b first.",
         "```\nresult = 1\nwhile exp > 0:\n    if exp is odd: result *= base\n    base *= base\n    exp //= 2\n```",
-        "The exponent halves every iteration, so the loop runs ⌊log₂ e⌋ + 1 times. For e = 1000 that is ten multiplications instead of a thousand.",
+        "The exponent halves every iteration, so the loop runs ⌊log₂ e⌋ + 1 times. For e = 1000 that is ten iterations — sixteen multiplications, counting the squarings — instead of a thousand.",
       ],
       examples: [
         {
@@ -165,9 +165,9 @@ largest n with n! in a long : 20
       id: "math-pow",
       heading: "Why not `Math.pow`",
       body: [
-        "Java's `Math.pow` takes two doubles and returns a double. Using it for integer work introduces floating-point error into an exact computation, and the failures are subtle rather than loud.",
-        "`(int) Math.pow(10, 2)` can be 99 rather than 100 on some platforms, because the double result is 99.999999… and the cast truncates. Whether it bites depends on the runtime, which is worse than always failing.",
-        "It also has no chance past 2⁵³, where a double stops representing consecutive integers — so `Math.pow(2, 60)` returns something that looks right and is not exactly right.",
+        "Java's `Math.pow` takes two doubles and returns a double. Using it for integer work puts a floating-point step in the middle of an exact computation, and the failures are subtle rather than loud.",
+        "`Math.pow(10, 2)` is exactly `100.0`: the Javadoc promises an exact result when both arguments are integers and the answer is representable as a double. The trouble is everything outside that promise.",
+        "Past 2⁵³ a double stops representing consecutive integers, so `(long) Math.pow(3, 35)` returns 50031545098999704 where 3³⁵ is 50031545098999707 — a number that looks right and is not. (`Math.pow(2, 60)` happens to be exact, because powers of two are representable.)",
         "**Use integer multiplication.** A `long` loop, exponentiation by squaring, or `Math.multiplyExact` if you want overflow to throw. In Python, `pow` and `**` on integers are exact and unbounded, so the issue only arises if you introduce a float yourself.",
       ],
       examples: [
@@ -229,7 +229,7 @@ largest n with n! in a long : 20
     {
       question: "How do you compute bᵉ in O(log e)?",
       answer:
-        "Exponentiation by squaring. Square the base and halve the exponent each iteration, multiplying the base into the result whenever the exponent is odd. It works because b²ᵏ = (b²)ᵏ, and the odd case peels off one factor. Equivalently it reads the exponent in binary: b¹³ = b⁸ × b⁴ × b¹ because 13 is 1101. The exponent halves every step, so the loop runs about log₂ e times — ten multiplications for e = 1000 rather than a thousand.",
+        "Exponentiation by squaring. Square the base and halve the exponent each iteration, multiplying the base into the result whenever the exponent is odd. It works because b²ᵏ = (b²)ᵏ, and the odd case peels off one factor. Equivalently it reads the exponent in binary: b¹³ = b⁸ × b⁴ × b¹ because 13 is 1101. The exponent halves every step, so the loop runs about log₂ e times — ten iterations for e = 1000 rather than a thousand multiplications.",
     },
     {
       question: "At what point does a factorial stop fitting in standard integer types?",
@@ -239,12 +239,12 @@ largest n with n! in a long : 20
     {
       question: "Why shouldn't you use `Math.pow` for integer exponentiation?",
       answer:
-        "It works in doubles, so it introduces rounding into an exact computation — `(int) Math.pow(10, 2)` can come out as 99 because the double is 99.999… and the cast truncates. Past 2⁵³ a double cannot represent consecutive integers at all, so the answer is approximate even when it looks right. Use integer multiplication, ideally exponentiation by squaring on a `long`, or `Math.multiplyExact` if you want overflow to throw rather than wrap.",
+        "It works in doubles, so it introduces rounding into an exact computation — integer powers are exact only while they fit in a double's 53 bits, and `(long) Math.pow(3, 35)` is already three too small. Past 2⁵³ a double cannot represent consecutive integers at all, so the answer is approximate even when it looks right. Use integer multiplication, ideally exponentiation by squaring on a `long`, or `Math.multiplyExact` if you want overflow to throw rather than wrap.",
     },
   ],
   takeaways: [
     "Exponentiation by squaring: square the base, halve the exponent, multiply in when odd",
-    "It runs in O(log e) — ten multiplications for e = 1000",
+    "It runs in O(log e) — ten iterations for e = 1000",
     "It works by reading the exponent in binary, so it generalises to anything associative",
     "12! is the largest factorial in an int; 20! is the largest in a long",
     "An input above 20 in a factorial problem means modular arithmetic, not BigInteger",

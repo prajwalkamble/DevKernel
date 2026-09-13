@@ -19,7 +19,7 @@ export const reversalAndRotationLesson: Lesson = {
       id: "recap",
       heading: "The three reversals, and the first thing to get right",
       body: [
-        "Module 0 showed you that rotating an array left by k is three reversals: reverse the whole thing, then reverse the first k, then reverse the rest. This lesson asks *why*, and what else it is good for.",
+        "Module 0 showed you that rotating an array right by k is three reversals: reverse the whole thing, then reverse the first k, then reverse the rest. Rotating left by k is the same three reversals with the cut at n − k. This lesson asks *why*, and what else it is good for.",
         "The why is short. Rotating splits the array into two blocks, `A` and `B`, and produces `BA` from `AB`. Reversing the whole array gives `(AB)ʳ`, and reversal has the property that `(AB)ʳ = BʳAʳ` — the blocks swap places and each is individually backwards. Reversing each block in place then undoes the second half of that, leaving `BA`. Three linear passes, O(n) time, O(1) space.",
         "Before any of it, though: **normalise k**. `k` can exceed `n`, and in a left/right conversion it can go negative. `k %= n` handles the first; in Java, where `%` keeps the sign of the dividend, `k = ((k % n) + n) % n` handles both. Forgetting this is the most common way this code fails, and it fails with an index out of bounds rather than a wrong answer, so it is at least loud.",
       ],
@@ -41,7 +41,6 @@ export const reversalAndRotationLesson: Lesson = {
       id: "juggling",
       heading: "The cycles underneath",
       body: [
-        "There is a second rotation algorithm, and it is worth knowing not because you will often need it but because of what it reveals.",
         "A rotation is a **permutation**: every element moves to a computable new position, `i → (i + k) mod n`. Follow that repeatedly from any starting index and you eventually come back to where you started — you have walked a *cycle*. So instead of three passes, you can walk each cycle once, carrying one held value round it.",
         "The question is how many cycles there are, and the answer is exactly **gcd(n, k)**. When n and k share no factor the whole array is one cycle; when they share a factor of 3 there are three independent cycles that never touch. This is the same fact that governs every \"step round a circle of n by k each time\" problem, and it is worth having seen it once.",
         "The payoff is that juggling does exactly n writes where the three-reversal version does about 2n.",

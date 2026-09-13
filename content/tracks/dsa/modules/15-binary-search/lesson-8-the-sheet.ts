@@ -11,7 +11,7 @@ export const theSheetLesson: Lesson = {
   objectives: [
     "Classify a problem into one of the five binary-search shapes",
     "Name the signals that distinguish them",
-    "Work the sheet in an order that builds rather than accumulates",
+    "Work the sheet in the order the shapes build on each other",
     "Know the complexity to state before writing anything",
   ],
   sections: [
@@ -58,13 +58,17 @@ export const theSheetLesson: Lesson = {
         },
       ],
     },
+  ],
+  interviewQuestions: [
     {
-      id: "revisit",
-      heading: "Revisiting, not accumulating",
-      body: [
-        "The failure mode with a sheet is treating it as a queue: solve, tick, never return. Two weeks later the loop conventions are gone again.",
-        "Instead: after finishing a shape, come back a day later and **rewrite one problem from that shape from a blank editor** — not from memory of the code, but from the four questions above. If you cannot, that is the signal to stay on the shape rather than move on. The whole module is about twelve lines of code; what you are actually building is the recognition that picks which twelve.",
-      ],
+      question: "How do you decide which binary search variant a problem needs?",
+      answer:
+        "There are five shapes: plain search in a sorted array; boundary search for first, last, count or insertion point, answered with lower and upper bound; a modified array such as rotated or a matrix; binary search on the answer, signalled by minimising a maximum or maximising a minimum over a number not in the input; and binary search as the inner step of a DP or counting algorithm. The question to ask is not whether the input is sorted but whether I can look at one point and rule out a side.",
+    },
+    {
+      question: "What do you settle before typing the loop?",
+      answer:
+        "Four things out loud: what I am searching, an index or a value in an answer range; what the predicate is, a comparison or a feasibility function; why it is monotone, or which half I can rule out; and what the bounds are and why the answer lies inside them. Then I state the complexity, O(log n) or O(n log range). Getting the first question wrong is the biggest time sink in the topic.",
     },
   ],
   takeaways: [
@@ -74,7 +78,6 @@ export const theSheetLesson: Lesson = {
     "Do the boundary problems until they are boring before starting shape 4",
     "Before typing: what am I searching, what is the predicate, is it monotone, what are the bounds",
     "Sorted input is a hint, not an instruction — it often means two pointers instead",
-    "Rewrite one problem per shape a day later, from the questions rather than the code",
   ],
   status: "available",
 };

@@ -194,7 +194,7 @@ print(sorted(people, key=lambda p: (p[1], p[0])))`,
       heading: "The two comparator mistakes",
       body: [
         "**Subtracting to compare.** `(a, b) -> a - b` looks neat and overflows: if `a` is 2,000,000,000 and `b` is −2,000,000,000, the subtraction wraps to a negative number and the comparator claims the larger value is smaller. Use `Integer.compare(a, b)`, which cannot overflow.",
-        "**An inconsistent comparator.** If your comparison is not a valid ordering — if it says `a < b` and `b < a`, or is not transitive — Java's TimSort detects it and throws `IllegalArgumentException: Comparison method violates its general contract!`. That message is famously confusing and it always means the same thing: your comparator is not a consistent ordering, usually because a tie-break case returns a nonzero value in both directions.",
+        "**An inconsistent comparator.** If your comparison is not a valid ordering — if it says `a < b` and `b < a`, or is not transitive — Java's TimSort may detect it and throw `IllegalArgumentException: Comparison method violates its general contract!`. That message is famously confusing and it always means the same thing: your comparator is not a consistent ordering, usually because a tie-break case returns a nonzero value in both directions.",
         "Python protects you from both by using `key=` rather than a comparison function. That is the deeper reason to prefer keys: a key cannot be inconsistent, because it reduces the problem to comparing values that already have a valid order.",
       ],
       examples: [

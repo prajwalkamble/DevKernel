@@ -23,7 +23,6 @@ export const whyPatternPrintingLesson: Lesson = {
         "This track uses the word \"pattern\" in two completely different senses, and it is worth separating them before anything else.",
         "**Algorithm patterns**, in Module 1, are recognisable problem shapes: two pointers, sliding window, monotonic stack. They are the organising idea of the whole track.",
         "**Pattern printing**, this module, is the classic exercise of printing shapes made of characters — triangles, pyramids, diamonds, number grids. It has nothing to do with algorithms.",
-        "The naming collision is unfortunate and universal, so it is better to name it than to pretend it does not exist.",
       ],
     },
     {
@@ -163,13 +162,12 @@ for r in range(n):
     },
     {
       id: "what-to-do",
-      heading: "How to work through this module",
+      heading: "How to work each pattern",
       body: [
-        "Seven more lessons, each a family of shapes. For every one:",
+        "For every shape:",
         "**Answer the three questions on paper first.** Write the row count and the per-row counts before touching the keyboard. If you cannot, the pattern is not yet understood and typing will be guessing.",
         "**Predict the output before running.** Say what the first two rows will look like. Running it to find out is how you end up adjusting bounds at random until it looks right, which teaches nothing.",
         "**When it is wrong, read the shape.** A pyramid leaning left means too few spaces; a triangle missing its top row means the inner bound is off by one; a single long line means a missing newline. The shape is a diagnostic, and reading it is the skill.",
-        "Half an hour of this makes nested loop bounds automatic, and everything after this module assumes they are.",
       ],
     },
   ],
@@ -182,7 +180,7 @@ for r in range(n):
     {
       question: "Why build each line in a variable rather than printing character by character?",
       answer:
-        "One write instead of n. Printing per character means a system call per character, which on any real output is far slower than accumulating the line and printing once — the same argument as batching output on a judge. In Java it also matters which accumulator you use: `+=` on a String in a loop is quadratic, so it must be a `StringBuilder`.",
+        "One write instead of n. In Java, printing per character with `System.out.print` made a write system call per character — 51,000 of them for a 51,000-character pattern; Python buffers its output and made 7, but still pays a `print` call per character. Accumulating the line and printing once avoids both — the same argument as batching output on a judge. In Java it also matters which accumulator you use: `+=` on a String in a loop is quadratic, so it must be a `StringBuilder`.",
     },
     {
       question: "How do you approach a pattern you have not seen before?",

@@ -1496,8 +1496,8 @@ func main() {
           body: "Memoise the longest-simple-path recursion over `(s, t)` and it will run, terminate quickly, and print a number. Nothing crashes, nothing warns, and on small graphs the number is often even right. Correctness under memoisation is something you argue before you write it, not something you observe afterwards \u2014 which is exactly the situation the greedy module was in, and exactly why an exchange argument existed.",
         },
         {
-          title: "Negative weights are the same bug in another costume",
-          body: "The reason Dijkstra breaks on a negative edge is this precondition, not an implementation detail. Dijkstra finalises a vertex on the assumption that no later route can improve it, which is the claim that a shortest path's prefixes are themselves shortest. A negative edge withdraws that claim, and the fix \u2014 Bellman-Ford \u2014 is precisely the version that stops assuming and relaxes every edge repeatedly.",
+          title: "Negative weights break Dijkstra's order, not optimal substructure",
+          body: "With negative edges but no negative cycle, optimal substructure still holds: every prefix of a shortest path is itself shortest, which is what Bellman-Ford relies on. Over 599 random graphs that had a negative edge and no negative cycle there was not one violation of it — while Dijkstra, which settles each vertex once, disagreed with Bellman-Ford on 21 of them. What a negative edge withdraws is Dijkstra's *order* \u2014 it finalises a vertex assuming nothing later can improve it \u2014 and the fix, Bellman-Ford, is the version that stops assuming and relaxes every edge repeatedly.",
         },
       ],
     },

@@ -22,7 +22,7 @@ export const bitsAsASetLesson: Lesson = {
       body: [
         "Bit manipulation feels like trivia right up to the moment you stop thinking of an integer as a *number* and start thinking of it as a **set**.",
         "Bit `i` is either present or absent. So a 32-bit integer is a subset of `{0, 1, ..., 31}`, and the bitwise operators are set operations: `|` is union, `&` is intersection, `^` is symmetric difference, `~` is complement. Every one of them runs in a single CPU instruction on the whole set at once.",
-        "That is the entire reason this topic matters for interviews. When a problem says *n ≤ 20 and you must consider every subset*, it is telling you that a subset fits in an integer and that there are only a million of them. The alternative — a `HashSet` per subset — is a hundred times slower and allocates.",
+        "That is the entire reason this topic matters for interviews. When a problem says *n ≤ 20 and you must consider every subset*, it is telling you that a subset fits in an integer and that there are only a million of them. The alternative — a `HashSet` per subset — is far slower and allocates.",
       ],
     },
     {
@@ -668,12 +668,12 @@ bitCount       3
       ],
       pitfalls: [
         {
-          title: "`&` binds more loosely than `==` in C, C++, Java and Python",
-          body: "`flags & 2 != 0` parses as `flags & (2 != 0)`, which is `flags & 1` — a completely different question that silently returns a plausible answer. Always parenthesise: `(flags & 2) != 0`. This is one of the oldest bugs in C and it survives into every language that inherited the precedence table.",
+          title: "`&` binds more loosely than `!=` in C, C++ and Java",
+          body: "In C and C++, `flags & 2 != 0` parses as `flags & (2 != 0)`, which is `flags & 1` — a different question that silently returns a plausible answer. Java parses it the same way and then refuses to compile `int & boolean`. Python ranks `&` above the comparisons, so there it means `(flags & 2) != 0`. Parenthesise every mask test anyway: `(flags & 2) != 0` is correct in all four.",
         },
         {
-          title: "`1 << 40` is zero in a 32-bit int",
-          body: "In Java and C, `1` is an `int`, so shifting by 40 wraps the shift count modulo 32 and gives you `1 << 8`. Write `1L << 40` when the mask needs more than 32 bits. Python has no such limit, which is exactly why a solution that works there can fail when translated.",
+          title: "`1 << 40` is not 2⁴⁰ in a 32-bit int",
+          body: "In Java, `1` is an `int` and the shift count is taken modulo 32, so `1 << 40` is `1 << 8`, which is 256. In C and C++ shifting an `int` by 40 is undefined behaviour. Write `1L << 40` when the mask needs more than 32 bits. Python has no such limit, which is exactly why a solution that works there can fail when translated.",
         },
       ],
     },
@@ -687,13 +687,25 @@ bitCount       3
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you use an integer as a set, and when is that the right representation?",
+      answer:
+        "Treat bit i as membership of element i. Union is or, intersection is and, symmetric difference is xor, and 1 << i is the mask for one element: set it with or, clear it with and-not, toggle it with xor. Each operation is one instruction on the whole set. It is the right representation when the universe is small and fixed — n up to about 20 with a question about subsets or assignments, or a set of lowercase letters that fits in 26 bits — because the alternative, a hash set per subset, allocates and is far slower.",
+    },
+    {
+      question: "What do n & -n and n & (n - 1) do, and why?",
+      answer:
+        "n & -n isolates the lowest set bit: in two's complement -n is the complement plus one, which flips every bit above the lowest set bit and leaves that bit standing. n & (n - 1) clears the lowest set bit, because subtracting one borrows through the trailing zeros and turns that bit into a zero. Looping on the second counts set bits in one iteration per set bit rather than one per bit of width, which is Kernighan's trick. In Java I would also use >>> rather than >> when walking bits, since >> copies the sign bit in.",
+    },
+  ],
   takeaways: [
     "An integer is a set: `|` unions, `&` intersects, `^` is symmetric difference",
     "`1 << i` is the mask for element i; set with `|=`, clear with `&= ~`, toggle with `^=`",
     "`n & -n` isolates the lowest set bit; `n & (n - 1)` clears it",
     "Kernighan's loop counts set bits in one iteration per set bit",
     "`>>` keeps the sign; use `>>>` in Java when the integer is a set",
-    "`&` binds looser than `==` — parenthesise every mask test",
+    "`&` binds looser than `==` in C, C++ and Java (not Python) — parenthesise every mask test",
     "`n ≤ 20` plus subsets is the signal to reach for a bitmask",
   ],
   status: "available",

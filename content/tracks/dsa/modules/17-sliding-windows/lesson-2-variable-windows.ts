@@ -95,7 +95,7 @@ minimum length with sum >= 7:
   [1, 4, 4]                  -> 2
   [1, 1, 1, 1, 1, 1, 1, 1]   -> 7`,
           explanation:
-            "The `longest` version uses a **jump** rather than a loop: seeing a repeat, `left` moves straight to just past the previous occurrence. That is an optimisation of the same shrink — the `while` version, decrementing counts one at a time, is equally correct and easier to adapt.\n\nThe `last[ch] >= left` guard is essential. `'pwwkew'` at `right=5` sees a `w` last seen at index 2, but `left` is already 2 — so the character is *not* in the current window and moving `left` backwards would be wrong. Without that check, `left` can go backwards and the algorithm breaks.\n\nIn `min_subarray_len` the answer is recorded **before** shrinking, inside the loop. Each iteration of that inner while is a genuinely valid window, and the smallest of them is the one you want.",
+            "The `longest` version uses a **jump** rather than a loop: seeing a repeat, `left` moves straight to just past the previous occurrence. That is an optimisation of the same shrink — the `while` version, decrementing counts one at a time, is equally correct and easier to adapt.\n\nThe `last[ch] >= left` guard is essential. `'pwwkew'` at `right=5` sees a `w` last seen at index 2 with `left` at 2, so that `w` is inside the window and `left` correctly moves to 3. The guard matters on a string like `'abba'`: at `right=3` the `a` was last seen at index 0, but `left` is already 2, so that `a` is *not* in the window and jumping `left` to 1 would move it backwards. Without that check, `left` can go backwards and the algorithm breaks.\n\nIn `min_subarray_len` the answer is recorded **before** shrinking, inside the loop. Each iteration of that inner while is a genuinely valid window, and the smallest of them is the one you want.",
           alternates: [
             {
               lang: "javascript",
@@ -555,7 +555,6 @@ func main() {
       body: [
         "It looks quadratic: a `for` over `right` with a `while` over `left` inside. It is not, and the argument is the same amortised one the arrays module used for cyclic sort.",
         "**`left` only ever increases, and it can never exceed `n`.** The inner `while` may run many times on one iteration and zero times on the next, but summed over the entire outer loop it executes at most `n` times in total. So the two pointers together do at most `2n` moves.",
-        "Say this out loud in an interview. \"The inner loop looks nested but `left` is monotonic, so the total work is O(n)\" is the sentence that gets the complexity question right, and people who have only memorised the shape cannot produce it.",
       ],
       pitfalls: [
         {
@@ -571,6 +570,18 @@ func main() {
           body: "`min_subarray_len` returns `best or 0` because the problem asks for 0 when no window qualifies. Initialising `best` to zero instead would make every answer zero, since `min` would never beat it.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Longest substring without repeating characters.",
+      answer:
+        "A variable window: extend right one character at a time, and when the character is already in the window, move left past its previous occurrence. The guard last[ch] >= left matters, because a character last seen before the current left is not in the window, and jumping left backwards would break it. Record the length after restoring validity. For longest problems the rule is shrink while invalid and record after; for shortest problems it is shrink while still valid and record inside the inner loop.",
+    },
+    {
+      question: "The window has a while loop inside a for loop. Why is it still O(n)?",
+      answer:
+        "Because left only ever increases and can never exceed n. The inner loop may run many times on one step and not at all on the next, but across the whole run it executes at most n times in total, so the two pointers make at most 2n moves. Saying that amortised argument out loud is what gets the complexity question right.",
     },
   ],
   takeaways: [

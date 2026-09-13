@@ -6,7 +6,7 @@ export const commentsAndNamingLesson: Lesson = {
   moduleSlug: "introduction-to-programming",
   title: "Comments, Naming & Code You Can Read Tomorrow",
   summary:
-    "Why most comments are worse than none, what to write instead, and the naming conventions that make an interviewer stop reading your code and start reading your reasoning.",
+    "Why most comments are worse than none, what to write instead, and the naming conventions that make most comments unnecessary.",
   estimatedMinutes: 20,
   status: "available",
   objectives: [
@@ -113,7 +113,7 @@ mid value: 1`,
       id: "naming",
       heading: "Naming is the comment you cannot forget to update",
       body: [
-        "Most comments exist because a name failed. Fix the name and the comment becomes unnecessary — and unlike the comment, the name cannot drift out of date, because the code will not run without it.",
+        "Most comments exist because a name failed. Fix the name and the comment becomes unnecessary — and unlike the comment, the name is read at every place the value is used, so a name that stops fitting gets noticed.",
         "Three guidelines cover nearly everything.",
         "**Say what it holds, not what type it is.** `count`, not `intValue`. `firstIndex`, not `idx1`.",
         "**Short names are fine where the scope is short.** `i`, `j`, `k` for loop counters and `n` for a size are universal and expanding them adds nothing — `for (int index = 0; ...)` is not clearer, just longer. The rule is that a name's length should scale with how far apart its declaration and its uses are.",
@@ -143,18 +143,8 @@ print(even_total)`,
           output: `70
 70`,
           explanation:
-            "Identical behaviour, identical speed. The second version answers \"what is this for?\" without a comment and without you having to hold `d`, `x` and `a` in your head while you read. In an interview the second version also does something the first cannot: it lets the interviewer follow your reasoning while you type, instead of waiting until you explain.",
+            "Identical behaviour, identical speed. The second version answers \"what is this for?\" without a comment and without you having to hold `d`, `x` and `a` in your head while you read.",
         },
-      ],
-    },
-    {
-      id: "interviews",
-      heading: "Why this matters more in an interview than at work",
-      body: [
-        "At work, unreadable code is a slow tax. In an interview it is an immediate failure mode, and it is worth understanding why.",
-        "The interviewer is not primarily checking whether your program is correct — a machine could do that. They are assessing whether they could work with you: whether your thinking is legible, whether you would leave a codebase better or worse. They are reading your reasoning through your code, in real time, while you type.",
-        "Single-letter names force them to hold a translation table in their head while doing that. Good names remove the translation and let them follow along. This is not a small effect — candidates whose code reads clearly get more useful hints, because the interviewer can see exactly where the reasoning went wrong.",
-        "One more thing that is specific to the format. Say your names out loud as you type them: \"I'll keep a `seen` set of the values I've already visited.\" You have now stated a design decision, given it a name, and made your next twenty lines predictable — in one sentence.",
       ],
     },
   ],
@@ -165,9 +155,9 @@ print(even_total)`,
         "One that says something the code cannot. The code already states what it does, so a comment restating it adds nothing and creates a second thing to keep true — and a comment that has drifted out of date is worse than none, because readers trust comments over code. Good comments explain why: why this approach over the obvious one, why this bound rather than that one, what invariant the loop maintains. If a comment is needed to explain what a variable is, the better fix is usually to rename the variable.",
     },
     {
-      question: "Why is `lo + (hi - lo) / 2` preferred over `(lo + hi) / 2`?",
+      question: "When should you rename a variable instead of commenting it?",
       answer:
-        "Because `lo + hi` can overflow. If both are near the maximum `int`, their sum wraps to a negative number and the midpoint is nonsense — and the program does not crash, it just searches the wrong half. `lo + (hi - lo) / 2` computes the same value without ever forming the large intermediate, since `hi - lo` is bounded by the array size. It is a real bug that existed in Java's own binary search implementation for nine years.",
+        "Whenever the comment would explain what the variable holds. `int d; // number of distinct values seen so far` is a name that failed — call it `distinctCount` and the comment has nothing left to say. The rename is better, because the name appears at every use, where a wrong one gets noticed, while a comment sits in one place and can silently become false. Keep comments for what no name can carry: why this approach, why this bound, what a loop maintains.",
     },
     {
       question: "Are single-letter variable names ever acceptable?",
@@ -180,9 +170,8 @@ print(even_total)`,
     "Comment the why, never the what — the code already says what it does",
     "A comment that restates its line is a liability, because it can drift out of date and be believed",
     "Delete commented-out code; version control already remembers it",
-    "Most comments exist because a name failed; fixing the name removes the need and cannot go stale",
+    "Most comments exist because a name failed; fixing the name removes the need",
     "Short names are fine in short scopes — `i`, `j`, `n`, `lo`, `hi`, `mid` are universal",
     "Booleans should read as questions: `isEmpty`, `hasDuplicate`, `found`",
-    "In an interview, readable names let the interviewer follow your reasoning as you type — and give better hints",
   ],
 };

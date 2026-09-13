@@ -65,7 +65,7 @@ public class Main {
 score desc, name asc: [bob, cy, ana, dee]
 subtraction overflows: true`,
           explanation:
-            "Note where `.reversed()` sits. It applies to **everything composed before it**, so `comparingInt(score).reversed().thenComparing(name)` reverses only the score — the name stays ascending. Written as `comparingInt(score).thenComparing(name).reversed()` it would reverse both. The last line is the punchline of the next section: `Integer.MIN_VALUE - 1` wraps around to positive, so a subtraction-based comparator reports that the smallest possible int is greater than itself minus one.",
+            "Note where `.reversed()` sits. It applies to **everything composed before it**, so `comparingInt(score).reversed().thenComparing(name)` reverses only the score — the name stays ascending. Written as `comparingInt(score).thenComparing(name).reversed()` it would reverse both. The last line is the punchline of the next section: `Integer.MIN_VALUE - 1` wraps around to `Integer.MAX_VALUE`, so a comparator written as `a - b` reports that `Integer.MIN_VALUE` is greater than 1.",
         },
       ],
     },

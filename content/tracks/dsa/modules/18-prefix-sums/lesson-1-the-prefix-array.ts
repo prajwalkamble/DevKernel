@@ -21,7 +21,7 @@ export const thePrefixArrayLesson: Lesson = {
       heading: "Pay once, answer forever",
       body: [
         "Answering *q* range-sum queries by looping over each range costs O(q · n). Precomputing prefix sums costs O(n) once and then O(1) per query — total O(n + q).",
-        "For one query the precomputation is wasted. For a thousand queries on a million elements it is the difference between a second and a fortnight. The pattern is worth recognising as a *trade* rather than a trick: you are buying query speed with a linear setup.",
+        "For one query the precomputation is wasted. For a thousand queries on a million elements it is the difference between a billion additions, which take seconds, and a million, which take milliseconds. The pattern is worth recognising as a *trade* rather than a trick: you are buying query speed with a linear setup.",
       ],
       examples: [
         {
@@ -496,6 +496,18 @@ func main() {
           body: "The last prefix entry is the sum of the whole array. For 10⁵ elements of 10⁹ that is 10¹⁴, which needs a `long` in Java, C++ and Go. This is the width question from the bits-and-math module, and it is the most common way a correct prefix solution still fails.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Answer many range-sum queries on a fixed array.",
+      answer:
+        "Precompute prefix sums once in O(n), with prefix[0] = 0 and prefix[i] the sum of the first i elements, so the array is one longer than the input. Then sum(a[lo:hi]) = prefix[hi] - prefix[lo] in O(1), for O(n + q) in total instead of O(q·n). The leading zero means a range starting at index 0 needs no special case and an empty range is zero by construction.",
+    },
+    {
+      question: "Why prefer the half-open, leading-zero convention?",
+      answer:
+        "With an inclusive prefix the query is prefix[hi] - prefix[lo - 1], and lo = 0 reads prefix[-1]: in Python that silently returns the last element, a wrong answer rather than an error, and in Java it throws. The half-open form also matches slicing, subList and substring. I convert inclusive problem indices once at the boundary and check whether the total sum needs 64 bits.",
     },
   ],
   takeaways: [

@@ -450,7 +450,7 @@ func main() {
       id: "guards",
       heading: "The two guards, and what they are protecting",
       body: [
-        "Every implementation of this gets written without the guards the first time, and it passes on square matrices. That is exactly what makes it a good interview question.",
+        "Written without the guards, the implementation still passes on square matrices.",
         "The problem: after walking the top row and the right column, the rectangle may already be empty. If it had one row, `top` has passed `bottom` — but the third loop runs anyway, and walks that same single row backwards, emitting every value a second time. The same happens to the fourth loop with a single column.",
         "So the guards are not defensive padding. They are the statement that **the rectangle must be re-checked between the moves, not only between laps**, because two of the four moves shrink it.",
       ],

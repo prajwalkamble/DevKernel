@@ -182,7 +182,6 @@ a-b-c`,
       id: "helper-pattern",
       heading: "The pattern recursion always needs",
       body: [
-        "Here is why this lesson sits immediately before recursion.",
         "A recursive solution almost always needs **more parameters than the problem gives you** — a current index, a depth, a partial result, a visited set. But the function you must expose has the signature the problem specifies.",
         "The standard answer is two functions: a **public one with the required signature**, which sets up the extra state and calls a **private helper with the full parameter list**. Java does this with an overload or a differently-named private method; Python does it with default arguments or a nested function.",
         "You will write this shape in every backtracking problem, every tree recursion that tracks depth, and every DP that memoises. Recognising it now means it is a pattern rather than an improvisation later.",

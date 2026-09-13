@@ -867,6 +867,18 @@ matrix: [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Apply many range additions to an array and read the final values.",
+      answer:
+        "A difference array of size n + 1: for each update add delta at lo and subtract it at hi + 1, O(1) per update, then one running-total pass reconstructs the array. It is the mirror of prefix sums, which have cheap reads and expensive updates. The lesson's comparison is a hundred billion operations for updating every range directly against 1.2 million with the difference array.",
+    },
+    {
+      question: "What problems is this technique really for?",
+      answer:
+        "Interval counting: Corporate Flight Bookings, Car Pooling where you add at pickup and subtract at drop-off, and the maximum number of overlapping intervals in Meeting Rooms II, which is the largest running value after +1 at each start and -1 at each end. The cue is many range updates followed by one read. If reads are interleaved with updates, it no longer applies and a Fenwick tree is the tool.",
+    },
+  ],
   takeaways: [
     "Difference arrays make range updates O(1) and reads O(n) — the mirror of prefix sums",
     "`diff[lo] += delta` and `diff[hi + 1] -= delta`, then one running-total pass",

@@ -543,7 +543,7 @@ xor swap: 4 9`,
       heading: "Why not a hash set, or a sum?",
       body: [
         "A `HashSet` solves single-number and missing-number too, in O(n) time — but in **O(n) space**, and with the constant factor of hashing every element. XOR is O(1) space and one instruction per element. When an interviewer says \"now do it without extra space\", XOR is the answer they are waiting for.",
-        "A **sum** also works for missing-number: add up `0..n`, subtract what you have. It reads more naturally, and it has one real weakness — the sum can overflow where the XOR cannot, because XOR never produces a value wider than its inputs. For `n = 10^5` the sum is fine; for `n` near the width of the type it is not. This is the same trade the cyclic-sort lesson made, seen from the other side.",
+        "A **sum** also works for missing-number: add up `0..n`, subtract what you have. It reads more naturally, and it has one real weakness — the sum can overflow where the XOR cannot, because XOR never produces a value wider than its inputs. For `n = 10^5` the sum is 5,000,050,000, already past a 32-bit `int`, so it needs a `long`; XOR needs nothing wider than the inputs. This is the same trade the cyclic-sort lesson made, seen from the other side.",
       ],
       pitfalls: [
         {
@@ -555,6 +555,18 @@ xor swap: 4 9`,
           body: "\"Everything appears twice except one\" is the precondition, and it matters. If a value appears three times it survives, and if two different values each appear once you get their XOR rather than either of them. Check what the problem actually guarantees before reaching for this.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Every number appears twice except one. Find it in O(1) space.",
+      answer:
+        "XOR everything. a ^ a is 0, a ^ 0 is a, and XOR is commutative and associative, so over the whole collection every paired value cancels regardless of order and the unpaired one survives. That is one pass and no extra memory; a hash set also works in O(n) time but costs O(n) space. The same idea finds a missing number by XORing all indices with all values, and unlike a sum it cannot overflow.",
+    },
+    {
+      question: "Now two numbers appear once and all others twice. How do you find both?",
+      answer:
+        "XOR everything to get a ^ b. They are different numbers, so that value has at least one set bit, and x & -x picks one bit where a and b disagree. Partition the whole list on that bit: a and b land in different halves, while each duplicate pair lands together and cancels. XOR each half separately and the two accumulators are a and b — one pass, constant space.",
     },
   ],
   takeaways: [

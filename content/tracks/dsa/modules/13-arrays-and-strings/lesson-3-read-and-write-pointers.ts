@@ -19,7 +19,6 @@ export const readAndWritePointersLesson: Lesson = {
       id: "the-shape",
       heading: "Two indices moving at different speeds",
       body: [
-        "Here is the first genuine *pattern* in the track, as opposed to a technique. It has a shape you will recognise on sight after this lesson.",
         "The problem: remove some elements from an array, in place, using no extra space. The obvious approach — shift everything left whenever you delete something — is O(n) per deletion and O(n²) overall. The pattern does it in one pass.",
         "**Use two indices. `read` visits every element exactly once. `write` marks where the next kept element goes.** They start together; `read` advances every iteration; `write` advances only when something is kept. The gap between them is exactly the number of elements discarded so far.",
         "**The invariant** — the sentence that makes it correct, and the sentence to say out loud in an interview: *`a[0:write]` contains every element kept so far, in their original order.* It is true before the loop starts, since both are zero and the empty prefix trivially contains nothing. Each iteration preserves it. So it is true at the end, when `read` has seen everything — and \"everything kept, in order\" is the answer.",
@@ -363,7 +362,6 @@ func main() {
       heading: "One skeleton, four problems",
       body: [
         "What makes this a pattern rather than a solution is that the loop never changes. Only the predicate does — the single line that decides whether the current element is kept.",
-        "That is worth internalising, because these are four separately-numbered problems on every sheet in existence, and they are one problem.",
       ],
       examples: [
         {
@@ -1255,7 +1253,7 @@ func main() {
         "These problems return an integer `k` and promise nothing about the array beyond index `k`. That looks like a quirk of the judge and it is not.",
         "**An array cannot be resized.** Its length is fixed at allocation, in Java literally and in Python effectively for this purpose, so \"remove in place\" cannot mean \"produce a shorter array\" — there is no such operation. It has to mean \"arrange the survivors at the front and tell me how many there are\", which is precisely what `(array, length)` is: the same pair a dynamic array keeps internally.",
         "So the signature is teaching you the representation. When you get to implementing your own growable structures, `(buffer, size)` with unused capacity beyond `size` is the whole idea, and this is the first place you meet it.",
-        "**In an interview**, say what you are leaving behind: \"the first k elements are the answer, and I make no promises about the rest.\" It is the difference between looking like you finished and looking like you knew what you were doing.",
+        "**In an interview**, say what you are leaving behind: \"the first k elements are the answer, and I make no promises about the rest.\"",
       ],
     },
   ],

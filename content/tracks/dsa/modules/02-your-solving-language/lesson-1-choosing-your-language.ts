@@ -42,8 +42,8 @@ export const choosingYourLanguageLesson: Lesson = {
       heading: "The speed argument, examined",
       body: [
         "Java runs faster than Python. Typically somewhere between ten and fifty times faster on tight numeric loops. That sounds decisive and it is almost never the thing that decides a submission.",
-        "The reason is that time limits are set with interpreted languages in mind, and the gap between an accepted solution and a rejected one is virtually always a gap in *complexity*, not in constant factor. An O(n²) solution to a problem wanting O(n log n) fails in both languages. An O(n log n) solution passes in both.",
-        "Where the constant factor does bite is narrow and worth naming so you can recognise it: very tight loops over 10⁷ or more elements on a strict judge. In that specific case Python needs its work pushed into built-ins — `sum`, `sorted`, slicing, `collections.Counter` — which are C underneath and roughly as fast as Java. If you are doing arithmetic element by element in a Python loop at that scale, you are the exception, and the fix is usually to stop looping rather than to change language.",
+        "The reason is that the gap between an accepted solution and a rejected one is usually a gap in *complexity*, not in constant factor — though not always: plain Python loops run one to two orders of magnitude slower than Java, and not every judge scales its time limit for that. An O(n²) solution to a problem wanting O(n log n) fails in both languages. An O(n log n) solution passes in both.",
+        "Where the constant factor does bite is narrow and worth naming so you can recognise it: very tight loops over 10⁷ or more elements on a strict judge. In that specific case Python needs its work pushed into built-ins — `sum`, `sorted`, slicing, `collections.Counter` — which run in C: `sum` over ten million integers measured about 150 ms on the machine this was written on, against about 15 ms for the equivalent Java loop — still around ten times slower, but far faster than the same work in a Python loop. If you are doing arithmetic element by element in a Python loop at that scale, you are the exception, and the fix is usually to stop looping rather than to change language.",
       ],
       examples: [
         {
@@ -116,14 +116,6 @@ public class Main {
         "This track shows every algorithm in both languages, so reading the one you did not choose costs you nothing and is worth doing occasionally. Write in one.",
       ],
     },
-    {
-      id: "commit",
-      heading: "Committing properly",
-      body: [
-        "Having chosen, the rest of this module is about making that choice pay. Seven more lessons, each on one thing you will do constantly: the arithmetic traps, building strings, the collections and what they cost, iterating, sorting with a custom order, reading input fast, and the template you start every problem from.",
-        "By the end you should be able to write all twelve core operations without looking anything up. That is what \"stop fighting the language\" means, and it is worth two or three hours to get there once rather than paying a tax on every problem for a year.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -134,7 +126,7 @@ public class Main {
     {
       question: "Is Python too slow for coding interviews or contests?",
       answer:
-        "For interviews, no — you are not judged on constant factors, and the algorithmic complexity is the whole discussion. For competitive programming it can matter, but the fix is usually to push work into built-ins like `sum`, `sorted` and `Counter`, which are implemented in C, rather than to change language. The cases where Python genuinely cannot pass a strict limit are narrow: tight element-by-element arithmetic over ten million or more values.",
+        "For interviews, no — you are not judged on constant factors, and the algorithmic complexity is the whole discussion. For competitive programming it can matter, but the fix is usually to push work into built-ins like `sum`, `sorted` and `Counter`, which are implemented in C, rather than to change language. The cases where Python struggles against a strict limit are tight loops: element-by-element work over ten million or more values, or an O(n²) loop at n in the thousands that Java would finish comfortably.",
     },
     {
       question: "Why does Python not have integer overflow?",

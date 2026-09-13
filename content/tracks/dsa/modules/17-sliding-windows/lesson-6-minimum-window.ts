@@ -69,8 +69,19 @@ export const minimumWindowLesson: Lesson = {
         "**Permutation in String** and **Find All Anagrams in a String** are the *fixed*-size cousins: the window is exactly `len(p)` wide, so there is no shrink loop, only a one-in-one-out step.",
         "**Longest Substring with At Most K Distinct Characters** is the longest-direction version with a simpler state.",
         "**Substring with Concatenation of All Words** is the same idea with words instead of characters, and needs a separate window per starting offset within a word length.",
-        "Meeting minimum-window-substring first makes all three read as simplifications, which is the reason it is worth the effort even though it is the hardest.",
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Find the minimum window of s containing every character of t, including duplicates.",
+      answer:
+        "Keep need as t's character counts and missing as len(t). When a character enters, if need[ch] > 0 it was still required, so decrement missing, then decrement need[ch] unconditionally so surplus goes negative. While missing is 0 the window is valid: record it, then remove s[left] by incrementing need and, if it became positive, incrementing missing. Because it is a shortest-window problem I record inside the shrink loop. That is O(|s| + |t|) with no map comparison per step.",
+    },
+    {
+      question: "What are the classic bugs in that solution?",
+      answer:
+        "Testing need[ch] > 0 after the decrement instead of before, or checking before the increment when removing; using a set for need, which cannot express duplicates; returning the length instead of the substring or losing its indices, which I avoid by tracking length, left and right together; and not handling the case where no valid window exists, which should return the empty string.",
     },
   ],
   takeaways: [

@@ -20,7 +20,7 @@ export const gcdAndLcmLesson: Lesson = {
       id: "euclid",
       heading: "Euclid's algorithm",
       body: [
-        "The greatest common divisor of a and b is the largest number dividing both. The algorithm for it is from around 300 BC and is still the one everybody uses.",
+        "The greatest common divisor of a and b is the largest number dividing both.",
         "**The insight:** any number dividing both a and b also divides a − b. So gcd(a, b) = gcd(a − b, b), and repeatedly subtracting the smaller from the larger eventually leaves two equal numbers, which is the answer.",
         "**The improvement:** repeatedly subtracting b from a is just computing a mod b the slow way. So gcd(a, b) = gcd(b, a mod b), and you recurse until the second argument is zero.",
         "That substitution is not a constant-factor tidy-up. It changes the number of steps from proportional to the *values* to proportional to their *number of digits*.",

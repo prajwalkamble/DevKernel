@@ -767,7 +767,7 @@ func main() {
       pitfalls: [
         {
           title: "`atMost(k - 1)` when k is 0",
-          body: "The subtraction calls the helper with `k - 1`, which is `-1` when `k` is zero. The helper must return 0 rather than misbehaving — with the `while len(count) > k` form it does, because the window immediately empties. Check it rather than assume it.",
+          body: "The subtraction calls the helper with `k - 1`, which is `-1` when `k` is zero. The helper must return 0 rather than misbehaving, and the `while len(count) > k` form does not: with k = −1 the condition stays true after the window empties, `left` runs past `right`, and the next read indexes out of range. Add `if k < 0: return 0` at the top.",
         },
         {
           title: "Deleting the key at zero, not just decrementing",
@@ -778,6 +778,18 @@ func main() {
           body: "The count must be added *after* the inner while restores validity, or you are counting invalid windows. It is one line in the wrong place and the answer is silently too large.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Count subarrays with exactly k distinct values.",
+      answer:
+        "Exactly k is not windowable, because adding an element can push the distinct count over and removing one can push it under. At most k is windowable, so compute exactly(k) = atMost(k) - atMost(k - 1). In atMost, after shrinking until the window has at most k distinct values, every subarray ending at right and starting between left and right is valid, so add right - left + 1. The lesson checks exactly(2) = 12 - 5 = 7 against brute force.",
+    },
+    {
+      question: "Where else does that subtraction work?",
+      answer:
+        "Whenever exactly k is not monotone but at most k is: subarrays with exactly k odd numbers, binary subarrays with sum k, and subarrays with sum exactly k when all values are non-negative. The cue is the word exactly in a counting problem. Two details: delete a frequency key when it reaches zero or the distinct count is wrong, and handle atMost(k - 1) when k is 0.",
     },
   ],
   takeaways: [

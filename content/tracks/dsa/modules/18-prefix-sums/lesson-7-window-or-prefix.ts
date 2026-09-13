@@ -56,6 +56,18 @@ export const windowOrPrefixLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "How do you choose between a sliding window and prefix sums with a hash map?",
+      answer:
+        "Two questions. Can values be negative? If so a sum-based window is invalid, because growing the window can shrink the sum. Is the target an exact value or a threshold? An exact value pairs with a prefix map looking up one complement; at least or at most pairs with a window. Minimum Size Subarray Sum is a window, Subarray Sum Equals K with negatives is a prefix map, and Contiguous Array is a prefix map after mapping 0 to -1.",
+    },
+    {
+      question: "When is neither right?",
+      answer:
+        "Maximum Subarray Sum with negatives: a window fails on the negatives, and a prefix map finds sums equal to a target rather than the largest sum. Kadane's algorithm, best_ending_here = max(x, best_ending_here + x), is the answer, and it is the same as the maximum of prefix[j] minus the smallest earlier prefix. Maximum Product Subarray needs both a running maximum and minimum, because two negatives multiply to a positive.",
+    },
+  ],
   takeaways: [
     "Question 1: any negatives? Then not a sum-based window",
     "Question 2: exact value or threshold? Exact suggests a prefix map, threshold a window",

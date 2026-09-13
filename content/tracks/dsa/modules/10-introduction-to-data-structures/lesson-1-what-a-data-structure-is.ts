@@ -20,7 +20,6 @@ export const whatADataStructureIsLesson: Lesson = {
       id: "operations-not-shapes",
       heading: "Operations, not shapes",
       body: [
-        "The usual way this topic is taught is a gallery of pictures — boxes with arrows for a linked list, a triangle for a tree — and then a list of names to memorise. That approach makes the subject feel like trivia.",
         "The useful definition is different. **A data structure is a set of operations, each with a cost.** The picture is an implementation detail that explains where the costs come from.",
         "So a hash map is not \"an array of buckets\". A hash map is: *insert in O(1), look up by key in O(1), delete in O(1), and no order.* The buckets explain why, and when you are choosing a structure the costs are what you actually consult.",
         "This reframing is what makes the rest of the course tractable. There are about eight structures worth knowing, and every problem is a question of which set of costs fits.",
@@ -166,7 +165,7 @@ visit in sorted order O(n log n) O(n log n) O(n log n)       O(n) O(n log n)
         "Three trades run through everything that follows, and naming them now means you will recognise them each time.",
         "**Space for time.** A hash map is fast because it keeps extra empty slots — typically it is only two-thirds full. Precomputing anything is the same trade.",
         "**Order for speed.** A hash map is faster than a tree at lookup precisely *because* it does not maintain order. The moment you need sorted output, you pay for it somewhere.",
-        "**Flexibility for locality.** A linked list inserts anywhere in O(1) and is slow to walk, because its nodes are scattered in memory. An array is the reverse. This is the one that does not show up in the big-O table at all and still shows up in the benchmark.",
+        "**Flexibility for locality.** A linked list inserts in O(1) wherever it already holds a node and is slow to walk, because its nodes are scattered in memory. An array is the reverse. This is the one that does not show up in the big-O table at all and still shows up in the benchmark.",
         "When a structure looks like it is free, look for which of these three it is quietly spending.",
       ],
     },

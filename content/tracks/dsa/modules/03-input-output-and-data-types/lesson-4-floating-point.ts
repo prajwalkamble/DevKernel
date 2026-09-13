@@ -57,7 +57,7 @@ False
         "**Never use `==` on two computed floating-point values.** The rule has one narrow exception — comparing against a value you literally assigned and never did arithmetic on — and it is not worth the exception.",
         "Instead, compare the difference against a tolerance, usually called epsilon. Two forms are useful.",
         "**Absolute tolerance:** `abs(a - b) < 1e-9`. Correct when the values are of known, modest size. This is what competitive programming problems mean when they say \"answers within 10⁻⁶ are accepted\".",
-        "**Relative tolerance:** `abs(a - b) <= 1e-9 * max(abs(a), abs(b))`. Correct when the values might be enormous, where an absolute difference of 10⁻⁹ is unachievable. Python's `math.isclose` does this for you, with a sensible default.",
+        "**Relative tolerance:** `abs(a - b) <= 1e-9 * max(abs(a), abs(b))`. Correct when the values might be enormous, where an absolute difference of 10⁻⁹ is unachievable. Python's `math.isclose` does this for you — but its default `abs_tol` is 0, so `isclose(1e-10, 0.0)` is `False`; pass `abs_tol` whenever zero is a possible value.",
       ],
       examples: [
         {
@@ -155,7 +155,7 @@ equal?     : true
 cross      : false
 cross equal: true`,
           explanation:
-            "One third and two sixths are the same number, and here the doubles happen to agree — but only because both divisions produce the same rounding error. Change the numbers and they will not. The cross-multiplied version compares `1 × 6` against `2 × 3` and is exactly right by construction, with no rounding anywhere. The casts to `long` are there because the products can overflow even when the inputs are small.",
+            "One third and two sixths are the same number, and the doubles agree — not by luck: dividing two exactly representable integers is correctly rounded, so equal fractions give equal doubles. Where division does fail is with large values: `10**17 / (10**17 + 1) == 1.0` is `True` although the fraction is not 1. The cross-multiplied version compares `1 × 6` against `2 × 3` and is exactly right by construction, with no rounding anywhere. The casts to `long` are there because the products can overflow even when the inputs are small.",
         },
       ],
     },
@@ -199,7 +199,7 @@ cross equal: true`,
     {
       question: "How do you compare two floating-point numbers?",
       answer:
-        "With a tolerance. For values of known modest size, `abs(a - b) < 1e-9`. For values that might be large, a relative tolerance — `abs(a - b) <= eps * max(abs(a), abs(b))` — because an absolute difference below 10⁻⁹ is unachievable once the values are around 10¹⁶, where consecutive representable doubles are further apart than that. Python's `math.isclose` implements the relative form with sensible defaults.",
+        "With a tolerance. For values of known modest size, `abs(a - b) < 1e-9`. For values that might be large, a relative tolerance — `abs(a - b) <= eps * max(abs(a), abs(b))` — because an absolute difference below 10⁻⁹ is unachievable once the values are around 10¹⁶, where consecutive representable doubles are further apart than that. Python's `math.isclose` implements the relative form; its absolute tolerance defaults to 0, so comparisons against zero need `abs_tol`.",
     },
     {
       question: "When would you deliberately avoid floating point?",

@@ -160,11 +160,11 @@ second
       body: [
         "`public static void main(String[] args)` is usually presented as a magic phrase to copy. It is not magic, and knowing what it says removes a small permanent source of unease.",
         "**`public`** — visible from outside this class. The JVM has to be able to find and call this method from outside your code, so it cannot be private.",
-        "**`static`** — belongs to the class itself rather than to an instance of it. This one matters: to call a non-static method you first need an object to call it *on*, and when your program starts there are no objects yet. `static` is what makes it callable without one.",
+        "**`static`** — belongs to the class itself rather than to an instance of it. This one matters: to call a non-static method you first need an object to call it *on*, and when your program starts there are no objects yet. `static` is what makes it callable without one. (Since Java 25 the launcher will also create the object itself and call a non-static `main`, which is why the short form works.)",
         "**`void`** — returns nothing. Some languages have the program return a number; Java does not use the return value here.",
         "**`main`** — the name the JVM looks for. It is a convention, not a keyword, but it is not negotiable: name it something else and the JVM will not find it.",
-        "**`String[] args`** — an array of text values, holding whatever arguments were typed after the program name on the command line. You will almost never use it, but it must be in the signature, because this exact shape is what the JVM searches for.",
-        "**`class Main`** — Java requires every piece of code to live inside a class. For now, treat the class as the container your program lives in. What a class is really for is a Module 2 topic, and trying to understand it now would cost more than it gives.",
+        "**`String[] args`** — an array of text values, holding whatever arguments were typed after the program name on the command line. You will almost never use it. Until Java 25 it had to be in the signature, because this exact shape is what the launcher searched for; since Java 25 a plain `void main()` also runs, and `String[] args` is only needed when you read the arguments.",
+        "**`class Main`** — Java requires every piece of code to live inside a class. For now, treat the class as the container your program lives in. What a class is really for does not come up in solving problems, and trying to understand it now would cost more than it gives.",
         "**`System.out.println`** — the `println` method of the `out` object belonging to the `System` class. It prints its argument and moves to a new line. There is a `print` without the `ln` that stays on the same line, which you will want later for building up a line piece by piece.",
       ],
       examples: [
@@ -202,10 +202,10 @@ on its own line`,
       id: "when-it-does-not-run",
       heading: "When it does not run",
       body: [
-        "Three failures account for nearly every first-program problem. All three are worth causing on purpose once, right now, so that you recognise them instantly later rather than at 1am.",
+        "Three failures account for nearly every first-program problem. All three are worth causing on purpose once, so that you recognise them instantly later.",
         "**Command not found.** The language is not installed, or not on your PATH. Nothing to do with your code — the file was never even read.",
         "**A syntax error.** Your text is not valid in the language: a missing bracket, a missing semicolon, a misspelled keyword. The message names a line number; start there and look at the line *above* it too, since an unclosed bracket is reported where the confusion becomes undeniable rather than where it started.",
-        "**Wrong directory.** `python3 main.py` from a folder that does not contain `main.py` gives \"No such file or directory\". Use `ls` (or `dir` on Windows) to check where you actually are. This one is embarrassingly common and takes people much longer than it should.",
+        "**Wrong directory.** `python3 main.py` from a folder that does not contain `main.py` gives \"No such file or directory\". Use `ls` (or `dir` on Windows) to check where you actually are.",
       ],
       examples: [
         {
@@ -224,20 +224,12 @@ SyntaxError: '(' was never closed`,
         },
       ],
     },
-    {
-      id: "which-to-use",
-      heading: "Which one should you actually pick?",
-      body: [
-        "For now: run both, for a week or two, while the programs are small. It costs almost nothing and it makes the next module — where you choose one properly — a decision based on experience rather than on what someone told you.",
-        "The short version of that decision, so it is not hanging over you: **Python** is less to type, has the more forgiving standard library, and gets you to a working answer faster, which is why most people should practise in it. **Java** is more verbose and makes the structures visible, which some people find clarifying, and it is what a large share of interview loops at big companies are conducted in. Neither is wrong. Choosing one and stopping the deliberation is what matters, and that is what the next module is for.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
       question: "Why does Java's `main` method have to be `static`?",
       answer:
-        "Because the JVM has to call it before any objects exist. A non-static method belongs to an instance and can only be called on one, so invoking it would require the JVM to construct an object of your class first — which raises the question of which constructor to use and with what arguments. Making `main` static sidesteps all of that: it belongs to the class itself, so the JVM can call it as soon as the class is loaded.",
+        "Because the JVM has to call it before any objects exist. A non-static method belongs to an instance and can only be called on one, so invoking it would require the JVM to construct an object of your class first — which raises the question of which constructor to use and with what arguments. Making `main` static sidesteps all of that: it belongs to the class itself, so the JVM can call it as soon as the class is loaded. Since Java 25 the launcher will also construct the object itself, with the no-argument constructor, when `main` is not static — which is why a plain `void main()` runs — but `static` remains the form that needs no object at all.",
     },
     {
       question: "What does `String[] args` do?",

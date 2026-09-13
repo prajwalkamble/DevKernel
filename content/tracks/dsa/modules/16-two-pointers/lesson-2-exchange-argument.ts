@@ -748,11 +748,19 @@ is_palindrome("ab_a"                            ) = true`,
           title: "Ties: move either, but pick one and be consistent",
           body: "In the container problem, `h[lo] == h[hi]` means both moves are safe — the pair itself is already measured, and neither side can do better with the other end held fixed. Moving both at once is also correct here, but it is a different loop; the version above moves `hi`, which is the `else` branch.",
         },
-        {
-          title: "Rehearse the argument, not just the code",
-          body: "\"Move the shorter side\" is a rule you can state in five seconds and defend in thirty. Interviewers ask *why* precisely because the rule is memorable and the reason is not, so the answer separates the two groups. Practise saying it: the shorter side caps every remaining pair it appears in, and the widest of those is the one you just measured.",
-        },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Container With Most Water: why move the shorter line inward?",
+      answer:
+        "Any pair that uses the shorter line has area at most the current width times that line's height, because the width can only shrink and the height is capped by the shorter line. That bound is exactly the area just measured, so no remaining pair containing the shorter line can do better, and discarding it is safe. Moving the taller line has no such argument: the width shrinks while the binding constraint stays put.",
+    },
+    {
+      question: "How do you tell when two pointers does not apply?",
+      answer:
+        "Try to build the exchange argument: if the optimal answer used a pair I am about to discard, some pair I keep is at least as good. If I cannot, the pattern does not apply. Unsorted Two Sum is the classic trap: with [3, 1, 4, 1, 5] and target 6 the ends sum to 8, moving the right pointer loses the 5, and 1 + 5 was the answer. If both moves are sometimes right, it is a branch rather than a walk, and a hash map or a sort is the better tool.",
     },
   ],
   takeaways: [

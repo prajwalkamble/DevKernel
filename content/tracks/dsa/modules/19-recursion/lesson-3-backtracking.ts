@@ -675,7 +675,7 @@ func main() {
       heading: "Why `path[:]` and not `path`",
       body: [
         "`out.append(path)` appends a **reference**. `path` keeps mutating for the rest of the search, so every entry in `out` ends up pointing at the same list — and at the end they all show whatever `path` finished as, which is usually empty.",
-        "`out.append(path[:])` — or `list(path)`, or `new ArrayList<>(path)` in Java — takes a snapshot. This is the same aliasing trap the Go module flagged for `append`, and it is the single most common backtracking bug because the code looks right and the output is uniformly wrong.",
+        "`out.append(path[:])` — or `list(path)`, or `new ArrayList<>(path)` in Java — takes a snapshot. This is the same aliasing trap the Go track flagged for `append`, and it is the single most common backtracking bug because the code looks right and the output is uniformly wrong.",
       ],
     },
     {
@@ -700,6 +700,18 @@ func main() {
           body: "For subsets, every node is an answer, so the record happens at the top of the function. For permutations only complete paths count, so it happens behind a length check and is followed by a `return`. Getting this wrong gives partial results in the output.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Generate all subsets of a list.",
+      answer:
+        "Backtracking with choose, explore, un-choose: record the current path, then for each index i from start, append nums[i], recurse with start i + 1, and pop. The pop restores the path before the next sibling branch. Record a copy of the path, not the path itself, or every entry aliases the same list and ends up showing its final contents. Permutations differ only by looping from 0 with a used array instead of a start index.",
+    },
+    {
+      question: "How do you avoid duplicate subsets when the input has repeated values?",
+      answer:
+        "Sort, then skip a value equal to its predecessor at the same level: if i > start and nums[i] == nums[i - 1], continue. The i > start condition means this is not the first choice at this level. Using i > 0 instead also skips a 2 whose twin was chosen by an ancestor, which wrongly drops answers like [2, 2].",
     },
   ],
   takeaways: [

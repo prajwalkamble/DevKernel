@@ -118,7 +118,6 @@ for (int i = 0; i < n; i++) {
       id: "oracle",
       heading: "The brute force as a test oracle",
       body: [
-        "Here is the use that people are most often unaware of, and it is the one that will save you the most time.",
         "You have two implementations: one obviously correct and slow, one fast and possibly wrong. Generate thousands of small random inputs and compare them. Any disagreement is a bug, and it comes with a minimal counterexample attached.",
         "This finds a category of bug that hand-picked tests structurally cannot. The examples you invent are the ones you thought of — but the bug is, by definition, in the case you did *not* think of. Random search does not share your blind spot.",
         "Three rules make it work. Keep the inputs **tiny** — length 0 to 8 — because a bug that exists at all almost always exists on a small input, and a small counterexample is one you can trace by hand. Keep the **alphabet small** — two or three distinct values — because that manufactures the duplicates and ties where bugs live. And **seed** the generator, so a failure is reproducible.",
@@ -184,7 +183,7 @@ print("fixed :", differential_test(fast))`,
           output: `buggy : FAILED on trial 9: s='bbaab' brute=2 fast=3
 fixed : 10000 random tests passed`,
           explanation:
-            "Nine trials. It took nine random five-character strings to find a bug that survives every example the problem statement provides. And the counterexample it hands you — `'bbaab'` — is short enough to trace by hand: after `\"bba\"` the window starts at index 2, so when the second `b` arrives at index 4 its last-seen index of 1 is **stale**, already behind the window. The buggy version jumps `left` backwards to 2 and reports a window that contains two `b`s.",
+            "Nine trials. It took nine random five-character strings to find a bug that survives every example the problem statement provides. And the counterexample it hands you — `'bbaab'` — is short enough to trace by hand: after `\"bbaa\"` the window starts at index 3, so when the last `b` arrives at index 4 its last-seen index of 1 is **stale**, already behind the window. The buggy version jumps `left` backwards to 2 and reports `\"aab\"` — a window that contains two `a`s.",
         },
         {
           id: "oracle-java",

@@ -108,7 +108,7 @@ prefix max of [3, 9, 1, 7]: [3, 9, 9, 9]
   max of b[1:3] is 9 but there is no arithmetic on
   prefix maxima that recovers it — 9 is in both prefixes.`,
           explanation:
-            "**Prefix XOR** substitutes directly into everything from lesson 2. The complement lookup becomes `run ^ k` instead of `run - k`, because XOR is its own inverse — `x ^ k ^ k == x`. That one substitution turns \"count subarrays summing to k\" into \"count subarrays XOR-ing to k\", which is a common problem in its own right.\n\nThe prefix-maximum output shows the failure concretely. `9` appears in the prefix maximum at every position from index 1 onwards, so both `pm[1]` and `pm[3]` are 9, and no operation on those two numbers recovers the maximum of the range between them.",
+            "**Prefix XOR** substitutes directly into everything from lesson 2. The complement lookup becomes `run ^ k` instead of `run - k`, because XOR is its own inverse — `(x ^ k ^ k) == x`. That one substitution turns \"count subarrays summing to k\" into \"count subarrays XOR-ing to k\", which is a common problem in its own right.\n\nThe prefix-maximum output shows the failure concretely. `9` appears in the prefix maximum at every position from index 1 onwards, so both `pm[1]` and `pm[3]` are 9, and no operation on those two numbers recovers the maximum of the range between them.",
           alternates: [
             {
               lang: "javascript",
@@ -610,6 +610,18 @@ func main() {
           body: "It has no update operation. One element changing invalidates O(n log n) precomputed entries. If the array changes at all, it is a segment tree.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Which aggregates can use the prefix technique?",
+      answer:
+        "Those with an inverse, because a range answer is the difference of two prefixes. Sum has subtraction, XOR is its own inverse, and counts work; products only with no zeros and exact division. Minimum, maximum and GCD have no inverse — the minimum of a longer prefix says nothing about the minimum without its first elements. Prefix XOR substitutes directly into the hash-map technique by looking up run ^ k instead of run - k.",
+    },
+    {
+      question: "What do you use for range minimum queries?",
+      answer:
+        "On a static array, a sparse table: O(n log n) to build and O(1) per query, and its overlapping lookups are safe because min is idempotent. If the array changes, a segment tree, with O(log n) queries and updates for any associative operation. A Fenwick tree is smaller and faster but still needs an invertible operation, so it handles sums and not minima.",
     },
   ],
   takeaways: [

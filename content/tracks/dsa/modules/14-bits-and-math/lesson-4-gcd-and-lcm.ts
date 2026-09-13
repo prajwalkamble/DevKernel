@@ -444,7 +444,7 @@ func main() {
       body: [
         "The bound is not obvious from the code, and the argument is short. **After two steps, the larger value has at least halved.**",
         "Consider `a mod b`. If `b ≤ a/2`, then the new pair's larger element is already at most `a/2`. If `b > a/2`, then `a mod b = a - b < a/2`. Either way, two iterations cut the larger value in half — so the number of iterations is at most `2 log₂(min(a, b))`.",
-        "The worst case is consecutive Fibonacci numbers, which is a pleasing fact and also the reason the bound cannot be improved: `gcd(F(n+1), F(n))` takes exactly n steps.",
+        "The worst case is consecutive Fibonacci numbers, which is a pleasing fact and also the reason the bound cannot be improved: `gcd(F(n+1), F(n))` takes exactly n − 1 steps.",
       ],
     },
     {
@@ -510,9 +510,21 @@ Long.MAX  = 9223372036854775807`,
       body: [
         "**Anything about repeating cycles lining up.** Two lights blinking every 6 and 8 seconds coincide every `lcm(6, 8)` seconds. Gear ratios, calendar problems, and \"when do these two patterns align\" are all LCM.",
         "**Reducing a fraction, or comparing two.** Divide both parts by their gcd.",
-        "**\"Can you measure exactly c litres with jugs of a and b?\"** Yes precisely when `gcd(a, b)` divides `c` — that is Bézout, restated as a puzzle.",
+        "**\"Can you measure exactly c litres with jugs of a and b?\"** Yes precisely when `c` is at most `a + b` and `gcd(a, b)` divides `c` — that is Bézout, restated as a puzzle, with the jugs' capacity as the extra bound.",
         "**A repeated pattern in a string.** The smallest repeating unit of a string of length n that also appears at offset k has length `gcd(n, k)`.",
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Why is Euclid's algorithm O(log n)?",
+      answer:
+        "gcd(a, b) = gcd(b, a mod b) keeps the same common divisors and strictly shrinks the pair. After two steps the larger value has at least halved: if b is at most a/2 the new pair is already bounded by a/2, and otherwise a mod b = a - b, which is less than a/2. So the step count is at most 2 log2 of the smaller value. Consecutive Fibonacci numbers are the worst case, which is why the bound cannot be improved.",
+    },
+    {
+      question: "How do you compute an LCM without overflow?",
+      answer:
+        "Divide before multiplying: a / gcd(a, b) * b. The division is exact because the gcd divides a, and the intermediate value never exceeds the result. The obvious a * b / gcd(a, b) overflows long before the answer does — in the lesson's example the answer is twelve billion, which fits a long easily, but the product on the way is twelve quintillion and the naive version returns a plausible-looking negative number.",
     },
   ],
   takeaways: [

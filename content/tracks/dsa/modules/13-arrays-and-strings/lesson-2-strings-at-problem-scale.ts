@@ -19,7 +19,6 @@ export const stringsAtProblemScaleLesson: Lesson = {
       id: "counting",
       heading: "Counting beats sorting when the alphabet is small",
       body: [
-        "Module 0 covered what a string is and what its operations cost. This lesson is about the two moves that appear in nearly every string problem worth the name.",
         "The first is **frequency counting**. \"Are these two words anagrams?\" has an obvious answer — sort both and compare — which is O(k log k) and completely correct. But an anagram is a statement about *how many of each letter*, and if the alphabet is 26 letters then a 26-slot array of counts answers it in O(k).",
         "The array is the point. It is fixed size regardless of the input, so its space cost is O(1); the index is computed from the character with `ch - 'a'`, which is the constant-time indexing from the last lesson doing exactly what it is good at.",
         "**When to use a map instead:** when the alphabet is not small or not known. Unicode, arbitrary tokens, or words rather than characters all want a `HashMap`/`dict`. The rule is the size of the key space, not the size of the input.",

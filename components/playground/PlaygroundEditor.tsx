@@ -182,10 +182,13 @@ export function PlaygroundEditor({ language, jsx, value, onChange }: PlaygroundE
       theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
       options={{
         fontSize: 13,
+        fontFamily: "var(--font-code-mono), ui-monospace, SF Mono, Menlo, Consolas, monospace",
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
         automaticLayout: true,
-        tabSize: language === "rust" || language === "cpp" || language === "java" ? 4 : 2,
+        // Two everywhere, so a tab is the same width in the editor as it is in
+        // the lesson code blocks and the console.
+        tabSize: 2,
         padding: { top: 12 },
         // Touch screens have no hover, and a 13px editor on a phone needs every
         // pixel of width it can get.

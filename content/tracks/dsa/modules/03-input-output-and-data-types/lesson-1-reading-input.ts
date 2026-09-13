@@ -142,7 +142,7 @@ number=42 after=[] line=[hello world]`,
       body: [
         "A category of failure worth naming because the code looks right and the output looks right.",
         "`BufferedReader.readLine()` in Java strips the newline; `sys.stdin.readline()` in Python does **not**. So a Python comparison against a raw line fails unless you strip it, and the printed representation of the two strings looks identical in a terminal.",
-        "Inputs also sometimes carry trailing spaces, and `split()` handles that gracefully in both languages — `\"1 2  3 \".split()` gives three tokens, not four or five — which is why splitting is safer than manual index arithmetic.",
+        "Inputs also sometimes carry trailing spaces, and Python's `split()` handles that gracefully — `\"1 2  3 \".split()` gives three tokens, not four or five. Java's `split(\"\\\\s+\")` does not: a leading space produces an empty first token, so `trim()` the line first. Either way, splitting is safer than manual index arithmetic.",
       ],
       examples: [
         {
@@ -169,20 +169,12 @@ split handles messy spacing: ['1', '2', '3']`,
         },
       ],
     },
-    {
-      id: "practice-note",
-      heading: "A note on this track",
-      body: [
-        "Almost nothing in this track requires you to read input. The problem sheet hands your function its arguments, and interviews do the same. This lesson exists because judges do not, and because a solved problem that fails on input parsing is uniquely annoying.",
-        "The one habit worth carrying everywhere: when something fails on input that looks correct, print the `repr` of what you actually read before you look at anything else. Nine times out of ten it is a newline, a space, or a value you thought was an `int` and is a string.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
       question: "How do you read n integers on one line, in Python and Java?",
       answer:
-        "In Python, `list(map(int, input().split()))` — split the line on whitespace and convert each token. In Java with `Scanner`, call `nextInt()` in a loop, since `nextInt` skips whitespace including newlines; with `BufferedReader`, read the line and split it with a `StringTokenizer` or `split(\"\\\\s+\")`. Splitting on whitespace handles multiple spaces and trailing spaces without extra work, which is why it is safer than index arithmetic.",
+        "In Python, `list(map(int, input().split()))` — split the line on whitespace and convert each token. In Java with `Scanner`, call `nextInt()` in a loop, since `nextInt` skips whitespace including newlines; with `BufferedReader`, read the line and split it with a `StringTokenizer` or `split(\"\\\\s+\")`. Splitting on whitespace handles multiple and trailing spaces without extra work; in Java, `trim()` first, because a leading space still produces an empty first token.",
     },
     {
       question: "Why does `nextLine()` return an empty string after `nextInt()`?",
@@ -200,7 +192,7 @@ split handles messy spacing: ['1', '2', '3']`,
     "`list(map(int, input().split()))` is the Python workhorse; learn it as one unit",
     "`nextInt` leaves the newline behind, so the next `nextLine` returns an empty string",
     "`BufferedReader.readLine()` strips the newline; Python's `sys.stdin.readline()` does not",
-    "`split()` handles multiple and trailing spaces in both languages",
+    "Python's `split()` handles multiple, leading and trailing spaces; Java's `split(\"\\\\s+\")` needs `trim()` first",
     "Iterate `sys.stdin`, or loop on `readLine() != null`, to read until end of input",
     "When input that looks right compares wrong, print its `repr` first",
   ],

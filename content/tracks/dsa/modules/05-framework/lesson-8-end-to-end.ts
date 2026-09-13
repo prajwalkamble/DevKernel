@@ -125,7 +125,6 @@ static int brute(String s, int k) {
       id: "wrong-turn",
       heading: "The wrong turn, and the step that catches it",
       body: [
-        "Here is where this problem earns its reputation, and it is worth walking into the trap deliberately.",
         "The natural implementation recomputes the most common count when the window shrinks — after all, removing a character might reduce it. So you would write: on every shrink, rescan the 26 counters and take the maximum.",
         "That is correct, and it is O(26n), which is linear and passes. Fine.",
         "Now the tempting optimisation: never recompute it. Just keep `mostCommon` as the largest count ever seen in any window, and never decrease it. That is obviously wrong — the window has shrunk, its most common letter might now be less common, so the affordability check is using a stale, too-large number and may accept a window it should reject.",
@@ -371,7 +370,7 @@ else:
       body: [
         "Take **Minimum Size Subarray Sum**: given an array of positive integers and a target, return the length of the shortest contiguous subarray whose sum is at least the target, or 0 if there is none. Constraints: `1 ≤ n ≤ 10⁵`, `1 ≤ nums[i] ≤ 10⁴`, and there is a follow-up asking for an O(n log n) solution if you have found the O(n) one.",
         "Work all seven steps before writing anything. Write the restatement down. Work an example by hand. State the brute force and its cost. Read the constraints to a target. Name the structure and the pattern — and check the precondition rather than matching on the phrase. Then write it, with the invariant as a comment.",
-        "Two things to notice while you do it. **\"Positive integers\"** is not decoration — it is what makes the condition monotone, and it is the constraint the whole solution rests on. And **the follow-up asking for O(n log n) when you have an O(n)** is strange until you realise it is pointing at a completely different technique — prefix sums plus binary search — which is the one that still works when the numbers can be negative.",
+        "Two things to notice while you do it. **\"Positive integers\"** is not decoration — it is what makes the condition monotone, and it is the constraint the whole solution rests on. And **the follow-up asking for O(n log n) when you have an O(n)** is strange until you realise it is pointing at a completely different technique — prefix sums plus binary search — which works because positive values make the prefix sums strictly increasing, and stops working the moment they can be negative.",
         "When you finish, write down the sentence that unlocked it. That sentence is the thing you are actually collecting.",
       ],
     },

@@ -214,7 +214,6 @@ func main() {
         "Swap the two lines — insert first, then check — and `[3, 2, 4]` with target 6 returns `[0, 0]`. The 3 finds itself, because it was in the map before it asked.",
         "Checking first encodes a real constraint: *you may not use the same element twice*. The map holds strictly the elements to the left of the current one, so a hit is always a genuinely different position. No index comparison, no guard clause — the loop's shape enforces it.",
         "`[3, 3]` with target 6 shows the other half of the argument. The first 3 finds nothing and is stored. The second 3 looks up 6 − 3 = 3 and finds the *first* one. Two equal values pair correctly, because they occupy different positions.",
-        "This is worth stating explicitly in an interview. \"I check before I insert so that an element cannot match itself, while two equal elements at different indices still pair\" is one sentence that answers the two follow-ups this problem always attracts.",
       ],
       pitfalls: [
         {

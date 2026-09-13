@@ -41,10 +41,11 @@ export function SolveEditor({
       theme={resolvedTheme === "dark" ? "vs-dark" : "light"}
       options={{
         fontSize: 13,
+        fontFamily: "var(--font-code-mono), ui-monospace, SF Mono, Menlo, Consolas, monospace",
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
         automaticLayout: true,
-        tabSize: profile.tabSize,
+        tabSize: 2,
         insertSpaces: true,
         padding: { top: 12 },
         lineNumbersMinChars: 3,

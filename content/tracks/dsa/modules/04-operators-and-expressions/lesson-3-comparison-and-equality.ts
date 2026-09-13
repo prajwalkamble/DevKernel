@@ -76,7 +76,7 @@ a.equals(d): true`,
       body: [
         "`equals` answers *are these the same value?* and returns a boolean.",
         "`compareTo` answers *which comes first?* and returns an `int`: **negative if the receiver is smaller, zero if equal, positive if larger**. The exact magnitude is unspecified and you should never depend on it — only the sign is meaningful.",
-        "The two carry a contract that matters when you write them yourself: `a.equals(b)` must be true exactly when `a.compareTo(b) == 0`, `equals` must agree with `hashCode`, and both must be symmetric and transitive. Violating any of those breaks sorting and hash maps in ways that are extremely hard to debug.",
+        "The two carry a contract that matters when you write them yourself: `equals` must agree with `hashCode`, both must be symmetric and transitive, and `a.equals(b)` should be true exactly when `a.compareTo(b) == 0`. The Javadoc strongly recommends that last one rather than requiring it, and `BigDecimal` breaks it: `2.0` and `2.00` compare equal and are not `equals`, so a `TreeSet` holds one of them and a `HashSet` holds both. Violating any of these breaks sorting and hash maps in ways that are extremely hard to debug.",
       ],
       examples: [
         {
@@ -199,7 +199,7 @@ True`,
     {
       question: "What does `compareTo` return?",
       answer:
-        "A negative `int` if the receiver sorts before the argument, zero if they are equal, and a positive `int` if it sorts after. Only the sign is specified — the magnitude is an implementation detail and code that relies on it, such as expecting exactly −1, is wrong. The contract also requires that `compareTo` returning zero agrees with `equals`, and that `equals` agrees with `hashCode`; breaking either produces sorting and hash-map bugs that are very hard to trace.",
+        "A negative `int` if the receiver sorts before the argument, zero if they are equal, and a positive `int` if it sorts after. Only the sign is specified — the magnitude is an implementation detail and code that relies on it, such as expecting exactly −1, is wrong. The contract requires that `equals` agrees with `hashCode`, and strongly recommends that `compareTo` returning zero agrees with `equals` — `BigDecimal` is the standard exception, where `2.0` and `2.00` compare equal and are not `equals`; breaking either produces sorting and hash-map bugs that are very hard to trace.",
     },
     {
       question: "How do you compare two arrays for equality in Java?",

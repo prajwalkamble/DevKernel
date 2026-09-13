@@ -41,7 +41,6 @@ export const twoPointerSheetLesson: Lesson = {
       body: [
         "Before writing the loop, answer this: **when I move a pointer, what set of candidates am I discarding, and why is none of them the answer?**",
         "If you can answer it in a sentence, write the loop. If you cannot, one of three things is true: the input needs sorting first, the problem needs a hash map instead, or it is a sliding window and you should be maintaining a summary of the region between the pointers rather than just walking them.",
-        "That question is also, almost word for word, what a good interviewer will ask you after you finish. Answering it unprompted is worth more than finishing thirty seconds sooner.",
       ],
       pitfalls: [
         {
@@ -53,6 +52,18 @@ export const twoPointerSheetLesson: Lesson = {
           body: "If you are maintaining a running sum, count or frequency map of what lies between the pointers, that is a sliding window. The next module gives it a structure — grow, then shrink while a condition holds — that is easier to get right than improvising.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "How do you recognise which two-pointer shape a problem needs?",
+      answer:
+        "Four shapes. Opposite ends converging: a sorted array and a question about a pair, or the container and rain-water family. Same direction read/write: in place, return the new length, O(1) extra space, filtering or partitioning. Same direction with a lag or different speeds: linked lists, nth from the end, the middle, cycle detection. One pointer per sequence: merging two sorted inputs, subsequence checks, comparing two strings.",
+    },
+    {
+      question: "What should you be able to answer before writing a two-pointer loop?",
+      answer:
+        "When I move a pointer, what candidates am I discarding, and why is none of them the answer? If I can say it in a sentence, I write the loop. If I cannot, the input needs sorting first, the problem needs a hash map, or it is a sliding window and I should be maintaining a summary of the region between the pointers. It is also nearly word for word what a good interviewer asks afterwards.",
     },
   ],
   takeaways: [

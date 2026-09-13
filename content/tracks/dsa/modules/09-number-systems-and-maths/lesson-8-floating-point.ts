@@ -139,7 +139,7 @@ Java's Math.round uses half-up: 2.5 -> 3, 3.5 -> 4, -2.5 -> -2`,
         "Never compare floats with `==`. Compare the **magnitude of their difference against a tolerance**.",
         "**Absolute epsilon:** `abs(a - b) <= 1e-9`. Simple, and right when the values are known to be near a modest scale.",
         "**Relative epsilon:** `abs(a - b) <= eps * max(abs(a), abs(b))`. Right when the scale varies, because an absolute tolerance of 1e-9 is meaningless next to values of 10¹⁶, where the smallest possible gap is already 2.",
-        "Python's `math.isclose` does both at once — relative by default with an absolute floor — and is what you should reach for. Java has no equivalent in the standard library, so you write it.",
+        "Python's `math.isclose` does both at once — a relative tolerance by default, plus an absolute floor you must set yourself, since `abs_tol` defaults to 0 — and is what you should reach for. Java has no equivalent in the standard library, so you write it.",
         "Interview problems that involve floats usually state a tolerance, typically 10⁻⁵ or 10⁻⁶. Read it; it tells you which comparison they expect.",
       ],
       examples: [
@@ -238,15 +238,6 @@ comparing slopes exactly (collinearity):
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "That is the numeric toolkit. Bases and two's complement explain how values are stored; digits, divisors, GCD, powers and modular arithmetic are the operations that appear inside problems; and this lesson is the standing warning about the one representation that lies.",
-        "**The through-line:** integers are exact and bounded, floats are inexact and vast. Every technique in this module — the √n bound, running modular reduction, cross-multiplication, exponentiation by squaring — exists to keep exact integer arithmetic inside its bounds rather than escaping to floats.",
-        "Two modules remain in this track. Next is a tour of the data structures themselves, and then complexity analysis, which is the vocabulary for everything after.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -257,7 +248,7 @@ comparing slopes exactly (collinearity):
     {
       question: "How should you compare two floating-point values?",
       answer:
-        "By the magnitude of their difference against a tolerance, never with `==`. An absolute epsilon — `abs(a - b) <= 1e-9` — is fine when the values are near a known modest scale. A relative one — scaling the tolerance by the larger magnitude — is needed when the scale varies, because at 10¹⁶ two *adjacent* doubles differ by 2, so any absolute tolerance below that calls them unequal. `math.isclose` does both; in Java you write it yourself. And remember NaN compares false against everything including itself.",
+        "By the magnitude of their difference against a tolerance, never with `==`. An absolute epsilon — `abs(a - b) <= 1e-9` — is fine when the values are near a known modest scale. A relative one — scaling the tolerance by the larger magnitude — is needed when the scale varies, because at 10¹⁶ two *adjacent* doubles differ by 2, so any absolute tolerance below that calls them unequal. `math.isclose` does both once you pass `abs_tol` for values near zero; in Java you write it yourself. And remember NaN compares false against everything including itself.",
     },
     {
       question: "How would you compare two fractions without floating point?",

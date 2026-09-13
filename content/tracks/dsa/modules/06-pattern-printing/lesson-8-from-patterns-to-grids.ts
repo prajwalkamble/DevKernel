@@ -64,7 +64,6 @@ total: 45`,
       id: "aliasing-demo",
       heading: "The grid-creation trap, demonstrated",
       body: [
-        "This deserves seeing rather than being warned about, because the symptom is bizarre and the cause is invisible.",
       ],
       examples: [
         {
@@ -170,16 +169,6 @@ cell (0,0) = 1, neighbours [4, 2]`,
         },
       ],
     },
-    {
-      id: "closing",
-      heading: "Closing the module",
-      body: [
-        "Eight lessons of shapes, cashed in. What you should have now is that two nested loops over rows and columns, with a decision per position, is *automatic* — not something you derive each time.",
-        "That is the whole objective, and it is the reason this module exists in a DSA track at all. Every matrix problem in Module 1 is these loops. Every dynamic-programming table is these loops. The difference is only what the decision at each cell is.",
-        "One honest caveat: **pattern printing itself is not an interview topic.** Nobody will ask you to print a diamond. The bounds fluency transfers; the shapes do not. Do a dozen, get fast, and move on.",
-        "Next is functions and the call stack, where these loops start getting names.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -206,6 +195,5 @@ cell (0,0) = 1, neighbours [4, 2]`,
     "Both diagonals need one loop, not two with a condition",
     "`0 <= r < rows and 0 <= c < cols` as a named function removes every edge and corner special case",
     "A direction list as data keeps flood fill and BFS short",
-    "Pattern printing is not an interview topic; the bounds fluency is what transfers",
   ],
 };

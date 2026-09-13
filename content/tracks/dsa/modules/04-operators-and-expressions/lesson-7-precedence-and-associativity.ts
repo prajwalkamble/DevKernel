@@ -26,7 +26,7 @@ export const precedenceLesson: Lesson = {
         "**3 — additive.** `+`, `-`.",
         "**4 — shifts, then relational, then equality.** `<<` `>>`, then `<` `<=` `>` `>=`, then `==` `!=`.",
         "**5 — bitwise, then logical.** `&`, then `^`, then `|`, then `&&`, then `||`. Loosest.",
-        "That is Java's ordering. Python agrees on everything except one thing: it places the bitwise operators *tighter* than comparison rather than looser, which is the subject of the next section and the only precedence difference between the two languages you will meet.",
+        "That is Java's ordering. Python agrees on everything except one thing: it places the bitwise operators *tighter* than comparison rather than looser, which is the subject of the next section. It is not the only difference: Python's `not` binds looser than comparisons, so `not 1 == 2` is `True`, and `**` binds tighter than unary minus, so `-2 ** 2` is `-4`.",
       ],
     },
     {
@@ -147,7 +147,6 @@ sum: 3
         "**Know that `*` beats `+`. Bracket everything else.**",
         "That is the whole recommendation. Brackets cost nothing at run time, cost two characters in the source, and are never ambiguous to a reader. Memorising fifteen precedence levels buys you the ability to write expressions that a reviewer has to look up.",
         "The stronger version, for anything with more than two operators: **give the intermediate a name.** `int mid = lo + (hi - lo) / 2;` is clearer than the same expression inlined into an array access, and when it misbehaves you can print it.",
-        "This is not a beginner's crutch. Experienced people bracket more, not less, because they have debugged more precedence bugs.",
       ],
       examples: [
         {
@@ -179,7 +178,7 @@ mid=2 values[mid]=2 values[hi]=4`,
     {
       question: "What does `x & 1 == 0` evaluate to, and why?",
       answer:
-        "Not what it looks like. Comparison binds tighter than the bitwise operators, so it parses as `x & (1 == 0)`. In Java that is a compile error since you cannot AND an `int` with a `boolean`. In Python `1 == 0` is `False`, which is 0 numerically, so the whole expression is 0 for every input — silently wrong, and falsy, so an `if` on it never fires. The correct form is `(x & 1) == 0`, and bitwise operations being compared should always be bracketed.",
+        "It depends on the language, and that is the trap. Java ranks `==` above `&`, so it parses as `x & (1 == 0)` — a compile error, since you cannot AND an `int` with a `boolean`. Python ranks `&` above `==`, so it parses as `(x & 1) == 0`: `True` for 6 and `False` for 7, exactly the evenness test it looks like. Writing `(x & 1) == 0` makes both languages agree, which is why a bitwise operation being compared should always be bracketed.",
     },
     {
       question: "Why is `10 - 4 - 3` equal to 3 rather than 9?",

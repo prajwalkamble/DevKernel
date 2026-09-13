@@ -533,6 +533,18 @@ sequence rises at mid+1 and must eventually stop rising (the edge is -inf).`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find a peak element in an unsorted array in O(log n).",
+      answer:
+        "Compare a[mid] with a[mid + 1]. If a[mid] < a[mid + 1], the sequence is rising there, and since the edge beyond the array counts as negative infinity the rise must stop somewhere to the right, so a peak exists in [mid + 1, hi]; otherwise one exists in [lo, mid]. Use hi = len - 1 and loop while lo < hi so mid + 1 is always valid. No sortedness is needed, because one local comparison rules out a side.",
+    },
+    {
+      question: "Does that find the maximum?",
+      answer:
+        "No, it finds a peak: an element at least as large as both neighbours. In the lesson's example it returns 5 at index 1 while the maximum is 9 at index 3, and that is a correct answer to the question asked. Finding the global maximum requires looking at every element, so no logarithmic algorithm can do it.",
+    },
+  ],
   takeaways: [
     "A peak is at least as large as both neighbours, with edges treated as -infinity",
     "One always exists, by a rise-must-stop argument",

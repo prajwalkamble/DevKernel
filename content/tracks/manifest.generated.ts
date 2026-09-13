@@ -77,7 +77,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "Comments, Naming & Code You Can Read Tomorrow",
             "estimatedMinutes": 20,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           },
           {
             "slug": "errors-and-how-they-announce-themselves",
@@ -326,7 +326,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Ternary Operator, and Where It Helps",
             "estimatedMinutes": 15,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },
@@ -476,7 +476,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "From Patterns to Grids",
             "estimatedMinutes": 25,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },
@@ -551,7 +551,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "Stack Overflow: Causing One, Reading It, Fixing It",
             "estimatedMinutes": 20,
             "status": "available",
-            "takeawayCount": 8
+            "takeawayCount": 7
           }
         ]
       },
@@ -859,7 +859,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "the-framework",
         "trackSlug": "dsa",
         "title": "The Framework: From Statement to First Line of Code",
-        "description": "The module most courses do not have, and the reason their graduates still freeze. A repeatable seven-step method for taking apart a problem you have never seen: restate it, work it by hand, write the brute force, read the constraints backwards to a target complexity, let the dominant operation choose the structure, match the shape to a pattern, and only then write code. Six of the seven steps happen before you type anything. It ends by running all seven, from cold, on a problem that appears nowhere else in this track.",
+        "description": "A repeatable seven-step method for taking apart a problem you have never seen: restate it, work it by hand, write the brute force, read the constraints backwards to a target complexity, let the dominant operation choose the structure, match the shape to a pattern, and only then write code. Six of the seven steps happen before you type anything. It ends by running all seven, from cold, on a problem that appears nowhere else in this track.",
         "order": 12,
         "status": "available",
         "phase": "Bridge · The Problem-Solving Framework",
@@ -1009,7 +1009,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "bit-manipulation-and-math",
         "trackSlug": "dsa",
         "title": "Bit Manipulation, Math & Number Theory",
-        "description": "The two areas that feel like trivia until the problem in front of you is one of them — and then nothing else will do. Bits reframed as a set, so that `n ≤ 20` stops being a constraint and starts being an instruction; XOR's three identities and the family of problems they collapse into one loop; subset enumeration and the 3^n bound that makes it feasible. Then the number theory an interview actually reaches for: Euclid, sieves and factorisation, modular arithmetic with fast exponentiation and inverses, nCr under a prime modulus — and finally overflow, which is where a correct Python solution goes wrong on the way to Java.",
+        "description": "Bits reframed as a set, so that `n ≤ 20` stops being a constraint and starts being an instruction; XOR's three identities and the family of problems they collapse into one loop; subset enumeration and the 3^n bound that makes it feasible. Then the number theory an interview actually reaches for: Euclid, sieves and factorisation, modular arithmetic with fast exponentiation and inverses, nCr under a prime modulus — and finally overflow, which is where a correct Python solution goes wrong on the way to Java.",
         "order": 14,
         "status": "available",
         "phase": "Module 1 · Linear DSA",
@@ -1084,7 +1084,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "binary-search",
         "trackSlug": "dsa",
         "title": "Binary Search & Binary Search on the Answer",
-        "description": "The most-failed easy question there is, and then the technique that quietly solves a whole family of hard ones. The two loop conventions and why mixing them is where every off-by-one comes from; the boundary searches that answer \"first\", \"last\" and \"how many\"; the rotated and matrix variants; and then the reframe that matters most — searching the range of possible answers rather than the input, which turns \"minimise the maximum\" into the same twelve lines. Ends on real-valued precision, binary search as the inner step of a larger algorithm, and a peak-finding problem with no sorted input at all.",
+        "description": "The two loop conventions and why mixing them is where every off-by-one comes from; the boundary searches that answer \"first\", \"last\" and \"how many\"; the rotated and matrix variants; and then the reframe that matters most — searching the range of possible answers rather than the input, which turns \"minimise the maximum\" into the same twelve lines. Ends on real-valued precision, binary search as the inner step of a larger algorithm, and a peak-finding problem with no sorted input at all.",
         "order": 15,
         "status": "available",
         "phase": "Module 1 · Linear DSA",
@@ -1151,7 +1151,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet: Recognising Which Variant",
             "estimatedMinutes": 30,
             "status": "available",
-            "takeawayCount": 7
+            "takeawayCount": 6
           }
         ]
       },
@@ -1301,7 +1301,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet: Recognising a Window",
             "estimatedMinutes": 25,
             "status": "available",
-            "takeawayCount": 7
+            "takeawayCount": 6
           }
         ]
       },
@@ -1676,7 +1676,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet, and How to Not Get Lost",
             "estimatedMinutes": 30,
             "status": "available",
-            "takeawayCount": 6
+            "takeawayCount": 5
           }
         ]
       },
@@ -1751,7 +1751,7 @@ export const trackMetas: TrackMeta[] = [
             "title": "The Sheet",
             "estimatedMinutes": 25,
             "status": "available",
-            "takeawayCount": 6
+            "takeawayCount": 5
           }
         ]
       },
@@ -1759,7 +1759,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "trees",
         "trackSlug": "dsa",
         "title": "Trees & Binary Search Trees",
-        "description": "Where recursion stops being a party trick. Traversals, the ordering invariant that makes a BST searchable, and the balancing that stops it degenerating into a linked list. The three depth-first orders are taught as one function with the visit line moved, because that is what tells you which one a problem needs — context carried down is pre-order, summaries returned up is post-order, and that single question settles most tree problems. A full lesson goes to validating a BST, since the obvious local check returns a wrong answer rather than a slow one. Ends on serialisation, which forces precision about what a traversal actually records and why in-order alone can never rebuild a tree.",
+        "description": "Traversals, the ordering invariant that makes a BST searchable, and the balancing that stops it degenerating into a linked list. The three depth-first orders are taught as one function with the visit line moved, because that is what tells you which one a problem needs — context carried down is pre-order, summaries returned up is post-order, and that single question settles most tree problems. A full lesson goes to validating a BST, since the obvious local check returns a wrong answer rather than a slow one. Ends on serialisation, which forces precision about what a traversal actually records and why in-order alone can never rebuild a tree.",
         "order": 24,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -1984,7 +1984,7 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-foundations",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: Foundations",
-        "description": "The technique people find hardest, taught the only way that works: start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. From there it is the state as a sentence you can write down, the two halves of a recurrence and the base case people leave out, the same table filled in two orders, the rows that can be thrown away and what that costs, getting the actual answer back rather than its value, and a closing lesson on recognising a problem you have already solved wearing different clothes.",
+        "description": "Start from a recursion you already believe, then make it fast. It opens on the diagnosis rather than the tables — the two preconditions, one of them measurable in six lines and the other the reason people write fast programs that print wrong answers. From there it is the state as a sentence you can write down, the two halves of a recurrence and the base case people leave out, the same table filled in two orders, the rows that can be thrown away and what that costs, getting the actual answer back rather than its value, and a closing lesson on recognising a problem you have already solved wearing different clothes.",
         "order": 27,
         "status": "available",
         "phase": "Module 1 · Non-linear DSA",
@@ -2059,18 +2059,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "dynamic-programming-patterns",
         "trackSlug": "dsa",
         "title": "Dynamic Programming: The Patterns",
-        "description": "The catalogue. Nine recognisable shapes covering the overwhelming majority of DP problems — the module that converts \"I understood the solution\" into \"I found the solution\".",
+        "description": "Module 27 was the method; this is the small set of shapes the method keeps producing, starting with the one more problems reduce to than any other — a subset chosen against a single additive budget. Eight lessons: the knapsack family and subset sum, the string-pair grid, longest increasing subsequence, grids, intervals, trees and rerooting, and the bitmask, digit and state-machine variants.",
         "order": 28,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "the-knapsack-family",
             "moduleSlug": "dynamic-programming-patterns",
-            "title": "Dynamic Programming: The Patterns — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "The Knapsack Family",
+            "estimatedMinutes": 40,
+            "status": "available",
             "takeawayCount": 8
+          },
+          {
+            "slug": "subset-sum-and-its-reductions",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "Subset Sum and Its Reductions",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "the-string-pair-grid",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "The String-Pair Grid",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "longest-increasing-subsequence",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "Longest Increasing Subsequence",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 9
+          },
+          {
+            "slug": "grids-and-paths",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "Grids and Paths",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 9
+          },
+          {
+            "slug": "interval-dp",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "Interval DP",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "dp-on-trees",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "DP on Trees, and Rerooting",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 9
+          },
+          {
+            "slug": "bitmask-digit-and-state-machines",
+            "moduleSlug": "dynamic-programming-patterns",
+            "title": "Bitmask, Digit and State-Machine DP",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 9
           }
         ]
       },
@@ -2078,18 +2134,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graphs",
         "trackSlug": "dsa",
         "title": "Graphs: Modelling, BFS & DFS",
-        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything.",
+        "description": "The most general structure here, and the one most real problems turn out to be. Two traversals cover a surprising share of everything — but the traversals are the easy part, so this module starts where the difficulty actually is: deciding what a node is, how to store it, and which of the three words in the problem statement changes the algorithm. Eight lessons: modelling, representations, the vocabulary, the two traversals, the visited set, components and flood fill, and cycle detection.",
         "order": 29,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "modelling-a-problem-as-a-graph",
             "moduleSlug": "graphs",
-            "title": "Graphs: Modelling, BFS & DFS — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Modelling a Problem as a Graph",
+            "estimatedMinutes": 45,
+            "status": "available",
             "takeawayCount": 8
+          },
+          {
+            "slug": "representations",
+            "moduleSlug": "graphs",
+            "title": "Adjacency Lists, Matrices and Edge Lists",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 9
+          },
+          {
+            "slug": "directed-weighted-and-acyclic",
+            "moduleSlug": "graphs",
+            "title": "Directed, Weighted and Acyclic",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "depth-first-search",
+            "moduleSlug": "graphs",
+            "title": "Depth-First Search",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "breadth-first-search",
+            "moduleSlug": "graphs",
+            "title": "Breadth-First Search and Shortest Paths",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "the-visited-set",
+            "moduleSlug": "graphs",
+            "title": "The Visited Set",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "components-and-flood-fill",
+            "moduleSlug": "graphs",
+            "title": "Connected Components and Flood Fill",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "cycle-detection",
+            "moduleSlug": "graphs",
+            "title": "Cycle Detection",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
           }
         ]
       },
@@ -2097,18 +2209,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "graph-algorithms",
         "trackSlug": "dsa",
         "title": "Graph Algorithms: Shortest Paths, MST & Ordering",
-        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong.",
+        "description": "The named algorithms, each introduced by the problem that forced its invention — and the conditions under which each one is wrong. Eight lessons: Dijkstra and the settle-once claim, Bellman-Ford and negative cycles, Floyd-Warshall and the loop order, 0-1 BFS and the deque, topological sort and DAG dynamic programming, union-find, minimum spanning trees, and strongly connected components.",
         "order": 30,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · Non-linear DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "dijkstra",
             "moduleSlug": "graph-algorithms",
-            "title": "Graph Algorithms: Shortest Paths, MST & Ordering — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
-            "takeawayCount": 8
+            "title": "Dijkstra, and What a Negative Edge Does",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "bellman-ford",
+            "moduleSlug": "graph-algorithms",
+            "title": "Bellman-Ford and Negative Cycles",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "floyd-warshall",
+            "moduleSlug": "graph-algorithms",
+            "title": "Floyd-Warshall and the Loop Order",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "zero-one-bfs",
+            "moduleSlug": "graph-algorithms",
+            "title": "0-1 BFS and the Deque",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "topological-sort",
+            "moduleSlug": "graph-algorithms",
+            "title": "Topological Sort and DAG Dynamic Programming",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "union-find",
+            "moduleSlug": "graph-algorithms",
+            "title": "Union-Find: Grouping Under Merges",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "minimum-spanning-trees",
+            "moduleSlug": "graph-algorithms",
+            "title": "Minimum Spanning Trees: Prim, Kruskal and the Cut Property",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
+          },
+          {
+            "slug": "strongly-connected-components",
+            "moduleSlug": "graph-algorithms",
+            "title": "Strongly Connected Components and the Condensation",
+            "estimatedMinutes": 45,
+            "status": "available",
+            "takeawayCount": 10
           }
         ]
       },
@@ -2116,17 +2284,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "pattern-atlas-drills",
         "trackSlug": "dsa",
         "title": "The Pattern Atlas: Recognition Drills",
-        "description": "Drills in which you are forbidden to write code. You read a statement and name the pattern, the structure and the target complexity — because that is the step you are actually missing, and practising it separately is the fastest way to fix it.",
+        "description": "Drills in which you are forbidden to write code. You read a statement and name the pattern, the structure and the target complexity — because that is the step you are actually missing, and practising it separately is the fastest way to fix it. Eight lessons: the sixty-second drill, reading the constraints backwards, the phrases that give a pattern away and the ones that mislead, two pairs of near-identical statements taken apart with measurements, what to do when two patterns both apply, growing a decision tree from your own misses, and spacing repetitions over patterns rather than over problems.",
         "order": 31,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "sixty-seconds",
             "moduleSlug": "pattern-atlas-drills",
-            "title": "The Pattern Atlas: Recognition Drills — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Sixty Seconds: Statement to Pattern",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "constraints-backwards",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Reading the Constraints Backwards",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "tells-and-traps",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "The Phrases That Give a Pattern Away, and the Ones That Mislead",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "window-or-prefix-map",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Window or Prefix Map: Telling Near-Identical Statements Apart",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "greedy-or-dp",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Greedy or DP: One Word Changes the Answer",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "two-patterns-both-apply",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "When Two Patterns Both Apply",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "your-own-decision-tree",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Building Your Own Decision Tree, and Pruning It",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "spacing-patterns",
+            "moduleSlug": "pattern-atlas-drills",
+            "title": "Spacing Patterns Rather Than Problems",
+            "estimatedMinutes": 25,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
@@ -2135,17 +2359,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "the-sheet",
         "trackSlug": "dsa",
         "title": "The Sheet: Company-Wise & Topic-Wise Grind Plans",
-        "description": "How to grind so that it compounds. Ordered sheets by topic, by pattern and by company, with a schedule that revisits rather than accumulates.",
+        "description": "How to grind so that it compounds. A pattern sheet is a dependency graph wearing a list costume, and the measurement here says what ignoring that costs. Eight lessons: why order beats volume, what finishing a pattern means precisely enough to check, how much signal a company list really carries, the progression inside a single pattern, how long to stare before looking, the step everybody skips after reading a solution, which problems earn a revisit, and the six fields worth logging.",
         "order": 32,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "order-beats-volume",
             "moduleSlug": "the-sheet",
-            "title": "The Sheet: Company-Wise & Topic-Wise Grind Plans — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "The Ordered Core Sheet, and Why Order Beats Volume",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "finish-a-pattern",
+            "moduleSlug": "the-sheet",
+            "title": "Topic-Wise Sheets: Finishing a Pattern Before Moving On",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "company-sheets",
+            "moduleSlug": "the-sheet",
+            "title": "Company-Wise Sheets, and How Much Signal They Carry",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "easy-medium-hard",
+            "moduleSlug": "the-sheet",
+            "title": "The Easy–Medium–Hard Progression Within a Pattern",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "twenty-minute-rule",
+            "moduleSlug": "the-sheet",
+            "title": "How Long to Stare Before Looking",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "after-you-look",
+            "moduleSlug": "the-sheet",
+            "title": "What to Do After You Look at the Solution",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "re-solving",
+            "moduleSlug": "the-sheet",
+            "title": "Re-Solving From Scratch, and the Spacing That Makes It Stick",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "tracking",
+            "moduleSlug": "the-sheet",
+            "title": "Tracking: What to Log So a Solved Problem Stays Solved",
+            "estimatedMinutes": 25,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
@@ -2153,19 +2433,75 @@ export const trackMetas: TrackMeta[] = [
       {
         "slug": "interview-technique",
         "trackSlug": "dsa",
-        "title": "Interview Technique: Thinking Out Loud",
-        "description": "Knowing the algorithm and passing the interview are different skills. How to attack an unseen problem in front of somebody, and how to talk while you do it.",
+        "title": "Interview Technique: Communicating a Solution",
+        "description": "The part of the assessment that is not the algorithm. Two of these lessons are measured rather than asserted: four hand-picked tests caught one of four seeded bugs where a brute-force oracle caught all four, and four versions of one problem each have a single visible loop while two of them are quadratic. Eight lessons: the clarifying questions worth asking, restating before solving, the brute force as an oracle, narrating the optimisation, stating complexity including space, testing before they ask, getting unstuck in public, and the last five minutes.",
         "order": 33,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "first-two-minutes",
             "moduleSlug": "interview-technique",
-            "title": "Interview Technique: Thinking Out Loud — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
-            "takeawayCount": 8
+            "title": "The First Two Minutes: Clarifying Questions Worth Asking",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "restate-and-confirm",
+            "moduleSlug": "interview-technique",
+            "title": "Restating the Problem, and Confirming It Before You Solve It",
+            "estimatedMinutes": 25,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "brute-force-out-loud",
+            "moduleSlug": "interview-technique",
+            "title": "The Brute Force, Out Loud, First",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "narrating-the-optimisation",
+            "moduleSlug": "interview-technique",
+            "title": "Narrating the Optimisation: Naming the Waste",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "stating-your-complexity",
+            "moduleSlug": "interview-technique",
+            "title": "Stating Your Complexity, Including the Space",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "testing-before-they-ask",
+            "moduleSlug": "interview-technique",
+            "title": "Testing Before They Ask, and Which Cases to Pick",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "getting-unstuck-in-public",
+            "moduleSlug": "interview-technique",
+            "title": "Getting Unstuck in Public, and What a Hint Tells You",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "the-last-five-minutes",
+            "moduleSlug": "interview-technique",
+            "title": "The Last Five Minutes: Closing, Behavioural Framing, and What to Ask",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
           }
         ]
       },
@@ -2173,17 +2509,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "algorithms-behind-gen-ai",
         "trackSlug": "dsa",
         "title": "The Data Structures & Algorithms Behind Gen AI",
-        "description": "Everything in this track, applied to the systems everyone is now building on. A vector database is a graph search, tokenisation is a greedy merge over a frequency map, and sampling a token is a heap.",
+        "description": "Everything in this track, applied to the systems everyone is now building on. A vector database is a graph search, tokenisation is a greedy merge over a frequency map, and sampling a token is a heap. Every lesson is measured: greedy byte-pair merges are optimal 2,687 times in 3,000, cosine survives rescaling 3,000 times in 3,000 where the dot product survives 1,190, a bounded heap spends 1.04 comparisons a document while the distance count stays at exactly n, and fusing a strong ranking with a weak one scores worse than the strong one alone.",
         "order": 34,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Module 1 · The Grind",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "tokenisation",
             "moduleSlug": "algorithms-behind-gen-ai",
-            "title": "The Data Structures & Algorithms Behind Gen AI — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Tokenisation: Byte-Pair Encoding as a Greedy Merge",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "embeddings-and-distance",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Embeddings and Distance: Cosine, Dot Product, Euclidean",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "exact-knn",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Exact k-Nearest Neighbours, and Where It Stops",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "approximate-neighbours",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Approximate Nearest Neighbours: Hashing, Clusters and Graphs",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "vector-quantisation",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Vector Quantisation, and the Shortlist That Rescues It",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "the-kv-cache",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "The KV Cache: A Growing Array, and Why Context Costs",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "decoding-strategies",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Decoding: Greedy, Beam Search, and Bounded Priority Queues",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "retrieval-pipelines",
+            "moduleSlug": "algorithms-behind-gen-ai",
+            "title": "Retrieval Pipelines: Inverted Indexes, BM25, Fusion and Reranking",
+            "estimatedMinutes": 40,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
@@ -2192,18 +2584,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "advanced-data-structures",
         "trackSlug": "dsa",
         "title": "Advanced Data Structures",
-        "description": "The structures that answer a question no simpler structure can answer fast — range queries, prefix queries, and dynamic connectivity.",
+        "description": "The structures that answer a question no simpler structure can answer fast — prefix queries, range queries with updates, and connectivity with relations. Eight lessons: tries, union-find with a value per node, Fenwick trees, segment trees, lazy propagation, sparse tables, order-statistic trees, and choosing between them by measured cost.",
         "order": 35,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Electives · Advanced DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "tries",
             "moduleSlug": "advanced-data-structures",
-            "title": "Advanced Data Structures — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "Tries: Prefix Search, Autocomplete, and the Memory Trade",
+            "estimatedMinutes": 35,
+            "status": "available",
             "takeawayCount": 8
+          },
+          {
+            "slug": "union-find-in-anger",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Union-Find in Anger: Storing a Relation to the Parent",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 8
+          },
+          {
+            "slug": "fenwick-trees",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Fenwick Trees: Prefix Sums That Survive Updates",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "segment-trees",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Segment Trees: Range Query, Point Update",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "lazy-propagation",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Lazy Propagation: Range Updates on a Segment Tree",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "sparse-tables",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Sparse Tables: Constant-Time Range Minimum",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "order-statistic-trees",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Balanced BSTs and Order-Statistic Trees",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "choosing-a-structure",
+            "moduleSlug": "advanced-data-structures",
+            "title": "Choosing Between Them: The Decision the Constraints Make",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
           }
         ]
       },
@@ -2211,17 +2659,73 @@ export const trackMetas: TrackMeta[] = [
         "slug": "advanced-algorithms",
         "trackSlug": "dsa",
         "title": "Advanced Algorithms & String Matching",
-        "description": "The specialised toolkit: string matching, hashing tricks, and the geometry that shows up just often enough to be worth knowing.",
+        "description": "The specialised toolkit: string matching, hashing, suffix structures, fast recurrences, geometry, and randomisation. Eight lessons: KMP, the Z-algorithm, Rabin-Karp and its collisions, Manacher's algorithm, suffix arrays with LCP, matrix exponentiation, orientation-based geometry, and randomised algorithms whose error is measured.",
         "order": 36,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Electives · Advanced DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "kmp",
             "moduleSlug": "advanced-algorithms",
-            "title": "Advanced Algorithms & String Matching — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
+            "title": "KMP and the Failure Function",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "z-algorithm",
+            "moduleSlug": "advanced-algorithms",
+            "title": "The Z-Algorithm, and When It Is Simpler Than KMP",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "rabin-karp",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Rabin-Karp, Rolling Hashes, and Collisions",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "manachers-algorithm",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Manacher's Algorithm for Palindromes",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "suffix-arrays",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Suffix Arrays and the Problems They Trivialise",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "matrix-exponentiation",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Matrix Exponentiation for Linear Recurrences",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "computational-geometry",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Computational Geometry: Orientation, Convex Hull, Segment Intersection",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "randomised-algorithms",
+            "moduleSlug": "advanced-algorithms",
+            "title": "Randomised Algorithms, and When Approximate Is the Right Answer",
+            "estimatedMinutes": 35,
+            "status": "available",
             "takeawayCount": 8
           }
         ]
@@ -2230,18 +2734,74 @@ export const trackMetas: TrackMeta[] = [
         "slug": "advanced-dp-and-graph-problems",
         "trackSlug": "dsa",
         "title": "Advanced DP & Graph Problems",
-        "description": "Where the two hardest topics stop being separate. Problems that need a DP over a graph, a graph built out of a DP state, or a technique from each composed into one solution.",
+        "description": "Where the two hardest topics stop being separate. Eight lessons: rerooting when the combine has no inverse, DP over subsets, digit DP, shortest paths as DP with a hop limit, binary lifting, Euler tours, network flow, and composing two techniques into one solution.",
         "order": 37,
-        "status": "coming-soon",
+        "status": "available",
         "phase": "Electives · Advanced DSA",
         "lessons": [
           {
-            "slug": "coming-soon",
+            "slug": "rerooting",
             "moduleSlug": "advanced-dp-and-graph-problems",
-            "title": "Advanced DP & Graph Problems — Coming Soon",
-            "estimatedMinutes": 0,
-            "status": "coming-soon",
-            "takeawayCount": 8
+            "title": "DP on Trees: Rerooting When the Combine Has No Inverse",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "dp-over-subsets",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Bitmask DP Over Subsets: Submask Walks and Sum Over Subsets",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "digit-dp",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Digit DP: Counting Numbers With a Property",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "shortest-paths-as-dp",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Shortest Paths as Dynamic Programming",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "binary-lifting",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Binary Lifting and Logarithmic Lowest Common Ancestor",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "euler-tours",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Euler Tours: Flattening a Tree Into an Array",
+            "estimatedMinutes": 30,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "network-flow",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Network Flow: Max-Flow, Min-Cut, and Bipartite Matching",
+            "estimatedMinutes": 40,
+            "status": "available",
+            "takeawayCount": 7
+          },
+          {
+            "slug": "composing-techniques",
+            "moduleSlug": "advanced-dp-and-graph-problems",
+            "title": "Composing Two Techniques: Binary Search Over a Matching",
+            "estimatedMinutes": 35,
+            "status": "available",
+            "takeawayCount": 7
           }
         ]
       }

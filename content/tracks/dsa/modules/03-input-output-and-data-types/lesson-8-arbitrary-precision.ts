@@ -62,7 +62,7 @@ print(len(str(2 ** 1000)))`,
       heading: "Why problems say \"modulo 10⁹ + 7\"",
       body: [
         "You will see this constantly: *return the answer modulo 1000000007*. It is not decoration and it is not about avoiding large output.",
-        "It exists so the answer **fits in a machine word**. The true answer to a counting problem might have thousands of digits; reduced modulo a prime just under 2³¹, every intermediate value stays under 10⁹ and every operation stays in fixed-width arithmetic. That makes the problem solvable identically in Java and Python, at the same speed.",
+        "It exists so the answer **fits in a machine word**. The true answer to a counting problem might have thousands of digits; reduced modulo 10⁹ + 7 — a prime just under 2³⁰ — every stored value stays below the modulus, every product of two of them stays below 2⁶³, and every operation stays in fixed-width arithmetic. That makes the problem solvable identically in Java and Python.",
         "The rule when you see it: **take the modulus at every step**, not at the end. Reducing only at the end means the intermediate values overflowed long before you got there.",
         "The prime is chosen so that it is just below 2³¹ — so two reduced values can be added in an `int` — and prime so that modular inverses exist, which matters once division enters.",
       ],
@@ -91,7 +91,7 @@ exact % MOD: 109361473
 reduced    : 109361473
 they agree : True`,
           explanation:
-            "Thirty factorial has 33 digits and would overflow a `long` many times over, yet reducing at every step gives the same answer as computing it exactly and reducing once — because modular arithmetic commutes with multiplication. Every intermediate in the reduced version stays below 10⁹, so the identical loop works in Java with `long` and never overflows.",
+            "Thirty factorial has 33 digits and would overflow a `long` many times over, yet reducing at every step gives the same answer as computing it exactly and reducing once — because taking the remainder before or after a multiplication gives the same result: `(a × b) mod m = ((a mod m) × (b mod m)) mod m`. Every stored value in the reduced version stays below 10⁹ + 7 and every product below 10¹⁸, so the identical loop works in Java with `long` and never overflows.",
         },
       ],
       pitfalls: [
@@ -141,16 +141,8 @@ public class Main {
       pitfalls: [
         {
           title: "Using `==` on BigInteger",
-          body: "It compares references, not values, and will be false for two separately-computed equal numbers. Use `.equals()` for equality and `.compareTo()` for ordering. The same trap as boxed `Integer`, with no small-value cache to make it accidentally work.",
+          body: "It compares references, not values, and will be false for two separately-computed equal numbers. Use `.equals()` for equality and `.compareTo()` for ordering. The same trap as boxed `Integer` — and like it, `BigInteger.valueOf` reuses a few small constants, so `==` can even appear to work on small values.",
         },
-      ],
-    },
-    {
-      id: "closing",
-      heading: "Closing the module",
-      body: [
-        "That is input, output and data types. The theme running through all eight lessons is the same: **fixed-width types are fast because they are small, and they lie when you exceed them.** Java exposes that directly and Python hides it for integers while keeping it for floats.",
-        "Three things to carry forward. Read the constraints and estimate whether your answer fits before you choose a type. Never compare computed floating-point values with `==`. And when a problem says \"modulo 10⁹ + 7\", it is telling you the intended answer is counting something enormous — and handing you the tool that makes it fit.",
       ],
     },
   ],
@@ -163,7 +155,7 @@ public class Main {
     {
       question: "Why do problems ask for the answer modulo 10⁹ + 7?",
       answer:
-        "So the answer fits in a machine word. Counting problems often have answers with thousands of digits; reducing modulo a prime just under 2³¹ keeps every intermediate below 10⁹, so fixed-width arithmetic suffices and the problem is equally solvable in any language. The modulus must be applied at every step rather than at the end, or the intermediates overflow first. It is prime so that modular inverses exist, which is needed as soon as division is involved.",
+        "So the answer fits in a machine word. Counting problems often have answers with thousands of digits; reducing modulo 10⁹ + 7, a prime just under 2³⁰, keeps every stored value below the modulus and every product of two below 2⁶³, so fixed-width arithmetic suffices and the problem is equally solvable in any language. The modulus must be applied at every step rather than at the end, or the intermediates overflow first. It is prime so that modular inverses exist, which is needed as soon as division is involved.",
     },
     {
       question: "When would you use BigInteger in Java?",
@@ -176,7 +168,7 @@ public class Main {
     "The cost is a loop and an allocation per operation instead of one instruction — a constant factor at normal sizes",
     "\"Modulo 10⁹ + 7\" exists so an enormous answer fits in a machine word",
     "Apply the modulus at every step, never only at the end, and use a `long` accumulator in Java",
-    "The modulus is just under 2³¹ so two reduced values still add safely, and prime so inverses exist",
+    "The modulus is just under 2³⁰, so two reduced values add inside an `int` and multiply inside a `long`, and prime so inverses exist",
     "Java's `BigInteger` is unbounded, immutable, method-call-based and slow — a last resort",
     "Compare `BigInteger` with `.equals()`; `==` compares references",
     "Fixed-width types are fast because they are small, and they lie when you exceed them",

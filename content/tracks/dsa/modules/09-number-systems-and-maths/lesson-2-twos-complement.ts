@@ -176,7 +176,6 @@ with long          = 2050000000`,
       body: [
         "Python's `int` is **arbitrary precision**. It grows as needed and there is no maximum, so nothing on this page can overflow.",
         "That is a real advantage for solving problems — no midpoint bug, no factorial overflow, no cast dance — and it has two costs. Arithmetic on large values is slower than a machine word, and, more insidiously, **a solution that works in Python may be wrong when translated to Java**, because the overflow was never exercised.",
-        "Which is exactly why this lesson exists in a Python-friendly track: if you solve in Python and interview in Java, or read editorial code in either, you need the failure mode in your head even though your own runs never hit it.",
         "The other side: when a problem *asks* for 32-bit behaviour — \"reverse an integer, return 0 if it overflows\" — Python has to simulate the limit by hand, comparing against 2³¹ − 1 explicitly. Java gets that check for free from the type.",
       ],
       examples: [

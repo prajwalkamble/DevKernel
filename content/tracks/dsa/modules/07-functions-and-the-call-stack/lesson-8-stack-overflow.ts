@@ -76,7 +76,7 @@ recursion limit is 1000`,
       body: [
         "**Python** counts frames and raises `RecursionError` at a configurable limit, 1,000 by default. It is a normal exception, so it can be caught, and the traceback is truncated rather than printing a thousand identical frames.",
         "**Java** has no counter — it runs until the actual stack memory is exhausted and throws `StackOverflowError`. That is an `Error` rather than an `Exception`, meaning it is not something you are expected to catch. The depth reached depends on the frame size and is typically 10,000 to 20,000 for a simple method.",
-        "The practical difference: Python's limit is low, predictable and adjustable; Java's is high, variable and not.",
+        "The practical difference: Python's limit is low, predictable and adjustable with `sys.setrecursionlimit`; Java's is higher, varies with frame size and JIT state, and is adjusted with `-Xss` or by running the work on a `Thread` created with a larger stack.",
       ],
       examples: [
         {
@@ -112,7 +112,7 @@ depth(-1): StackOverflowError`,
         "**1. Fix the base case or the progress.** If the recursion is not actually correct, nothing else matters. Check that the base case is reachable — `<=` rather than `==` — and that every recursive call strictly shrinks the input.",
         "**2. Convert to iteration.** For a linear recursion this is usually easy and always removes the depth entirely. Any recursion whose recursive call is the last thing it does — *tail recursion* — converts to a loop mechanically.",
         "**3. Use an explicit stack.** For a branching recursion that must not recurse, replace the call stack with a list you manage yourself. More code, no depth limit, and it is how you would iterate a tree over a million nodes.",
-        "**4. Raise the limit.** Python's `sys.setrecursionlimit(10000)` and Java's `-Xss` flag. This is last for a reason: it is not available in an interview, is often not available on a judge, and it postpones the problem rather than removing it. It is legitimate when you have measured the depth and know the bound.",
+        "**4. Raise the limit.** Python's `sys.setrecursionlimit(10000)` and Java's `-Xss` flag. This is last for a reason: it is not available in an interview, `-Xss` is usually not settable on a judge, and it postpones the problem rather than removing it. It is legitimate when you have measured the depth and know the bound.",
       ],
       examples: [
         {
@@ -172,7 +172,7 @@ depth via explicit stack: 3`,
       body: [
         "The useful question is not \"will this overflow?\" but **\"how deep does this go, in terms of n?\"** — and the constraints answer it.",
         "**Depth proportional to log n** — balanced trees, binary search, merge sort. Always safe: a billion items is about 30 frames.",
-        "**Depth proportional to n** — linked lists, unbalanced trees, linear recursions. Safe up to a few thousand in Python and a few tens of thousands in Java. Above that, use iteration.",
+        "**Depth proportional to n** — linked lists, unbalanced trees, linear recursions. CPython's default limit is 1,000 frames, so only a few hundred deep is safe there; Java managed about ten thousand frames of a simple recursive search on its default stack. Above that, use iteration.",
         "**Depth proportional to n where n ≤ 10⁵ or more** — the constraints have told you not to recurse. This is why linked-list reversal is taught iteratively and why an in-order traversal of a degenerate tree needs care.",
         "Doing this estimate before writing is the same habit as reading the constraints for a time complexity, applied to space. It takes ten seconds and it decides the shape of your solution.",
       ],
@@ -214,15 +214,6 @@ degenerate tree  n=100,000  depth 100,000  OVERFLOWS
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "Eight lessons on functions, and the thread through them is that **a function is a boundary**. What crosses it is arguments in and a return value out; everything else — globals, mutated parameters, printing — is a leak that makes the function harder to test, unsafe to memoise, and unreliable inside a recursion.",
-        "That boundary is also literally a stack frame, which is why the same idea explains both good design and the depth limit.",
-        "Next is arrays and strings, where these functions start operating on real data, and where the in-place techniques depend on understanding exactly which changes the caller will see.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -233,12 +224,12 @@ degenerate tree  n=100,000  depth 100,000  OVERFLOWS
     {
       question: "How would you fix a recursion that overflows the stack?",
       answer:
-        "In order: check the base case is reachable and the recursion actually shrinks its input; convert to iteration if the recursion is linear, which removes the depth entirely; replace the call stack with an explicit stack if the problem branches; and only then raise the limit with `sys.setrecursionlimit` or `-Xss`. Raising the limit is last because it is unavailable in interviews, often unavailable on judges, and postpones rather than removes the problem.",
+        "In order: check the base case is reachable and the recursion actually shrinks its input; convert to iteration if the recursion is linear, which removes the depth entirely; replace the call stack with an explicit stack if the problem branches; and only then raise the limit with `sys.setrecursionlimit` or `-Xss`. Raising the limit is last because it is unavailable in interviews, `-Xss` is often unavailable on judges, and postpones rather than removes the problem.",
     },
     {
       question: "How do you decide in advance whether recursion is safe?",
       answer:
-        "Ask how the depth relates to n. Logarithmic depth — balanced trees, binary search, merge sort — is safe at any realistic size, since 100,000 items is about 17 frames. Linear depth — linked lists, degenerate trees — is safe to a few thousand in Python and tens of thousands in Java, and overflows at the input sizes problems actually specify. Reading that off the constraints before writing is the space-side counterpart of reading them for a time complexity.",
+        "Ask how the depth relates to n. Logarithmic depth — balanced trees, binary search, merge sort — is safe at any realistic size, since 100,000 items is about 17 frames. Linear depth — linked lists, degenerate trees — is safe only to a few hundred in Python, whose default limit is 1,000 frames, and around ten thousand in Java, and overflows at the input sizes problems actually specify. Reading that off the constraints before writing is the space-side counterpart of reading them for a time complexity.",
     },
   ],
   takeaways: [
@@ -249,6 +240,5 @@ degenerate tree  n=100,000  depth 100,000  OVERFLOWS
     "Fixes in order: correct the recursion, convert to iteration, use an explicit stack, raise the limit",
     "Raising the limit is last — unavailable in interviews and on many judges",
     "Logarithmic depth is always safe; linear depth overflows at realistic input sizes",
-    "A function is a boundary: arguments in, return value out, and everything else is a leak",
   ],
 };

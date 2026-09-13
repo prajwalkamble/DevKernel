@@ -240,12 +240,329 @@ export function coinChange(coins = [1, 3, 4], amount = 6): Visualisation {
   };
 }
 
+/* --------------------------------------------------------------- bitmasks -- */
+
+/**
+ * A bitmask table, filled in numeric order.
+ *
+ * Rows are the position you are standing on, columns are the subset already
+ * visited, read as bits. The fill order is plain numeric order over the masks,
+ * and the reason that works is worth seeing rather than being told: adding an
+ * element only ever makes the integer larger, so every state a cell depends on
+ * has a strictly smaller mask and is already done.
+ */
+export function bitmaskTour(
+  dist = [[0, 4, 1, 9], [4, 0, 2, 6], [1, 2, 0, 3], [9, 6, 3, 0]]
+): Visualisation {
+  const n = dist.length;
+  const rec = new Recorder<MatrixFrame>();
+  const INF = Infinity;
+  const dp: number[][] = Array.from({ length: n }, () => new Array(1 << n).fill(INF));
+  dp[0][1] = 0;
+  const bits = (mask: number) => mask.toString(2).padStart(n, "0");
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: dp.map((row) => row.map((v) => (v === INF ? "" : String(v)))),
+      roles,
+      rowLabels: dp.map((_, i) => `at ${i}`),
+      colLabels: Array.from({ length: 1 << n }, (_, m) => bits(m)),
+      note,
+    });
+
+  emit({ [cellKey(0, 1)]: "sorted" },
+    `${n} cities. Columns are the set visited so far, in binary; rows are where you are standing. Only "at 0, visited {0}" costs nothing.`);
+  for (let mask = 0; mask < 1 << n; mask++) {
+    if (!(mask & 1)) continue;
+    for (let last = 0; last < n; last++) {
+      if (dp[last][mask] === INF) continue;
+      for (let next = 0; next < n; next++) {
+        if ((mask >> next) & 1) continue;
+        rec.bump("comparisons");
+        const grown = mask | (1 << next);
+        const step = dp[last][mask] + dist[last][next];
+        if (step < dp[next][grown]) {
+          dp[next][grown] = step;
+          emit({ [cellKey(next, grown)]: "swap", [cellKey(last, mask)]: "compare" },
+            `From ${last} with ${bits(mask)} visited, step to ${next} for ${dist[last][next]}: ${bits(grown)} reachable at ${step}.`);
+        }
+      }
+    }
+  }
+  const full = (1 << n) - 1;
+  let best = INF;
+  let home = 0;
+  for (let last = 0; last < n; last++) {
+    if (dp[last][full] + dist[last][0] < best) {
+      best = dp[last][full] + dist[last][0];
+      home = last;
+    }
+  }
+  const ties = Array.from({ length: n }, (_, last) => last)
+    .filter((last) => last !== home && dp[last][full] + dist[last][0] === best);
+  emit({ [cellKey(home, full)]: "found" },
+    `All visited. ${ties.length ? "One" : "The"} cheapest finish is at ${home} for ${dp[home][full]}, plus ${dist[home][0]} to get home: ${best}.` +
+      (ties.length ? ` Finishing at ${ties.join(" or ")} ties.` : ""));
+  return {
+    frames: rec.frames,
+    summary:
+      "The state is a set and a position — the set alone cannot price the next edge, because that depends on where you are standing. Filling in numeric order over the masks is a valid topological order for free: adding a city only ever makes the integer larger, so every cell a state reads has a smaller mask and is already written.",
+  };
+}
+
+/* ------------------------------------------------------------------- trees -- */
+
+/**
+ * Tree DP as the table it really is: two numbers per node, folded upwards.
+ *
+ * Maximum-weight independent set. The tree is a parent array with
+ * `parent[i] < i`, so walking the nodes from last to first visits every child
+ * before its parent — which is a post-order without a stack, and makes the
+ * "table" a pair of rows indexed by node. Two rows and not one, because the
+ * parent needs to know whether the child was used, and a single best-per-node
+ * cannot say.
+ */
+export function treeIndependentSet(
+  parent = [-1, 0, 1, 1, 0], weight = [4, 1, 2, 2, 4]
+): Visualisation {
+  const n = parent.length;
+  const rec = new Recorder<MatrixFrame>();
+  const take = [...weight];
+  const skip = new Array(n).fill(0);
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: [
+        parent.map((p) => (p < 0 ? "root" : String(p))),
+        take.map(String),
+        skip.map(String),
+      ],
+      roles,
+      rowLabels: ["parent", "take", "skip"],
+      colLabels: parent.map((_, i) => String(i)),
+      note,
+    });
+
+  emit({}, `Weights ${weight.join(", ")}. Each node starts as if it were alone: take is its own weight, skip is nothing.`);
+  for (let v = n - 1; v > 0; v--) {
+    const p = parent[v];
+    const best = Math.max(take[v], skip[v]);
+    rec.bump("comparisons");
+    take[p] += skip[v];
+    skip[p] += best;
+    emit(
+      { [cellKey(1, p)]: "swap", [cellKey(2, p)]: "swap", [cellKey(1, v)]: "compare", [cellKey(2, v)]: "compare" },
+      `Fold ${v} into ${p}. Taking ${p} forbids ${v}, so it gains skip[${v}] = ${skip[v]}; skipping ${p} leaves ${v} free, so it gains the better of the two, ${best}.`
+    );
+  }
+  const answer = Math.max(take[0], skip[0]);
+  emit({ [cellKey(take[0] >= skip[0] ? 1 : 2, 0)]: "found" },
+    `Every child is folded in. The answer is the better of the root's two numbers: ${answer}.`);
+  return {
+    frames: rec.frames,
+    summary:
+      "Two numbers per node, not one: the best with this node taken, and the best with it skipped. A child folds into its parent by contributing its *skip* value to the parent's take, and the better of its two to the parent's skip. Collapsing that to a single best-per-node loses exactly the fact the parent needs.",
+  };
+}
+
+/* --------------------------------------------------------------- intervals -- */
+
+/**
+ * An interval table filling by increasing length, along its diagonals.
+ *
+ * This is the picture that makes interval DP's fill order obvious, and it is
+ * the one thing prose keeps failing to convey: the table fills diagonal by
+ * diagonal from the main diagonal outwards, never row by row, because
+ * dp[i][j] reads dp[i+1][j-1] and dp[i+1][j] — cells on a *later* row. A
+ * row-major sweep would read those before they exist, and they would be zero
+ * rather than missing.
+ */
+export function intervalTable(text = "bbbab"): Visualisation {
+  const n = text.length;
+  const rec = new Recorder<MatrixFrame>();
+  const dp: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+  const seen: boolean[][] = Array.from({ length: n }, () => new Array(n).fill(false));
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: dp.map((row, i) => row.map((v, j) => (j < i ? "" : seen[i][j] ? String(v) : "·"))),
+      roles,
+      rowLabels: text.split(""),
+      colLabels: text.split(""),
+      note,
+    });
+
+  emit({}, `Longest palindromic subsequence of "${text}". Cells below the diagonal are never used.`);
+  for (let i = 0; i < n; i++) {
+    dp[i][i] = 1;
+    seen[i][i] = true;
+  }
+  emit(Object.fromEntries(text.split("").map((_, i) => [cellKey(i, i), "sorted" as Role])),
+    "The main diagonal is every one-character interval, and each is a palindrome of length 1.");
+
+  for (let length = 2; length <= n; length++) {
+    for (let i = 0; i + length <= n; i++) {
+      const j = i + length - 1;
+      seen[i][j] = true;
+      rec.bump("comparisons");
+      if (text[i] === text[j]) {
+        const inner = i + 1 <= j - 1 ? dp[i + 1][j - 1] : 0;
+        dp[i][j] = inner + 2;
+        const roles: Record<string, Role> = { [cellKey(i, j)]: "swap" };
+        if (i + 1 <= j - 1) roles[cellKey(i + 1, j - 1)] = "compare";
+        emit(roles, `'${text[i]}' matches '${text[j]}': the inner interval's ${inner}, plus the two ends.`);
+      } else {
+        dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+        emit({ [cellKey(i, j)]: "swap", [cellKey(i + 1, j)]: "compare", [cellKey(i, j - 1)]: "compare" },
+          `'${text[i]}' and '${text[j]}' differ: drop one end or the other, and keep the better of ${dp[i + 1][j]} and ${dp[i][j - 1]}.`);
+      }
+    }
+  }
+  emit({ [cellKey(0, n - 1)]: "found" },
+    `The whole string is the last diagonal: ${dp[0][n - 1]}. Every cell it needed sits below and to its left.`);
+  return {
+    frames: rec.frames,
+    summary:
+      "The table fills diagonal by diagonal, shortest intervals first, because a cell reads the interval one shorter on each side and the one two shorter in the middle. A row-major sweep would read the row below before writing it — and those cells hold zero, which is a plausible enough answer that nothing complains.",
+  };
+}
+
+/* ------------------------------------------------------------- grid paths -- */
+
+/**
+ * Counting right/down paths through a grid with a wall in it.
+ *
+ * The point the picture makes that the prose cannot: each cell is the sum of
+ * exactly two neighbours, so the wall's zero propagates down and right through
+ * everything that would have gone through it. On an open grid the answer is a
+ * binomial coefficient and no table is needed; one wall and the closed form is
+ * gone while the table has not changed at all.
+ */
+export function gridPaths(grid = ["....", "..#.", "....", "...."]): Visualisation {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const rec = new Recorder<MatrixFrame>();
+  const dp: number[][] = Array.from({ length: rows }, () => new Array(cols).fill(0));
+  const seen: boolean[][] = Array.from({ length: rows }, () => new Array(cols).fill(false));
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: dp.map((row, i) =>
+        row.map((v, j) => (grid[i][j] === "#" ? "#" : seen[i][j] ? String(v) : ""))
+      ),
+      roles,
+      rowLabels: grid.map((_, i) => String(i)),
+      colLabels: grid[0].split("").map((_, j) => String(j)),
+      note,
+    });
+
+  emit({}, `Right/down paths across a ${rows} by ${cols} grid with one wall. Blank cells are not computed yet.`);
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      seen[i][j] = true;
+      if (grid[i][j] === "#") {
+        emit({ [cellKey(i, j)]: "discarded" }, `(${i}, ${j}) is a wall: no path goes through it.`);
+        continue;
+      }
+      if (i === 0 && j === 0) {
+        dp[i][j] = 1;
+        emit({ [cellKey(i, j)]: "found" }, "The start is reached one way: by already being there.");
+        continue;
+      }
+      const above = i > 0 ? dp[i - 1][j] : 0;
+      const left = j > 0 ? dp[i][j - 1] : 0;
+      rec.bump("comparisons");
+      dp[i][j] = above + left;
+      const roles: Record<string, Role> = { [cellKey(i, j)]: "swap" };
+      if (i > 0) roles[cellKey(i - 1, j)] = "compare";
+      if (j > 0) roles[cellKey(i, j - 1)] = "compare";
+      emit(roles, `(${i}, ${j}) is entered from above (${above}) or from the left (${left}): ${dp[i][j]}.`);
+    }
+  }
+  emit({ [cellKey(rows - 1, cols - 1)]: "found" },
+    `${dp[rows - 1][cols - 1]} paths. Without the wall it would be the binomial coefficient C(${rows + cols - 2}, ${rows - 1}).`);
+  return {
+    frames: rec.frames,
+    summary:
+      "Every cell is the sum of the one above and the one to its left, because those are the only two cells a right/down path can arrive from. A wall contributes zero, and that zero spreads through everything downstream of it — which is exactly why the open-grid closed form stops applying the moment one cell is blocked.",
+  };
+}
+
+/* ------------------------------------------- longest increasing subsequence -- */
+
+/**
+ * The patience method, shown as the tails array being overwritten.
+ *
+ * Two rows on purpose. The top row is the input being consumed left to right;
+ * the bottom is `tails`, whose length is the answer and whose *contents* are
+ * not always a subsequence of the input. This default input is the case where
+ * that goes wrong visibly: the final 1 overwrites the first tail at the very
+ * end, leaving [1, 3, 4, 5] — an array that could never have been read off
+ * [2, 6, 8, 3, 4, 5, 1] in order.
+ */
+export function longestIncreasingSubsequence(values = [2, 6, 8, 3, 4, 5, 1]): Visualisation {
+  const rec = new Recorder<MatrixFrame>();
+  const tails: number[] = [];
+  const emit = (roles: Record<string, Role>, note: string) =>
+    rec.push({
+      kind: "matrix",
+      cells: [
+        values.map(String),
+        values.map((_, i) => (i < tails.length ? String(tails[i]) : "")),
+      ],
+      roles,
+      rowLabels: ["input", "tails"],
+      colLabels: values.map((_, i) => String(i)),
+      note,
+    });
+
+  emit({}, `Longest strictly increasing subsequence of ${values.join(", ")}. The tails row starts empty.`);
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    // The first tail not below `value`: replacing it keeps every length still
+    // reachable and lowers the bar for the next element.
+    let lo = 0;
+    let hi = tails.length;
+    while (lo < hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      rec.bump("comparisons");
+      if (tails[mid] < value) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo === tails.length) {
+      tails.push(value);
+      emit({ [cellKey(0, i)]: "active", [cellKey(1, lo)]: "swap" },
+        `${value} is above every tail, so it extends the best run: length ${tails.length}.`);
+    } else {
+      const replaced = tails[lo];
+      tails[lo] = value;
+      emit({ [cellKey(0, i)]: "active", [cellKey(1, lo)]: "swap" },
+        `${value} replaces ${replaced} as the smallest ending for a run of ${lo + 1}. The length does not change.`);
+    }
+  }
+  const last = values.length - 1;
+  emit(
+    Object.fromEntries(tails.map((_, i) => [cellKey(1, i), "found" as Role])),
+    `Length ${tails.length}, from ${last + 1} elements. Read the length, not the contents — the final ${values[last]} overwrote a tail after everything it would have to precede.`
+  );
+  return {
+    frames: rec.frames,
+    summary:
+      "Each value either extends the tails array or overwrites the first tail not below it, found by binary search — O(n log n) rather than the quadratic table. What the array holds is the smallest possible ending value for a run of each length, which is why its *length* is the answer while its contents need not form a real subsequence of the input.",
+  };
+}
+
 export const DP_ALGOS = {
   fibonacci: { label: "Fibonacci (memoised)", run: () => fibonacciMemo() },
   lcs: { label: "Longest common subsequence", run: () => longestCommonSubsequence() },
   edit: { label: "Edit distance", run: () => editDistance() },
   knapsack: { label: "0/1 knapsack", run: () => knapsack() },
   coins: { label: "Coin change", run: () => coinChange() },
+  bitmask: { label: "Bitmask tour, filled by mask", run: () => bitmaskTour() },
+  tree: { label: "Tree DP, folded upwards", run: () => treeIndependentSet() },
+  interval: { label: "Interval table, filled diagonally", run: () => intervalTable() },
+  paths: { label: "Grid paths with a wall", run: () => gridPaths() },
+  lis: { label: "Longest increasing subsequence", run: () => longestIncreasingSubsequence() },
 } as const;
 
 export type DpAlgoName = keyof typeof DP_ALGOS;

@@ -42,7 +42,6 @@ export const partitioningLesson: Lesson = {
       body: [
         "Textbook quicksort partitions into two regions — less than the pivot, and not less. On an array with many equal keys that degrades badly: every duplicate of the pivot lands on one side, the split becomes lopsided, and an array of all-identical values gives the O(n²) worst case.",
         "**Three-way partitioning** fixes it. Split into less-than, equal-to and greater-than, then recurse only on the outer two. Every duplicate of the pivot is finished in that pass and never recursed on, so an all-identical array becomes O(n) rather than O(n²).",
-        "This is not a footnote — it is what production sorts do. The sorting module returns to it.",
       ],
       pitfalls: [
         {
@@ -58,6 +57,18 @@ export const partitioningLesson: Lesson = {
           body: "Swapping with the tail moves elements arbitrarily far. For 0/1/2 that is invisible, but if you are partitioning records by a key and the relative order of equal keys matters, this algorithm destroys it.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Sort an array of 0s, 1s and 2s in one pass with O(1) space.",
+      answer:
+        "The Dutch national flag partition, with three pointers and four regions: a[0:low] is 0s, a[low:mid] is 1s, a[mid:high+1] is unexamined, and a[high+1:] is 2s. Loop while mid <= high. If a[mid] is 0, swap it with a[low] and advance both; if it is 1, advance mid; if it is 2, swap with a[high] and decrement high, but do not advance mid, because the value that just arrived from the tail has not been examined. Advancing mid there is the bug people write.",
+    },
+    {
+      question: "Why does three-way partitioning matter for quicksort?",
+      answer:
+        "A two-way partition puts every copy of the pivot on one side, so heavy duplication makes the split lopsided, and an array of identical values is the O(n^2) worst case. Splitting into less-than, equal and greater-than finishes all copies of the pivot in one pass and recurses only on the outer parts, so the all-identical array becomes O(n). The partition is not stable, which is worth saying if stability matters.",
     },
   ],
   takeaways: [

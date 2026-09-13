@@ -21,7 +21,7 @@ export const recursionToIterationLesson: Lesson = {
       body: [
         "When a function calls itself, the runtime pushes a **frame** containing the arguments, the local variables, and the point to return to. Returning pops it and resumes there.",
         "So a recursion is a stack-driven loop where the language manages the stack. Writing the stack yourself changes nothing about the algorithm — only about who allocates the memory.",
-        "Two consequences follow. The call stack is a fixed-size region — typically around 1 MB, giving a few thousand frames — so deep recursion overflows where an explicit stack on the heap would not. Python's limit is 1000 by default and is a hard error rather than a crash. And an explicit stack lets you *inspect* the pending work, which is occasionally what a problem asks for.",
+        "Two consequences follow. The call stack is a fixed-size region — a JVM thread's default is around 1 MB, roughly 10,000 to 20,000 frames — so deep recursion overflows where an explicit stack on the heap would not. Python's limit is 1000 by default and is a hard error rather than a crash. And an explicit stack lets you *inspect* the pending work, which is occasionally what a problem asks for.",
       ],
       visual: {
         id: "stack-frames-visual",
@@ -60,7 +60,7 @@ export const recursionToIterationLesson: Lesson = {
         },
         {
           title: "Converting when the recursion was fine",
-          body: "An iterative version is usually two to three times longer and materially harder to verify. Depth of about a million is where a stack overflow becomes a real risk; below that the recursion is the better code.",
+          body: "An iterative version is usually two to three times longer and materially harder to verify. Overflow is a real risk when depth grows with n — a linear recursion at n = 10⁵ — and not when it stays logarithmic or in the hundreds; there the recursion is the better code.",
         },
         {
           title: "Assuming tail-call optimisation",

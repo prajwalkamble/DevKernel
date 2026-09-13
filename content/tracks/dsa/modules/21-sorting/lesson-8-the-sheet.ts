@@ -48,9 +48,8 @@ export const sortingSheetLesson: Lesson = {
       body: [
         "Three questions, in order.",
         "**Does the answer involve positions?** If yes, sorting costs you them — carry indices or find another way.",
-        "**Is there an O(n) requirement, stated or implied by the constraints?** n up to 10⁶ with a tight limit usually rules out the log factor. n up to 10⁵ almost never does.",
+        "**Is there an O(n) requirement, stated or implied by the constraints?** n up to 10⁶ still admits the log factor in a compiled language — n log n is about 2 × 10⁷ — and starts to squeeze it in Python; n up to 10⁵ almost never rules it out.",
         "**What property would order give me?** Adjacency, monotonicity, or a greedy order. If you can name it, sort. If you cannot, the sort is probably a reflex rather than a plan.",
-        "And one habit worth building: when you do sort, say what you are sorting **by** and why, before writing the comparator. In interval problems especially, start-versus-end is the entire decision, and articulating it is what separates a solution from a guess.",
       ],
       pitfalls: [
         {

@@ -53,6 +53,18 @@ export const stringsLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find the longest palindromic substring.",
+      answer:
+        "Expand from every centre: push two pointers outward while the characters match, and keep the longest run. There are 2n - 1 centres, every character for odd lengths and every gap for even lengths; forgetting the even ones makes abba report 1. That is O(n^2) time and O(1) space, which is the expected interview answer. Manacher's algorithm does it in O(n) and is rarely asked for.",
+    },
+    {
+      question: "Is s a subsequence of t, and what if you must answer for a billion different s?",
+      answer:
+        "One pointer per string: always advance in t, advance in s only on a match, and s is a subsequence if its pointer reaches the end, in O(|s| + |t|). Matching each character at the earliest position in t is safe by an exchange argument, since it leaves the longest remainder of t. For a billion queries against one t, preprocess t into the next occurrence of each letter after each position, so every query is O(|s|) lookups without scanning t.",
+    },
+  ],
   takeaways: [
     "Palindrome checks walk inward, skipping non-participating characters",
     "Guard every inner skip loop with `lo < hi`",

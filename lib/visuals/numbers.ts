@@ -202,7 +202,7 @@ export function sieve(n = 30): Visualisation {
   return {
     frames: rec.frames,
     summary:
-      "Crossing out beats testing: each composite is reached from its prime factors rather than searched for. The two refinements are not micro-optimisations — starting at p² skips work already done by smaller primes, and stopping the outer loop at √n is what makes the whole thing O(n log log n) rather than O(n√n).",
+      "Crossing out beats testing: each composite is reached from its prime factors rather than searched for, which is what makes the sieve O(n log log n) where testing every number by trial division is O(n√n). The two refinements save work without changing that class — starting at p² skips multiples a smaller prime has already crossed out, and stopping the outer loop at √n skips primes with nothing left to cross out.",
   };
 }
 
@@ -240,7 +240,7 @@ export function euclid(a = 252, b = 105): Visualisation {
   return {
     frames: rec.frames,
     summary:
-      "The invariant is that gcd(a, b) = gcd(b, a mod b): a common divisor of the first pair divides the remainder too, and vice versa, so no divisor is lost on the way down. It terminates fast because a mod b is always less than half of a when b ≤ a/2, and is b's own successor otherwise — either way the pair at least halves every two steps, which is where the O(log min(a, b)) comes from.",
+      "The invariant is that gcd(a, b) = gcd(b, a mod b): a common divisor of the first pair divides the remainder too, and vice versa, so no divisor is lost on the way down. It terminates fast because a mod b is always less than half of a: when b ≤ a/2 the remainder is below b, and when b > a/2 it is a − b. So the larger number at least halves every two steps, which is where the O(log min(a, b)) comes from.",
   };
 }
 

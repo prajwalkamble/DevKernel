@@ -21,7 +21,7 @@ export const moduloLesson: Lesson = {
       heading: "The remainder, precisely",
       body: [
         "`a % b` is what is left of `a` after taking away as many whole `b`s as possible. `17 % 5` is 2, because 17 is three fives and two left over.",
-        "The definition that makes the negative cases predictable is that `%` is tied to `/`: both languages guarantee that `(a / b) * b + (a % b) == a`. Since the two languages round division differently, they must give different remainders to keep that identity true. That is the whole explanation for the disagreement.",
+        "The definition that makes the negative cases predictable is that `%` is tied to `/`: both languages guarantee that quotient times divisor plus remainder gives back `a` — `(a / b) * b + a % b == a` in Java, `(a // b) * b + a % b == a` in Python, where `/` is true division. Since the two languages round division differently, they must give different remainders to keep that identity true. That is the whole explanation for the disagreement.",
       ],
       examples: [
         {
@@ -74,7 +74,7 @@ identity holds: True
       body: [
         "In problem solving, `%` shows up doing one of four things. Recognising which one you need is usually the whole trick.",
         "**Wrapping.** Moving around a circular structure: `next = (i + 1) % n`. Clock arithmetic, circular buffers, round-robin turn order, moving on a ring of houses.",
-        "**Digit extraction.** `n % 10` is the last digit and `n / 10` removes it. Together they walk a number's digits from the right.",
+        "**Digit extraction.** `n % 10` is the last digit and integer division by 10 — `n / 10` in Java, `n // 10` in Python — removes it. Together they walk a number's digits from the right.",
         "**Parity and divisibility.** `n % 2 == 0` for even. `n % k == 0` for divisible by k.",
         "**Bucketing.** Mapping a large key into a small table — which is what a hash map does internally, and what you do by hand when you build a frequency array over a limited range.",
       ],
@@ -160,7 +160,7 @@ plus n    : 4 0 1`,
       body: [
         "Counting problems routinely ask for the answer *modulo 10⁹ + 7*, which the previous module explained: it keeps an astronomically large count inside a machine word.",
         "Two rules make it work.",
-        "**Reduce at every step.** Multiplication and addition both commute with the modulus, so `(a * b) % m` equals `((a % m) * (b % m)) % m`. Reducing only at the end means the intermediates overflowed first.",
+        "**Reduce at every step.** Taking the remainder before or after an addition or a multiplication gives the same result, so `(a * b) % m` equals `((a % m) * (b % m)) % m`. Reducing only at the end means the intermediates overflowed first.",
         "**Use a wide enough accumulator.** Two values just under 10⁹ multiply to just under 10¹⁸ — which fits in a `long` and not in an `int`. In Java the accumulator must be `long` even though every stored value is small.",
         "Subtraction needs care too: `(a - b) % m` can be negative, so the safe form is `((a - b) % m + m) % m`.",
       ],
@@ -200,7 +200,7 @@ plus n    : 4 0 1`,
     {
       question: "What does `-7 % 3` give in Java and in Python, and why the difference?",
       answer:
-        "−1 in Java, 2 in Python. Both languages guarantee `(a / b) * b + (a % b) == a`, and they round division differently — Java truncates toward zero, Python floors — so the remainders must differ to keep that identity. The practical consequence is that Java's result takes the sign of the dividend and can be negative, while Python's takes the sign of the divisor and is always in 0..n−1 for a positive modulus, which is what an array index needs.",
+        "−1 in Java, 2 in Python. Both languages guarantee that quotient times divisor plus remainder gives back `a` — `(a / b) * b + a % b` in Java, `(a // b) * b + a % b` in Python — and they round division differently — Java truncates toward zero, Python floors — so the remainders must differ to keep that identity. The practical consequence is that Java's result takes the sign of the dividend and can be negative, while Python's takes the sign of the divisor and is always in 0..n−1 for a positive modulus, which is what an array index needs.",
     },
     {
       question: "How do you wrap an index backwards around a circular array?",
@@ -210,16 +210,16 @@ plus n    : 4 0 1`,
     {
       question: "Why must you take the modulus at every step rather than at the end?",
       answer:
-        "Because the intermediate values overflow long before the end. Modular arithmetic commutes with addition and multiplication, so reducing as you go gives the same answer as reducing once at the end — but only the reduced version stays inside a machine word. In Java the accumulator must still be a `long`: two reduced values just under 10⁹ multiply to just under 10¹⁸, which overflows an `int` even though both inputs are small.",
+        "Because the intermediate values overflow long before the end. Reducing before or after each addition and multiplication gives the same remainder, so reducing as you go gives the same answer as reducing once at the end — but only the reduced version stays inside a machine word. In Java the accumulator must still be a `long`: two reduced values just under 10⁹ multiply to just under 10¹⁸, which overflows an `int` even though both inputs are small.",
     },
   ],
   takeaways: [
-    "`%` is tied to `/` by `(a / b) * b + (a % b) == a`, which is why the languages differ on negatives",
+    "`%` is tied to integer division — `(a / b) * b + a % b == a` in Java, `(a // b) * b + a % b == a` in Python — which is why the languages differ on negatives",
     "Java's remainder takes the sign of the dividend; Python's takes the sign of the divisor",
     "Python's `%` is always in 0..n−1 for a positive modulus, so it is safe as an index",
     "Four jobs: wrapping, digit extraction, parity and divisibility, and bucketing",
     "`n % 10` is the last digit and `n // 10` removes it — digits come out in reverse",
-    "In Java use `Math.floorMod`, or `(a + n) % n`, whenever the value can be negative",
+    "In Java use `Math.floorMod`, or `((a % n) + n) % n`, whenever the value can be negative",
     "Reduce at every step in modular arithmetic, and keep the accumulator a `long`",
     "`(a - b) % m` can be negative; the safe form is `((a - b) % m + m) % m`",
   ],

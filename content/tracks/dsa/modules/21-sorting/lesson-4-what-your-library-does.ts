@@ -22,7 +22,7 @@ export const librarySortLesson: Lesson = {
         "**TimSort** — Python's `sorted`, Java's `Arrays.sort` on objects, JavaScript's `Array.sort` in V8. Finds existing ascending or descending **runs** in the data, extends short ones with insertion sort, then merges runs using a stack with balancing rules. Stable, O(n log n) worst case, and **O(n) on data that is already sorted or nearly so**. Built on the observation that real-world data usually has structure.",
         "**Introsort** — C++'s `std::sort`. Quicksort, with two escape hatches: below about 16 elements it switches to insertion sort, and if the recursion goes deeper than roughly `2·log n` it concludes the pivots are pathological and switches to heap sort. That converts quicksort's O(n²) worst case into a guaranteed O(n log n) while keeping quicksort's speed on ordinary input. Not stable.",
         "**Dual-pivot quicksort** — Java's `Arrays.sort` on primitives. Partitions into three regions around two pivots rather than two around one, which measures faster on primitive arrays. Not stable, but for primitives stability is unobservable, so nothing is lost.",
-        "**pdqsort** — Rust's `sort_unstable`, and newer C++ implementations. Pattern-defeating quicksort: detects the input patterns that make quicksort degrade and handles each specially.",
+        "**pdqsort** — Boost's `pdqsort`, and Rust's `sort_unstable` until Rust 1.81 replaced it with ipnsort (and `sort` with driftsort). Pattern-defeating quicksort: detects the input patterns that make quicksort degrade and handles each specially.",
       ],
       examples: [
         {
@@ -68,9 +68,8 @@ primitives:        [1, 3, 3, 5, 9]`,
       heading: "The quadratic worst case, and who still has it",
       body: [
         "Textbook quicksort is O(n²) when pivots split badly, and the classic trigger — already-sorted input with a first-element pivot — is depressingly common in practice.",
-        "Modern library sorts have mostly closed this. Introsort switches to heap sort on deep recursion. TimSort was never quicksort. Dual-pivot quicksort in Java is still theoretically quadratic on adversarial input, and there are known inputs that trigger it, though you will not meet them by accident.",
-        "The place this genuinely bites is **C++ competitive programming**, where `std::sort` on `int` was historically attackable with a crafted anti-quicksort test. The standard defence is shuffling before sorting — `std::shuffle` with a random seed — which destroys any adversarial arrangement for the cost of one linear pass.",
-        "The other place is `unordered_map` and friends, which is the hashing module's territory. The shared lesson is that a public deterministic algorithm can be gamed, and the fix is nearly always to inject randomness.",
+        "Modern library sorts have mostly closed this. Introsort switches to heap sort on deep recursion. TimSort was never quicksort. Java's dual-pivot quicksort, in current JDKs, switches to heap sort once its recursion gets too deep, so its worst case is O(n log n) as well.",
+        "The place this genuinely bit was **Java competitive programming**, where `Arrays.sort(int[])` on older JDKs could be driven quadratic by a crafted anti-quicksort test. The standard defence was shuffling before sorting, or sorting an `Integer[]`, which uses TimSort. libstdc++'s `std::sort` caps its recursion depth and finishes with a heap-based partial sort, so the same attack does not apply to it.",
       ],
       pitfalls: [
         {
@@ -94,7 +93,6 @@ primitives:        [1, 3, 3, 5, 9]`,
         "**Use the library sort.** It is a hybrid tuned by people who measured, and hand-rolling a textbook quicksort is a downgrade in every respect.",
         "**Know its stability.** Stable in Python, Java on objects, JavaScript, Rust's `sort`. Unstable in C++'s `std::sort`, Java on primitives, Rust's `sort_unstable`. This is the fact most likely to change your output.",
         "**Know the escape hatch.** `std::stable_sort` when you need stability in C++; `sort_unstable` when you want speed and do not in Rust.",
-        "**Say it in interviews.** Asked how you would sort, \"I would call the library sort — TimSort in Python, which is stable and adaptive\" is a stronger answer than reciting merge sort, and it opens the door to discussing when you would not.",
       ],
     },
   ],
@@ -102,7 +100,7 @@ primitives:        [1, 3, 3, 5, 9]`,
     {
       question: "What algorithm does your language's sort use?",
       answer:
-        "Python and Java-on-objects use TimSort: run detection plus merging, stable, O(n log n) worst case and O(n) on nearly-sorted data. C++ uses introsort: quicksort that falls back to heap sort on deep recursion and insertion sort when small, not stable. Java sorts primitives with dual-pivot quicksort, because stability is unobservable there.",
+        "Python and Java-on-objects use TimSort: run detection plus merging, stable, O(n log n) worst case and O(n) on nearly-sorted data. libstdc++ and MSVC's `std::sort` use introsort: quicksort that falls back to heap sort on deep recursion and insertion sort when small, not stable. Java sorts primitives with dual-pivot quicksort, because stability is unobservable there.",
     },
     {
       question: "How does introsort avoid quicksort's quadratic worst case?",

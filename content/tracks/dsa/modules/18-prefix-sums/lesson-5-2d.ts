@@ -59,6 +59,18 @@ export const twoDimensionalLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Answer submatrix-sum queries in O(1).",
+      answer:
+        "Build p one row and one column larger: p[r+1][c+1] = m[r][c] + p[r][c+1] + p[r+1][c] - p[r][c], the cell plus the rectangles above and to the left minus the top-left block counted twice. Query the inclusive rectangle from (r1, c1) to (r2, c2) as p[r2+1][c2+1] - p[r1][c2+1] - p[r2+1][c1] + p[r1][c1]. The signs are inclusion-exclusion, and drawing the four rectangles once is more reliable than memorising them.",
+    },
+    {
+      question: "How do you find the maximum-sum submatrix?",
+      answer:
+        "Fix a pair of rows, collapse each column between them to a single sum using the prefix table, and run Kadane's algorithm on the resulting 1D array, for O(rows^2 · cols). The same collapse followed by the prefix-sum hash map counts submatrices summing to a target. Fixing two boundaries to reduce a 2D problem to a 1D one is the more valuable technique than the table itself.",
+    },
+  ],
   takeaways: [
     "`p` is one row and one column larger, so queries need no boundary checks",
     "Build: cell + above + left − the doubly-counted top-left block",

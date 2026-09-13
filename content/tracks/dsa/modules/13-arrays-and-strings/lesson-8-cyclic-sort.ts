@@ -917,7 +917,7 @@ func main() {
       body: [
         "For the single-missing-number case there are two shorter answers, and it is worth knowing all three along with their trade-offs.",
         "**The sum formula.** The values 0 to n sum to n(n+1)/2, so subtract the actual sum and the difference is the missing value. Two lines. It only works when exactly one value is missing and nothing repeats, and it is vulnerable to overflow.",
-        "**XOR.** XOR every index and every value together, and every present value cancels with its index — leaving the missing one, since `x ^ x == 0`. Also two lines, no formula, and **no overflow is possible**, because XOR is bitwise and never produces a value wider than its inputs.",
+        "**XOR.** XOR every index and every value together, and every present value cancels with its index — leaving the missing one, since `(x ^ x) == 0`. Also two lines, no formula, and **no overflow is possible**, because XOR is bitwise and never produces a value wider than its inputs.",
         "**Cyclic sort.** Longer, and the only one that generalises to duplicates, multiple missing values, and out-of-range input.",
         "The overflow point deserves an actual demonstration rather than a warning, because the failure is not where people expect it to be.",
       ],
@@ -994,17 +994,6 @@ XOR has no formula, no division and cannot overflow.`,
           explanation:
             "This is a better lesson than \"beware of overflow\". At **n = 100,000 the int version is already overflowing and still returns the right answer**, because two's complement addition and subtraction are exact modulo 2³², so two wrapped sums differ by the true difference. At n = 200,000 it returns nonsense — and the reason is the `/ 2`. Division is *not* well defined modulo 2³²: halving the wrapped 1,345,494,336 gives 672,747,168, which is not the wrapped value of the true 20,000,100,000. So the danger is not addition, which survives, but the multiply-then-divide in the closed-form formula. **The fix is `(long) n * (n + 1) / 2`, with the cast on the first operand** — casting the result instead is too late, since the multiplication has already happened in `int`.",
         },
-      ],
-    },
-    {
-      id: "module-close",
-      heading: "Closing the module",
-      body: [
-        "That is the first module of Module 1, and it has a theme worth naming before moving on.",
-        "**Everything here was one array and two or three indices.** Compaction, partitioning, the flag, spiral boundaries, cyclic sort — none of them allocated anything, and all of them worked by maintaining an invariant about what each region of the array contains. That is the skill this module was actually teaching; the individual problems are consequences of it.",
-        "**The three habits to carry.** State the invariant in one sentence before writing the loop, and you will not get the pointer updates wrong. Test on the shapes that break boundary code — 1×1, single row, single column, non-square. And when the constraints say the values lie in 1 to n, stop and ask whether the array can index itself.",
-        "**On the sheet.** *Valid Anagram* is the counting move from lesson two, and *Contains Duplicate* is the same idea one level simpler. *Product of Array Except Self* is a two-pass in-place construction of exactly the kind lesson three set up, and it is the natural bridge into prefix sums. *Two Sum* is there for contrast — it is the first problem in the track where no amount of pointer discipline helps and you need a different structure entirely, which is what the hashing module is for.",
-        "**What comes next.** Two pointers takes the idea of indices moving under an invariant and adds a proof obligation: showing that moving a pointer discards nothing you needed. Everything after that — windows, prefix sums, binary search — is the same discipline applied to progressively less obvious invariants.",
       ],
     },
   ],

@@ -144,8 +144,8 @@ with mid    : ('hung', 21)`,
       ],
       pitfalls: [
         {
-          title: "Testing binary search only on values that are present",
-          body: "The hang above needs a target that is absent, or one that lands between elements — the branches that shrink by zero are the ones a present target never exercises. Any binary search should be tested with a target below everything, above everything, and between two elements.",
+          title: "Testing binary search on a few hand-picked targets",
+          body: "The hang above does not need an unusual target — in this example it also hangs searching for values that are present. What triggers it is the branch that sets `lo = mid` running while `lo` and `hi` are adjacent, so test a binary search with every element of a small array as the target, plus one below everything, one above, and one between two elements.",
         },
       ],
     },
@@ -189,15 +189,6 @@ sqrt(1000) = 31.622777  in 9 passes
         },
       ],
     },
-    {
-      id: "module-close",
-      heading: "Closing the control-flow module",
-      body: [
-        "Eight lessons on branching and repetition, which between them are most of what a program does.",
-        "The through-line worth keeping: **a loop is only as trustworthy as the two sentences you can say about it.** The invariant says what it knows so far; the termination measure says why it stops. A loop with both is one you can defend on a whiteboard; a loop with neither is one you adjusted until the tests passed.",
-        "Next is pattern printing, which is nothing but nested loops with immediate visual feedback — the fastest way to make everything in this module automatic.",
-      ],
-    },
   ],
   interviewQuestions: [
     {
@@ -208,7 +199,7 @@ sqrt(1000) = 31.622777  in 9 passes
     {
       question: "Why does a binary search sometimes loop forever?",
       answer:
-        "Because a branch fails to shrink the range. With an exclusive `hi` and `while lo < hi`, writing `lo = mid` instead of `lo = mid + 1` hangs: when `lo` and `hi` are adjacent, `mid` equals `lo`, so the assignment changes nothing and the measure `hi - lo` does not decrease. It only shows up for targets that are absent or between elements, which is why binary search must be tested with a target below everything, above everything, and in a gap.",
+        "Because a branch fails to shrink the range. With an exclusive `hi` and `while lo < hi`, writing `lo = mid` instead of `lo = mid + 1` hangs: when `lo` and `hi` are adjacent, `mid` equals `lo`, so the assignment changes nothing and the measure `hi - lo` does not decrease. It shows up for present targets as well as absent ones — whenever that branch runs with `lo` and `hi` adjacent — which is why a binary search should be tested with every element as a target, plus one below everything, one above, and one in a gap.",
     },
     {
       question: "When is `while (true)` the right thing to write?",
@@ -222,7 +213,7 @@ sqrt(1000) = 31.622777  in 9 passes
     "Prove termination by naming a non-negative quantity that strictly decreases each pass",
     "For binary search and two pointers that quantity is `hi - lo`",
     "`lo = mid` instead of `lo = mid + 1` hangs once `lo` and `hi` are adjacent",
-    "Test binary search with a target below, above, and between the elements",
+    "Test binary search with every element as the target, plus one below, one above, and one between",
     "`while True` is right when the exit depends on work done inside the body",
     "A loop is as trustworthy as its invariant and its termination measure",
   ],

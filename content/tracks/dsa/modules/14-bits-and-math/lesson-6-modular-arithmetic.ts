@@ -550,6 +550,18 @@ long a*b % MOD = 1`,
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Why do problems ask for the answer modulo 10^9 + 7, and what does and does not survive the modulus?",
+      answer:
+        "Counting answers outgrow fixed-width integers almost immediately, and a modulus keeps every intermediate value small. 10^9 + 7 is prime, which makes division possible through modular inverses, and it is under 2^30, so the product of two residues fits in 64 bits. Addition, subtraction and multiplication can be reduced at any point; division cannot, and needs an inverse — for a prime modulus, a^(p-2) mod p by Fermat's little theorem.",
+    },
+    {
+      question: "How do you compute a^b mod m for b around 10^18?",
+      answer:
+        "Fast exponentiation: walk the bits of the exponent, squaring the base each step and multiplying it into the result where the bit is set, reducing after every multiplication. That is about 60 steps for 10^18. In Java, C++ or Go I cast to a 64-bit type before multiplying two residues; the lesson shows an int version returning 923446813 where the correct answer is 1, a plausible residue rather than a crash.",
+    },
+  ],
   takeaways: [
     "`10^9 + 7` is prime, which is what makes modular division possible",
     "Addition, subtraction and multiplication distribute; division does not",

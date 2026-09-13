@@ -11,7 +11,6 @@ export const stacksQueuesSheetLesson: Lesson = {
   objectives: [
     "Recall the standard problems in a sensible order",
     "Apply the recognition rules for each pattern",
-    "Know which problems are worth repeating",
   ],
   sections: [
     {
@@ -51,14 +50,9 @@ export const stacksQueuesSheetLesson: Lesson = {
     },
     {
       id: "what-to-repeat",
-      heading: "What to repeat, and what to just read",
+      heading: "State the invariant before the loop",
       body: [
-        "Three are worth doing more than once, because everything else in the module is assembled from them.",
-        "**Daily Temperatures**, until the monotonic stack loop is automatic and you can give the amortised argument without pausing.",
-        "**Largest Rectangle**, until the width calculation is something you derive rather than recall. It is the only index arithmetic here that genuinely needs tracing.",
-        "**Sliding Window Maximum**, until the two discard rules are separate in your head — back for domination, front for expiry.",
-        "The rest are recognition. Once you can name the pattern, the implementation is a template you already have, and a second attempt teaches little.",
-        "One habit for interviews: when you reach for a monotonic structure, **say what invariant the stack maintains before writing the loop**. \"The stack holds indices whose next-greater is still unknown, in decreasing order of value.\" That sentence is the design, and stating it turns the code into transcription — as well as pre-empting the \"isn't that quadratic?\" question, which you can answer with the pushed-once, popped-once argument.",
+        "When you reach for a monotonic structure, **say what invariant the stack maintains before writing the loop**. \"The stack holds indices whose next-greater is still unknown, in decreasing order of value.\" That sentence is the design, and stating it turns the code into transcription — as well as pre-empting the \"isn't that quadratic?\" question, which you can answer with the pushed-once, popped-once argument.",
       ],
       pitfalls: [
         {
@@ -94,7 +88,6 @@ export const stacksQueuesSheetLesson: Lesson = {
     "\"For each element, the next bigger\" means a monotonic stack",
     "\"Extreme of every window\" means a monotonic deque",
     "A query the structure cannot answer means augment it",
-    "Repeat Daily Temperatures, Largest Rectangle and Window Maximum",
     "State the stack's invariant before writing the loop",
   ],
   status: "available",

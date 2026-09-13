@@ -21,9 +21,8 @@ export const definingFunctionsLesson: Lesson = {
       heading: "What a function is for",
       body: [
         "A function gives a piece of work a **name** and a **boundary**. Those are two different benefits and both matter.",
-        "The name is documentation that cannot go stale — `binarySearch` says what the twenty lines do, and unlike a comment it is checked by the compiler every time it is called.",
+        "The name is documentation at every call site — `binarySearch` says what the twenty lines do. The compiler only checks that the name exists, not that it is still accurate, but because it is read wherever the function is used, a name that stops fitting gets noticed.",
         "The boundary is what makes the work testable. A function has declared inputs and one output, so you can call it with a value and check what comes back. Twenty lines inline in a loop cannot be tested at all without running everything around them.",
-        "That second point is why this module comes before recursion and before every algorithm in Module 1. The unit you test, the unit you reason about, and the unit an interviewer asks you to write are all functions.",
       ],
       examples: [
         {
@@ -58,7 +57,7 @@ shout returned: None`,
       body: [
         "This is the single most common structural mistake beginners make, and it is worth stating as a rule: **a function that computes something should return it, not print it.**",
         "A returned value can be tested, stored, passed on, and combined. A printed one is gone — the only thing the caller receives is `None`.",
-        "It also matters directly for this track: every problem on the sheet, and every interview question, asks for a function that *returns* an answer. A solution that prints the right thing scores zero, because the harness calls your function and looks at what came back.",
+        "It also matters directly for this track: almost every problem on the sheet, and almost every interview question, asks for a function that *returns* an answer. A solution that prints the right thing scores zero, because the harness calls your function and looks at what came back.",
         "Print at the edges — in `main`, in a test — and return everywhere else.",
       ],
       examples: [

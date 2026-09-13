@@ -23,7 +23,7 @@ export const hashMapsAndSetsLesson: Lesson = {
         "Indexing an array is O(1) because the position is arithmetic. A hash map takes that and makes it work for keys that are not integers.",
         "**Hash the key to a number, reduce it modulo the number of buckets, and that is the position.** Both steps are constant time, so finding where a key *should* be is O(1) regardless of how many entries exist.",
         "Then the complication: two different keys can hash to the same bucket. That is a **collision**, and it is unavoidable — there are infinitely many possible keys and finitely many buckets.",
-        "The standard fix is **chaining**: each bucket holds a small list, and a lookup walks it. With a good hash function and enough buckets, those lists have length 0 or 1 almost always, which is why the average lookup is O(1) even though the worst case is not.",
+        "Java's `HashMap` uses **chaining**: each bucket holds a small list, and a lookup walks it. Python's `dict` uses open addressing instead, probing other slots of the same table — a different mechanism with the same average cost. With a good hash function and enough buckets, those lists have length 0 or 1 almost always, which is why the average lookup is O(1) even though the worst case is not.",
       ],
       examples: [
         {
@@ -229,7 +229,7 @@ getOrDefault: 0`,
       heading: "The honest worst case",
       body: [
         "\"A hash map is O(1)\" is an average-case claim, and the distinction occasionally matters.",
-        "If every key hashes to the same bucket, every lookup walks a chain of length n and the map degrades to **O(n) per operation**. With random data this is vanishingly unlikely; with *adversarial* data it is not, which is why Python randomises its string hashing and why Java 8 upgraded long chains into balanced trees, capping the worst case at O(log n).",
+        "If every key hashes to the same bucket, every lookup walks a chain of length n and the map degrades to **O(n) per operation**. With random data this is vanishingly unlikely; with *adversarial* data it is not, which is why Python randomises its string hashing and why Java 8 turns long chains into balanced trees, capping the worst case at O(log n) when the colliding keys are `Comparable` — otherwise the tree cannot order them and a lookup can still walk every one.",
         "For interviews the useful phrasing is: **average O(1), worst case O(n), and the worst case requires either a hostile input or a badly written `hashCode`.** Saying that shows you know it is not magic.",
         "The other honest cost is memory. A hash map holds spare buckets plus per-entry overhead — in Java, each entry is an object with a key reference, a value reference, a cached hash and a next pointer. Expect several times the memory of the raw data.",
       ],
@@ -239,12 +239,12 @@ getOrDefault: 0`,
     {
       question: "How does a hash map achieve O(1) lookup?",
       answer:
-        "It hashes the key to an integer and reduces it modulo the bucket count, which gives the position directly — both steps are constant time regardless of size. Collisions, where two keys land in the same bucket, are handled by chaining a small list per bucket. With a good hash and a load factor kept below about 0.75, those chains are almost always length 0 or 1, so the average lookup is constant. The map resizes and rehashes when the load factor is exceeded, which keeps inserts amortised O(1).",
+        "It hashes the key to an integer and reduces it modulo the bucket count, which gives the position directly — both steps are constant time regardless of size. Collisions, where two keys land in the same bucket, are handled by chaining a small list per bucket in Java, or by probing other slots in Python. With a good hash and a load factor kept below about 0.75, those chains are almost always length 0 or 1, so the average lookup is constant. The map resizes and rehashes when the load factor is exceeded, which keeps inserts amortised O(1).",
     },
     {
       question: "What is the worst case for a hash map, and when does it happen?",
       answer:
-        "O(n) per operation, when every key hashes into the same bucket and each lookup walks a chain of length n. It requires either an adversarial input designed to collide or a badly written `hashCode` — a constant one, for instance. Real implementations defend against it: Python randomises string hashing per process, and Java 8 converts long chains into balanced trees, capping the worst case at O(log n). The correct phrasing is average O(1), worst case O(n).",
+        "O(n) per operation, when every key hashes into the same bucket and each lookup walks a chain of length n. It requires either an adversarial input designed to collide or a badly written `hashCode` — a constant one, for instance. Real implementations defend against it: Python randomises string hashing per process, and Java 8 converts long chains into balanced trees, capping the worst case at O(log n) for `Comparable` keys. The correct phrasing is average O(1), worst case O(n).",
     },
     {
       question: "What are the common hash-map problem patterns?",
@@ -254,7 +254,7 @@ getOrDefault: 0`,
   ],
   takeaways: [
     "Hash the key, reduce modulo the bucket count — both O(1), which is where the speed comes from",
-    "Collisions are unavoidable; chaining keeps them cheap while the load factor stays low",
+    "Collisions are unavoidable; chaining or probing keeps them cheap while the load factor stays low",
     "Resizing rehashes every key, which makes inserts amortised O(1) by the doubling argument",
     "A hash map is deliberately kept about two-thirds full; the empty space is the mechanism",
     "Average O(1), worst case O(n) — say both",

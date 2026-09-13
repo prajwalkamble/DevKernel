@@ -587,13 +587,25 @@ func main() {
       pitfalls: [
         {
           title: "Comparing against `a[write - 1]`, not `a[read - 1]`",
-          body: "In the dedup, the last *kept* value is at `write - 1`, not `read - 1` — those diverge as soon as anything is dropped. Using `read - 1` compares against a value that may have been discarded, and it fails on the first input with three or more consecutive duplicates.",
+          body: "In the dedup, the last *kept* value is at `write - 1`, and that is the index to compare against. For keep-one deduplication of a sorted array `read - 1` happens to work too — the two indices hold equal values whenever it matters, and 20,000 random sorted arrays never told them apart — which is exactly why the habit survives. The moment the rule keeps up to two copies it breaks: compare against `a[write - 2]`, because `a[read - 2]` may be a copy that was already dropped.",
         },
         {
           title: "`fast + 1 < len` against `fast < len` changes which middle you get",
           body: "For an even-length input there are two middles. `fast + 1 < len` gives the first, `fast < len` gives the second. Neither is wrong; the problem statement decides, and it is the kind of off-by-one that only shows on even inputs.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Remove duplicates from a sorted array in place and return the new length.",
+      answer:
+        "Use a read pointer that visits every element and a write pointer marking where the next kept element goes. Keep an element if it differs from a[write - 1], the last kept value, copy it to a[write] and advance write. The invariant is that a[0:write] is finished and correct, a[read:] is unexamined, and the gap between them is garbage the caller never reads. Return write as the length.",
+    },
+    {
+      question: "How do you find the middle of a linked list, or detect a cycle, in one pass?",
+      answer:
+        "Fast and slow pointers: one moves one step, the other two. When the fast pointer reaches the end, the slow one is at the middle. In a list with a cycle the fast pointer laps the slow one and they meet; without one, the fast pointer falls off the end — Floyd's algorithm. For the nth node from the end, start one pointer n ahead and walk both until the leader falls off. None of these keep a summary of the region between the pointers; if you are doing that, it is a sliding window.",
     },
   ],
   takeaways: [

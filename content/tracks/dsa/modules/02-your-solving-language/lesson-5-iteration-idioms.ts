@@ -138,7 +138,7 @@ for i in range(len(values) - 1, -1, -1):
       heading: "The bug: changing a collection while iterating it",
       body: [
         "Removing elements from a list while looping over it is one of the most common bugs there is, and the two languages handle it in completely opposite ways.",
-        "**Java throws.** The collection tracks a modification count, notices it changed underneath the iterator, and raises `ConcurrentModificationException`. Loud, immediate, impossible to miss.",
+        "**Java usually throws.** The collection tracks a modification count, notices it changed underneath the iterator, and raises `ConcurrentModificationException` on the next step. Usually — removing the second-to-last element makes `hasNext` return false before that check runs, so the loop ends quietly and the last element is never visited.",
         "**Python does not.** It quietly keeps an internal index that no longer lines up with the shifted list. Elements are skipped. No error, wrong answer.",
         "Python's behaviour is worse precisely because it is quieter, and the example below shows an input where the result is not merely different but plainly wrong.",
       ],

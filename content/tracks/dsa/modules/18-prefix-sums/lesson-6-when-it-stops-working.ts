@@ -45,7 +45,7 @@ export const whenItStopsWorkingLesson: Lesson = {
         "There is a standard three-step escalation, and recognising it means you can see the next question coming.",
         "**\"Range sum query on a fixed array.\"** Prefix sums. This is LeetCode 303.",
         "**\"Now the array can be updated.\"** Fenwick or segment tree. LeetCode 307, explicitly named *Range Sum Query — Mutable*.",
-        "**\"Now updates apply to a whole range too.\"** Segment tree with lazy propagation, or a difference array on top of a Fenwick tree.",
+        "**\"Now updates apply to a whole range too.\"** Segment tree with lazy propagation, or two Fenwick trees — one over the difference array and one over i times the difference.",
         "The useful move is to say out loud, at step one, that the prefix array assumes a static input — and to name what you would reach for if it were not. That answers step two before it is asked, and it is a cheap way to show you know the boundary of the technique rather than only the technique.",
       ],
       visual: {
@@ -63,6 +63,18 @@ export const whenItStopsWorkingLesson: Lesson = {
           body: "The overcorrection. If nothing changes, a prefix array is simpler, faster, and less to get wrong. Complexity that is not needed is still complexity.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Range sum queries, but now the array can be updated.",
+      answer:
+        "A prefix array stops working, because changing one element invalidates every prefix after it and repairing that is O(n) per update. A Fenwick tree gives O(log n) queries and updates in about ten lines for sums; a segment tree gives O(log n) for any associative operation, including min, max and GCD, with more code. So: static means a prefix array, mutable sums mean Fenwick, and mutable non-invertible operations mean a segment tree.",
+    },
+    {
+      question: "And if updates apply to whole ranges?",
+      answer:
+        "A segment tree with lazy propagation, or two Fenwick trees over the difference array. It is worth saying at the first step that a prefix array assumes a static input and naming what I would use otherwise, because that is the standard escalation from Range Sum Query - Immutable to Range Sum Query - Mutable.",
     },
   ],
   takeaways: [

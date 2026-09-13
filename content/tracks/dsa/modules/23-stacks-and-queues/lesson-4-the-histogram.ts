@@ -269,7 +269,6 @@ func main() {
         "**Sum of Subarray Minimums.** For each element, count the subarrays in which it is the minimum — which is `(i − prevSmaller) × (nextSmaller − i)`, the same two queries as the histogram. Strictness must differ between the two sides or subarrays with duplicate minima are counted twice; that asymmetry is the whole difficulty.",
         "**Remove K Digits** and **Create Maximum Number.** Build the smallest or largest result by popping worse choices while budget remains. Monotonic stacks used for construction rather than measurement.",
         "**Online Stock Span.** Previous-greater, answered as the elements arrive rather than in a batch.",
-        "Once the histogram is solid, the rest of this list is recognition rather than new technique — which is why it is worth spending the extra time on this one.",
       ],
     },
   ],

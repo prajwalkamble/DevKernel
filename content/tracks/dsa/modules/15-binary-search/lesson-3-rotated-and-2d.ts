@@ -738,6 +738,18 @@ matrix: [[1, 3, 5, 7], [10, 11, 16, 20], [23, 30, 34, 60]]
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Search a rotated sorted array in O(log n).",
+      answer:
+        "At any midpoint at least one half is still sorted, because the rotation point can only be in one of them. Check a[lo] <= a[mid] to see whether the left half is sorted — <= so a two-element window behaves — then test whether the target falls in that sorted half's range and go there, otherwise go to the other half. What binary search really needs is the ability to rule out one side at each step; sortedness is only the most common way to get it.",
+    },
+    {
+      question: "How do you search when you do not know the input's length?",
+      answer:
+        "Manufacture an upper bound by doubling: probe indices 1, 2, 4, 8 until the value exceeds the target, then binary search between the last two probes. Bracketing costs O(log p) probes for a target at position p and the search another O(log p), so the total stays logarithmic. For a matrix sorted row-major I would instead treat it as one array and convert a flat index with mid // cols and mid % cols.",
+    },
+  ],
   takeaways: [
     "The requirement is being able to discard half, not sortedness as such",
     "In a rotated array one half is always sorted — find it, then test the range",

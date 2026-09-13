@@ -53,6 +53,18 @@ export const sortingAndIndicesLesson: Lesson = {
       ],
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Two Sum on an unsorted array: sort and two-point, or hash map?",
+      answer:
+        "Hash map. Sorting costs O(n log n), and it destroys the original indices, which is what Two Sum asks for; a map from value to index answers in O(n) on unsorted input and preserves them. Sort-and-two-point is the better choice when I need all pairs, clean duplicate handling, O(1) extra space, or a generalisation to three or four elements, which is why it is the answer to 3Sum.",
+    },
+    {
+      question: "What if you need sorted order and the original positions?",
+      answer:
+        "Sort (value, original index) pairs instead of values — enumerate plus a key in Python, an array of int pairs with a comparator in Java. And never sort when the order is what the problem measures, like counting inversions or the longest increasing subsequence, because sorting deletes the question. Library sorts also mutate in place, so copy first if the caller still needs the original.",
+    },
+  ],
   takeaways: [
     "Sorting costs the indices, O(n log n), and sometimes the problem",
     "Sort `(value, index)` pairs when you need both",

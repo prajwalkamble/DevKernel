@@ -20,9 +20,7 @@ export const writingItCorrectlyLesson: Lesson = {
       id: "why-hard",
       heading: "Why an easy idea is a hard function",
       body: [
-        "Jon Bentley reported that when he set professional programmers the task of writing binary search, about **ninety per cent** produced a buggy version — given as much time as they wanted, with no compiler pressure. Bentley's own published version, and the one in the JDK, both carried an overflow bug for years.",
         "The idea is trivial: look at the middle, throw away half. The difficulty is entirely in the boundaries, and the reason people get them wrong is that they half-remember two different conventions and blend them.",
-        "So this lesson does one thing: names both conventions, states the invariant each one maintains, and insists you pick one.",
       ],
     },
     {
@@ -557,6 +555,18 @@ lo + (hi - lo) / 2 = 2050000000`,
           body: "The JDK documents this explicitly: the result is unspecified. It will not throw.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Write binary search and explain why it is correct.",
+      answer:
+        "I use the half-open convention: hi = len(a), loop while lo < hi, mid = lo + (hi - lo) / 2, and move lo = mid + 1 when a[mid] < target, otherwise hi = mid. The invariant is that if the target is present, it is inside the current window; each move keeps that true and shrinks the window, so when the window is empty the target was never there. The closed convention works too, but its three choices — the initial hi, the loop test and the hi update — are a package, and mixing the two conventions is where the bugs come from.",
+    },
+    {
+      question: "Why does lo = mid cause an infinite loop?",
+      answer:
+        "Because integer division rounds down. With lo = 2 and hi = 3, mid is 2, and setting lo = mid leaves lo exactly where it was, so the window never shrinks. hi = mid is safe for the same reason, since mid is always strictly less than hi. That asymmetry is why the updates are lo = mid + 1 and hi = mid in the half-open form.",
     },
   ],
   takeaways: [

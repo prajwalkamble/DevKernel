@@ -23,7 +23,7 @@ export const modularArithmeticLesson: Lesson = {
         "Counting problems — how many paths, how many arrangements, how many subsets — produce astronomically large answers. The number of paths across a 100×100 grid has 59 digits.",
         "The setter has two options: require big-integer arithmetic, which tests library knowledge rather than algorithms, or ask for the answer **modulo a fixed number**, which keeps every value inside a machine word while leaving the algorithm exactly as hard.",
         "They always take the second, and the number is nearly always **10⁹ + 7**.",
-        "Three reasons for that specific value. It is **prime**, which makes modular division possible via inverses. It is **just under 2³⁰**, so a product of two reduced values fits comfortably in a 64-bit `long` — the largest such product is about 10¹⁸ against a `long` limit of 9.2 × 10¹⁸. And it is large enough that collisions are rare when it is used as a hashing modulus.",
+        "Three reasons for that specific value. It is **prime**, which makes modular division possible via inverses. It is **just under 2³⁰**, so a product of two reduced values fits comfortably in a 64-bit `long` — the largest such product is about 10¹⁸ against a `long` limit of 9.2 × 10¹⁸. As a hashing modulus it is only moderately large: by the birthday bound, 10⁵ keys already give about five collisions, so hashing with it needs a verification step or a second modulus.",
       ],
       examples: [
         {

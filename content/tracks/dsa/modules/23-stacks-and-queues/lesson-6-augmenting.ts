@@ -323,7 +323,7 @@ func main() {
         },
         {
           title: "Using < instead of <= in the two-stack variant",
-          body: "With duplicate minima, `<` pushes the minimum only once but pops it on the first matching removal — leaving a stack that reports a minimum smaller than anything actually present. The duplicate-3 sequence above is exactly the test that exposes it.",
+          body: "With duplicate minima, `<` pushes the minimum only once but pops it on the first matching removal — leaving a stack that reports a minimum larger than one still present: it answers 5 while 3 is still in the stack. The duplicate-3 sequence above is exactly the test that exposes it.",
         },
         {
           title: "Assuming the same trick gives a min-queue",

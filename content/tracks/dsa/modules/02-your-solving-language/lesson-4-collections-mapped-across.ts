@@ -155,7 +155,7 @@ public class Main {
 1 3
 1 5 1`,
           explanation:
-            "The last line is the thing Python does not have. `TreeMap` keeps keys sorted and answers \"the smallest key at least 4\" (`ceilingKey`) and \"the largest key at most 4\" (`floorKey`) in O(log n). Problems about the nearest earlier or later value — interval scheduling, stock spans, calendar bookings — are usually asking for exactly this, and in Python you build it out of a sorted list and `bisect`.",
+            "The last line is the thing Python does not have. `TreeMap` keeps keys sorted and answers \"the smallest key at least 4\" (`ceilingKey`) and \"the largest key at most 4\" (`floorKey`) in O(log n). Problems about the nearest earlier or later value — interval scheduling, stock spans, calendar bookings — are usually asking for exactly this, and in Python you build it out of a sorted list and `bisect` — O(log n) to find the neighbour, but O(n) to insert, because `insort` shifts the list.",
         },
       ],
       pitfalls: [
@@ -242,8 +242,8 @@ sum of values[1:4]: 14`,
     "Java's two workhorse Map methods are `merge` for counting and `computeIfAbsent` for grouping",
     "`bisect_right` minus `bisect_left` is the count of a value in a sorted list",
     "`list.pop(0)` is O(n) and turns a BFS quadratic; use a deque",
-    "`heapq` is min-only — negate for a max-heap, including inside tuples",
-    "Java's `TreeMap` answers nearest-above and nearest-below in O(log n); Python needs a sorted list plus bisect",
+    "`heapq` is min-only before Python 3.14 — negate for a max-heap, including inside tuples",
+    "Java's `TreeMap` answers nearest-above and nearest-below in O(log n); Python needs a sorted list plus bisect, whose inserts are O(n)",
     "Pick the structure from the operation the problem repeats most, never from preference",
   ],
 };

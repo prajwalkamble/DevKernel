@@ -837,7 +837,6 @@ func main() {
       id: "flattening",
       heading: "A matrix is a flat array with arithmetic on top",
       body: [
-        "The last piece, and the one that reconnects this to the first lesson.",
         "A 2D index is not a different kind of thing. `m[r][c]` in row-major layout is element `r × COLS + c` of one flat array, and the inverse is `r = i / COLS`, `c = i % COLS`. That is the `base + i × width` arithmetic again with one more level of multiplication.",
         "Knowing this is directly useful. **A sorted matrix where each row starts after the previous row ends is a sorted array**, so you can binary search it in O(log(r × c)) by searching the index range and converting — no special two-dimensional algorithm required. It is also how you store a grid in a single allocation when you care about locality, and how flood-fill and BFS queues usually encode a cell as one integer instead of a pair.",
       ],

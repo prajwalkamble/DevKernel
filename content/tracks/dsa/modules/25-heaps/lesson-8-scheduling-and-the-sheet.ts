@@ -815,9 +815,9 @@ func main() {
     },
     {
       id: "the-sheet",
-      heading: "Closing the module",
+      heading: "Picking the heap shape",
       body: [
-        "Every problem in this module resolved into the same two decisions, and they are the two worth carrying out of it.",
+        "Two decisions pick the shape of every heap solution.",
         "**What does the root need to be?** The root is the only element a heap makes cheap, so the question is which single element the algorithm repeatedly asks about. For the k largest it is the smallest thing kept, for meeting rooms the earliest end time, for connect-sticks the shortest stick. Answer this and the min-or-max question answers itself.",
         "**What is allowed in the heap at once?** This fixes both the memory and the log in the bound. k for top-k, one cursor per list for a merge, one entry per busy resource for scheduling, half the data for a running median.",
         "And one check that comes before both: if the thing being ranked is a bounded non-negative integer, the answer is probably an array of buckets and there is no heap in it at all.",

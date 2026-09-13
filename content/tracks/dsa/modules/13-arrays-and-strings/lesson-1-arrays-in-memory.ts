@@ -19,7 +19,6 @@ export const arraysInMemoryLesson: Lesson = {
       id: "why-again",
       heading: "You have met arrays already — this is the other half",
       body: [
-        "Module 0 taught you to *use* an array: declare it, walk it, index it, reverse it in place. This module treats it as the thing algorithms are built on, and that starts with one question Module 0 deferred.",
         "**Why is `a[999999]` exactly as fast as `a[0]`?** Not \"because arrays are fast\" — because of a specific mechanism, and the mechanism explains several things that otherwise look arbitrary.",
         "An array is one contiguous block of memory holding elements of identical width. The array variable knows the address of the first element and the width of one element. That is all the information needed, because the address of element `i` is not searched for, it is *computed*: `base + i × width`.",
         "One multiply and one add, regardless of `i`. That is the whole of O(1) indexing — there is no lookup table, no traversal, no search. It also explains the two restrictions that come with it: every element must be the same width (or the multiply is wrong), and the block must be contiguous (or the addition lands somewhere else entirely).",
@@ -351,7 +350,7 @@ Integer[] bytes   : 80000000 of pointers + 160000000 of objects
 boxed slower      : true
 by more than 2x   : true`,
           explanation:
-            "Six times the memory for the same ten million numbers, and about **4.7×** the time on the verifying machine. The memory figures are exact arithmetic rather than a measurement: eight bytes for each reference, plus a sixteen-byte object header and payload for each `Integer` it points at. Neither array's traversal is anything other than O(n) — this is entirely constant factor, and constant factors of five decide whether a solution finishes inside a time limit.",
+            "Six times the memory by this arithmetic for the same ten million numbers, and about **4.7×** the time on the verifying machine. The memory figures are arithmetic rather than a measurement, and they assume eight-byte references plus a sixteen-byte `Integer` for each one. A default 64-bit JVM compresses references to four bytes, which makes it 20 bytes against 4 — about five times — and measuring the heap agreed: 4.1 against 20.4 bytes per element. Neither array's traversal is anything other than O(n) — this is entirely constant factor, and constant factors of five decide whether a solution finishes inside a time limit.",
         },
       ],
       pitfalls: [
@@ -363,12 +362,10 @@ by more than 2x   : true`,
     },
     {
       id: "what-to-carry",
-      heading: "What to carry forward",
+      heading: "What the arithmetic and the contiguity buy",
       body: [
-        "Three things from this lesson get used constantly in the rest of Module 1.",
         "**Indexing is arithmetic, not search.** Every technique that computes an index instead of scanning for it — cyclic sort, counting sort, marking a value's presence by its own index, the bucket in a hash table — is trading on exactly this. When you see \"values are in the range 1 to n\", the reason it is a gift is that it lets you index by value.",
         "**Contiguity is a real advantage, and it does not appear in the complexity.** It is why an array beats a linked list at nearly everything in practice despite the linked list's better insertion complexity, and why you should be suspicious of a structure whose elements are scattered.",
-        "**Say complexity and constant factor separately.** They are different claims, they are improved by different means, and conflating them is how a good optimisation gets described as a wrong one.",
       ],
     },
   ],
@@ -386,7 +383,7 @@ by more than 2x   : true`,
     {
       question: "When would you choose `int[]` over `List<Integer>`?",
       answer:
-        "Whenever the work is numeric and hot, and the size is known or manageable. `List<Integer>` is backed by an `Object[]`, so every element is a reference to a separately allocated box — about six times the memory and, measured over ten million elements, roughly five times the time for the same sum. It also introduces the `==` trap, since comparing two `Integer` references outside the −128 to 127 cache compares identity rather than value. Take the list when you need growth or the collections API, and take the array when the loop matters.",
+        "Whenever the work is numeric and hot, and the size is known or manageable. `List<Integer>` is backed by an `Object[]`, so every element is a reference to a separately allocated box — about five times the memory with the JVM's default compressed references and, measured over ten million elements, roughly five times the time for the same sum. It also introduces the `==` trap, since comparing two `Integer` references outside the −128 to 127 cache compares identity rather than value. Take the list when you need growth or the collections API, and take the array when the loop matters.",
     },
   ],
   takeaways: [
@@ -394,7 +391,7 @@ by more than 2x   : true`,
     "That arithmetic is the whole reason indexing is O(1) — nothing is searched",
     "Memory arrives a cache line at a time, so consecutive access is nearly free",
     "Row-major vs column-major over a 4000×4000 matrix: ~17× apart, same O(n²)",
-    "`Integer[]` costs ~6× the memory and ~5× the time of `int[]` for the same numbers",
+    "`Integer[]` costs ~5× the memory and ~5× the time of `int[]` for the same numbers",
     "`==` on boxed Integers compares identity — true below 128, false above it",
     "Complexity and constant factor are separate claims; state them separately",
     "\"Values in the range 1 to n\" is an invitation to index by value",

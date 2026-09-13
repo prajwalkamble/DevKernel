@@ -31,7 +31,7 @@ export const windowSheetLesson: Lesson = {
       heading: "Ruling it out fast",
       body: [
         "**\"Subsequence\"** — not contiguous, so not a window. Usually DP or greedy.",
-        "**Negative numbers with a sum condition** — not monotone. Prefix sums with a hash map.",
+        "**Negative numbers with a sum condition** — not monotone. Prefix sums with a hash map for an exact sum; prefix sums with a monotonic deque for \"at least k\".",
         "**\"Exactly k\"** in a counting problem — not monotone directly, but try `atMost(k) - atMost(k-1)`.",
         "**A maximum or median as the window state** — needs a monotonic deque or two heaps, not a plain window.",
         "**The window size is fixed and the state is a comparison against a target map** — still a window, and the simplest kind; do not over-engineer it.",
@@ -62,11 +62,19 @@ export const windowSheetLesson: Lesson = {
           title: "Using a window because the problem mentions subarrays",
           body: "\"Maximum subarray sum\" mentions subarrays and is Kadane's, not a window, because negatives break monotonicity. \"Subarray sum equals k\" mentions subarrays and is prefix sums plus a hash map. The word *subarray* is necessary for a window and nowhere near sufficient.",
         },
-        {
-          title: "Not revisiting",
-          body: "The loop shape is small enough to feel learned after two problems and is not. Re-solve one variable-size problem from a blank editor a day after finishing this module — specifically a *shortest* one, since the record-inside-the-shrink placement is the detail that fades first.",
-        },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "How do you recognise a sliding window problem?",
+      answer:
+        "Three parts must all be present: the answer is contiguous, a subarray or substring; the question is about length or a count of qualifying stretches; and the condition is monotone, so growth pushes it one way and shrinking pushes it back. Subsequence rules it out immediately. Negative numbers with a sum condition point to prefix sums, and a maximum or median as the state points to a deque or two heaps.",
+    },
+    {
+      question: "What do you decide before writing the window?",
+      answer:
+        "What the state is and whether removal is O(1); whether it is a longest or shortest problem, which fixes whether the shrink runs while invalid or while valid and where the answer is recorded; and why the condition is monotone. Then the complexity: O(n) for nearly all of them, or O(n log n) if a heap is used for a maximum.",
     },
   ],
   takeaways: [
@@ -76,7 +84,6 @@ export const windowSheetLesson: Lesson = {
     "\"Exactly k\" counting means try the at-most subtraction",
     "Decide longest or shortest first — it fixes the shrink and the recording",
     "\"Subarray\" in the statement is necessary but nowhere near sufficient",
-    "Revisit a shortest-window problem a day later; that placement fades first",
   ],
   status: "available",
 };

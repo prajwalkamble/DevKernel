@@ -3844,7 +3844,6 @@ func main() {
         "**Drop dimensions only when the answer is a number**, and size the window by how far the transition reaches rather than by habit.",
         "**Extract the solution deliberately** \u2014 fix the tie rule, mirror it in the traceback, and replay the result to check it produces what the table promised.",
         "One habit runs through all of it and is worth more than any single step: **every claim in these eight lessons was checked against exhaustive search on inputs small enough to enumerate.** That is what caught the key that was missing an argument, the base case that made the impossible free, the ring buffer one slot too small, the traceback that drifted from its fill, and the clipped count in the section above. Each of those produced a confident, plausible, wrong number, and each was found in under a second by a loop over a few thousand tiny inputs.",
-        "What comes next is the catalogue \u2014 knapsack and its variants, the string-pair family, longest increasing subsequence, grids, intervals, trees, bitmasks. That module is a list of shapes. This one is what makes a list of shapes readable instead of memorised.",
       ],
     },
   ],

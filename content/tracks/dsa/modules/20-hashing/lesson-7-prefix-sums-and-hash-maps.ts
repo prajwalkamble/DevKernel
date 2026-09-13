@@ -221,7 +221,7 @@ func main() {
         },
         {
           title: "Assuming O(n) space is avoidable",
-          body: "It is not, in general. The map can hold n distinct prefix sums. If the interviewer asks for O(1) space, they are telling you the values are non-negative and they want the window.",
+          body: "It is not, in general. The map can hold n distinct prefix sums. If the interviewer asks for O(1) space, they are telling you the values are non-negative and they want the window — and if zeros are allowed, an exact-sum count needs the `atMost(k) − atMost(k − 1)` form rather than one sweep.",
         },
       ],
     },

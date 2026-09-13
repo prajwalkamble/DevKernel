@@ -538,7 +538,7 @@ func main() {
       pitfalls: [
         {
           title: "Recording the current prefix before doing the lookup",
-          body: "The `seen[running] += 1` must come *after* the lookup, or an element equal to k counts itself twice through a zero-length subarray. In the loop above the order is: update running, look up, then record.",
+          body: "The `seen[running] += 1` must come *after* the lookup. Recorded first, the current prefix matches itself whenever k is 0 — a zero-length subarray — so `[-1, -1, -1, -2, -1]` with k = 0 reports 5 instead of 0. For any other k the order makes no difference, which is why the bug survives tests. In the loop above the order is: update running, look up, then record.",
         },
         {
           title: "Using a set instead of a count map",
@@ -549,6 +549,18 @@ func main() {
           body: "For the counting variant you need only the count; for longest, only the earliest index. Keeping lists of indices turns O(n) space into O(n) space with a much larger constant and tempts an O(n²) scan at query time.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Count subarrays summing to k when values can be negative.",
+      answer:
+        "Walk once with a running sum and a map from prefix value to how many times it has occurred. A subarray ending at j sums to k exactly when an earlier prefix equals running - k, so add that count, then record the current prefix. Initialise the map with {0: 1} for the empty prefix, or subarrays starting at index 0 are missed — [3] with k = 3 should give 1. This is algebra rather than a monotonicity argument, so signs do not matter.",
+    },
+    {
+      question: "What variants does that technique cover?",
+      answer:
+        "Longest subarray summing to k stores the first index of each prefix and never overwrites; shortest stores the latest. Subarray sum divisible by k keys the map on the remainder, normalised to be non-negative outside Python. Contiguous Array, with equal 0s and 1s, maps 0 to -1 and looks for sum 0. In every case the lookup comes before recording the current prefix.",
     },
   ],
   takeaways: [

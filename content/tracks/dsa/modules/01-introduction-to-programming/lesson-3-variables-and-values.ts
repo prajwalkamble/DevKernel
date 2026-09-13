@@ -271,7 +271,6 @@ func main() {
       id: "integer-division",
       heading: "The first trap: integer division",
       body: [
-        "Here is a result that surprises nearly everyone once, and it is better for it to be now than during a contest.",
         "When you divide one whole number by another in Java, the answer is a whole number. The fractional part is not rounded — it is discarded. `7 / 2` is 3, not 3.5 and not 4.",
         "Python splits this into two operators to keep it explicit: `/` always produces a fractional result, and `//` does the whole-number division. That is a genuinely better design, and it means the trap in Python is the opposite one — getting a `float` where you wanted an `int`.",
       ],
@@ -658,15 +657,6 @@ problem statement is still the thing to read first.`,
           title: "Assuming a sum is safe because each element is",
           body: "An array of 100,000 values each up to 100,000 sums to 10 billion. Every individual element fits in an `int` comfortably; the total does not. Sums, products and prefix sums are where this bites, and the habit worth building is to make the accumulator a `long` by default.",
         },
-      ],
-    },
-    {
-      id: "naming",
-      heading: "Naming, briefly",
-      body: [
-        "One rule, because it pays off immediately and there is a whole lesson on it later: a variable's name should say what it holds.",
-        "`n`, `i`, `j` and `k` are fine and idiomatic for a size and for loop counters — everybody reads them correctly and expanding them adds nothing. Beyond those, spell it out. `maxSoFar` costs eight extra characters and saves you re-deriving what `m` meant when you come back to the code in an hour.",
-        "Java uses `camelCase` for variables; Python uses `snake_case`. Both languages have strong conventions here and following them costs nothing.",
       ],
     },
   ],

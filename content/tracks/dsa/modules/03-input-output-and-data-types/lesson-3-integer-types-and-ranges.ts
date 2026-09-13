@@ -113,7 +113,7 @@ addExact threw: integer overflow
         "Python's `int` has no maximum. It grows to whatever size is needed, limited only by memory, so none of this lesson applies.",
         "That is a genuine advantage and it comes with two small consequences worth knowing.",
         "**Arithmetic on very large integers is slower**, because they are not machine words. This never matters at the scale problems use, but it is why a factorial of 10,000 takes noticeable time.",
-        "**Converting through a float loses it.** `int(1e19)` does not give 10¹⁹ exactly, because `1e19` is a float and floats stop representing every integer beyond 2⁵³. Stay in integers and it never comes up.",
+        "**Converting through a float loses it.** `int(1e23)` gives 99999999999999991611392, not 10²³, because `1e23` is a float and floats stop representing every integer beyond 2⁵³. Stay in integers and it never comes up.",
       ],
       examples: [
         {

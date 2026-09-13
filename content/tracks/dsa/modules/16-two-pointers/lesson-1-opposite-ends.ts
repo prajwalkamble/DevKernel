@@ -543,6 +543,18 @@ func main() {
       },
     },
   ],
+  interviewQuestions: [
+    {
+      question: "Find two numbers in a sorted array that sum to a target, in O(n) time and O(1) space.",
+      answer:
+        "Put one pointer at each end. If the sum is too small, move the left pointer right; if it is too big, move the right pointer left; stop when it matches. Each step moves one pointer inward, so the loop runs at most n - 1 times. The lesson's eight-element example takes seven steps against twenty-eight possible pairs, and the gap comes from never examining most pairs at all.",
+    },
+    {
+      question: "Why is it safe to skip the pairs you skip?",
+      answer:
+        "The invariant is that any valid pair lies inside [lo, hi]. If a[lo] + a[hi] is below the target, a[hi] is the largest value left, so a[lo] plus any a[j] with j <= hi is also below the target; moving lo discards a whole row of pairs that were all provably too small. The symmetric argument covers moving hi. That two-sentence proof is what an interviewer asks for, and it is also why the technique needs sorted input.",
+    },
+  ],
   takeaways: [
     "Two indices at opposite ends, moving towards each other, is O(n)",
     "The invariant: any valid pair still lies inside the window",

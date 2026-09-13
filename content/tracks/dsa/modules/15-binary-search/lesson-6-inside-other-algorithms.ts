@@ -121,7 +121,7 @@ it is only ever the same *length* as one.
 
 both agree on 400 pseudo-random values: 35 vs 35  ok`,
           explanation:
-            "Follow the trace. Seeing `3` when `tails` is `[2, 5]` replaces the 5: there is still a length-2 subsequence, but now it ends on 3 rather than 5, which leaves more room for whatever comes next. **Replacing never changes the length; appending is the only thing that grows it.**\n\nThe warning in the middle matters. The final `tails` is `[2, 3, 7, 18]`, which is *not* an increasing subsequence of the input — 18 comes after 101, and the actual LIS is `[2, 3, 7, 101]` or `[2, 3, 7, 18]`. `tails` is only guaranteed to have the right *length*. Reconstructing the subsequence itself needs a parallel array of predecessor indices.\n\nStrict versus non-decreasing is one function call. `bisect_left` finds the first slot `>= v` and so overwrites an equal value, forbidding repeats. `bisect_right` skips past equals and appends, allowing them. `[2, 2, 2, 3, 3]` gives 2 and 5 respectively — a difference no amount of testing on distinct values would reveal.",
+            "Follow the trace. Seeing `3` when `tails` is `[2, 5]` replaces the 5: there is still a length-2 subsequence, but now it ends on 3 rather than 5, which leaves more room for whatever comes next. **Replacing never changes the length; appending is the only thing that grows it.**\n\nThe warning in the middle matters. The final `tails` here is `[2, 3, 7, 18]`, which happens to be an increasing subsequence of the input — but that is luck, not a guarantee. On `[3, 4, 1]` the final `tails` is `[1, 4]`, and 1 comes after 4, so it is not a subsequence at all. `tails` is only guaranteed to have the right *length*. Reconstructing the subsequence itself needs a parallel array of predecessor indices.\n\nStrict versus non-decreasing is one function call. `bisect_left` finds the first slot `>= v` and so overwrites an equal value, forbidding repeats. `bisect_right` skips past equals and appends, allowing them. `[2, 2, 2, 3, 3]` gives 2 and 5 respectively — a difference no amount of testing on distinct values would reveal.",
           alternates: [
             {
               lang: "javascript",
@@ -755,6 +755,18 @@ func main() {
           body: "It decides whether equal elements are allowed, and the two answers can differ by the whole length of the array. Decide from the problem statement's wording — \"increasing\" is strict, \"non-decreasing\" and \"increasing or equal\" are not.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Find the length of the longest increasing subsequence in O(n log n).",
+      answer:
+        "Keep tails, where tails[k] is the smallest value that can end an increasing subsequence of length k + 1. That array is sorted automatically, so for each element binary search for the first tail not smaller than it and replace it, or append if there is none. Replacing never changes the length and appending is the only thing that grows it, so the answer is the length of tails. bisect_left gives strictly increasing and bisect_right non-decreasing.",
+    },
+    {
+      question: "Is the final tails array the subsequence itself?",
+      answer:
+        "No. It has the right length but can mix elements from different subsequences — on [3, 4, 1] it ends as [1, 4], where 1 comes after 4 in the input. Reconstructing an actual subsequence needs a parallel array of predecessor indices. The general move behind it is that an O(n^2) algorithm whose inner loop scans something that can be kept sorted becomes O(n log n) with a binary search.",
     },
   ],
   takeaways: [

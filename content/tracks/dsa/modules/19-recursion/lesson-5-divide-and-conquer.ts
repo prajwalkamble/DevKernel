@@ -38,7 +38,7 @@ export const divideAndConquerLesson: Lesson = {
         "For a recurrence `T(n) = a·T(n/b) + f(n)` — `a` subproblems, each of size `n/b`, plus `f(n)` work to split and combine — the cost falls into three cases depending on whether the leaves or the root dominate.",
         "**Work dominated by the leaves.** Two halves, constant combine: `T(n) = 2T(n/2) + O(1)` gives **O(n)**. Binary tree traversals are here.",
         "**Work evenly spread.** Two halves, linear combine: `T(n) = 2T(n/2) + O(n)` gives **O(n log n)**. Merge sort, and quicksort's average case. There are `log n` levels and each does O(n) total work — which is the picture worth carrying rather than the formula.",
-        "**Work dominated by the root.** One half, constant work: `T(n) = T(n/2) + O(1)` gives **O(log n)**. Binary search.",
+        "**A single branch.** One half, constant work: `T(n) = T(n/2) + O(1)` gives **O(log n)** — log n levels, each doing O(1). Binary search. Root-dominated is a different case: `T(n) = T(n/2) + O(n)` sums to **O(n)**, because the top level's work outweighs everything below it.",
         "You can nearly always get the answer by drawing the tree and asking how much work each *level* does, then multiplying by the number of levels. That is the master theorem's content without its notation.",
       ],
     },
@@ -63,9 +63,21 @@ export const divideAndConquerLesson: Lesson = {
         },
         {
           title: "Allocating a new array at every level",
-          body: "Merge sort allocating a fresh buffer per call is O(n log n) memory. Allocating one scratch buffer up front and reusing it is O(n). Both are correct; the second is what a library does.",
+          body: "Merge sort allocating a fresh buffer per call allocates O(n log n) in total — peak memory is still O(n), because each buffer is freed before its sibling call runs, but the churn is real. Allocating one scratch buffer up front and reusing it is O(n). Both are correct; the second is what a library does.",
         },
       ],
+    },
+  ],
+  interviewQuestions: [
+    {
+      question: "Compare merge sort and quicksort as divide and conquer.",
+      answer:
+        "Same shape, opposite placement of the work. Merge sort splits trivially at the midpoint and does its work in the combine, merging two sorted halves. Quicksort does its work in the split, partitioning around a pivot, and the combine is nothing. Both are O(n log n) when the split is even, because there are log n levels each doing O(n) work; an uneven split, like a bad pivot, collapses that to O(n^2).",
+    },
+    {
+      question: "How do you read the complexity of a recurrence like T(n) = 2T(n/2) + O(n)?",
+      answer:
+        "Draw the recursion tree, ask how much work each level does, and multiply by the depth. Two halves with a linear combine is O(n) per level over log n levels, so O(n log n); two halves with a constant combine is O(n); one half with constant work, like binary search, is O(log n). That is the master theorem's content without its notation. Counting inversions is merge sort with a counter, O(n log n) instead of O(n^2).",
     },
   ],
   takeaways: [
