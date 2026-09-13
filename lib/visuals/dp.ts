@@ -298,8 +298,11 @@ export function bitmaskTour(
       home = last;
     }
   }
+  const ties = Array.from({ length: n }, (_, last) => last)
+    .filter((last) => last !== home && dp[last][full] + dist[last][0] === best);
   emit({ [cellKey(home, full)]: "found" },
-    `All visited. The cheapest finish is at ${home} for ${dp[home][full]}, plus ${dist[home][0]} to get home: ${best}.`);
+    `All visited. ${ties.length ? "One" : "The"} cheapest finish is at ${home} for ${dp[home][full]}, plus ${dist[home][0]} to get home: ${best}.` +
+      (ties.length ? ` Finishing at ${ties.join(" or ")} ties.` : ""));
   return {
     frames: rec.frames,
     summary:

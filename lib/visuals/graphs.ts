@@ -314,11 +314,17 @@ export function unionFind(): Visualisation {
     edges: [],
   };
   const parent = new Map<string, string>(spec.nodes.map((n) => [n.id, n.id]));
-  const treeEdges: { from: string; to: string }[] = [];
 
-  const find = (x: string): string => {
+  // Reading the root for a badge must not change the forest, or the picture
+  // would compress paths that no find in the algorithm ever walked.
+  const rootOf = (x: string): string => {
     let root = x;
     while (parent.get(root) !== root) root = parent.get(root)!;
+    return root;
+  };
+
+  const find = (x: string): string => {
+    const root = rootOf(x);
     // Path compression: point everything on the way directly at the root.
     let cur = x;
     while (parent.get(cur) !== root) {
@@ -330,18 +336,14 @@ export function unionFind(): Visualisation {
   };
 
   const emit = (note: string, roles: Record<string, Role> = {}) => {
-    const roots = new Map<string, string[]>();
-    for (const n of spec.nodes) {
-      const r = find(n.id);
-      if (!roots.has(r)) roots.set(r, []);
-      roots.get(r)!.push(n.id);
-    }
-    const badges: Record<string, string> = {};
-    for (const n of spec.nodes) badges[n.id] = find(n.id);
+    const roots = new Set(spec.nodes.map((n) => rootOf(n.id)));
     rec.push({
       kind: "graph",
-      nodes: spec.nodes.map((n) => ({ id: n.id, label: n.id, x: n.x, y: n.y, role: roles[n.id], badge: badges[n.id] })),
-      edges: treeEdges.map((e) => ({ from: e.from, to: e.to, role: "sorted" as Role, directed: true })),
+      nodes: spec.nodes.map((n) => ({ id: n.id, label: n.id, x: n.x, y: n.y, role: roles[n.id], badge: rootOf(n.id) })),
+      // The arrows are the parent pointers as they are now, so compression shows up as an arrow moving.
+      edges: spec.nodes
+        .filter((n) => parent.get(n.id) !== n.id)
+        .map((n) => ({ from: n.id, to: parent.get(n.id)!, role: "sorted" as Role, directed: true })),
       note,
       stats: { sets: roots.size },
     });
@@ -360,11 +362,18 @@ export function unionFind(): Visualisation {
     emit(`union(${a}, ${b}): representatives ${ra} and ${rb} differ, so the sets must be merged.`,
       { [a]: "compare", [b]: "compare" });
     parent.set(rb, ra);
-    treeEdges.push({ from: rb, to: ra });
     rec.bump("unions");
     emit(`Point ${rb} at ${ra}. Everything in both sets now shares one representative.`,
       { [a]: "sorted", [b]: "sorted" });
   }
+  const deep = "5";
+  const via = parent.get(deep)!;
+  emit(`find(${deep}) has to walk ${deep} → ${via} → ${rootOf(deep)} to reach the representative.`,
+    { [deep]: "compare", [via]: "compare" });
+  find(deep);
+  rec.bump("finds");
+  emit(`Path compression: ${deep} now points straight at ${rootOf(deep)}, so the next find from ${deep} takes one step.`,
+    { [deep]: "sorted" });
   emit("Finished. Each arrow points at a parent; following them reaches the representative.");
   return {
     frames: rec.frames,

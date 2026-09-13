@@ -225,7 +225,7 @@ export function floydCycle(): Visualisation {
   return {
     frames: rec.frames,
     summary:
-      "Floyd's tortoise and hare: one pointer moves one step, the other two. In a cycle the fast one gains a place per step and must eventually lap the slow one, so a meeting proves a cycle and no meeting proves none. The second phase finds the cycle's *entrance*, which falls out of the arithmetic: the distance from the head to the entrance equals the distance from the meeting point to the entrance. O(n) time, O(1) space.",
+      "Floyd's tortoise and hare: one pointer moves one step, the other two. In a cycle the fast one gains a place per step and must eventually lap the slow one, so a meeting proves a cycle and no meeting proves none. The second phase finds the cycle's *entrance*, which falls out of the arithmetic: the distance from the head to the entrance equals the distance from the meeting point to the entrance plus some whole number of laps, so two pointers stepping together from those two places arrive at the entrance at the same moment. O(n) time, O(1) space.",
   };
 }
 
